@@ -1,7 +1,4 @@
 # PowerBI-Visuals-AppSource
-This repository includes Power BI visuals from Microsoft AppSource. Read our Wiki to learn more.
-https://github.com/DataChant/PowerBI-Visuals-AppSource/wiki
+This repository includes Power BI visuals from Microsoft AppSource.
 
-
-Read more about the folder structure of this repository:
-https://github.com/DataChant/PowerBI-Visuals-AppSource/wiki/Folders-structure
+Learn more in our Wiki [here](https://github.com/DataChant/PowerBI-Visuals-AppSource/wiki).
