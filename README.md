@@ -1,2 +1,3 @@
 # PowerBI-Visuals-AppSource
-This repository includes all the Power BI visuals from AppSource. The visuals are shared here for Power BI administration purposes.
+This repository includes Power BI visuals from Microsoft AppSource. Read our Wiki to learn more.
+https://github.com/DataChant/PowerBI-Visuals-AppSource/wiki
