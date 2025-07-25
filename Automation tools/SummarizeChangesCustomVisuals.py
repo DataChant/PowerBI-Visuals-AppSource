@@ -292,7 +292,7 @@ def generate_diff_file(previous_commit_date, latest_commit_date):
     title = f"[{latest_commit_date}] {new_count_str}{removed_count_str}{versions_count_str}{certified_count_str}\n\n"
 
     try:
-        with open('visual_summary_diff.txt', 'w', encoding='utf-8') as file:
+        with open('visual_summary_diff.md', 'w', encoding='utf-8') as file:
             
             file.write(title)
 
