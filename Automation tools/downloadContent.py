@@ -3,10 +3,7 @@ import csv
 import requests
 import shutil
 from pathlib import Path
-from typing import Optional, Set
 import logging
-import sys
-import subprocess
 from importlib.metadata import distributions
 
 # Set up logging

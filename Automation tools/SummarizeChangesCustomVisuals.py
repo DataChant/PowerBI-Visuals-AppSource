@@ -79,13 +79,11 @@ def compare_csv(old_csv_content, new_csv_content):
         logger.warning(f"{latest_data_file_path} not found in workspace.")
 
     old_csv_dict_reader = csv.DictReader(io.StringIO(old_csv_content))
-    next(old_csv_dict_reader)  # Skip header row
     for i, row in enumerate(old_csv_dict_reader, 1):
         _previous_data[row["Visual GUID"]] = row
 
     
     latest_csv_dict_reader = csv.DictReader(io.StringIO(new_csv_content))
-    next(latest_csv_dict_reader)  # Skip header row
     for i, row in enumerate(latest_csv_dict_reader, 1):
         _latest_data[row["Visual GUID"]] = row
 
@@ -178,6 +176,9 @@ def writeDiff(file, title, set_of_changes, data_dict):
     if length_of_changes == 1:
         title_str = title[:-1]
 
+    if title == "Other Changes":
+        title_str = "Changes in Listings or Terms"
+
     file.write(f"\n## {length_of_changes} {title_str}: ##\n")
     file.write('\n<table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">\n')
     
@@ -254,7 +255,7 @@ def writeDiff(file, title, set_of_changes, data_dict):
     file.write('</table>\n\n')
 
 
-def generate_diff_file(latest_commit_date, previous_commit_date):
+def generate_diff_file(previous_commit_date, latest_commit_date):
     new_count_str = ""
     if _new_visuals:
         new_count = len(_new_visuals)
@@ -271,8 +272,8 @@ def generate_diff_file(latest_commit_date, previous_commit_date):
         removed_count_str = f", {removed_count} removed"
 
     versions_count_str = ""
-    if _other_changes:
-        versions_count = len(_other_changes)
+    if _version_changes:
+        versions_count = len(_version_changes)
         if versions_count == 1:
             versions_count_str = f", {versions_count} new version"
         else:
@@ -352,7 +353,7 @@ def main():
 
     if latest_content and previous_content:
         compare_csv(previous_content, latest_content)
-        generate_diff_file(latest_commit_date, previous_commit_date)
+        generate_diff_file(previous_commit_date, latest_commit_date)
 
 if __name__ == "__main__":
     main()
