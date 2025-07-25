@@ -19,6 +19,9 @@ REPO_NAME = 'PowerBI-Visuals-AppSource'
 FILENAME_TO_ANALYZE = "Visuals Summary.csv"  # Summary file
 LATEST_DATA_FILE = "Custom Visuals.csv" # Detailed snapshot of all visuals on AppSource including more fields
 
+LATEST_COMMIT_INDEX = 2
+PREVIOUS_COMMIT_INDEX = 3
+
 _latest_data = dict()
 _previous_data = dict()
 _version_changes = set()
@@ -335,8 +338,8 @@ def main():
         return
 
     # unpack (sha, date)
-    latest_sha, latest_commit_date = commits[0]
-    prev_sha, previous_commit_date = commits[1]
+    latest_sha, latest_commit_date = commits[LATEST_COMMIT_INDEX]
+    prev_sha, previous_commit_date = commits[PREVIOUS_COMMIT_INDEX]
 
     latest_content = get_file_from_git(FILENAME_TO_ANALYZE, latest_sha)
     previous_content = get_file_from_git(FILENAME_TO_ANALYZE, prev_sha)
