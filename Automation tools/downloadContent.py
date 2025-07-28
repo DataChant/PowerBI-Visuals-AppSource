@@ -1,10 +1,25 @@
+# Script to extract JavaScript code from a .pbiviz.json file and save as .js files
+
+
 import os
 import csv
 import requests
 import shutil
 from pathlib import Path
 import logging
-from importlib.metadata import distributions
+import zipfile
+import json
+import base64
+from collections import defaultdict
+import datetime
+import re
+from urllib.parse import urljoin
+
+
+DOWNLOAD_ALL = False  # Set to True to download all visuals, False to only process existing files
+
+# Global set for unique external JS files
+EXTERNAL_JS_FILES = set()
 
 # Set up logging
 logging.basicConfig(
@@ -12,7 +27,46 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# Add file handler to also write logs to a file
 logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler('visual_extraction.log')
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+logger.addHandler(file_handler)
+
+def load_external_js_files():
+    """Load existing external JS files from CSV if it exists."""
+    workspace_path = get_workspace_path()
+    csv_path = os.path.join(workspace_path, "external_js_files.csv")
+    
+    if not os.path.exists(csv_path):
+        logger.info("No existing external_js_files.csv found. Starting with empty set.")
+        return
+        
+    try:
+        logger.info(f"Loading external JS files from: {csv_path}")
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            logger.info(f"CSV content length: {len(content)} bytes")
+            if not content.strip():
+                logger.info("CSV file is empty")
+                return
+                
+            f.seek(0)  # Reset file pointer to start
+            reader = csv.DictReader(f)
+            headers = reader.fieldnames
+            logger.info(f"CSV headers: {headers}")
+            
+            for row in reader:
+                logger.info(f"Processing row: {row}")
+                if "JavaScript File" in row:
+                    EXTERNAL_JS_FILES.add(row["JavaScript File"])
+                else:
+                    logger.warning("Row missing 'JavaScript File' column")
+                    
+        logger.info(f"Loaded {len(EXTERNAL_JS_FILES)} external JS files from existing CSV.")
+    except Exception as e:
+        logger.error(f"Error loading external JS files from CSV: {str(e)}")
+        logger.exception("Detailed error:")
 
 def file_exists(file_path: str) -> bool:
     """Check if a file exists at the given path."""
@@ -33,7 +87,7 @@ def ensure_directories(base_folder: str) -> None:
         "PBIVIZ with guid",
         "Images"
     ]
-    
+
     for subdir in subdirs:
         dir_path = os.path.join(base_folder, subdir)
         os.makedirs(dir_path, exist_ok=True)
@@ -77,7 +131,7 @@ def cleanup_files(workspace_path: str, mode: str, simple_filename: str, guid: st
                 try:
                     os.remove(path)
                     logging.info(f"Cleaned up unlisted file: {path}")
-                except logging as e:
+                except Exception as e:
                     logging.error(f"Failed to clean up {path}: {str(e)}")
     
     elif mode == "Certified" and is_certified:
@@ -148,6 +202,7 @@ def copy_files_from_all_visuals(workspace_path: str, mode: str, simple_filename:
     except Exception as e:
         logger.error(f"Failed to copy files from All Visuals: {str(e)}")
 
+
 def process_visuals(mode: str) -> None:
     """Process visuals based on mode (All Visuals/Certified/Uncertified)."""
     workspace_path = get_workspace_path()
@@ -187,7 +242,7 @@ def process_visuals(mode: str) -> None:
 
                 # Check if file already exists
                 version_path = os.path.join(base_folder, 'PBIVIZ with versions', versioned_filename)
-                if file_exists(version_path):
+                if file_exists(version_path) and not DOWNLOAD_ALL:
                     logger.debug(f"Skipping existing file: {simple_filename} ({i}/{total_rows})")
                     cleanup_files(workspace_path, mode, simple_filename, guid, is_certified)
                     continue
@@ -209,7 +264,9 @@ def process_visuals(mode: str) -> None:
                         guid_path = os.path.join(base_folder, 'PBIVIZ with guid', f"{guid}.pbiviz")
                         shutil.copy2(version_path, pbiviz_path)
                         shutil.copy2(version_path, guid_path)
-                    
+
+                        extract_new_visual(version_path)
+
                     # Download PBIX file
                     if pbix_url:
                         pbix_path = os.path.join(base_folder, 'PBIX', f"{simple_filename}.pbix")
@@ -326,9 +383,192 @@ def handle_unlisted_visuals() -> None:
                 except Exception as e:
                     logger.error(f"Error moving GUID file {filename}: {str(e)}")
 
+
+def scan_unarchived_visuals(parent_folder) -> None:
+    """Scan for unarchived visuals and extract their versions."""
+    workspace_path = get_workspace_path()
+    all_visuals_path = os.path.join(workspace_path, parent_folder, "PBIVIZ with versions")
+    
+    # Ensure the destination directory exists
+    destination_path = os.path.join(workspace_path,"Extracted")
+    os.makedirs(destination_path, exist_ok=True)
+    
+    # Scan for .pbiviz files in the All Visuals directory
+    for root, _, files in os.walk(all_visuals_path):
+        for filename in files:
+            if filename.lower().endswith('.pbiviz'):
+                file_path = os.path.join(all_visuals_path, filename)
+                extract_new_visual(file_path)
+                
+            else:
+                logger.warning(f"File {filename} does not have a .pbiviz extension, skipping extraction.")
+
+
+def extract_new_visual(filename: str) -> str:
+  
+    # Define the root and repo folders as in the PowerShell script
+    workspace_path = get_workspace_path()
+    destination_path = os.path.join(workspace_path, "Extracted")
+
+    if not os.path.exists(destination_path):
+        os.makedirs(destination_path)
+
+    base_name = ""
+    # The extracted folder will be named after the pbiviz file (without extension)
+    base_name = os.path.basename(filename)[:-7]  # Remove '.pbiviz' extension
+    
+    logger.info(f"Extracting visual: {base_name}")
+    
+    unzip_folder = os.path.join(destination_path, base_name)
+
+    # If already extracted, skip
+    if os.path.exists(unzip_folder) and not DOWNLOAD_ALL:
+        logger.debug(f"Skipping {os.path.basename(filename)} - already extracted.")
+        return unzip_folder
+
+    # Copy .pbiviz file to .zip file
+    zip_filename = os.path.splitext(filename)[0] + ".zip"
+    shutil.copy2(filename, zip_filename)
+
+    # Create the unzip folder
+    os.makedirs(unzip_folder, exist_ok=True)
+
+    # Unzip .zip file into the destination folder
+    try:
+        with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
+            zip_ref.extractall(unzip_folder)
+    except Exception as e:
+        logger.warning(f"Failed to unzip {zip_filename}: {e}")
+        os.remove(zip_filename)
+        return ""
+
+    # Cleanup: Delete the temporary .zip file
+    os.remove(zip_filename)
+
+    resources_path = os.path.join(unzip_folder, "resources")
+    # find the first pbiviz.json file in the resources folder and return its path
+    json_path = ""
+    for root, _, files in os.walk(resources_path):
+        for file in files:
+            if file.lower().endswith('.pbiviz.json'):
+                json_path = os.path.join(root, file)
+                break
+        if json_path:
+            break
+    
+    if json_path:
+        extract_and_save(json_path, unzip_folder)
+
+    return unzip_folder
+
+
+def extract_and_save(file_path, parent_dir):
+    """Extract JavaScript from the pbiviz.json file and save it to the parent directory."""
+    data = None
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+    if not data:
+        logger.warning(f"No data found in {file_path}")
+    
+    content = data.get("content", {})
+    external_js_files = data.get("externalJS", [])
+    if external_js_files and external_js_files != []:
+        handle_external_javascripts(external_js_files, parent_dir)
+    
+    javascript_data = content.get("js")
+    if javascript_data:
+        extract_javascript(javascript_data, parent_dir, "internal")
+
+    css_data = content.get("css")
+    if css_data and css_data != "\n":
+        extract_css(css_data, parent_dir, "visual")
+
+    # remove the extracted content from the file and save it as a new json file cleaned_for_scan.
+    # json file should be in the same folder as the original pbiviz.json file
+    cleaned_for_scan_path = os.path.join(parent_dir, "cleaned.json")
+    data.pop("content", None)
+    with open(cleaned_for_scan_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
+
+def handle_external_javascripts(external_js_files, parent_dir):
+    """Handle external JavaScript files and maintain a global list."""
+    # Create externalJs.txt file in the parent_dir (extracted visual folder)
+    external_js_file_path = os.path.join(parent_dir, "externalJs.txt")
+    
+    # Update global set
+    EXTERNAL_JS_FILES.update(external_js_files)
+    
+    # Ensure the parent directory exists
+    os.makedirs(parent_dir, exist_ok=True)
+    
+    # Write the external JS files list to the file (create if doesn't exist)
+    with open(external_js_file_path, "w", encoding="utf-8") as f:
+        for external_js_file in external_js_files:
+            f.write(external_js_file + "\n")
+
+def save_external_js_list():
+    """Save the list of all unique external JS files with their URLs."""
+    workspace_path = get_workspace_path()
+    
+    # Create the CSV file
+    csv_path = os.path.join(workspace_path, "external_js_files.csv")
+    
+    with open(csv_path, "w", encoding="utf-8", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["JavaScript File", "Type", "CDN URL", "URL Status"])
+        
+        # Sort files for better readability
+        sorted_files = sorted(EXTERNAL_JS_FILES)
+        
+        for js_file in sorted_files:
+            writer.writerow([js_file])
+            
+    logger.info(f"Saved external JS files list to {csv_path}")
+
+def extract_javascript(javascript, target_dir, filename):
+    """Extract JavaScript code from the given base64 encoded or non-encoded string and save it to a file."""   
+    try:
+        decoded = base64.b64decode(javascript).decode("utf-8")
+        javascript = decoded
+    except Exception:
+        pass
+    
+    path = os.path.join(target_dir,f"{filename}.js")
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(javascript)
+    except Exception as e:
+        logger.error(f"Error saving JavaScript file {path}: {str(e)}")
+
+
+def extract_css(css, target_dir, filename):
+    """Extract JavaScript code from the given base64 encoded or non-encoded string and save it to a file."""   
+    try:
+        decoded = base64.b64decode(css).decode("utf-8")
+        css = decoded
+    except Exception:
+        pass
+    
+    path = os.path.join(target_dir,f"{filename}.css")
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(css)
+    except Exception as e:
+        logger.error(f"Error saving CSS file {path}: {str(e)}")
+
+
+
 def main():
     """Main function to orchestrate the download process."""
     try:
+        # Load existing external JS files from root folder
+        load_external_js_files()
+
+        # Collect existing external JS files
+        collect_existing_external_js()
+        
         # Process all categories
         process_visuals("All Visuals")
         process_visuals("Certified")
@@ -337,11 +577,47 @@ def main():
         # Handle unlisted visuals
         handle_unlisted_visuals()
         
+        scan_unarchived_visuals("All Visuals")
+        scan_unarchived_visuals("Unlisted")
+        
+        # Save the external JS list
+        save_external_js_list()
+        
         logger.info("Download process completed successfully")
         
     except Exception as e:
         logger.error(f"Main process error: {str(e)}")
 
+def collect_existing_external_js():
+    """One-time function to collect all external JS files from extracted visuals."""
+    workspace_path = get_workspace_path()
+    extracted_path = os.path.join(workspace_path, "Extracted")
+    
+    if not os.path.exists(extracted_path):
+        logger.info("No Extracted directory found.")
+        return
+    
+    # Collect all external JS files
+    for visual_dir in os.listdir(extracted_path):
+        js_file_path = os.path.join(extracted_path, visual_dir, "externalJs.txt")
+        if os.path.exists(js_file_path):
+            try:
+                with open(js_file_path, 'r', encoding='utf-8') as f:
+                    js_files = f.read().splitlines()
+                    # Add non-empty lines to the global set
+                    EXTERNAL_JS_FILES.update(line.strip() for line in js_files if line.strip())
+                    logger.info(f"Added {len(js_files)} JS files from {visual_dir}")
+            except Exception as e:
+                logger.error(f"Error reading {js_file_path}: {str(e)}")
+    
+    # Save the collected files
+    if EXTERNAL_JS_FILES:
+        save_external_js_list()
+        logger.info(f"Collected {len(EXTERNAL_JS_FILES)} unique external JS files in total")
+    else:
+        logger.info("No external JS files found")
+
 if __name__ == "__main__":
-    # Install requirements before running
+    
+    # Run the script
     main()
