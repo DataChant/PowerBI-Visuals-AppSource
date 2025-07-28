@@ -1,0 +1,978 @@
+{
+    "visual": {
+        "name": "BoxWhisker(JanPieter)",
+        "displayName": "Box and Whisker chart",
+        "guid": "BoxWhiskerChart1455240051538",
+        "visualClassName": "BoxWhiskerChart",
+        "version": "2.5.3",
+        "description": "Visualize a dataset as a box and whisker chart. A box and whisker chart shows basic statistical information of a dataset: the 1st and 3rd quartile (box),  the median (line), the mean (dot) and dependent of the type either the minimum and maximum value of all values or between the 1.5x interquartile range [IQR] (whiskers).",
+        "supportUrl": "https://azurebi.jppp.org/box-and-whisker-chart/",
+        "gitHubUrl": "https://github.com/liprec/powerbi-boxWhiskerChart"
+    },
+    "apiVersion": "1.13.0",
+    "author": {
+        "name": "Jan Pieter Posthuma",
+        "email": "mail@jppp.org"
+    },
+    "assets": {
+        "icon": "assets/BoxWhisker.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/lodash/lodash.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-colorutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Groups",
+                "kind": "Grouping",
+                "displayName": "Category"
+            },
+            {
+                "name": "Samples",
+                "kind": "Grouping",
+                "displayName": "Sampling"
+            },
+            {
+                "name": "Values",
+                "kind": "Measure",
+                "cartesianKind": 1,
+                "displayName": "Values"
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "Tooltips",
+                "kind": "Measure"
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "supportsHighlight": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "Tooltips"
+            ]
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Groups": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "Values": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "Groups"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 100
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "Samples",
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 30000
+                                }
+                            },
+                            "select": [
+                                {
+                                    "for": {
+                                        "in": "Values"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "formatString": {
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": false
+                            }
+                        }
+                    },
+                    "telemetry": {
+                        "displayName": "Telemetry",
+                        "description": "Enable telemetry logging",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataPointColors": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "chartOptions": {
+                "displayName": "Chart Options",
+                "properties": {
+                    "orientation": {
+                        "displayName": "Orientation",
+                        "description": "Orientation of the chart, horizontal or viertical",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Horizontal"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Vertical"
+                                }
+                            ]
+                        }
+                    },
+                    "quartile": {
+                        "displayName": "Quartile",
+                        "description": "The way of how the quartiles are calculated, inclusive or exclusive",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Exclusive"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Inclusive"
+                                }
+                            ]
+                        }
+                    },
+                    "includeEmpty": {
+                        "displayName": "Include empty values",
+                        "description": "Treat empty values as zeros (0) in calculations",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "whisker": {
+                        "displayName": "Whisker type",
+                        "description": "Determines the type of whiskers",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Min/Max"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "< 1.5 IQR"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "= 1.5 IQR"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "Custom"
+                                }
+                            ]
+                        }
+                    },
+                    "lower": {
+                        "displayName": "Lower %",
+                        "description": "Lower % Whisker value",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "higher": {
+                        "displayName": "Higher %",
+                        "description": "Higher % Whisker value",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "outliers": {
+                        "displayName": "Outliers",
+                        "description": "Show outliers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "margin": {
+                        "displayName": "Chart margin",
+                        "description": "The margin between the different boxes.\nOnly used when no datalabels are shown",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Small"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Medium"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Large"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "displayName": "Category Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display units",
+                        "description": "Selects the unit (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Value decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "orientation": {
+                        "displayName": "Label orientation",
+                        "description": "Set the orientation of the labels",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Horizontal"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "45 deg"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Vertical"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "title": {
+                        "displayName": "Title",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontColor": {
+                        "displayName": "Title Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Title Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayName": "Title Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "titleAlignment": {
+                        "displayName": "Title Alignment",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Value Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scaleType": {
+                        "displayName": "Scale type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Log"
+                                }
+                            ]
+                        }
+                    },
+                    "start": {
+                        "displayName": "Start",
+                        "description": "Start value of the axis",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "end": {
+                        "displayName": "End",
+                        "description": "End value of the axis",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display units",
+                        "description": "Selects the unit (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Value decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "showTitle": {
+                        "displayName": "Show Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "title": {
+                        "displayName": "Title",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontColor": {
+                        "displayName": "Title Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Title Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayName": "Title Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "titleAlignment": {
+                        "displayName": "Title Alignment",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    }
+                }
+            },
+            "dataPoint": {
+                "displayName": "Data colors",
+                "properties": {
+                    "meanColor": {
+                        "displayName": "Mean Color",
+                        "description": "Color of the mean dot",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "medianColor": {
+                        "displayName": "Median Color",
+                        "description": "Color of the median line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "oneFill": {
+                        "displayName": "Default Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showAll": {
+                        "displayName": "Show all",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "toolTip": {
+                "displayName": "Tooltip settings",
+                "description": "Settings used for the default tooltips.",
+                "properties": {
+                    "labelDisplayUnits": {
+                        "displayName": "Display units",
+                        "description": "Selects the unit (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Value decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "labels": {
+                "displayName": "Data labels",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        },
+                        "description": "If datalabels are to big, the default size is used."
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display units",
+                        "description": "Selects the unit (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Value decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "shapes": {
+                "displayName": "Shapes",
+                "properties": {
+                    "showMean": {
+                        "displayName": "Mean",
+                        "description": "Display Mean dot",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMedian": {
+                        "displayName": "Median",
+                        "description": "Display Median line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "highlight": {
+                        "displayName": "Highlight",
+                        "description": "Enable highlight support",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fixedCategory": {
+                        "displayName": "Fixed Category",
+                        "description": "When highlight is not supported, keep the same amount of categories",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "gridLines": {
+                "displayName": "Gridlines",
+                "properties": {
+                    "show": {
+                        "displayName": "Show (Major) gridlines",
+                        "description": "Display major gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "majorGridSize": {
+                        "displayName": "Thickness",
+                        "description": "Thickness of the major gridlines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "majorGridColor": {
+                        "displayName": "Color",
+                        "description": "Color of the major gridlines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minorGrid": {
+                        "displayName": "Minor gridlines",
+                        "description": "Display minor gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minorGridSize": {
+                        "displayName": "Thickness",
+                        "description": "Thickness of the minor gridlines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minorGridColor": {
+                        "displayName": "Color",
+                        "description": "Color of the minor gridlines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "dataLoad": {
+                "displayName": "Data loading",
+                "description": "Settings related to loading large datasets",
+                "properties": {
+                    "enablePaging": {
+                        "displayName": "Enable paging",
+                        "description": "Enable loading of more data points then +/- 30.000 rows",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showProgress": {
+                        "displayName": "Show progress",
+                        "description": "Show message when additional data loading is in progress",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "progressColor": {
+                        "displayName": "Progress color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "progressText": {
+                        "displayName": "Progress text",
+                        "description": "Text of the data loading progress",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showWarning": {
+                        "displayName": "Show warning",
+                        "description": "Show warning if there is more data available, but not loaded",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "warningColor": {
+                        "displayName": "Warning color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "warningText": {
+                        "displayName": "Warning text",
+                        "description": "Text of the warning",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "y1AxisReferenceLine": {
+                "displayName": "Constant line",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Name",
+                        "description": "Set reference line name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "value": {
+                        "displayName": "Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "style": {
+                        "displayName": "Style",
+                        "description": "Set reference line style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "description": "Arrange relative to chart data points",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "In Front"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Behind"
+                                }
+                            ]
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Data Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelType": {
+                        "displayName": "Text",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Value"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Name"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Name and Value"
+                                }
+                            ]
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelFontFamily": {
+                        "displayName": "Label Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display units",
+                        "description": "Selects the unit (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Value decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "hPosition": {
+                        "displayName": "Horizontal Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "vPosition": {
+                        "displayName": "Vertical Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Above"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Under"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "stringResources": {}
+}

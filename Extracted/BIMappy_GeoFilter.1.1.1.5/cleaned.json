@@ -1,0 +1,285 @@
+{
+    "visual": {
+        "name": "BIMappy_GeoFilter",
+        "displayName": "BIMappy GeoFilter 1.1.1.5",
+        "guid": "BIMappy_GeoFilter",
+        "visualClassName": "Visual",
+        "version": "1.1.1.5",
+        "description": "Filter coordinates based on GeoJSON area",
+        "supportUrl": "www.bimappy.com",
+        "gitHubUrl": "https://github.com/arthurdesmidt/BIMappy"
+    },
+    "author": {
+        "name": "Arthur de Smidt",
+        "email": "support@bimappy.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "latitude",
+                "kind": "Grouping",
+                "displayName": "Latitude",
+                "description": "Latitude coordinates"
+            },
+            {
+                "name": "longitude",
+                "kind": "Grouping",
+                "displayName": "Longitude",
+                "description": "Longitude coordinates"
+            },
+            {
+                "name": "tooltipFields",
+                "kind": "Grouping",
+                "displayName": "Tooltip Fields",
+                "description": "Fields to show in tooltip"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "latitude": {
+                            "max": 1
+                        },
+                        "longitude": {
+                            "max": 1
+                        },
+                        "tooltipFields": {
+                            "max": 10
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "latitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "longitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltipFields"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "mapSettingsCard": {
+                "displayName": "Map Settings",
+                "properties": {
+                    "zoomLevel": {
+                        "displayName": "Zoom Level",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "licenseCard": {
+                "displayName": "License Settings",
+                "properties": {
+                    "licenseKey": {
+                        "displayName": "License Key",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "validateButton": {
+                        "displayName": "Validate License",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "markerStyleCard": {
+                "displayName": "Marker Style",
+                "description": "Customize the appearance of map markers",
+                "properties": {
+                    "markerRadius": {
+                        "displayName": "Marker Size",
+                        "description": "Size of the marker points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "markerColor": {
+                        "displayName": "Fill Color",
+                        "description": "Fill color of the markers",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "description": "Color of the marker border",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "displayName": "Border Width",
+                        "description": "Width of the marker border",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "description": "Opacity of the markers (0-100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "geoJsonCard": {
+                "displayName": "GeoJSON Filter Layer",
+                "properties": {
+                    "geoJsonUrl": {
+                        "displayName": "GeoJSON URL",
+                        "description": "Enter URL to GeoJSON file",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "layerColor": {
+                        "displayName": "Layer Color",
+                        "description": "Color of the GeoJSON layer",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Layer Opacity",
+                        "description": "Opacity of the GeoJSON layer (0-100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "activateFilter": {
+                        "displayName": "Activate Filter",
+                        "description": "Enable or disable the GeoJSON filter",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "zoomSelectionCard": {
+                "displayName": "Zoom Selection Settings",
+                "properties": {
+                    "enableZoomSelection": {
+                        "displayName": "Enable Selection Based on Zoom",
+                        "description": "Enable or disable selection based on visible markers during zoom/pan.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "reportSettings": {
+                "displayName": "Report Settings",
+                "description": "Settings shared across all instances of the visual",
+                "properties": {
+                    "sharedLicenseKey": {
+                        "displayName": "Shared License Key",
+                        "description": "License key shared across report",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": true,
+                "parameters": [
+                    "https://*.openstreetmap.org",
+                    "https://*.opentopomap.org",
+                    "https://*.stadiamaps.com",
+                    "https://*.arcgisonline.com",
+                    "https://*.amazonaws.com",
+                    "https://*.s3.amazonaws.com",
+                    "https://storage.googleapis.com",
+                    "https://*.blob.core.windows.net",
+                    "https://*.arcgis.com",
+                    "https://*.mapbox.com",
+                    "https://api.mapbox.com",
+                    "https://*.carto.com",
+                    "https://services.arcgis.com",
+                    "https://data.humdata.org",
+                    "https://*.naturalearthdata.com",
+                    "https://geojson.xyz",
+                    "https://*.geojson.io",
+                    "https://geo.api.gouv.fr",
+                    "https://gist.githubusercontent.com",
+                    "https://*.gitlab.io",
+                    "https://*.gitlab-static.net",
+                    "https://data.gov.uk",
+                    "https://*.data.gov",
+                    "https://open.canada.ca",
+                    "https://data.europa.eu",
+                    "https://*.eurostat.eu",
+                    "https://*.un.org",
+                    "https://*.who.int",
+                    "https://*.worldbank.org",
+                    "https://data.oecd.org",
+                    "https://*.githubusercontent.com",
+                    "https://raw.githubusercontent.com",
+                    "https://*.bimappy.nl",
+                    "https://*.bimappy.com",
+                    "https://bimappy.nl",
+                    "https://bimappy.com",
+                    "https://*.pdok.nl",
+                    "https://*.data.overheid.nl",
+                    "https://*.kadaster.nl",
+                    "https://*.cbs.nl",
+                    "https://*.rivm.nl",
+                    "https://*.rvo.nl",
+                    "https://*.basisregistraties.nl",
+                    "https://*.esri.nl",
+                    "https://*.esri.com",
+                    "https://*.nationaalgeoregister.nl",
+                    "https://*.geoservices.nl"
+                ]
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

@@ -1,0 +1,422 @@
+{
+    "visual": {
+        "name": "CardBrowser",
+        "displayName": "Card Browser",
+        "guid": "CardBrowser8D7CFFDA2E7E400C9474F41B9EDBBA58",
+        "visualClassName": "CardBrowserVisual",
+        "description": "ESSEX Card Browser",
+        "supportUrl": "http://community.powerbi.com",
+        "gitHubUrl": "https://github.com/Microsoft/PowerBI-visuals-CardBrowser",
+        "version": "2.0.0"
+    },
+    "author": {
+        "name": "Microsoft",
+        "email": "msrvizsupport@microsoft.com"
+    },
+    "apiVersion": "2.6.0",
+    "assets": {
+        "icon": "assets/icon.svg",
+        "thumbnail": "assets/thumbnail.png",
+        "screenshot": "assets/1-preview.png"
+    },
+    "style": "style/visual.scss",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "id",
+                "kind": 0,
+                "displayName": "Document Id",
+                "description": "Unique ID for the document"
+            },
+            {
+                "name": "title",
+                "kind": 0,
+                "displayName": "Title",
+                "description": "Title of the document; shown on cards and in the reader"
+            },
+            {
+                "name": "summary",
+                "displayName": "Preview",
+                "description": "Preview text; only displayed on cards",
+                "kind": 1
+            },
+            {
+                "name": "content",
+                "displayName": "Content",
+                "description": "Full content to display in the reader",
+                "kind": 1
+            },
+            {
+                "name": "imageUrl",
+                "displayName": "Title Image (URL)",
+                "description": "Main image(s) for the document; displayed on cards and in the reader",
+                "kind": 0
+            },
+            {
+                "name": "subtitle",
+                "displayName": "Subtitle Fields",
+                "description": "Text items to display as a subtitle",
+                "kind": 0
+            },
+            {
+                "name": "sourceImage",
+                "displayName": "Badge (Image URL)",
+                "description": "URL for an image to display in the top-right corner of the card",
+                "kind": 0
+            },
+            {
+                "name": "metadata",
+                "displayName": "MetaData Fields",
+                "description": "Key-value pairs for the table on the back of the cards",
+                "kind": 1
+            },
+            {
+                "name": "topBarColor",
+                "displayName": "Top Bar Color",
+                "description": "Color of the bar at the top of the card",
+                "kind": 0
+            },
+            {
+                "name": "dummySortingField",
+                "displayName": "Sorting Field",
+                "description": "Field that can be used to sort the visual's data based on an arbitrary column",
+                "kind": 2
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "id": {
+                            "max": 1
+                        },
+                        "title": {
+                            "max": 10
+                        },
+                        "summary": {
+                            "max": 1
+                        },
+                        "content": {
+                            "max": 1
+                        },
+                        "imageUrl": {
+                            "max": 4
+                        },
+                        "subtitle": {
+                            "max": 6
+                        },
+                        "sourceImage": {
+                            "max": 1
+                        },
+                        "metadata": {
+                            "max": 10
+                        },
+                        "topBarColor": {
+                            "max": 1
+                        },
+                        "dummySortingField": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "id"
+                        },
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "title"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "summary"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "content"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "imageUrl"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "subtitle"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "sourceImage"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "metadata"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "topBarColor"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 500
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "id"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 20000
+                            }
+                        }
+                    },
+                    "rowCount": {
+                        "preferred": {
+                            "min": 500,
+                            "max": 6000
+                        },
+                        "supported": {
+                            "min": 0,
+                            "max": 20000
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "version": {
+                        "displayName": "Version",
+                        "description": "The version of Card Browser",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "presentation": {
+                "properties": {
+                    "dateFormat": {
+                        "displayName": "Date Format",
+                        "description": "Subtitle date format using tokens; e.g. YYYY MM DD h:mm:ss",
+                        "type": {
+                            "text": "MMM D, YYYY"
+                        }
+                    },
+                    "separator": {
+                        "displayName": "Separator",
+                        "description": "Character to place between subtitle fields",
+                        "type": {
+                            "text": " \u2022 "
+                        }
+                    },
+                    "cardWidth": {
+                        "displayName": "Card Width",
+                        "description": "Width, in pixels, of each card",
+                        "type": {
+                            "numeric": 200
+                        }
+                    },
+                    "cardHeight": {
+                        "displayName": "Card Height",
+                        "description": "Height, in pixels, of each card when using wrapped layout",
+                        "type": {
+                            "numeric": 300
+                        }
+                    },
+                    "filter": {
+                        "type": {
+                            "bool": true
+                        },
+                        "displayName": "Filter",
+                        "description": "If on, selecting a card filters other visuals to that article."
+                    },
+                    "cropImages": {
+                        "displayName": "Crop Images",
+                        "description": "If on, crop and recenter images to fill the top of the card",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "shadow": {
+                        "displayName": "Shadow",
+                        "description": "Control the style of border around cards.",
+                        "type": {
+                            "bool": "true"
+                        }
+                    },
+                    "fade": {
+                        "displayName": "Fade Text",
+                        "description": "Fade text toward the bottom of the card",
+                        "type": {
+                            "bool": "true"
+                        }
+                    },
+                    "showImageOnBack": {
+                        "description": "Whether to show Title Images on the card's MetaData face",
+                        "displayName": "Title Image on MetaData",
+                        "type": {
+                            "bool": "true"
+                        }
+                    }
+                },
+                "displayName": "Cards"
+            },
+            "reader": {
+                "properties": {
+                    "headerBackgroundColor": {
+                        "description": "Background color for the reader header",
+                        "displayName": "Header Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": "#000"
+                                }
+                            }
+                        }
+                    },
+                    "width": {
+                        "description": "Expanded width of the inline reader",
+                        "displayName": "Expanded Width",
+                        "type": {
+                            "numeric": 520
+                        }
+                    },
+                    "height": {
+                        "description": "Height of the vertical (wrapped) reader",
+                        "displayName": "Height",
+                        "type": {
+                            "numeric": 500
+                        }
+                    }
+                },
+                "displayName": "Reader"
+            },
+            "metadata": {
+                "properties": {
+                    "fontSize": {
+                        "description": "MetaData text size",
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayName": "Title font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "valueFontFamily": {
+                        "displayName": "Value font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "titleColor": {
+                        "description": "Color for the row titles",
+                        "displayName": "Titles Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": "#bbb"
+                                }
+                            }
+                        }
+                    },
+                    "valueColor": {
+                        "description": "Color for the MetaData values",
+                        "displayName": "Values Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": "#000"
+                                }
+                            }
+                        }
+                    }
+                },
+                "displayName": "MetaData Format"
+            },
+            "flipState": {
+                "properties": {
+                    "show": {
+                        "description": "Whether to enable card flipping",
+                        "displayName": "Enable Flip",
+                        "type": {
+                            "bool": "true"
+                        }
+                    },
+                    "cardFaceDefault": {
+                        "description": "Which face of the card to show by default",
+                        "displayName": "Card Face",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "preview",
+                                    "displayName": "Preview"
+                                },
+                                {
+                                    "value": "metadata",
+                                    "displayName": "MetaData"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "description": "Cards flipping configuration",
+                "displayName": "Flip"
+            },
+            "loadMoreData": {
+                "properties": {
+                    "show": {
+                        "description": "Whether to load more data than the initial rows",
+                        "displayName": "Enable",
+                        "type": {
+                            "bool": "false"
+                        }
+                    },
+                    "limit": {
+                        "description": "Stop after loading this many Documents",
+                        "displayName": "Limit",
+                        "type": {
+                            "numeric": 500
+                        }
+                    }
+                },
+                "description": "Control over data loading",
+                "displayName": "Load More Data"
+            }
+        },
+        "sorting": {
+            "default": {}
+        },
+        "suppressDefaultTitle": true,
+        "supportsHighlight": false
+    },
+    "output": "dist/essex.cardbrowser.pbiviz"
+}

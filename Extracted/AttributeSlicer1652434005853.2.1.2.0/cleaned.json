@@ -1,0 +1,469 @@
+{
+    "visual": {
+        "name": "AttributeSlicer",
+        "displayName": "Attribute Slicer",
+        "guid": "AttributeSlicer1652434005853",
+        "visualClassName": "AttributeSlicer",
+        "description": "This visual is experimental and not actively being developed, only major issues will be addressed. Attribute Slicer lets you filter a dataset on a given column by selecting attribute values of interest. The initial display is a helpful overview that lists the most common values first and shows the overall distribution of values as a horizontal bar chart. Whenever you select an attribute value, it is moved to the list of applied filters and all records containing that value are added to the result set for further analysis.",
+        "supportUrl": "https://community.powerbi.com",
+        "gitHubUrl": "https://github.com/Microsoft/PowerBI-visuals-AttributeSlicer",
+        "version": "2.1.2"
+    },
+    "author": {
+        "name": "Microsoft",
+        "email": "msrvizsupport@microsoft.com"
+    },
+    "apiVersion": "1.11.0",
+    "assets": {
+        "icon": "assets/icon.svg",
+        "screenshot": "assets/screenshot.png",
+        "thumbnail": "assets/thumbnail.png"
+    },
+    "style": "src/css/AttributeSlicerVisual.scss",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Category",
+                "kind": 0,
+                "displayName": "Items"
+            },
+            {
+                "name": "Values",
+                "kind": 1,
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "displayName": "With Values"
+            },
+            {
+                "name": "Series",
+                "kind": 0,
+                "displayName": "Segmented By"
+            },
+            {
+                "name": "Color",
+                "kind": 0,
+                "displayName": "Colored By"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 0
+                        },
+                        "Color": {
+                            "max": 0
+                        }
+                    },
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 0
+                        },
+                        "Values": {
+                            "max": 1,
+                            "min": 0
+                        },
+                        "Color": {
+                            "max": 0
+                        }
+                    },
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "Values": {
+                            "max": 1,
+                            "min": 1
+                        },
+                        "Color": {
+                            "max": 0
+                        }
+                    },
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 0
+                        },
+                        "Values": {
+                            "min": 0
+                        },
+                        "Color": {
+                            "max": 0
+                        }
+                    },
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 1
+                        },
+                        "Values": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "Color": {
+                            "max": 0
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "Category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 500
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "Series",
+                            "select": [
+                                {
+                                    "for": {
+                                        "in": "Values"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 60
+                                }
+                            }
+                        }
+                    },
+                    "rowCount": {
+                        "preferred": {
+                            "min": 2
+                        },
+                        "supported": {
+                            "min": 0
+                        }
+                    }
+                }
+            },
+            {
+                "conditions": [
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Color": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "Values": {
+                            "max": 1,
+                            "min": 0
+                        },
+                        "Series": {
+                            "max": 0
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "Category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 500
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "Color",
+                            "select": [
+                                {
+                                    "for": {
+                                        "in": "Values"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 60
+                                }
+                            }
+                        }
+                    },
+                    "rowCount": {
+                        "preferred": {
+                            "min": 2
+                        },
+                        "supported": {
+                            "min": 0
+                        }
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "general": {
+                "objectName": "general",
+                "displayName": "General",
+                "properties": {
+                    "selfFilter": {
+                        "displayName": "selfFilter",
+                        "type": {
+                            "filter": {
+                                "selfFilter": true
+                            }
+                        }
+                    },
+                    "selection": {
+                        "displayName": "Selection",
+                        "type": {
+                            "text": {}
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text Size",
+                        "description": "The size of the text",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "itemTextColor": {
+                        "displayName": "Text Color",
+                        "description": "Item text color.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "leftAlignText": {
+                        "displayName": "Text Align Left",
+                        "description": "On to left align item text.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showOptions": {
+                        "displayName": "Show options",
+                        "description": "Should the search box and other options be shown.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSearch": {
+                        "displayName": "Show Search",
+                        "description": "Show the search box.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selfFilterEnabled": {
+                        "type": {
+                            "operations": {
+                                "searchEnabled": true
+                            }
+                        }
+                    },
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    },
+                    "version": {
+                        "displayName": "Version",
+                        "description": "The version of Attribute Slicer",
+                        "type": {
+                            "text": {}
+                        }
+                    }
+                }
+            },
+            "display": {
+                "objectName": "display",
+                "displayName": "Display",
+                "properties": {
+                    "horizontal": {
+                        "displayName": "Horizontal",
+                        "description": "Display the attributes horizontally, rather than vertically",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "valueColumnWidth": {
+                        "displayName": "Value Width %",
+                        "description": "The percentage of the width that the value column should take up.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "hideEmptyItems": {
+                        "displayName": "Hide Empty Items",
+                        "description": "Hide empty / blank Items.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Units",
+                        "description": "The units to use when displaying values.",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Precision",
+                        "description": "The precision to use when displaying values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayValueLabels": {
+                        "displayName": "Always On Values",
+                        "description": "Display value labels.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "overflowValueLabels": {
+                        "displayName": "Overflow value text",
+                        "description": "Allow value text to overflow the bar.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "selection": {
+                "objectName": "selection",
+                "displayName": "Selection",
+                "properties": {
+                    "singleSelect": {
+                        "displayName": "Single Select",
+                        "description": "Only allow for one item to be selected at a time",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "brushMode": {
+                        "displayName": "Brush Mode",
+                        "description": "Allow for the drag selecting of attributes",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSelections": {
+                        "displayName": "Use Tokens",
+                        "description": "Will show the selected attributes as tokens",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataPoint": {
+                "objectName": "dataPoint",
+                "displayName": "Data Point",
+                "properties": {
+                    "fill": {
+                        "displayName": "fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorMode": {
+                        "displayName": "Color Mode",
+                        "description": "Determines how the individual bars within the time brush are colored",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": 0,
+                                    "displayName": "Gradient"
+                                },
+                                {
+                                    "value": 1,
+                                    "displayName": "Instance"
+                                }
+                            ]
+                        }
+                    },
+                    "startColor": {
+                        "displayName": "Start color",
+                        "description": "The start color of the gradient",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "endColor": {
+                        "displayName": "End color",
+                        "description": "The end color of the gradient",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "startValue": {
+                        "displayName": "Start Value",
+                        "description": "The value to use as the start value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "endValue": {
+                        "displayName": "End Value",
+                        "description": "The value to use as the end value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "reverseOrder": {
+                        "displayName": "Reverse Order",
+                        "description": "If enabled, the order of the bars will be reversed",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "output": "dist/AttributeSlicer.pbiviz"
+}

@@ -1,0 +1,1649 @@
+{
+    "visual": {
+        "name": "BIBookPlanning",
+        "displayName": "BI Book Planning",
+        "guid": "BIBookPlanning",
+        "visualClassName": "Visual",
+        "version": "1.0.0.5",
+        "description": "The BI Book Planning visual enhances Power BI reporting by enabling users to input, edit, and update data directly within the platform. This feature allows for real-time financial planning, where forecasts and budgets can be adjusted instantly. It streamlines collaboration by allowing team members to update figures in a single report and supports scenario modeling for \u201cwhat-if\u201d analyses without altering the main dataset. This visual provides its users with accuracy through real-time updates, efficiency by simplifying processes, and informed decision-making with immediate access to data.",
+        "supportUrl": "https://help.bibook.com/en/collections/custom-visuals",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "BI Book",
+        "email": "support@bibook.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Rows",
+                "displayName": "Rows",
+                "kind": "Grouping"
+            },
+            {
+                "name": "Columns",
+                "displayName": "Columns",
+                "kind": "Grouping"
+            },
+            {
+                "name": "Measure",
+                "displayName": "Values",
+                "kind": "Measure"
+            },
+            {
+                "name": "AllocationsData",
+                "displayName": "Allocations Data",
+                "kind": "Measure"
+            },
+            {
+                "name": "CommentsData",
+                "displayName": "Comments Data",
+                "kind": "Measure"
+            },
+            {
+                "name": "LockedCells",
+                "displayName": "Locked Cells",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Measure": {
+                            "max": 20
+                        },
+                        "CommentsData": {
+                            "max": 1
+                        },
+                        "LockedCells": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "matrix": {
+                    "rows": {
+                        "for": {
+                            "in": "Rows"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "columns": {
+                        "for": {
+                            "in": "Columns"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Measure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "AllocationsData"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "CommentsData"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "LockedCells"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "drilldown": {
+            "roles": [
+                "Rows",
+                "Columns"
+            ]
+        },
+        "objects": {
+            "saveGroup": {
+                "displayName": "Save Setting",
+                "properties": {
+                    "navigation": {
+                        "displayName": "Navigation",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowNavigationState": {
+                        "displayName": "",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "writeBack": {
+                "displayName": "Write Back",
+                "properties": {
+                    "bibookDomain": {
+                        "displayName": "BI Book Domain",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "api_key": {
+                        "displayName": "API Key",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "enviroment_id": {
+                        "displayName": "BI Book Environment ID",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "isRealTimeSave": {
+                        "displayName": "Multiple Save",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "batchData": {
+                        "displayName": "Data Chunk",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "grid": {
+                "displayName": "Grid",
+                "properties": {
+                    "showHorizontal": {
+                        "displayName": "Horizontal Grid",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "horizontalColor": {
+                        "displayName": "Horizontal Grid Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "horizontalWidth": {
+                        "displayName": "Horizontal Grid Weight",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showVertical": {
+                        "displayName": "Vertical Grid",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "verticalColor": {
+                        "displayName": "Vertical Grid Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "verticalWidth": {
+                        "displayName": "Vertical Grid Weight",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "suggestions": {
+                "displayName": "Suggestions",
+                "properties": {
+                    "selectedFieldName": {
+                        "displayName": "Selected Field Name",
+                        "type": {
+                            "enumeration": []
+                        }
+                    },
+                    "isSuggestionForAllCellsApplied": {
+                        "displayName": "Is Suggestion For All Cells Applied",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "comments": {
+                "displayName": "Comments",
+                "properties": {
+                    "highlightMarkerColor": {
+                        "displayName": "Comment cell highlight marker color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "isShowTooltip": {
+                        "displayName": "Show tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "cells": {
+                "displayName": "Cell",
+                "properties": {
+                    "width": {
+                        "displayName": "Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "height": {
+                        "displayName": "Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBoldFont": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalicFont": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isUnderlineFont": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font color",
+                        "description": "Set the reference line data label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "isHighlightEditedCell": {
+                        "displayName": "Highlight Edited Cells",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "highlightedEditedCellBgColor": {
+                        "displayName": "Highlight Edited Cells Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "isCellHighlightingEnabled": {
+                        "displayName": "Enable Cell Hover Color",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "highlightedCellColor": {
+                        "displayName": "Highlighted Cell Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "highlightedEditedCellBorderColor": {
+                        "displayName": "Highlight Edited Cells Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "isEditableCellBGColorEnabled": {
+                        "displayName": "Enable Editable Cell Background Color",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "editableCellBGColor": {
+                        "displayName": "Editable Cell Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "isHighlightLockedCell": {
+                        "displayName": "Highlight Locked Cells",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lockedCellBgColor": {
+                        "displayName": "Highlight locked Cells Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "displayUnit": {
+                        "displayName": "Display Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Thousands",
+                                    "value": "thousands"
+                                },
+                                {
+                                    "displayName": "Million",
+                                    "value": "million"
+                                },
+                                {
+                                    "displayName": "Billion",
+                                    "value": "billion"
+                                },
+                                {
+                                    "displayName": "Trillion",
+                                    "value": "trillion"
+                                }
+                            ]
+                        }
+                    },
+                    "decimals": {
+                        "displayName": "Decimals",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "blankCellText": {
+                        "displayName": "Blank Cell Text",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Blank",
+                                    "value": "(Blank)"
+                                },
+                                {
+                                    "displayName": "Zero",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "Empty",
+                                    "value": ""
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "colHeaders": {
+                "displayName": "Column Headers",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBoldFont": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalicFont": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isUnderlineFont": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Font color",
+                        "description": "Set the reference line data label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "isAutoWidth": {
+                        "displayName": "Auto/Manual Width",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width": {
+                        "displayName": "Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "isAutoHeight": {
+                        "displayName": "Auto/Manual Height",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "height": {
+                        "displayName": "Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "rowHeaders": {
+                "displayName": "Row Headers",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBoldFont": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalicFont": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isUnderlineFont": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Font color",
+                        "description": "Set the reference line data label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "isAutoWidth": {
+                        "displayName": "Auto/Manual Width",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width": {
+                        "displayName": "Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "isAutoHeight": {
+                        "displayName": "Auto/Manual Height",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "height": {
+                        "displayName": "Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "subTotals": {
+                "displayName": "Totals",
+                "properties": {
+                    "rowSubtotals": {
+                        "displayName": "Show Row Subtotal",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnSubtotals": {
+                        "displayName": "Show Column Subtotal",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "perRowLevel": {
+                        "displayName": "Per Row Level",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "perColumnLevel": {
+                        "displayName": "Per Column Level",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "levelSubtotalEnabled": {
+                        "displayName": "Level Subtotal Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "subTotalColumnsLabel": {
+                        "displayName": "Sub total columns label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowAggregation": {
+                        "displayName": "Row Aggregation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Sum",
+                                    "value": "sum"
+                                },
+                                {
+                                    "displayName": "Average",
+                                    "value": "avg"
+                                }
+                            ]
+                        }
+                    },
+                    "columnAggregation": {
+                        "displayName": "Column Aggregation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Sum",
+                                    "value": "sum"
+                                },
+                                {
+                                    "displayName": "Average",
+                                    "value": "avg"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "subTotalsFormatting": {
+                "displayName": "Sub Totals Formatting",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBoldFont": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalicFont": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isUnderlineFont": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "grandTotalFormatting": {
+                "displayName": "Grand Total Formatting",
+                "properties": {
+                    "grandTotalRowLabel": {
+                        "displayName": "Grand total row label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "rowFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "rowIsBoldFont": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowIsItalicFont": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowIsUnderlineFont": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowFontColor": {
+                        "displayName": "Row Font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowTextAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "grandTotalColumnLabel": {
+                        "displayName": "Grand total column label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "placement": {
+                        "displayName": "Placement",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "columnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "columnFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "columnIsBoldFont": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnIsItalicFont": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnIsUnderlineFont": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnFontColor": {
+                        "displayName": "Column Font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "columnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "columnTextAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "general": {
+                "displayName": "General Settings",
+                "properties": {
+                    "formatString": {
+                        "type": {
+                            "formatting": {
+                                "formatString": true
+                            }
+                        }
+                    },
+                    "isEditableMeasure": {
+                        "displayName": "Editable Measure",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isHideMeasure": {
+                        "displayName": "Hide Measure",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isShowOnlyTotals": {
+                        "displayName": "Show Only Totals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isSetToAPIBody": {
+                        "displayName": "Set To API Body",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isPercentageFormatting": {
+                        "displayName": "Percentage Formatting",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isSendBlankAsNull": {
+                        "displayName": "Send Black as Null",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isValueMeasure": {
+                        "displayName": "Value Measure",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "APIKey": {
+                        "displayName": "API Key",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "buttonFormatting": {
+                "displayName": "Button Formatting",
+                "properties": {
+                    "saveBtnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "saveBtnFontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "saveBtnFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "saveBtnFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "saveBtnFontUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "saveBtnColor": {
+                        "displayName": "Font color",
+                        "description": "Set the button font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "saveBtnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "saveBtnIsBorderEnabled": {
+                        "displayName": "Border Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "saveBtnBorderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "clearBtnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "clearBtnFontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "clearBtnFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "clearBtnFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "clearBtnFontUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "clearBtnColor": {
+                        "displayName": "Font color",
+                        "description": "Set the button font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "clearBtnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "clearBtnIsBorderEnabled": {
+                        "displayName": "Border Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "clearBtnBorderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "suggestionsBtnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "suggestionsBtnFontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "suggestionsBtnFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "suggestionsBtnFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "suggestionsBtnFontUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "suggestionsBtnColor": {
+                        "displayName": "Font color",
+                        "description": "Set the button font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "suggestionsBtnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "suggestionsBtnIsBorderEnabled": {
+                        "displayName": "Border Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "suggestionsBtnBorderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "calculatedColumnBtnShow": {
+                        "displayName": "Show Button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "calculatedColumnBtnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "calculatedColumnBtnFontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "calculatedColumnBtnFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "calculatedColumnBtnFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "calculatedColumnBtnFontUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "calculatedColumnBtnColor": {
+                        "displayName": "Font color",
+                        "description": "Set the button font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "calculatedColumnBtnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "calculatedColumnBtnIsBorderEnabled": {
+                        "displayName": "Border Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "calculatedColumnBtnBorderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "copyPlanningDataBtnShow": {
+                        "displayName": "Show Button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "copyPlanningDataBtnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "copyPlanningDataBtnFontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "copyPlanningDataBtnFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "copyPlanningDataBtnFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "copyPlanningDataBtnFontUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "copyPlanningDataBtnColor": {
+                        "displayName": "Font color",
+                        "description": "Set the button font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "copyPlanningDataBtnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "copyPlanningDataBtnIsBorderEnabled": {
+                        "displayName": "Border Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "copyPlanningDataBtnBorderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "CFBtnShow": {
+                        "displayName": "Show Button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "CFBtnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "CFBtnFontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "CFBtnFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "CFBtnFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "CFBtnFontUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "CFBtnColor": {
+                        "displayName": "Font color",
+                        "description": "Set the button font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "CFBtnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "CFBtnIsBorderEnabled": {
+                        "displayName": "Border Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "CFBtnBorderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "undoBtnFontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "undoBtnFontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "undoBtnFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "undoBtnFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "undoBtnFontUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "undoBtnColor": {
+                        "displayName": "Font color",
+                        "description": "Set the button font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "undoBtnBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "undoBtnIsBorderEnabled": {
+                        "displayName": "Border Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "undoBtnBorderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "calculatedColumns": {
+                "displayName": "Calculated Columns",
+                "properties": {
+                    "list": {
+                        "displayName": "",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "conditionalFormatting": {
+                "displayName": "Conditional Formatting",
+                "properties": {
+                    "list": {
+                        "displayName": "",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsLandingPage": true,
+        "supportsHighlight": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "Tooltips"
+            ]
+        },
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": true,
+                "parameters": [
+                    "*",
+                    "https://help.bibook.com/*"
+                ]
+            }
+        ],
+        "advancedEditModeSupport": 2
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

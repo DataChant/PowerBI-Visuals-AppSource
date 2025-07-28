@@ -1,0 +1,240 @@
+{
+    "visual": {
+        "name": "BarChartWithRelativeVariance",
+        "displayName": "Bar chart with relative variance",
+        "guid": "PBI_CV_0B9C9FBA_15A2_4A94_8AE4_8F778869B200",
+        "visualClassName": "SimpleBarchart",
+        "version": "1.0.1",
+        "description": "Bar Chart with Relative (%) Variance automatically calculates relative or percentage variance between two scenarios and generates an overlapping bar chart that displays the relative variance with a lollipop chart situated parallel to the chart. The visualization is meant for comparing Actual, Forecast, Planned, and Previous Year data. Formatting for the charts is influenced by the International Business Communication Standards (IBCS).  Customization available includes inversing the colours for red and green, resizing the data label font sizes, highlighting the data labels, hiding data labels, drill downs by category, adjusting units(to thousands-K, Millions-M, Billions-B) and more.  This visualization is ideal for comparing \u201cActual vs. Planned\u201d, \u201cActual vs. Previous Year\u201d, \u201cForecast vs. Planned\u201d, and \u201cForecast vs. Previous Year\u201d.",
+        "supportUrl": "www.3agsystems.com/blog/bar-chart-with-relative-variance",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "2.1.0",
+    "author": {
+        "name": "3AG Systems",
+        "email": "info@3agsystems.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.js",
+        "node_modules/d3/d3.js",
+        "node_modules/lodash/lodash.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "name": "myCategory",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Actual",
+                "name": "actualMeasure",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Previous Year",
+                "name": "previousYearMeasure",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Plan",
+                "name": "plannedMeasure",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Forcast",
+                "name": "forcastMeasure",
+                "kind": "Measure"
+            }
+        ],
+        "drilldown": {
+            "roles": [
+                "myCategory"
+            ]
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "myCategory": {
+                            "max": 1
+                        },
+                        "actualMeasure": {
+                            "max": 1
+                        },
+                        "previousYearMeasure": {
+                            "max": 1
+                        },
+                        "plannedMeasure": {
+                            "max": 1
+                        },
+                        "forcastMeasure": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "myCategory"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {}
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "actualMeasure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "previousYearMeasure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "plannedMeasure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "forcastMeasure"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "barchartProperties": {
+                "displayName": "Bar Chart Properties",
+                "properties": {
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "boldFont": {
+                        "displayName": "Bold Font",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "valueDecimalPlaces": {
+                        "displayName": "Value Decimal Places",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "invertVarianceColours": {
+                        "displayName": "Invert Variance Colours",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "categories": {
+                "displayName": "Categories",
+                "description": "Only use when the category is date data type",
+                "properties": {
+                    "showYear": {
+                        "displayName": "Show Year",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMonth": {
+                        "displayName": "Show Month",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDay": {
+                        "displayName": "Show Day",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data Labels",
+                "properties": {
+                    "units": {
+                        "displayName": "Units",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "None",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "Thousands",
+                                    "displayName": "Thousands"
+                                },
+                                {
+                                    "value": "Millions",
+                                    "displayName": "Millions"
+                                },
+                                {
+                                    "value": "Billions",
+                                    "displayName": "Billions"
+                                }
+                            ]
+                        }
+                    },
+                    "highlightDataLabel": {
+                        "displayName": "Highlight Data Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showActualText": {
+                        "displayName": "Show Actual Text",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPrevYearText": {
+                        "displayName": "Show Previous Text",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPlanText": {
+                        "displayName": "Show Plan Text",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showForcastText": {
+                        "displayName": "Show Forcast Text",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "stringResources": {}
+}
