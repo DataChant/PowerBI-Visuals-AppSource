@@ -1,0 +1,774 @@
+{
+    "visual": {
+        "name": "routemap",
+        "displayName": "Route map",
+        "guid": "routemap863828C4992A473C9A5FB6A6B0EDF5DC",
+        "visualClassName": "Visual",
+        "version": "1.3.3",
+        "description": "Plot trajectories on a map",
+        "supportUrl": "https://weiweicui.github.io/PowerBI-Routemap",
+        "gitHubUrl": "https://github.com/weiweicui/PowerBI-Routemap"
+    },
+    "apiVersion": "1.6.0",
+    "author": {
+        "name": "Weiwei Cui",
+        "email": "weiweicui@outlook.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "./app.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Timestamp",
+                "description": "Values to decide the chronological order of the records",
+                "name": "stamp",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Latitude",
+                "description": "Latitudes of the records",
+                "name": "latitude",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Longitude",
+                "description": "Longitudes of the records",
+                "name": "longitude",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Segment",
+                "description": "(Optional) Categorical values to segment records into routes",
+                "name": "route",
+                "kind": "Grouping",
+                "preferredTypes": [
+                    {
+                        "integer": true
+                    },
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Color Legend",
+                "description": "(Optional) Categorical values to decide route colors",
+                "name": "color",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Width Legend",
+                "description": "(Optional) Categorical values to decide route widths",
+                "name": "thick",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Dash Legend",
+                "description": "(Optional) Categorical values to decide dash styles of routes",
+                "name": "style",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Tooltip",
+                "description": "(Optional) Information displayed when hovering over arrows",
+                "name": "tooltip",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "latitude": {
+                            "max": 1
+                        },
+                        "longitude": {
+                            "max": 1
+                        },
+                        "thick": {
+                            "max": 1
+                        },
+                        "color": {
+                            "max": 1
+                        },
+                        "style": {
+                            "max": 1
+                        },
+                        "stamp": {
+                            "max": 1,
+                            "min": 1
+                        },
+                        "route": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "thick"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "color"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "style"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "stamp"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "route"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "latitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "longitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltip"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "description": "Select the location for the legend",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bot"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "description": "Edit color labels, (hidden when empty)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "thick": {
+                        "displayName": "Width",
+                        "description": "Edit width labels, (hidden when empty)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "style": {
+                        "displayName": "Dash",
+                        "description": "Edit dash labels, (hidden when empty)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color_label": {
+                        "displayName": "\u2022 Default",
+                        "description": "Label for the color",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "color_default": {
+                        "displayName": "\u2022 (Autofill)",
+                        "description": "Show default labels if unspecified",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "style_label": {
+                        "displayName": "\u2022 Default",
+                        "description": "Label for the dash",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "style_default": {
+                        "displayName": "\u2022 (Autofill)",
+                        "description": "Show default labels if unspecified",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "thick_label": {
+                        "displayName": "\u2022 Default",
+                        "description": "Label for the thickness",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "thick_default": {
+                        "displayName": "\u2022 (Autofill)",
+                        "description": "Show default labels if unspecified",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Special",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "color": {
+                "displayName": "Color",
+                "description": "Color mapping",
+                "properties": {
+                    "customize": {
+                        "displayName": "Specify",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "item": {
+                        "displayName": "Stroke",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Special",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "thick": {
+                "displayName": "Width",
+                "description": "Thickness mapping",
+                "properties": {
+                    "customize": {
+                        "displayName": "Specify",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "item": {
+                        "displayName": "Default",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Special",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "style": {
+                "displayName": "Dash",
+                "description": "Dash style mapping",
+                "properties": {
+                    "customize": {
+                        "displayName": "Specify",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "item": {
+                        "displayName": "Default",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid type",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dash type 1",
+                                    "value": "dash1"
+                                },
+                                {
+                                    "displayName": "Dash type 2",
+                                    "value": "dash2"
+                                },
+                                {
+                                    "displayName": "Dash type 3",
+                                    "value": "dash3"
+                                },
+                                {
+                                    "displayName": "Dash type 4",
+                                    "value": "dash4"
+                                }
+                            ]
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Special",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "arrow": {
+                "displayName": "Glyphs",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "interval": {
+                        "displayName": "\u2022 Interval",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "start": {
+                        "displayName": "Start",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "startScale": {
+                        "displayName": "\u2022 Scale",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "middle": {
+                        "displayName": "Middle",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "middleScale": {
+                        "displayName": "\u2022 Scale",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "end": {
+                        "displayName": "End",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "endShape": {
+                        "displayName": "\u2022 Icon",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Arrow",
+                                    "value": "triangle"
+                                },
+                                {
+                                    "displayName": "Car (top)",
+                                    "value": "car1"
+                                },
+                                {
+                                    "displayName": "Car (front)",
+                                    "value": "car2"
+                                },
+                                {
+                                    "displayName": "Plane (top)",
+                                    "value": "plane"
+                                },
+                                {
+                                    "displayName": "Plane (front)",
+                                    "value": "planefront"
+                                },
+                                {
+                                    "displayName": "Ship (front)",
+                                    "value": "shipfront"
+                                },
+                                {
+                                    "displayName": "Ship (top)",
+                                    "value": "shiptop"
+                                },
+                                {
+                                    "displayName": "Custom shape",
+                                    "value": "customize"
+                                },
+                                {
+                                    "displayName": "Custom image",
+                                    "value": "image"
+                                }
+                            ]
+                        }
+                    },
+                    "endData": {
+                        "displayName": "\u2022 Shape data",
+                        "description": "In the svg format, anchored at (0,0)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "endImage": {
+                        "displayName": "\u2022 Image URL",
+                        "description": "Accept PNG or JPEG files",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "endDirectional": {
+                        "displayName": "\u2022 Direction",
+                        "description": "Rotate this icon to align with the path",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Up",
+                                    "value": "up"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                },
+                                {
+                                    "displayName": "Down",
+                                    "value": "down"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                }
+                            ]
+                        }
+                    },
+                    "endScale": {
+                        "displayName": "\u2022 Scale",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "customize": {
+                        "displayName": "Specify",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "item": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Special",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "advance": {
+                "displayName": "Advanced",
+                "properties": {
+                    "onlyvalid": {
+                        "displayName": "Ignore invalids",
+                        "description": "Exclude all invalid geo-coordinates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "nonzero": {
+                        "displayName": "Ignore zeros",
+                        "description": "Exclude all zero geo-coordinates",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "mapControl": {
+                "displayName": "Map control",
+                "properties": {
+                    "type": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Aerial",
+                                    "value": "aerial"
+                                },
+                                {
+                                    "displayName": "Color",
+                                    "value": "road"
+                                },
+                                {
+                                    "displayName": "Gray",
+                                    "value": "grayscale"
+                                },
+                                {
+                                    "displayName": "Dark",
+                                    "value": "canvasDark"
+                                },
+                                {
+                                    "displayName": "Light",
+                                    "value": "canvasLight"
+                                }
+                            ]
+                        }
+                    },
+                    "lang": {
+                        "displayName": "Language",
+                        "description": "The language used in the map",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "Chinese",
+                                    "value": "zh-HK"
+                                },
+                                {
+                                    "displayName": "Czech",
+                                    "value": "cs-CZ"
+                                },
+                                {
+                                    "displayName": "Danish",
+                                    "value": "da-DK"
+                                },
+                                {
+                                    "displayName": "Dutch",
+                                    "value": "nl-NL"
+                                },
+                                {
+                                    "displayName": "English",
+                                    "value": "en-US"
+                                },
+                                {
+                                    "displayName": "Finnish",
+                                    "value": "fi-FI"
+                                },
+                                {
+                                    "displayName": "French",
+                                    "value": "fr-FR"
+                                },
+                                {
+                                    "displayName": "German",
+                                    "value": "de-DE"
+                                },
+                                {
+                                    "displayName": "Italian",
+                                    "value": "it-IT"
+                                },
+                                {
+                                    "displayName": "Japanese",
+                                    "value": "ja-JP"
+                                },
+                                {
+                                    "displayName": "Korean",
+                                    "value": "Ko-KR"
+                                },
+                                {
+                                    "displayName": "Norwegian(Bokmal)",
+                                    "value": "nb-NO"
+                                },
+                                {
+                                    "displayName": "Polish",
+                                    "value": "pl-PL"
+                                },
+                                {
+                                    "displayName": "Portuguese",
+                                    "value": "pt-BR"
+                                },
+                                {
+                                    "displayName": "Russian",
+                                    "value": "ru-RU"
+                                },
+                                {
+                                    "displayName": "Spanish",
+                                    "value": "es-ES"
+                                },
+                                {
+                                    "displayName": "Swedish",
+                                    "value": "sv-SE"
+                                }
+                            ]
+                        }
+                    },
+                    "pan": {
+                        "displayName": "Pan",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom": {
+                        "displayName": "Zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autofit": {
+                        "displayName": "Auto fit",
+                        "description": "Fit all routes in the view when data changed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scale": {
+                        "displayName": "Scale bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cright": {
+                        "displayName": "Copyright",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "mapElement": {
+                "displayName": "Map element",
+                "properties": {
+                    "forest": {
+                        "displayName": "Forest",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "road": {
+                        "displayName": "Road",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "Gray w/ label",
+                                    "value": "gray_label"
+                                },
+                                {
+                                    "displayName": "Gray w/o label",
+                                    "value": "gray"
+                                },
+                                {
+                                    "displayName": "Hidden",
+                                    "value": "hidden"
+                                }
+                            ]
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "city": {
+                        "displayName": "City",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "building": {
+                        "displayName": "Building",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "icon": {
+                        "displayName": "Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "area": {
+                        "displayName": "Area",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "persist": {
+                "displayName": "Hidden persists",
+                "properties": {
+                    "centerzoom": {
+                        "displayName": "Persist for Map",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true,
+        "supportsHighlight": true,
+        "sorting": {
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "stamp",
+                        "direction": 1
+                    }
+                ]
+            }
+        }
+    },
+    "stringResources": {}
+}

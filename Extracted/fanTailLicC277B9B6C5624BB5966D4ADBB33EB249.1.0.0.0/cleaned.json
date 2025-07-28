@@ -1,0 +1,144 @@
+{
+    "visual": {
+        "name": "fanTailLic",
+        "displayName": "FanTail by Flash BI",
+        "guid": "fanTailLicC277B9B6C5624BB5966D4ADBB33EB249",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Fantil Licenced",
+        "supportUrl": "https://flashbi.com.au/fantail-support/",
+        "gitHubUrl": "https://flashbi.com.au/fantail-support/"
+    },
+    "author": {
+        "name": "Fiona Foley",
+        "email": "chris@flashbi.com.au"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Layers",
+                "kind": "Grouping",
+                "name": "Layers"
+            },
+            {
+                "displayName": "% value",
+                "kind": "Measure",
+                "name": "Values"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "Layers"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Values"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {}
+                                }
+                            }
+                        },
+                        "conditions": [
+                            {
+                                "min": 1
+                            }
+                        ]
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "############### Utility functions ###############\nlibraryRequireInstall = function(packageName, ...)\n{\n  if(!require(packageName, character.only = TRUE)) \n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\n}\n\nlibraryRequireInstall(\"xml2\")\nlibraryRequireInstall(\"htmlwidgets\")\n\ninternalSaveWidget <- function(widget, fname)\n{\n  tempFname = paste(fname, \".tmp\", sep=\"\")\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\n  FlattenHTML(tempFname, fname)\n}\n\nFlattenHTML <- function(fnameIn, fnameOut)\n{\n  # Read and parse HTML file\n  # Embed all js and css files into one unified file\n  \n  if(!file.exists(fnameIn))\n    return(FALSE)\n  \n  dir = dirname(fnameIn)\n  html = read_html(fnameIn, useInternal = TRUE)\n  top = xml_root(html)\n  \n  # extract all <script> tags with src value\n  srcNode=xml_find_all(top, '//script[@src]')\n  for (node in srcNode)\n  {\n    b = xml_attrs(node)\n    fname = file.path(dir, b['src'])\n    alternateSrc = FindSrcReplacement(fname)\n    if (!is.null(alternateSrc))\n    {\n      s = alternateSrc\n      names(s) = 'src'\n      newNode = xml_new_root(\"script\")\n      xml_set_attrs(newNode, s)\n      xml_replace(node, newNode)\n    }else{\n      str=ReadFileForEmbedding(fname);\n      if (!is.null(str))\n      {      \n        newNode = xml_new_root(\"script\",str)\n        xml_set_attrs( newNode, c( type = \"text/javascript\") )\n        xml_replace(node, newNode)\n      }\n    }\n  }\n  \n  # extract all <link> tags with src value\n  linkNode=xml_find_all(top, '//link[@href]')\n  for (node in linkNode)\n  {\n    b = xml_attrs(node)\n    fname = file.path(dir, b['href'])\n    str = ReadFileForEmbedding(fname, FALSE);\n    if (!is.null(str))\n    {\n      newNode = xml_new_root(\"style\", str)\n      xml_replace(node, newNode)\n    }\n  }\n  \n  write_xml(html, file = fnameOut)\n  return(TRUE)\n}\n\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\n{\n  data = ReadFullFile(fname)\n  if (is.null(data))\n    return(NULL)\n\n  str = paste(data, collapse ='\\n')\n  if (addCdata) {\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\n  }\n  return(str)\n}\n\nReadFullFile <- function(fname)\n{\n  if(!file.exists(fname))\n    return(NULL)\n  \n  con = file(fname, open = \"r\")\n  data = readLines(con)\n  close(con)\n  return(data)\n}\n\nFindSrcReplacement <- function(str)\n{\n  # finds reference to 'plotly' js and replaces with a version from CDN\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\n  str <- iconv(str, to=\"UTF-8\")\n  pattern = \"plotly-(\\\\w.+)/plotly-latest.min.js\"\n  match1=regexpr(pattern, str)\n  attr(match1, 'useBytes') <- FALSE\n  strMatch=regmatches(str, match1, invert = FALSE)\n  if (length(strMatch) == 0) return(NULL)\n  \n  pattern2 = \"-(\\\\d.+)/\"\n  match2 = regexpr(pattern2, strMatch[1])\n  attr(match2, 'useBytes') <- FALSE\n  strmatch = regmatches(strMatch[1], match2)\n  if (length(strmatch) == 0) return(NULL)\n  \n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\n  # This matches the specific version used in the plotly package used.\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\n  return(str)\n}\n\nReadFullFileReplaceString <- function(fnameIn, fnameOut, sourceString,targetString) {\n  # Replaces texts in file\n  # This makes it possible to replace e.g. paddings in the generated html widget code\n  if(!file.exists(fnameIn))\n    return(NULL)\n  tx  <- readLines(fnameIn,encoding = \"UTF-8\")\n  tx2  <- gsub(pattern = sourceString, replace = targetString, x = tx)\n  writeLines(tx2, con = fnameOut)\n}\n#################################################\n\n\n#  Load R packages needed ####\nlibrary(ggplot2)\nlibrary(plotly)\nlibrary(reshape2)\nlibrary(htmlwidgets)\nlibrary(htmltools)\nlibrary(tidyverse)\nlibrary(colorspace)\nlibrary(dplyr)\nlibrary(viridis)\nlibrary(RColorBrewer)\nlibrary(data.table)\nlibrary(uuid)\n\n#https://community.fabric.microsoft.com/t5/Custom-Visuals-Development/Set-a-user-defined-title-to-a-custom-R-HTML-visual/m-p/2013183\n\n# Function to generate a UUID   example 27d04328-4376-43de-85a4-b0414128c244\ngenerate_uuid <- function() {\n  UUIDgenerate()\n}\n# Function to validate a UUID\nvalidate_uuid <- function(uuid) {\n  grepl(\"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$\", uuid, ignore.case = TRUE)\n}\n# Example usage\n#uuid <- generate_uuid()\n#cat(\"Generated UUID:\", uuid, \"\\n\")\n#cat(\"Is Valid:\", validate_uuid(uuid), \"\\n\")            1a45a8fa8-2bf7-487b-aad7-f572fc43df58\n                                               # sample d658d3b5-0ede-444f-9e1a-bf9bd5c1f527432\n\n\nMyLicence <- \"\"\n if (exists(\"directEdit_licensecode\")  && \n      validate_uuid(substring(directEdit_licensecode,2))    && substring(directEdit_licensecode,1,1) == '1' ) \n   { MyLicence <- \"\" }  else  {MyLicence <-  \"To Licence the FanTail go to www.FlashBI.com.au\"  }  # valid licence code\n\n \n if (exists(\"directEdit_licensecode\")  && (directEdit_licensecode ==  'd658d3b5-0ede-444f-9e1a-bf9bd5c1f527432'))\n    { MyLicence <- \"To Licence the FanTail go to www.FlashBI.com.au\" }  # Heading on the sample in the marketplace  \n\n\n \n\n\n###### Sunburst function - to wrangle data into the subnurst hierarchy format ####\nas.sunburstDF <- function(DF, valueCol = NULL){ require(data.table)\n  colNamesDF <- names(DF)\n  if(is.data.table(DF)){\n    DT <- copy(DF)\n  } else {\n    DT <- data.table(DF, stringsAsFactors = FALSE)\n  }\n  DT[, root := \"Total\"]\n  colNamesDT <- names(DT)\n  if(is.null(valueCol)){\n    setcolorder(DT, c(\"root\", colNamesDF))\n  } else {\n    setnames(DT, valueCol, \"values\", skip_absent=TRUE)\n    setcolorder(DT, c(\"root\", setdiff(colNamesDF, valueCol), \"values\"))\n  }\n  hierarchyCols <- setdiff(colNamesDT, \"values\")\n  hierarchyList <- list()  \n  for(i in seq_along(hierarchyCols)){\n    currentCols <- colNamesDT[1:i]\n    if(is.null(valueCol)){\n      currentDT <- unique(DT[, ..currentCols][, values := .N, by = currentCols], by = currentCols)\n    } else {\n      currentDT <- DT[, lapply(.SD, sum, na.rm = TRUE), by=currentCols, .SDcols = \"values\"]\n    }\n    setnames(currentDT, length(currentCols), \"labels\")\n    hierarchyList[[i]] <- currentDT\n  }\n  hierarchyDT <- rbindlist(hierarchyList, use.names = TRUE, fill = TRUE)\n  parentCols <- setdiff(names(hierarchyDT), c(\"labels\", \"values\", valueCol))\n  hierarchyDT[, parents := apply(.SD, 1, function(x){fifelse(all(is.na(x)),\n                                                             yes = NA_character_, no = paste(x[!is.na(x)],sep = \":\", collapse = \" - \"))}),.SDcols = parentCols]\n  hierarchyDT[, ids := apply(.SD, 1, function(x){paste(x[!is.na(x)], collapse = \" - \")}),\n              .SDcols = c(\"parents\", \"labels\")]\n  hierarchyDT[, c(parentCols) := NULL]\n  return(hierarchyDT)\n}\n\n \ndf <-  data.frame(cbind(Layers,  Values)) # Values\n \n#df <- df %>% select(1,2)\nsunburstDFpos <- as.sunburstDF(df,valueCol =  rev(names(df))[1])  # valueCol = rev(names(df))[1])  #\n\n###  get the data for the hover over values and labels ####\nnumcols <- as.integer(NROW(unique(sunburstDFpos$values) ))\nnumlabs <- as.integer(NROW(unique(sunburstDFpos$labels) ))\nthelabs  <-  data.frame( thelabnames = unique(sunburstDFpos$labels))\nthelabs  <- tibble::rowid_to_column(thelabs, \"ID\")\nthelabsvals   <-   sunburstDFpos %>% select(labels,values)  %>%  group_by(labels) %>%\n  slice(which.max(1 ))  %>% select(labels,groupvalues =  values)  \nthelabs$labcol <- NA\n\n###  set the color pallet ####\nthelabs$labcol <- viridis(nrow(thelabs)) \nthelabs<- thelabs %>% mutate (labcol =  ifelse(thelabnames == 'Total', \"#FFFFFF\",labcol ))    # #98fb98\nthelabs<- thelabs %>% mutate (labcol =  ifelse(thelabnames == 'Total', \"#FFFFFF\",labcol ))    # #98fb98\n\n\n####  Wrangle  the data to show the totals sections ####\nsunburstDFpos <- sunburstDFpos %>% mutate( valuestotzero  = ifelse(labels == 'Total' ,0 ,values )  ,\n                                           valuestotonly  = ifelse(labels == 'Total' ,values ,\"\"))  %>%\n  inner_join( thelabsvals , by = c(\"labels\" = \"labels\" ))\nsunburstDFpos <- sunburstDFpos %>%  mutate( thelabsvals = ifelse( ids == 'Total' ,0 ,groupvalues))  %>%\n  arrange(-thelabsvals)\nsunburstDFpos<-   inner_join( sunburstDFpos  ,  thelabs,  by = c( \"labels\" = \"thelabnames\"))\n#sunburstDFpos <- sunburstDFpos %>%  mutate( labels = ifelse( labels == 'Total' ,\"Total\",labels))\nsunburstDFpos <- sunburstDFpos %>%\n  group_by(parents) %>%\n  mutate(parentval = sum(values , na.rm= T))\nsunburstDFpos <- sunburstDFpos %>%  mutate( percofparent= values / parentval )\n\n\n##### plot the sunburst ####\n q <- plot_ly(data = sunburstDFpos, ids = ~ids, labels= ~labels, parents = ~parents,  text = ~valuestotzero,\n             branchvalues = 'remainder',customdata = ~percofparent,\n             hovertext = ~values, values= ~valuestotzero, type='sunburst',marker = list( colors = ~labcol )   ,\n             insidetextorientation='radial' , outsidetextfont = list(size = 14, color = \"white\", family = \"Arial\"), \n            texttemplate=\"%{label}\",\n            hovertemplate=\"%{label} <br> %{value:#,.5s} <br> %{customdata:.1%}</b><extra></extra>\"\n            )   %>%  #percentParent percentEntry\n  hide_colorbar() %>%\n  layout ( title =  list( text = MyLicence ,     font = list(     color = \"red\")), \n           grid = list(columns = 1, rows= 1), xaxis = list( zeroline = FALSE,  showline = FALSE,\n                                                            showticklabels = FALSE,  showgrid = FALSE),\n                                                            title = MyLicence,\n           yaxis = list( zeroline = FALSE,  showline = FALSE,\n                         showticklabels = FALSE,  showgrid = FALSE),  margin(2, 2, 2, 2)  )\n\n\np <- ggplotly(q)\ninternalSaveWidget(p, 'out.html')"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "directEdit": {
+                "properties": {
+                    "licensecode": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsMultiVisualSelection": true,
+        "suppressDefaultTitle": true,
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "parameters": [
+                    "https://cdn.plot.ly/"
+                ]
+            }
+        ]
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "xml2",
+                "displayName": "xml2",
+                "url": "https://cran.r-project.org/web/packages/xml2/index.html"
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

@@ -1,0 +1,1066 @@
+{
+    "visual": {
+        "name": "heatmap",
+        "displayName": "Heat map",
+        "guid": "heatmapF244EA9EE1F34E828A80CF19B41976F8",
+        "visualClassName": "Visual",
+        "version": "1.1.9",
+        "description": "Visualize the density of data points as a heatmap",
+        "supportUrl": "https://weiweicui.github.io/PowerBI-Heatmap/",
+        "gitHubUrl": "https://github.com/weiweicui/PowerBI-Heatmap"
+    },
+    "apiVersion": "1.6.0",
+    "author": {
+        "name": "Weiwei Cui",
+        "email": "weiweicui@outlook.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "./app.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Location (ID)",
+                "description": "Addresses or Ids to differentiate records",
+                "name": "location",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Latitude",
+                "description": "(Optional) Manually specify geo-coordinates",
+                "name": "latitude",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "latitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Longitude",
+                "description": "(Optional) Manually specify geo-coordinates",
+                "name": "longitude",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Value",
+                "description": "(Optional) Numeric values associated to locations, defaut is one",
+                "name": "value",
+                "kind": "Measure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Group",
+                "description": "(Optional) Records are grouped based the values in this field",
+                "name": "group",
+                "kind": "Grouping"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "location": {
+                            "max": 1
+                        },
+                        "latitude": {
+                            "max": 1
+                        },
+                        "longitude": {
+                            "max": 1
+                        },
+                        "group": {
+                            "max": 1
+                        },
+                        "value": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "location"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "latitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "longitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "group"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "value"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "description": "Location for the legend",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bot"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font",
+                        "description": "Font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "scale": {
+                        "displayName": "Color",
+                        "description": "Color-value mapping",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "info": {
+                        "displayName": "Detail",
+                        "description": "Useful information displayed as text",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "renderer": {
+                "displayName": "Renderer",
+                "properties": {
+                    "type": {
+                        "displayName": "Type",
+                        "description": "The overall visual effect",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Contour",
+                                    "value": "contour"
+                                },
+                                {
+                                    "displayName": "Heat",
+                                    "value": "heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "radius": {
+                        "displayName": "Radius",
+                        "description": "The influential radius for each data point",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "description": "Max opacity used by the renderer",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "peak": {
+                        "displayName": "Measure",
+                        "description": "The strategy to decide the max value based on groups",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Average",
+                                    "value": "average"
+                                },
+                                {
+                                    "displayName": "Highest",
+                                    "value": "max"
+                                },
+                                {
+                                    "displayName": "First",
+                                    "value": "first"
+                                },
+                                {
+                                    "displayName": "Last",
+                                    "value": "last"
+                                },
+                                {
+                                    "displayName": "Sum",
+                                    "value": "sum"
+                                },
+                                {
+                                    "displayName": "Manual",
+                                    "value": "manual"
+                                }
+                            ]
+                        }
+                    },
+                    "max": {
+                        "displayName": "Max",
+                        "description": "Manually set the maximum value used by the renderer",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "contour": {
+                "displayName": "Contour map",
+                "properties": {
+                    "theme5": {
+                        "displayName": "Theme",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "theme4": {
+                        "displayName": "Theme",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "theme3": {
+                        "displayName": "Theme",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "theme2": {
+                        "displayName": "Theme",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "theme1": {
+                        "displayName": "Theme",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level": {
+                        "displayName": "Max level",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "1",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "displayName": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "displayName": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "displayName": "5",
+                                    "value": "5"
+                                }
+                            ]
+                        }
+                    },
+                    "measure": {
+                        "displayName": "Measure",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Relative value",
+                                    "value": "relative"
+                                },
+                                {
+                                    "displayName": "Absolute value",
+                                    "value": "absolute"
+                                }
+                            ]
+                        }
+                    },
+                    "specify": {
+                        "displayName": "Specify",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color50": {
+                        "displayName": "Level 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color51": {
+                        "displayName": "Level 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color52": {
+                        "displayName": "Level 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color53": {
+                        "displayName": "Level 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color54": {
+                        "displayName": "Level 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color40": {
+                        "displayName": "Level 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color41": {
+                        "displayName": "Level 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color42": {
+                        "displayName": "Level 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color43": {
+                        "displayName": "Level 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color30": {
+                        "displayName": "Level 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color31": {
+                        "displayName": "Level 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color32": {
+                        "displayName": "Level 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color20": {
+                        "displayName": "Level 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color21": {
+                        "displayName": "Level 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color10": {
+                        "displayName": "Level 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stopr50": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr51": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr52": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr53": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr54": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr40": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr41": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr42": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr43": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr30": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr31": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr32": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr20": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr21": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopr10": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa50": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa51": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa52": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa53": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa54": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa40": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa41": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa42": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa43": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa30": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa31": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa32": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa20": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa21": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stopa10": {
+                        "displayName": "       ",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "heatmap": {
+                "displayName": "Heat map",
+                "properties": {
+                    "color0": {
+                        "displayName": "Level 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level0": {
+                        "displayName": " ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color1": {
+                        "displayName": "Level 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level1": {
+                        "displayName": " ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color2": {
+                        "displayName": "Level 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level2": {
+                        "displayName": " ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color3": {
+                        "displayName": "Level 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level3": {
+                        "displayName": " ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color4": {
+                        "displayName": "Level 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level4": {
+                        "displayName": " ",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "group": {
+                "displayName": "Group",
+                "description": "Customize group visuals when not animating",
+                "properties": {
+                    "item": {
+                        "displayName": "Default",
+                        "type": {
+                            "bool": true
+                        },
+                        "description": "Visibility"
+                    },
+                    "persist": {
+                        "displayName": "Group Persist",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "animation": {
+                "displayName": "Animation",
+                "description": "Animate through each group in the sorted order",
+                "properties": {
+                    "time": {
+                        "displayName": "Morphing",
+                        "type": {
+                            "numeric": true
+                        },
+                        "description": "Time duration between groups (in seconds)"
+                    },
+                    "freeze": {
+                        "displayName": "Freezing",
+                        "type": {
+                            "numeric": true
+                        },
+                        "description": "Time duration for each group (in seconds)"
+                    },
+                    "play": {
+                        "displayName": "Play",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pause": {
+                        "displayName": "Pause",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "repeat": {
+                        "displayName": "Repeat",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "advance": {
+                "displayName": "Advance",
+                "properties": {
+                    "cache": {
+                        "displayName": "Cache",
+                        "description": "Cache geocoding results to speed up",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "mapControl": {
+                "displayName": "Map control",
+                "properties": {
+                    "type": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Aerial",
+                                    "value": "aerial"
+                                },
+                                {
+                                    "displayName": "Color",
+                                    "value": "road"
+                                },
+                                {
+                                    "displayName": "Gray",
+                                    "value": "grayscale"
+                                },
+                                {
+                                    "displayName": "Dark",
+                                    "value": "canvasDark"
+                                },
+                                {
+                                    "displayName": "Light",
+                                    "value": "canvasLight"
+                                }
+                            ]
+                        }
+                    },
+                    "lang": {
+                        "displayName": "Language",
+                        "description": "The language used in the map",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "Chinese",
+                                    "value": "zh-HK"
+                                },
+                                {
+                                    "displayName": "Czech",
+                                    "value": "cs-CZ"
+                                },
+                                {
+                                    "displayName": "Danish",
+                                    "value": "da-DK"
+                                },
+                                {
+                                    "displayName": "Dutch",
+                                    "value": "nl-NL"
+                                },
+                                {
+                                    "displayName": "English",
+                                    "value": "en-US"
+                                },
+                                {
+                                    "displayName": "Finnish",
+                                    "value": "fi-FI"
+                                },
+                                {
+                                    "displayName": "French",
+                                    "value": "fr-FR"
+                                },
+                                {
+                                    "displayName": "German",
+                                    "value": "de-DE"
+                                },
+                                {
+                                    "displayName": "Italian",
+                                    "value": "it-IT"
+                                },
+                                {
+                                    "displayName": "Japanese",
+                                    "value": "ja-JP"
+                                },
+                                {
+                                    "displayName": "Korean",
+                                    "value": "Ko-KR"
+                                },
+                                {
+                                    "displayName": "Norwegian(Bokmal)",
+                                    "value": "nb-NO"
+                                },
+                                {
+                                    "displayName": "Polish",
+                                    "value": "pl-PL"
+                                },
+                                {
+                                    "displayName": "Portuguese",
+                                    "value": "pt-BR"
+                                },
+                                {
+                                    "displayName": "Russian",
+                                    "value": "ru-RU"
+                                },
+                                {
+                                    "displayName": "Spanish",
+                                    "value": "es-ES"
+                                },
+                                {
+                                    "displayName": "Swedish",
+                                    "value": "sv-SE"
+                                }
+                            ]
+                        }
+                    },
+                    "autofit": {
+                        "displayName": "Autofit",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pan": {
+                        "displayName": "Pan",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom": {
+                        "displayName": "Zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "mapElement": {
+                "displayName": "Map element",
+                "properties": {
+                    "forest": {
+                        "displayName": "Forest",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "road": {
+                        "displayName": "Road",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "color"
+                                },
+                                {
+                                    "displayName": "Gray w/ label",
+                                    "value": "gray_label"
+                                },
+                                {
+                                    "displayName": "Gray w/o label",
+                                    "value": "gray"
+                                },
+                                {
+                                    "displayName": "Hidden",
+                                    "value": "hidden"
+                                }
+                            ]
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "city": {
+                        "displayName": "City",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "icon": {
+                        "displayName": "Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "building": {
+                        "displayName": "Building",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "area": {
+                        "displayName": "Area",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "persist": {
+                "displayName": "Persist values",
+                "properties": {
+                    "map": {
+                        "displayName": "Persist centerzoom",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "locations": {
+                        "displayName": "Persist location",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": false
+    },
+    "stringResources": {}
+}

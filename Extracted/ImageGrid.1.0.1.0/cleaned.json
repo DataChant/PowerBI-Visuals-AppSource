@@ -1,0 +1,138 @@
+{
+    "visual": {
+        "name": "ImageGrid",
+        "displayName": "Image Grid",
+        "guid": "ImageGrid_FC5183B9_926C_45E0_B5F7_0CE9EAF1DA9B",
+        "visualClassName": "Visual",
+        "version": "1.0.1",
+        "description": "Visualize images in Power BI. Images can be visualized as top lists, weighted based on a measure or in a grid format.",
+        "supportUrl": "http://www.fredrikhedenstrom.com",
+        "gitHubUrl": "https://github.com/fredrikheden/imagegrid"
+    },
+    "apiVersion": "1.7.0",
+    "author": {
+        "name": "Fredrik Hedenstr\u00f6m",
+        "email": "fredrik.hedenstrom@outlook.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/lodash/lodash.min.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/d3/d3.min.js",
+        "external/hashtable.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Image URL (lower quality)",
+                "name": "ImageURL",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Image URL (higher quality)",
+                "name": "ImageURLHQ",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Value",
+                "name": "Value",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Value": {
+                            "max": 1
+                        },
+                        "ImageURL": {
+                            "max": 1
+                        },
+                        "ImageURLHQ": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Value"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ImageURL"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ImageURLHQ"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "settings": {
+                "displayName": "Settings",
+                "properties": {
+                    "pMaxColumns": {
+                        "displayName": "Maximum Columns (for grid)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pHQMinWidth": {
+                        "displayName": "Minimum width for higher quality images",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pTopListWeight": {
+                        "displayName": "Top list weight (for circle top list)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pRenderType": {
+                        "displayName": "Render type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "CIRCLETOPLIST",
+                                    "displayName": "Top list circles"
+                                },
+                                {
+                                    "value": "CIRCLE",
+                                    "displayName": "Weighted circles"
+                                },
+                                {
+                                    "value": "GRID",
+                                    "displayName": "Grid"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "stringResources": {}
+}

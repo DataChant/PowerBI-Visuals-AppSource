@@ -1,0 +1,291 @@
+{
+    "visual": {
+        "name": "TableSorter",
+        "displayName": "Table Sorter",
+        "guid": "TableSorter1450434005853",
+        "visualClassName": "TableSorterVisual",
+        "description": "This visual is experimental and not actively being developed, only major issues will be addressed. Table Sorter lets you create stacked table columns to explore how different combinations and weightings of numerical column values result in different rank orderings of table records. Column headings show the distribution of column values and support rapid re-sorting of table rows (which may also be filtered by linked visuals). Table Sorter is built on LineUp (http://caleydo.github.io/tools/lineup/).",
+        "supportUrl": "",
+        "githubUrl": "https://github.com/Microsoft/PowerBI-visuals-TableSorter"
+    },
+    "author": {
+        "name": "Microsoft (experimental)",
+        "email": "msrvizsupport@microsoft.com"
+    },
+    "apiVersion": "1.11.0",
+    "assets": {
+        "icon": "src/assets/icon.svg",
+        "screenshot": "src/assets/screenshot.png",
+        "thumbnail": "src/assets/thumbnail.png"
+    },
+    "style": "src/css/TableSorterVisual.scss",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Values",
+                "kind": 2,
+                "displayName": "Values"
+            },
+            {
+                "name": "Rank",
+                "kind": 2,
+                "displayName": "Rank",
+                "description": "Causes TableSorter to create ranking information based on the contents of the column. *Note* This should be a numeric column"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Values": {
+                            "min": 0
+                        },
+                        "Rank": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Values"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Rank"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "rowCount": {
+                        "preferred": {
+                            "min": 1
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": {}
+                        },
+                        "rule": {
+                            "output": {
+                                "property": "selected",
+                                "selector": [
+                                    "Values"
+                                ]
+                            }
+                        }
+                    },
+                    "version": {
+                        "displayName": "Version",
+                        "description": "The version of Table Sorter",
+                        "type": {
+                            "text": {}
+                        }
+                    }
+                }
+            },
+            "layout": {
+                "properties": {
+                    "layout": {
+                        "type": {
+                            "text": {}
+                        }
+                    }
+                }
+            },
+            "rank": {
+                "objectName": "rank",
+                "displayName": "Rank",
+                "properties": {
+                    "colorMode": {
+                        "displayName": "Color Mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": 1,
+                                    "displayName": "Gradient"
+                                },
+                                {
+                                    "value": 2,
+                                    "displayName": "Instance"
+                                }
+                            ]
+                        }
+                    },
+                    "reverseBars": {
+                        "displayName": "Reverse Columns",
+                        "description": "If enabled, the order of the generated rank columns will be reversed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "histogram": {
+                        "displayName": "Histogram",
+                        "description": "If true, a histogram will be shown across the rank columns",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "startColor": {
+                        "displayName": "Start color",
+                        "description": "The start color of the gradient",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "endColor": {
+                        "displayName": "End color",
+                        "description": "The end color of the gradient",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "startValue": {
+                        "displayName": "Start Value",
+                        "description": "The value to use as the start color",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "endValue": {
+                        "displayName": "End Value",
+                        "description": "The value to use as the end color",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rankInstanceColors": {
+                        "displayName": "Ranks",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "presentation": {
+                "objectName": "presentation",
+                "displayName": "Presentation",
+                "properties": {
+                    "textColor": {
+                        "displayName": "Row Text Color",
+                        "description": "The color for the text in the rows",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "headerTextColor": {
+                        "displayName": "Header Text Color",
+                        "description": "The text color for the headers",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Units",
+                        "description": "The units to use when formatting numbers within TableSorter",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Precision",
+                        "description": "The decimal precision to use when formatting numbers within TableSorter",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stacked": {
+                        "displayName": "Stacked",
+                        "description": "If true, when columns are combined, the all columns will be displayed stacked",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "values": {
+                        "displayName": "Values",
+                        "description": "If the actual values should be displayed under the bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "histograms": {
+                        "displayName": "Histograms",
+                        "description": "Show histograms in the column headers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "animation": {
+                        "displayName": "Animation",
+                        "description": "Should the grid be animated when sorting",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltips": {
+                        "displayName": "Table tooltips",
+                        "description": "Should the grid show tooltips on hover of a row",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "selection": {
+                "objectName": "selection",
+                "displayName": "Selection",
+                "properties": {
+                    "multiSelect": {
+                        "displayName": "Multi Select",
+                        "description": "If true, multiple rows can be selected",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "sorting": {
+            "custom": {}
+        }
+    },
+    "output": "dist/TableSorter.pbiviz"
+}

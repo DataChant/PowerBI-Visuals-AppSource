@@ -1,0 +1,401 @@
+{
+    "visual": {
+        "name": "NetworkNavigator",
+        "displayName": "Network Navigator",
+        "guid": "NetworkNavigator1550434005853",
+        "visualClassName": "NetworkNavigator",
+        "description": "This visual is experimental and not actively being developed, only major issues will be addressed. Network Navigator lets you explore node-link data by panning over and zooming into a force-directed node layout (which can be precomputed or animated live). From an initial overview of all nodes, you can use simple text search to enlarge matching nodes in ways that guide subsequent navigation. Network nodes can also be color-coded based on additional attributes of the dataset and filtered by linked visuals.",
+        "supportUrl": "",
+        "gitHubUrl": "https://github.com/Microsoft/PowerBI-visuals-NetworkNavigator"
+    },
+    "author": {
+        "name": "Microsoft (experimental)",
+        "email": "msrvizsupport@microsoft.com"
+    },
+    "apiVersion": "1.11.0",
+    "assets": {
+        "icon": "assets/icon.svg",
+        "screenshot": "assets/screenshot.png",
+        "thumbnail": "assets/thumbnail.png"
+    },
+    "style": "src/css/NetworkNavigatorVisual.scss",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "SOURCE_NODE",
+                "displayName": "Source Node",
+                "kind": 2
+            },
+            {
+                "name": "TARGET_NODE",
+                "displayName": "Target Node",
+                "kind": 2
+            },
+            {
+                "name": "EDGE_VALUE",
+                "displayName": "Edge Weight",
+                "kind": 2
+            },
+            {
+                "name": "EDGE_COLOR_VALUE",
+                "displayName": "Edge Color Weight",
+                "kind": 2
+            },
+            {
+                "name": "SOURCE_NODE_WEIGHT",
+                "displayName": "Source Node Weight",
+                "kind": 2
+            },
+            {
+                "name": "SOURCE_NODE_COLOR",
+                "displayName": "Source Node Color",
+                "kind": 2
+            },
+            {
+                "name": "SOURCE_LABEL_COLOR",
+                "displayName": "Source Node Label Color",
+                "kind": 2
+            },
+            {
+                "name": "TARGET_NODE_WEIGHT",
+                "displayName": "Target Node Weight",
+                "kind": 2
+            },
+            {
+                "name": "TARGET_NODE_COLOR",
+                "displayName": "Target Node Color",
+                "kind": 2
+            },
+            {
+                "name": "TARGET_LABEL_COLOR",
+                "displayName": "Target Node Label Color",
+                "kind": 2
+            },
+            {
+                "name": "FILTER_FIELD",
+                "displayName": "Filter",
+                "kind": 2
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "SOURCE_NODE"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "TARGET_NODE"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "EDGE_VALUE"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "EDGE_COLOR_VALUE"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "SOURCE_NODE_WEIGHT"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "SOURCE_NODE_COLOR"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "SOURCE_LABEL_COLOR"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "TARGET_NODE_WEIGHT"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "TARGET_NODE_COLOR"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "TARGET_LABEL_COLOR"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "FILTER_FIELD"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "conditions": [
+                    {
+                        "SOURCE_NODE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "TARGET_NODE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "EDGE_VALUE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "EDGE_COLOR_VALUE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "SOURCE_NODE_WEIGHT": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "SOURCE_NODE_COLOR": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "SOURCE_LABEL_COLOR": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "TARGET_NODE_WEIGHT": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "TARGET_NODE_COLOR": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "TARGET_LABEL_COLOR": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "FILTER_FIELD": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ]
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "general": {
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": {}
+                        },
+                        "rule": {
+                            "output": {
+                                "property": "selected",
+                                "selector": [
+                                    "Values"
+                                ]
+                            }
+                        }
+                    },
+                    "version": {
+                        "displayName": "Version",
+                        "description": "The version of Network Navigator",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                },
+                "displayName": "General"
+            },
+            "search": {
+                "properties": {
+                    "caseInsensitive": {
+                        "type": {
+                            "bool": true
+                        },
+                        "displayName": "Case Insensitive",
+                        "description": "Case Insensitive Filtering"
+                    }
+                },
+                "displayName": "Search"
+            },
+            "layout": {
+                "properties": {
+                    "animate": {
+                        "type": {
+                            "bool": true
+                        },
+                        "displayName": "Animate",
+                        "description": "Should the graph be animated"
+                    },
+                    "maxNodeCount": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Max nodes",
+                        "description": "The maximum number of nodes to render"
+                    },
+                    "maxNodeSize": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Max node size",
+                        "description": "The maximum size to render a vertex"
+                    },
+                    "minNodeSize": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Min node size",
+                        "description": "The minimum size to render a vertex"
+                    },
+                    "linkDistance": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Link Distance",
+                        "description": "Link Distance"
+                    },
+                    "linkStrength": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Link Strength",
+                        "description": "Link Strength"
+                    },
+                    "gravity": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Gravity",
+                        "description": "Gravity parameter used in force-directed layout"
+                    },
+                    "charge": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Charge",
+                        "description": "Charge parameter used in force-directed layout"
+                    },
+                    "labels": {
+                        "type": {
+                            "bool": true
+                        },
+                        "displayName": "Labels",
+                        "description": "If labels on the nodes should be shown"
+                    },
+                    "minZoom": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Min Zoom",
+                        "description": "Minimum zoom scale"
+                    },
+                    "maxZoom": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Max Zoom",
+                        "description": "Maximum zoom scale"
+                    },
+                    "defaultLabelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "Default Label Color",
+                        "description": "The default color to use for labels"
+                    },
+                    "textSize": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Font Size",
+                        "description": "The font size (pts) to use for labels"
+                    },
+                    "minEdgeWeight": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Min Edge Weight",
+                        "description": "The minimum value of the edge weight data"
+                    },
+                    "maxEdgeWeight": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Max Edge Weight",
+                        "description": "The maximum value of the edge weight data"
+                    },
+                    "minEdgeColorWeight": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Min Edge Color Weight",
+                        "description": "The minimum value of the edge color weight data"
+                    },
+                    "maxEdgeColorWeight": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Max Edge Color Weight",
+                        "description": "The maximum value of the edge color weight data"
+                    },
+                    "edgeMinWidth": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Min Edge Width",
+                        "description": "The minimum edge width to render"
+                    },
+                    "edgeMaxWidth": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Max Edge width",
+                        "description": "The maximum edge width to render"
+                    },
+                    "edgeStartColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "Edge Start Color",
+                        "description": "Edge Start Color"
+                    },
+                    "edgeEndColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "Edge End Color",
+                        "description": "Edge End Color"
+                    }
+                },
+                "displayName": "Layout"
+            }
+        }
+    },
+    "output": "dist/NetworkNavigator.pbiviz"
+}

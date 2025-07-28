@@ -1,0 +1,2304 @@
+{
+    "visual": {
+        "name": "violinPlot",
+        "displayName": "Violin Plot (1.3.0)",
+        "guid": "violinPlot4D46EB9EB3A141D9BA2289793175D971",
+        "visualClassName": "ViolinPlot",
+        "version": "1.3.0.4",
+        "description": "Use to visualise the distribution of your data.",
+        "supportUrl": "https://bitbucket.org/dm-p/power-bi-visuals-violin-plot",
+        "gitHubUrl": "https://bitbucket.org/dm-p/power-bi-visuals-violin-plot"
+    },
+    "apiVersion": "2.5.0",
+    "author": {
+        "name": "Daniel Marsh-Patrick",
+        "email": "d.s.marsh@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/desktop_icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.cultures.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-chartutils/lib/index.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/jquery/dist/jquery.slim.min.js",
+        "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayNameKey": "Roles_Sampling",
+                "descriptionKey": "Roles_Sampling_Description",
+                "displayName": "Sampling",
+                "name": "sampling",
+                "kind": "Grouping",
+                "description": "Sampling description."
+            },
+            {
+                "displayNameKey": "Roles_Measure",
+                "descriptionKey": "Roles_Measure_Description",
+                "displayName": "Measure Data",
+                "name": "measure",
+                "kind": "Measure",
+                "description": "Measure description.",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayNameKey": "Roles_Category",
+                "descriptionKey": "Roles_Category_Description",
+                "displayName": "Category",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "Category description."
+            }
+        ],
+        "objects": {
+            "dataLimit": {
+                "displayNameKey": "Objects_DataLimit",
+                "descriptionKey": "Objects_DataLimit_Description",
+                "displayName": "Data Limit Options",
+                "description": "Data Limit Options description.",
+                "properties": {
+                    "override": {
+                        "displayNameKey": "Objects_DataLimit_Override",
+                        "descriptionKey": "Objects_DataLimit_Override_Description",
+                        "displayName": "Override Row Limit",
+                        "description": "Override Row Limit description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showInfo": {
+                        "displayNameKey": "Objects_DataLimit_ShowProgress",
+                        "descriptionKey": "Objects_DataLimit_ShowProgress_Description",
+                        "displayName": "Show Loading Progress",
+                        "description": "Show loading progress description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCustomVisualNotes": {
+                        "displayNameKey": "Objects_DataLimit_ShowCustomVisualNotes",
+                        "descriptionKey": "Objects_DataLimit_ShowCustomVisualNotes_Description",
+                        "displayName": "Show Data Loading Notes",
+                        "description": "Show Data Loading Notes description.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "violin": {
+                "displayNameKey": "Objects_Violin",
+                "descriptionKey": "Objects_Violin_Description",
+                "displayName": "Violin Options",
+                "description": "Violin Options description.",
+                "properties": {
+                    "innerPadding": {
+                        "displayNameKey": "Objects_Violin_InnerPadding",
+                        "descriptionKey": "Objects_Violin_InnerPadding_Description",
+                        "displayName": "Inner Padding (%)",
+                        "description": "Inner Padding (%) description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "strokeWidth": {
+                        "displayNameKey": "Objects_Violin_StrokeWidth",
+                        "descriptionKey": "Objects_Violin_StrokeWidth_Description",
+                        "displayName": "Stroke Width",
+                        "description": "Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "clamp": {
+                        "displayNameKey": "Objects_Violin_Clamp",
+                        "descriptionKey": "Objects_Violin_Clamp_Description",
+                        "displayName": "Clamp to Min/Max",
+                        "description": "Clamp to Min/Max description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "resolution": {
+                        "displayNameKey": "Objects_Violin_SamplingResolution",
+                        "descriptionKey": "Objects_Violin_SamplingResolution_Description",
+                        "displayName": "Sampling Resolution",
+                        "description": "Sampling Resolution description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Violin_SamplingResolution_Standard",
+                                    "displayName": "Standard",
+                                    "value": "25"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Violin_SamplingResolution_High",
+                                    "displayName": "High",
+                                    "value": "50"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Violin_SamplingResolution_VeryHigh",
+                                    "displayName": "Very High",
+                                    "value": "100"
+                                }
+                            ]
+                        }
+                    },
+                    "kernel": {
+                        "displayNameKey": "Objects_Violin_Kernel",
+                        "descriptionKey": "Objects_Violin_Kernel_Description",
+                        "displayName": "Kernel",
+                        "description": "Kernel description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Violin_Kernel_Epanechnikov",
+                                    "displayName": "Epanechnikov",
+                                    "value": "epanechnikov"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Violin_Kernel_Gaussian",
+                                    "displayName": "Gaussian",
+                                    "value": "gaussian"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Violin_Kernel_Quartic",
+                                    "displayName": "Quartic",
+                                    "value": "quartic"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Violin_Kernel_Triweight",
+                                    "displayName": "Triweight",
+                                    "value": "triweight"
+                                }
+                            ]
+                        }
+                    },
+                    "specifyBandwidth": {
+                        "displayNameKey": "Objects_Violin_SpecifyBandwidth",
+                        "descriptionKey": "Objects_Violin_SpecifyBandwidth_Description",
+                        "placeHolderTextKey": "Placeholder_SpecifyNumber",
+                        "displayName": "Specify Bandwidth",
+                        "description": "Specify Bandwidth description.",
+                        "placeHolderText": "Specify Number",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bandwidth": {
+                        "displayNameKey": "Objects_Violin_Bandwidth",
+                        "descriptionKey": "Objects_Violin_Bandwidth_Description",
+                        "displayName": "Bandwidth",
+                        "description": "Bandwidth description.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bandwidthByCategory": {
+                        "displayNameKey": "Objects_Violin_BandwidthByCategory",
+                        "descriptionKey": "Objects_Violin_BandwidthByCategory_Description",
+                        "displayName": "Bandwidth By Category",
+                        "description": "Bandwidth By Category description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "categoryBandwidth": {
+                        "displayNameKey": "Objects_Violin_CategoryBandwidth",
+                        "descriptionKey": "Objects_Violin_CategoryBandwidth_Description",
+                        "displayName": "Bandwidth",
+                        "description": "Bandwidth description.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "sorting": {
+                "displayNameKey": "Objects_Sorting",
+                "descriptionKey": "Objects_Sorting_Description",
+                "displayName": "Sorting",
+                "description": "Sorting description.",
+                "properties": {
+                    "by": {
+                        "displayNameKey": "Objects_Sorting_By",
+                        "descriptionKey": "Objects_Sorting_By_Description",
+                        "displayName": "Sort By",
+                        "description": "Sort By description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Sorting_By_Category",
+                                    "value": "category",
+                                    "displayName": "Category"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Sorting_By_Samples",
+                                    "value": "samples",
+                                    "displayName": "# Samples"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Sorting_By_Median",
+                                    "value": "median",
+                                    "displayName": "Median"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Sorting_By_Mean",
+                                    "value": "mean",
+                                    "displayName": "Mean"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Sorting_By_Max",
+                                    "value": "max",
+                                    "displayName": "Maximum"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Sorting_By_Min",
+                                    "value": "min",
+                                    "displayName": "Minimum"
+                                }
+                            ]
+                        }
+                    },
+                    "order": {
+                        "displayNameKey": "Objects_Sorting_Order",
+                        "descriptionKey": "Objects_Sorting_Order_Description",
+                        "displayName": "Sort Order",
+                        "description": "Sort Order description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Sorting_Order_Ascending",
+                                    "value": "ascending",
+                                    "displayName": "Ascending"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Sorting_Order_Descending",
+                                    "value": "descending",
+                                    "displayName": "Descending"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "dataColours": {
+                "displayNameKey": "Objects_DataColours",
+                "descriptionKey": "Objects_DataColours_Description",
+                "displayName": "Data Colors",
+                "description": "Data Colors description.",
+                "properties": {
+                    "defaultFillColour": {
+                        "displayNameKey": "Objects_DataColours_DefaultFillColour",
+                        "descriptionKey": "Objects_DataColours_DefaultFillColour_Description",
+                        "displayName": "All Categories",
+                        "description": "All Categories description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayNameKey": "Objects_DataColours_Transparency",
+                        "descriptionKey": "Objects_DataColours_Transparency_Description",
+                        "displayName": "Transparency",
+                        "description": "Transparency description",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "categoryFillColour": {
+                        "displayNameKey": "Objects_DataColours_CategoryFillColour",
+                        "descriptionKey": "Objects_DataColours_CategoryFillColour_Description",
+                        "displayName": "Category Color",
+                        "description": "Category Color description",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colourByCategory": {
+                        "displayNameKey": "Objects_DataColours_ColourByCategory",
+                        "descriptionKey": "Objects_DataColours_ColourByCategory_Description",
+                        "displayName": "By Category",
+                        "description": "By Category description.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataPoints": {
+                "displayNameKey": "Objects_DataPoints",
+                "descriptionKey": "Objects_DataPoints_Description",
+                "displayName": "Combo Plot",
+                "description": "Combo Plot description.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "plotType": {
+                        "displayNameKey": "Objects_DataPoints_PlotType",
+                        "descriptionKey": "Objects_DataPoints_PlotType_Description",
+                        "displayName": "Plot Type",
+                        "description": "Plot type description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_ComboPlot_Type_Barcode",
+                                    "displayName": "Barcode",
+                                    "value": "barcodePlot"
+                                },
+                                {
+                                    "displayNameKey": "Enum_ComboPlot_Type_Box",
+                                    "displayName": "Box",
+                                    "value": "boxPlot"
+                                },
+                                {
+                                    "displayNameKey": "Enum_ComboPlot_Type_Column",
+                                    "displayName": "Column",
+                                    "value": "columnPlot"
+                                }
+                            ]
+                        }
+                    },
+                    "strokeWidth": {
+                        "displayNameKey": "Objects_DataPoints_StrokeWidth",
+                        "descriptionKey": "Objects_DataPoints_StrokeWidth_Description",
+                        "displayName": "Stroke Width",
+                        "description": "Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "boxFillColour": {
+                        "displayNameKey": "Objects_DataPoints_BoxFillColour",
+                        "descriptionKey": "Objects_DataPoints_BoxFillColour_Description",
+                        "displayName": "Fill Color",
+                        "description": "Fill Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "barColour": {
+                        "displayNameKey": "Objects_DataPoints_BarColour",
+                        "descriptionKey": "Objects_DataPoints_BarColour_Description",
+                        "displayName": "Bar Color",
+                        "description": "Bar color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayNameKey": "Objects_DataPoints_Transparency",
+                        "descriptionKey": "Objects_DataPoints_Transparency_Description",
+                        "displayName": "Transparency",
+                        "description": "Transparency description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "innerPadding": {
+                        "displayNameKey": "Objects_DataPoints_InnerPadding",
+                        "descriptionKey": "Objects_DataPoints_InnerPadding_Description",
+                        "displayName": "Inner Padding (%)",
+                        "description": "Inner Padding (%) description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showWhiskers": {
+                        "displayNameKey": "Objects_DataPoints_ShowWhiskers",
+                        "descriptionKey": "Objects_DataPoints_ShowWhiskers_Description",
+                        "displayName": "Show Whiskers",
+                        "description": "Show Whiskers description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showQuartiles": {
+                        "displayNameKey": "Objects_DataPoints_ShowQuartiles",
+                        "descriptionKey": "Objects_DataPoints_ShowQuartiles_Description",
+                        "displayName": "Show 1st & 3rd Quartiles",
+                        "description": "Show 1st & 3rd Quartiles description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "quartile1FillColour": {
+                        "displayNameKey": "Objects_DataPoints_Quartile1FillColour",
+                        "descriptionKey": "Objects_DataPoints_Quartile1FillColour_Description",
+                        "displayName": "1st Quartile Line Color",
+                        "description": "1st Quartile Line Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "quartile1StrokeWidth": {
+                        "displayNameKey": "Objects_DataPoints_Quartile1StrokeWidth",
+                        "descriptionKey": "Objects_DataPoints_Quartile1StrokeWidth_Description",
+                        "displayName": "1st Quartile Stroke Width",
+                        "description": "1st Quartile Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "quartile1StrokeLineStyle": {
+                        "displayNameKey": "Objects_DataPoints_Quartile1StrokeLineStyle",
+                        "descriptionKey": "Objects_DataPoints_Quartile1StrokeLineStyle_Description",
+                        "displayName": "1st Quartile Line Style",
+                        "description": "1st Quartile Line Style description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dashed",
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Solid",
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dotted",
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_DotDash",
+                                    "displayName": "Dot-Dash",
+                                    "value": "dotdash"
+                                }
+                            ]
+                        }
+                    },
+                    "quartile3FillColour": {
+                        "displayNameKey": "Objects_DataPoints_Quartile3FillColour",
+                        "descriptionKey": "Objects_DataPoints_Quartile3FillColour_Description",
+                        "displayName": "3rd Quartile Line Color",
+                        "description": "3rd Quartile Line Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "quartile3StrokeWidth": {
+                        "displayNameKey": "Objects_DataPoints_Quartile3StrokeWidth",
+                        "descriptionKey": "Objects_DataPoints_Quartile3StrokeWidth_Description",
+                        "displayName": "3rd Quartile Stroke Width",
+                        "description": "3rd Quartile Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "quartile3StrokeLineStyle": {
+                        "displayNameKey": "Objects_DataPoints_Quartile3StrokeLineStyle",
+                        "descriptionKey": "Objects_DataPoints_Quartile3StrokeLineStyle_Description",
+                        "displayName": "3rd Quartile Line Style",
+                        "description": "3rd Quartile Line Style description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dashed",
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Solid",
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dotted",
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_DotDash",
+                                    "displayName": "Dot-Dash",
+                                    "value": "dotdash"
+                                }
+                            ]
+                        }
+                    },
+                    "showMedian": {
+                        "displayNameKey": "Objects_DataPoints_ShowMedian",
+                        "descriptionKey": "Objects_DataPoints_ShowMedian_Description",
+                        "displayName": "Show Median (Line)",
+                        "description": "Show Median (Line) description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "medianStrokeWidth": {
+                        "displayNameKey": "Objects_DataPoints_MedianStrokeWidth",
+                        "descriptionKey": "Objects_DataPoints_MedianStrokeWidth_Description",
+                        "displayName": "Median Stroke Width",
+                        "description": "Median Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "medianFillColour": {
+                        "displayNameKey": "Objects_DataPoints_MedianFillColour",
+                        "descriptionKey": "Objects_DataPoints_MedianFillColour_Description",
+                        "displayName": "Median Line Color",
+                        "description": "Median Line Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "medianStrokeLineStyle": {
+                        "displayNameKey": "Objects_DataPoints_MedianStrokeLineStyle",
+                        "descriptionKey": "Objects_DataPoints_MedianStrokeLineStyle_Description",
+                        "displayName": "Median Line Style",
+                        "description": "Median Line Style description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dashed",
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Solid",
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dotted",
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_DotDash",
+                                    "displayName": "Dot-Dash",
+                                    "value": "dotdash"
+                                }
+                            ]
+                        }
+                    },
+                    "showMean": {
+                        "displayNameKey": "Objects_DataPoints_ShowMean",
+                        "descriptionKey": "Objects_DataPoints_ShowMean_Description",
+                        "displayName": "Show Mean (Circle)",
+                        "description": "Show Mean (Circle) description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "meanStrokeWidth": {
+                        "displayNameKey": "Objects_DataPoints_MeanStrokeWidth",
+                        "descriptionKey": "Objects_DataPoints_MeanStrokeWidth_Description",
+                        "displayName": "Mean Stroke Width",
+                        "description": "Mean Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "meanFillColour": {
+                        "displayNameKey": "Objects_DataPoints_MeanFillColour",
+                        "descriptionKey": "Objects_DataPoints_MeanFillColour_Description",
+                        "displayName": "Mean Circle Color",
+                        "description": "Mean Circle Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "meanFillColourInner": {
+                        "displayNameKey": "Objects_DataPoints_MeanFillColourInner",
+                        "descriptionKey": "Objects_DataPoints_MeanFillColourInner_Description",
+                        "displayName": "Mean Circle Color (Inner)",
+                        "description": "Mean Circle Color (Inner) description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayNameKey": "Objects_YAxis",
+                "descriptionKey": "Objects_YAxis_Description",
+                "displayName": "Y-Axis",
+                "description": "Y-Axis description.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "start": {
+                        "displayNameKey": "Objects_YAxis_Start",
+                        "descriptionKey": "Objects_YAxis_Start_Description",
+                        "placeHolderTextKey": "Placeholder_Auto",
+                        "displayName": "Start",
+                        "description": "Start description.",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "Auto",
+                        "suppressFormatPainterCopy": true
+                    },
+                    "end": {
+                        "displayNameKey": "Objects_YAxis_End",
+                        "descriptionKey": "Objects_YAxis_End_Description",
+                        "placeHolderTextKey": "Placeholder_Auto",
+                        "displayName": "End",
+                        "description": "End description.",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "Auto",
+                        "suppressFormatPainterCopy": true
+                    },
+                    "showLabels": {
+                        "displayNameKey": "Objects_YAxis_ShowLabels",
+                        "descriptionKey": "Objects_YAxis_ShowLabels_Description",
+                        "displayName": "Show Labels",
+                        "description": "Show Labels description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTitle": {
+                        "displayNameKey": "Objects_YAxis_ShowTitle",
+                        "descriptionKey": "Objects_YAxis_ShowTitle_Description",
+                        "displayName": "Show Title",
+                        "description": "Show Title description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleStyle": {
+                        "displayNameKey": "Objects_YAxis_TitleStyle",
+                        "descriptionKey": "Objects_YAxis_TitleStyle_Description",
+                        "displayName": "Title Style",
+                        "description": "Title Style description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_TitleStyle_Title",
+                                    "displayName": "Show Title Only",
+                                    "value": "title"
+                                },
+                                {
+                                    "displayNameKey": "Enum_TitleStyle_Unit",
+                                    "displayName": "Show Unit Only",
+                                    "value": "unit"
+                                },
+                                {
+                                    "displayNameKey": "Enum_TitleStyle_Both",
+                                    "displayName": "Show Both",
+                                    "value": "both"
+                                }
+                            ]
+                        }
+                    },
+                    "titleColor": {
+                        "displayNameKey": "Objects_YAxis_TitleColor",
+                        "descriptionKey": "Objects_YAxis_TitleColor_Description",
+                        "displayName": "Title Color",
+                        "description": "Title Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleText": {
+                        "displayNameKey": "Objects_YAxis_TitleText",
+                        "descriptionKey": "Objects_YAxis_TitleText_Description",
+                        "displayName": "Title Text",
+                        "description": "Title Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "Auto"
+                    },
+                    "titleFontSize": {
+                        "displayNameKey": "Objects_YAxis_TitleFontSize",
+                        "descriptionKey": "Objects_YAxis_TitleFontSize_Description",
+                        "displayName": "Text Size",
+                        "description": "Text size description.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayNameKey": "Objects_YAxis_TitleFontFamily",
+                        "descriptionKey": "Objects_YAxis_TitleFontFamily_Description",
+                        "displayName": "Title Font Family",
+                        "description": "Title Font Family description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Default",
+                                    "displayName": "Default",
+                                    "value": "helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Arial",
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialBlack",
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialUnicode",
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Calibri",
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Cambria",
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CambriaMath",
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Candara",
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ComicSans",
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Consolas",
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Constantia",
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Corbel",
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CourierNew",
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Georgia",
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_LucidaSansUnicode",
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeBold",
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUI",
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUILight",
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Symbol",
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Tahoma",
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_TimesNewRoman",
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Trebuchet",
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Verdana",
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Wingdings",
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "gridlines": {
+                        "displayNameKey": "Objects_YAxis_Gridlines",
+                        "descriptionKey": "Objects_YAxis_Gridlines_Description",
+                        "displayName": "Gridlines",
+                        "description": "Gridlines description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridlineColor": {
+                        "displayNameKey": "Objects_YAxis_GridlineColor",
+                        "descriptionKey": "Objects_YAxis_GridlineColor_Description",
+                        "displayName": "Gridline Color",
+                        "description": "Gridline Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridlineStrokeWidth": {
+                        "displayNameKey": "Objects_YAxis_GridlineStrokeWidth",
+                        "descriptionKey": "Objects_YAxis_GridlineStrokeWidth_Description",
+                        "displayName": "Gridline Stroke Width",
+                        "description": "Gridline Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "gridlineStrokeLineStyle": {
+                        "displayNameKey": "Objects_YAxis_GridlineStrokeLineStyle",
+                        "descriptionKey": "Objects_YAxis_GridlineStrokeLineStyle_Description",
+                        "displayName": "Gridline Style",
+                        "description": "Gridline Style description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dashed",
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Solid",
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dotted",
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_DotDash",
+                                    "displayName": "Dot-Dash",
+                                    "value": "dotdash"
+                                }
+                            ]
+                        }
+                    },
+                    "fontColor": {
+                        "displayNameKey": "Objects_YAxis_FontColor",
+                        "descriptionKey": "Objects_YAxis_FontColor_Description",
+                        "displayName": "Font Color",
+                        "description": "Font Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayNameKey": "Objects_YAxis_FontSize",
+                        "descriptionKey": "Objects_YAxis_FontSize_Description",
+                        "displayName": "Text Size",
+                        "description": "Text Size description.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayNameKey": "Objects_YAxis_FontFamily",
+                        "descriptionKey": "Objects_YAxis_FontFamily_Description",
+                        "displayName": "Font Family",
+                        "description": "Font Family description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Default",
+                                    "displayName": "Default",
+                                    "value": "helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Arial",
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialBlack",
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialUnicode",
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Calibri",
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Cambria",
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CambriaMath",
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Candara",
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ComicSans",
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Consolas",
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Constantia",
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Corbel",
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CourierNew",
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Georgia",
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_LucidaSansUnicode",
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeBold",
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUI",
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUILight",
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Symbol",
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Tahoma",
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_TimesNewRoman",
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Trebuchet",
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Verdana",
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Wingdings",
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayNameKey": "Objects_YAxis_DisplayUnits",
+                        "descriptionKey": "Objects_YAxis_DisplayUnits_Description",
+                        "displayName": "Display Units",
+                        "description": "Display Units description.",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "precision": {
+                        "displayNameKey": "Objects_YAxis_Precision",
+                        "descriptionKey": "Objects_YAxis_Precision_Description",
+                        "placeHolderTextKey": "Placeholder_Auto",
+                        "displayName": "Value Decimal Places",
+                        "description": "Value Decimal Places description.",
+                        "type": {
+                            "integer": true
+                        },
+                        "placeHolderText": "Auto"
+                    }
+                }
+            },
+            "xAxis": {
+                "displayNameKey": "Objects_XAxis",
+                "descriptionKey": "Objects_XAxis_Description",
+                "displayName": "X-Axis",
+                "description": "X-Axis description.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLabels": {
+                        "displayNameKey": "Objects_XAxis_ShowLabels",
+                        "descriptionKey": "Objects_XAxis_ShowLabels_Description",
+                        "displayName": "Show Labels",
+                        "description": "Show Labels description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayNameKey": "Objects_XAxis_FontColor",
+                        "descriptionKey": "Objects_XAxis_FontColor_Description",
+                        "displayName": "Font Color",
+                        "description": "Font Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayNameKey": "Objects_XAxis_FontSize",
+                        "descriptionKey": "Objects_XAxis_FontSize_Description",
+                        "displayName": "Text Size",
+                        "description": "Text Size description.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayNameKey": "Objects_XAxis_FontFamily",
+                        "descriptionKey": "Objects_XAxis_FontFamily_Description",
+                        "displayName": "Font Family",
+                        "description": "Font Family description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Default",
+                                    "displayName": "Default",
+                                    "value": "helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Arial",
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialBlack",
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialUnicode",
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Calibri",
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Cambria",
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CambriaMath",
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Candara",
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ComicSans",
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Consolas",
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Constantia",
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Corbel",
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CourierNew",
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Georgia",
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_LucidaSansUnicode",
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeBold",
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUI",
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUILight",
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Symbol",
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Tahoma",
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_TimesNewRoman",
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Trebuchet",
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Verdana",
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Wingdings",
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "displayNameKey": "Objects_XAxis_ShowTitle",
+                        "descriptionKey": "Objects_XAxis_ShowTitle_Description",
+                        "displayName": "Show Title",
+                        "description": "Show Title description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleColor": {
+                        "displayNameKey": "Objects_XAxis_TitleColor",
+                        "descriptionKey": "Objects_XAxis_TitleColor_Description",
+                        "displayName": "Title Color",
+                        "description": "Title Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleText": {
+                        "displayNameKey": "Objects_XAxis_TitleText",
+                        "descriptionKey": "Objects_XAxis_TitleText_Description",
+                        "displayName": "Title Text",
+                        "description": "Title Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "Auto"
+                    },
+                    "titleFontSize": {
+                        "displayNameKey": "Objects_XAxis_TitleFontSize",
+                        "descriptionKey": "Objects_XAxis_TitleFontSize_Description",
+                        "displayName": "Text Size",
+                        "description": "Text size description.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayNameKey": "Objects_XAxis_TitleFontFamily",
+                        "descriptionKey": "Objects_XAxis_TitleFontFamily_Description",
+                        "displayName": "Title Font Family",
+                        "description": "Title Font Family description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Default",
+                                    "displayName": "Default",
+                                    "value": "helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Arial",
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialBlack",
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ArialUnicode",
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Calibri",
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Cambria",
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CambriaMath",
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Candara",
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_ComicSans",
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Consolas",
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Constantia",
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Corbel",
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_CourierNew",
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Georgia",
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_LucidaSansUnicode",
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeBold",
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUI",
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_SegoeUILight",
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Symbol",
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Tahoma",
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_TimesNewRoman",
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Trebuchet",
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Verdana",
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayNameKey": "Enum_FontFamily_Wingdings",
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "gridlines": {
+                        "displayNameKey": "Objects_XAxis_Gridlines",
+                        "descriptionKey": "Objects_XAxis_Gridlines_Description",
+                        "displayName": "Gridlines",
+                        "description": "Gridlines description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridlineColor": {
+                        "displayNameKey": "Objects_XAxis_GridlineColor",
+                        "descriptionKey": "Objects_XAxis_GridlineColor_Description",
+                        "displayName": "Gridline Color",
+                        "description": "Gridline Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridlineStrokeWidth": {
+                        "displayNameKey": "Objects_XAxis_GridlineStrokeWidth",
+                        "descriptionKey": "Objects_XAxis_GridlineStrokeWidth_Description",
+                        "displayName": "Gridline Stroke Width",
+                        "description": "Gridline Stroke Width description.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "gridlineStrokeLineStyle": {
+                        "displayNameKey": "Objects_XAxis_GridlineStrokeLineStyle",
+                        "descriptionKey": "Objects_XAxis_GridlineStrokeLineStyle_Description",
+                        "displayName": "Gridline Style",
+                        "description": "Gridline Style description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dashed",
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Solid",
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_Dotted",
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Line_Style_DotDash",
+                                    "displayName": "Dot-Dash",
+                                    "value": "dotdash"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "displayNameKey": "Objects_Tooltip",
+                "descriptionKey": "Objects_Tooltip_Description",
+                "displayName": "Default Tooltip Details",
+                "description": "Default Tooltip Details description.",
+                "properties": {
+                    "numberSamplesDisplayUnits": {
+                        "displayNameKey": "Objects_Tooltip_NumberSamplesDisplayUnits",
+                        "descriptionKey": "Objects_Tooltip_NumberSamplesDisplayUnits_Description",
+                        "displayName": "# Samples Display Units",
+                        "description": "# Samples Display Units description.",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "numberSamplesPrecision": {
+                        "displayNameKey": "Objects_Tooltip_NumberSamplesPrecision",
+                        "descriptionKey": "Objects_Tooltip_NumberSamplesPrecision_Description",
+                        "placeHolderTextKey": "Placeholder_Auto",
+                        "displayName": "# Samples Decimal Places",
+                        "description": "# Samples Decimal Places description.",
+                        "type": {
+                            "integer": true
+                        },
+                        "placeHolderText": "Auto"
+                    },
+                    "measureDisplayUnits": {
+                        "displayNameKey": "Objects_Tooltip_MeasureDisplayUnits",
+                        "descriptionKey": "Objects_Tooltip_MeasureDisplayUnits_Description",
+                        "displayName": "Measure Display Units",
+                        "description": "Measure Display Units description",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "measurePrecision": {
+                        "displayNameKey": "Objects_Tooltip_MeasurePrecision",
+                        "descriptionKey": "Objects_Tooltip_MeasurePrecision_Description",
+                        "displayName": "Measure Decimal Places",
+                        "description": "Measure Decimal Places description.",
+                        "type": {
+                            "integer": true
+                        },
+                        "placeHolderText": "Auto"
+                    },
+                    "showMaxMin": {
+                        "displayNameKey": "Objects_Tooltip_ShowMaxMin",
+                        "descriptionKey": "Objects_Tooltip_ShowMaxMin_Description",
+                        "displayName": "Maximum & Minimum",
+                        "description": "Maximum & Minimum description",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSpan": {
+                        "displayNameKey": "Objects_Tooltip_ShowSpan",
+                        "descriptionKey": "Objects_Tooltip_ShowSpan_Description",
+                        "displayName": "Span (Min to Max)",
+                        "description": "Span (Min to Max) description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMedian": {
+                        "displayNameKey": "Objects_Tooltip_ShowMedian",
+                        "descriptionKey": "Objects_Tooltip_ShowMedian_Description",
+                        "displayName": "Median",
+                        "description": "Median description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMean": {
+                        "displayNameKey": "Objects_Tooltip_ShowMean",
+                        "descriptionKey": "Objects_Tooltip_ShowMean_Description",
+                        "displayName": "Mean",
+                        "description": "Mean description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDeviation": {
+                        "displayNameKey": "Objects_Tooltip_ShowDeviation",
+                        "descriptionKey": "Objects_Tooltip_ShowDeviation_Description",
+                        "displayName": "Standard Deviation",
+                        "description": "Standard Deviation description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showQuartiles": {
+                        "displayNameKey": "Objects_Tooltip_ShowQuartiles",
+                        "descriptionKey": "Objects_Tooltip_ShowQuartiles_Description",
+                        "displayName": "Upper & Lower Quartiles",
+                        "description": "Upper & Lower Quartiles description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showIqr": {
+                        "displayNameKey": "Objects_Tooltip_ShowIqr",
+                        "descriptionKey": "Objects_Tooltip_ShowIqr_Description",
+                        "displayName": "Inter Quartile Range",
+                        "description": "Inter Quartile Range description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showConfidence": {
+                        "displayNameKey": "Objects_Tooltip_ShowConfidence",
+                        "descriptionKey": "Objects_Tooltip_ShowConfidence_Description",
+                        "displayName": "Whisker (Confidence) Values",
+                        "description": "Whisker (Confidence) Values description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showBandwidth": {
+                        "displayNameKey": "Objects_Tooltip_ShowBandwidth",
+                        "descriptionKey": "Objects_Tooltip_ShowBandwidth_Description",
+                        "displayName": "KDE Bandwidth",
+                        "description": "KDE Bandwidth description.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayNameKey": "Objects_Legend",
+                "descriptionKey": "Objects_Legend_Description",
+                "displayName": "Legend",
+                "description": "Legend description.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayNameKey": "Objects_Legend_Position",
+                        "descriptionKey": "Objects_Legend_Position_Description",
+                        "displayName": "Position",
+                        "description": "Position description.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Enum_Position_Top",
+                                    "displayName": "Top",
+                                    "value": "Top"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Position_Bottom",
+                                    "displayName": "Bottom",
+                                    "value": "Bottom"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Position_Left",
+                                    "displayName": "Left",
+                                    "value": "Left"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Position_Right",
+                                    "displayName": "Right",
+                                    "value": "Right"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Position_TopCenter",
+                                    "displayName": "Top Center",
+                                    "value": "TopCenter"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Position_BottomCenter",
+                                    "displayName": "Bottom Center",
+                                    "value": "BottomCenter"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Position_LeftCenter",
+                                    "displayName": "Left Center",
+                                    "value": "LeftCenter"
+                                },
+                                {
+                                    "displayNameKey": "Enum_Position_RightCenter",
+                                    "displayName": "Right Center",
+                                    "value": "RightCenter"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "displayNameKey": "Objects_Legend_ShowTitle",
+                        "descriptionKey": "Objects_Legend_ShowTitle_Description",
+                        "displayName": "Show Title",
+                        "description": "Show Title description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayNameKey": "Objects_Legend_TitleText",
+                        "descriptionKey": "Objects_Legend_TitleText_Description",
+                        "displayName": "Title Text",
+                        "description": "Title Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "Category/Measure"
+                    },
+                    "fontColor": {
+                        "displayNameKey": "Objects_Legend_FontColor",
+                        "descriptionKey": "Objects_Legend_FontColor_Description",
+                        "displayName": "Font Color",
+                        "description": "Font Color description.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayNameKey": "Objects_Legend_FontSize",
+                        "descriptionKey": "Objects_Legend_FontSize_Description",
+                        "displayName": "Text Size",
+                        "description": "Text Size description.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "showCategories": {
+                        "displayNameKey": "Objects_Legend_ShowCategories",
+                        "descriptionKey": "Objects_Legend_ShowCategories_Description",
+                        "displayName": "Show Categories",
+                        "description": "Show Categories description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showStatisticalPoints": {
+                        "displayNameKey": "Objects_Legend_ShowStatisticalPoints",
+                        "descriptionKey": "Objects_Legend_ShowStatisticalPoints_Description",
+                        "displayName": "Show Statistical Data Indicators",
+                        "description": "Show Statistical Data Indicators description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataPointText": {
+                        "displayNameKey": "Objects_Legend_DataPointText",
+                        "descriptionKey": "Objects_Legend_DataPointText_Description",
+                        "displayName": "Data Point Text",
+                        "description": "Data Point Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "Individual Data Point"
+                    },
+                    "medianText": {
+                        "displayNameKey": "Objects_Legend_MedianText",
+                        "descriptionKey": "Objects_Legend_MedianText_Description",
+                        "placeHolderTextKey": "Placeholder_MedianValue",
+                        "displayName": "Median Text",
+                        "description": "Median Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "Median Value"
+                    },
+                    "meanText": {
+                        "displayNameKey": "Objects_Legend_MeanText",
+                        "descriptionKey": "Objects_Legend_MeanText_Description",
+                        "placeHolderTextKey": "Placeholder_MeanValue",
+                        "displayName": "Mean Text",
+                        "description": "Mean Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "Mean Value"
+                    },
+                    "quartileCombinedText": {
+                        "displayNameKey": "Objects_Legend_QuartileCombinedText",
+                        "descriptionKey": "Objects_Legend_QuartileCombinedText_Description",
+                        "placeHolderTextKey": "Placeholder_QuartileCombined",
+                        "displayName": "1st & 3rd Quartiles Text",
+                        "description": "1st & 3rd Quartiles Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "1st & 3rd Quartiles"
+                    },
+                    "quartile1Text": {
+                        "displayNameKey": "Objects_Legend_Quartile1Text",
+                        "descriptionKey": "Objects_Legend_Quartile1Text_Description",
+                        "placeHolderTextKey": "Placeholder_Quartile1",
+                        "displayName": "1st Quartile Text",
+                        "description": "1st Quartile Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "1st Quartile"
+                    },
+                    "quartile3Text": {
+                        "displayNameKey": "Objects_Legend_Quartile3Text",
+                        "descriptionKey": "Objects_Legend_Quartile3Text_Description",
+                        "placeHolderTextKey": "Placeholder_Quartile3",
+                        "displayName": "3rd Quartile Text",
+                        "description": "3rd Quartile Text description.",
+                        "type": {
+                            "text": true
+                        },
+                        "placeHolderText": "3rd Quartile"
+                    }
+                }
+            },
+            "about": {
+                "displayNameKey": "Objects_About",
+                "descriptionKey": "Objects_About_Description",
+                "displayName": "About",
+                "description": "About description.",
+                "properties": {
+                    "visualName": {
+                        "displayNameKey": "Objects_About_VisualName",
+                        "descriptionKey": "Objects_About_VisualName_Description",
+                        "displayName": "Visual Name",
+                        "description": "Visual Name description.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "version": {
+                        "displayNameKey": "Objects_About_Version",
+                        "descriptionKey": "Objects_About_Version_Description",
+                        "displayName": "Version",
+                        "description": "Version description.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "debugMode": {
+                        "displayNameKey": "Objects_About_DebugMode",
+                        "descriptionKey": "Objects_About_DebugMode_Description",
+                        "displayName": "Debug",
+                        "description": "Debug description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "debugVisualUpdate": {
+                        "displayNameKey": "Objects_About_DebugVisualUpdate",
+                        "descriptionKey": "Objects_About_DebugVisualUpdate_Description",
+                        "displayName": "Visual Update",
+                        "description": "Visual Update description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "debugTooltipEvents": {
+                        "displayNameKey": "Objects_About_DebugTooltipEvents",
+                        "descriptionKey": "Objects_About_DebugTooltipEvents_Description",
+                        "displayName": "Tooltip Events",
+                        "description": "Tooltip Events description.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "debugProperties": {
+                        "displayNameKey": "Objects_About_DebugProperties",
+                        "descriptionKey": "Objects_About_DebugProperties_Description",
+                        "displayName": "Properties",
+                        "description": "Properties description.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "sampling": {
+                            "max": 1
+                        },
+                        "measure": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "sampling"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "bind": {
+                            "to": "measure"
+                        }
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "category",
+                        "direction": 1
+                    }
+                ]
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        }
+    },
+    "stringResources": {
+        "en-US": {
+            "Roles_Sampling": "Sampling",
+            "Roles_Sampling_Description": "The level you wish to aggregate your measure data at, to prevent incorrect aggregation prior to plotting.",
+            "Roles_Measure": "Measure Data",
+            "Roles_Measure_Description": "The values you wish to observe in your violin plot for each category.",
+            "Roles_Category": "Category",
+            "Roles_Category_Description": "The category that you wish to group your data into.",
+            "Objects_DataLimit": "Data Limit Options",
+            "Objects_DataLimit_Description": "By default, custom visuals can display a maximum of 30,000 rows. If you have more than this in the data you want to visualise, then these options allow you to override the default limit \ud835\uddee\ud835\ude01 \ud835\ude01\ud835\uddf5\ud835\uddf2 \ud835\uddf0\ud835\uddfc\ud835\ude00\ud835\ude01 \ud835\uddfc\ud835\uddf3 \ud835\uddfd\ud835\uddf2\ud835\uddff\ud835\uddf3\ud835\uddfc\ud835\uddff\ud835\uddfa\ud835\uddee\ud835\uddfb\ud835\uddf0\ud835\uddf2.\n\n\ud835\udde1\ud835\udde2\ud835\udde7\ud835\uddd8: anything that updates the visual (data, properties) can be costly. If you are making interim changes to your visual, it is recommended that you turn these options off while doing that, and re-enable them when you're finished.",
+            "Objects_DataLimit_Override": "Override Row Limit",
+            "Objects_DataLimit_Override_Description": "Allow loading of additional data from the model to the visual, if it is available.\n\nNote that Power BI still may not be able to supply all data to your visual, depending on memory constraints.",
+            "Objects_DataLimit_ShowProgress": "Show Loading Progress",
+            "Objects_DataLimit_ShowProgress_Description": "Display information and explanation when fetching more data from the model if the row limit is exceeded.",
+            "Objects_DataLimit_ShowCustomVisualNotes": "Show Data Loading Notes",
+            "Objects_DataLimit_ShowCustomVisualNotes_Description": "Display information about the custom visual limitations and recommendations for end users.\n\nThis option allows you to turn this info off for end-users if you feel it is not relevant to them.",
+            "Objects_Violin": "Violin Options",
+            "Objects_Violin_Description": "Configure how the violin (Kernel Density Estimation/KDE) plot is displayed in your report.",
+            "Objects_Violin_InnerPadding": "Inner Padding (%)",
+            "Objects_Violin_InnerPadding_Description": "Amount of padding to apply from the edge of the series.",
+            "Objects_Violin_StrokeWidth": "Stroke Width",
+            "Objects_Violin_StrokeWidth_Description": "Width of the lines bordering the violin plot.",
+            "Objects_Violin_Clamp": "Clamp to Min/Max",
+            "Objects_Violin_Clamp_Description": "If enabled, this will terminate the KDE plot at the min and max values of the data set for each category, and not plot the tail of the series.\n\nNote that in some cases this may not reliably communicate the distribution or modality of your data.",
+            "Objects_Violin_SamplingResolution": "Sampling Resolution",
+            "Objects_Violin_SamplingResolution_Description": "Specify how densely the data should be sampled when calculating its distribution.",
+            "Objects_Violin_Kernel": "Kernel",
+            "Objects_Violin_Kernel_Description": "The kernel function to use when calculating density estimation.",
+            "Objects_Violin_SpecifyBandwidth": "Specify Bandwidth",
+            "Objects_Violin_SpecifyBandwidth_Description": "If disabled, this will automatically estimate the \"rule-of-thumb\" KDE bandwidth.\n\nEnable this to manually specify your own value(s).",
+            "Objects_Violin_Bandwidth": "Bandwidth",
+            "Objects_Violin_Bandwidth_Description": "Manually provided KDE bandwidth value to apply to all data.\n\nIf using Bandwidth By Category, then this will serve as the default for all categories that don't have a bandwidth explicitly set.",
+            "Objects_Violin_BandwidthByCategory": "Bandwidth By Category",
+            "Objects_Violin_BandwidthByCategory_Description": "If disabled, the same KDE bandwidth value will be applied across all categories.\n\nIf enabled, the bandwidth will be estimated or can be specified for each category, as applicable.",
+            "Objects_Violin_CategoryBandwidth": "Bandwidth",
+            "Objects_Violin_CategoryBandwidth_Description": "Specified bandwidth value for this category.\n\nIf this has not been explicitly set, then this will inherit from the Bandwidth value above.\n\nTo revert to the default value (if you have already specified it), then clear the field value and it will be replaced with the Bandwidth value.",
+            "Objects_Sorting": "Category Sorting",
+            "Objects_Sorting_Description": "Sorting options for displayed categories within the plot.",
+            "Objects_Sorting_By": "Sort By",
+            "Objects_Sorting_By_Description": "Specify how to sort the displayed categories in the visual.",
+            "Objects_Sorting_Order": "Sort Order",
+            "Objects_Sorting_Order_Description": "The order/direction in which to sort.",
+            "Objects_DataColours": "Data Colors",
+            "Objects_DataColours_Description": "Colors to apply to the violin plot, or multiple plot categories.",
+            "Objects_DataColours_DefaultFillColour": "All Categories",
+            "Objects_DataColours_DefaultFillColour_Description": "Color to apply to all categories in the chart.",
+            "Objects_DataColours_Transparency": "Transparency",
+            "Objects_DataColours_Transparency_Description": "Level of transparency to apply to the violin fill.",
+            "Objects_DataColours_CategoryFillColour": "Category Color",
+            "Objects_DataColours_CategoryFillColour_Description": "Fill color for this particular category.",
+            "Objects_DataColours_ColourByCategory": "By Category",
+            "Objects_DataColours_ColourByCategory_Description": "Apply specific fill color to invididual categories.",
+            "Objects_DataPoints": "Combo Plot",
+            "Objects_DataPoints_Description": "Provides an accompanying plot to the violin.",
+            "Objects_DataPoints_PlotType": "Plot Type",
+            "Objects_DataPoints_PlotType_Description": "The type of combo plot to display:\n\n - 'Barcode (Strip)' shows a plot of individual data points, using a consistent width.\n - 'Box' shows distribution of data using a box and whisker plot.\n - 'Column (Min/Max)' shows a ranged plot from minimum to maximum.",
+            "Objects_DataPoints_StrokeWidth": "Stroke Width",
+            "Objects_DataPoints_StrokeWidth_Description": "Width of the lines used in the selected combo plot.",
+            "Objects_DataPoints_BoxFillColour": "Fill Color",
+            "Objects_DataPoints_BoxFillColour_Description": "Fill color to apply to the combo plot.",
+            "Objects_DataPoints_BarColour": "Bar Color",
+            "Objects_DataPoints_BarColour_Description": "Color to apply to the data bars in the combo plot.",
+            "Objects_DataPoints_Transparency": "Transparency",
+            "Objects_DataPoints_Transparency_Description": "Level of transparency to apply to the combo plot fill.",
+            "Objects_DataPoints_InnerPadding": "Inner Padding (%)",
+            "Objects_DataPoints_InnerPadding_Description": "Amount of padding to apply from the edge of the violin.",
+            "Objects_DataPoints_ShowWhiskers": "Show Whiskers",
+            "Objects_DataPoints_ShowWhiskers_Description": "Show the 5% - 95% confidence interval (whiskers) on the box plot.",
+            "Objects_DataPoints_ShowQuartiles": "Show 1st & 3rd Quartiles",
+            "Objects_DataPoints_ShowQuartiles_Description": "Show 1st & 3rd quartiles, as lines on the diagram.",
+            "Objects_DataPoints_Quartile1FillColour": "1st Quartile Line Color",
+            "Objects_DataPoints_Quartile1FillColour_Description": "Color to apply to the 1st quartile line in the combo plot.",
+            "Objects_DataPoints_Quartile1StrokeWidth": "1st Quartile Stroke Width",
+            "Objects_DataPoints_Quartile1StrokeWidth_Description": "Width of the 1st quartile line in the combo plot.",
+            "Objects_DataPoints_Quartile1StrokeLineStyle": "1st Quartile Line Style",
+            "Objects_DataPoints_Quartile1StrokeLineStyle_Description": "The style to apply to the 1st quartile line in the combo plot.",
+            "Objects_DataPoints_Quartile3FillColour": "3rd Quartile Line Color",
+            "Objects_DataPoints_Quartile3FillColour_Description": "Color to apply to the 3rd quartile line in the combo plot.",
+            "Objects_DataPoints_Quartile3StrokeWidth": "3rd Quartile Stroke Width",
+            "Objects_DataPoints_Quartile3StrokeWidth_Description": "Width of the 3rd quartile line in the combo plot.",
+            "Objects_DataPoints_Quartile3StrokeLineStyle": "3rd Quartile Line Style",
+            "Objects_DataPoints_Quartile3StrokeLineStyle_Description": "The style to apply to the 3rd quartile line in the combo plot.",
+            "Objects_DataPoints_ShowMedian": "Show Median (Line)",
+            "Objects_DataPoints_ShowMedian_Description": "Show the median, as a line across the box plot.",
+            "Objects_DataPoints_MedianStrokeWidth": "Median Stroke Width",
+            "Objects_DataPoints_MedianStrokeWidth_Description": "Width of the median line.",
+            "Objects_DataPoints_MedianFillColour": "Median Line Color",
+            "Objects_DataPoints_MedianFillColour_Description": "Color to apply to the median line.",
+            "Objects_DataPoints_MedianStrokeLineStyle": "Median Line Style",
+            "Objects_DataPoints_MedianStrokeLineStyle_Description": "Style to apply to the median line.",
+            "Objects_DataPoints_ShowMean": "Show Mean (Circle)",
+            "Objects_DataPoints_ShowMean_Description": "Show the mean, as a circle in the combo plot.",
+            "Objects_DataPoints_MeanStrokeWidth": "Mean Stroke Width",
+            "Objects_DataPoints_MeanStrokeWidth_Description": "Width of the lines used when displaying the mean.",
+            "Objects_DataPoints_MeanFillColour": "Mean Circle Color",
+            "Objects_DataPoints_MeanFillColour_Description": "The color to apply to the mean indicator.",
+            "Objects_DataPoints_MeanFillColourInner": "Mean Circle Color (Inner)",
+            "Objects_DataPoints_MeanFillColourInner_Description": "The inner color to apply to the mean indicator.",
+            "Objects_YAxis": "Y-Axis",
+            "Objects_YAxis_Description": "Enable/Disable Y-Axis",
+            "Objects_YAxis_Start": "Start",
+            "Objects_YAxis_Start_Description": "Enter a starting value (optional).",
+            "Objects_YAxis_End": "End",
+            "Objects_YAxis_End_Description": "Enter an ending value (optional).",
+            "Objects_YAxis_ShowLabels": "Show Labels",
+            "Objects_YAxis_ShowLabels_Description": "Show/hide labels on the Y-Axis.",
+            "Objects_YAxis_ShowTitle": "Show Title",
+            "Objects_YAxis_ShowTitle_Description": "Show/hide title on the Y-Axis.",
+            "Objects_YAxis_TitleStyle": "Title Style",
+            "Objects_YAxis_TitleStyle_Description": "Specify what to display in the Y-Axis title.",
+            "Objects_YAxis_TitleColor": "Title Color",
+            "Objects_YAxis_TitleColor_Description": "Specify color for the Y-Axis title.",
+            "Objects_YAxis_TitleText": "Title Text",
+            "Objects_YAxis_TitleText_Description": "Specify manual text for the Y-Axis title.",
+            "Objects_YAxis_TitleFontSize": "Title Text Size",
+            "Objects_YAxis_TitleFontSize_Description": "Specify size of the Y-Axis title text.",
+            "Objects_YAxis_TitleFontFamily": "Title Font Family",
+            "Objects_YAxis_TitleFontFamily_Description": "Specify the font to use for the Y-Axis title.",
+            "Objects_YAxis_Gridlines": "Gridlines",
+            "Objects_YAxis_Gridlines_Description": "Toggle the display of Y-Axis gridlines.",
+            "Objects_YAxis_GridlineColor": "Gridline Color",
+            "Objects_YAxis_GridlineColor_Description": "Specify the color to apply to Y-Axis gridlines.",
+            "Objects_YAxis_GridlineStrokeWidth": "Gridline Stroke Width",
+            "Objects_YAxis_GridlineStrokeWidth_Description": "Specify the width of the Y-Axis gridlines.",
+            "Objects_YAxis_GridlineStrokeLineStyle": "Gridline Style",
+            "Objects_YAxis_GridlineStrokeLineStyle_Description": "The style to apply to the Y-Axis gridlines.",
+            "Objects_YAxis_FontColor": "Font Color",
+            "Objects_YAxis_FontColor_Description": "Specify color for the Y-Axis labels.",
+            "Objects_YAxis_FontSize": "Text Size",
+            "Objects_YAxis_FontSize_Description": "Specify the size of the Y-Axis labels.",
+            "Objects_YAxis_FontFamily": "Font Family",
+            "Objects_YAxis_FontFamily_Description": "Specify the font to use for the Y-Axis labels.",
+            "Objects_YAxis_DisplayUnits": "Display Units",
+            "Objects_YAxis_DisplayUnits_Description": "Select the units (millions, billions etc.)",
+            "Objects_YAxis_Precision": "Value Decimal Places",
+            "Objects_YAxis_Precision_Description": "Select the number of decimal places to display for the values.",
+            "Objects_XAxis": "X-Axis",
+            "Objects_XAxis_Description": "Enable/Disable X-Axis",
+            "Objects_XAxis_ShowLabels": "Show Labels",
+            "Objects_XAxis_ShowLabels_Description": "Show/hide labels on the X-Axis.",
+            "Objects_XAxis_FontColor": "Font Color",
+            "Objects_XAxis_FontColor_Description": "Specify color for the X-Axis labels.",
+            "Objects_XAxis_FontSize": "Text Size",
+            "Objects_XAxis_FontSize_Description": "Specify the size of the X-Axis labels.",
+            "Objects_XAxis_FontFamily": "Font Family",
+            "Objects_XAxis_FontFamily_Description": "Specify the font to use for the X-Axis labels.",
+            "Objects_XAxis_ShowTitle": "Show Title",
+            "Objects_XAxis_ShowTitle_Description": "Show/hide title on the X-Axis.",
+            "Objects_XAxis_TitleColor": "Title Color",
+            "Objects_XAxis_TitleColor_Description": "Specify color for the X-Axis title.",
+            "Objects_XAxis_TitleText": "Title Text",
+            "Objects_XAxis_TitleText_Description": "Specify manual text for the X-Axis title.",
+            "Objects_XAxis_TitleFontSize": "Title Text Size",
+            "Objects_XAxis_TitleFontSize_Description": "Specify size of the X-Axis title text.",
+            "Objects_XAxis_TitleFontFamily": "Title Font Family",
+            "Objects_XAxis_TitleFontFamily_Description": "Specify the font to use for the X-Axis title.",
+            "Objects_XAxis_Gridlines": "Gridlines",
+            "Objects_XAxis_Gridlines_Description": "Toggle the display of X-Axis gridlines.",
+            "Objects_XAxis_GridlineColor": "Gridline Color",
+            "Objects_XAxis_GridlineColor_Description": "Specify the color to apply to X-Axis gridlines.",
+            "Objects_XAxis_GridlineStrokeWidth": "Gridline Stroke Width",
+            "Objects_XAxis_GridlineStrokeWidth_Description": "Specify the width of the X-Axis gridlines.",
+            "Objects_XAxis_GridlineStrokeLineStyle": "Gridline Style",
+            "Objects_XAxis_GridlineStrokeLineStyle_Description": "The style to apply to the X-Axis gridlines.",
+            "Objects_Legend": "Legend",
+            "Objects_Legend_Description": "Enable/disable legend",
+            "Objects_Legend_Position": "Position",
+            "Objects_Legend_Position_Description": "Select the location for the legend.",
+            "Objects_Legend_ShowTitle": "Show Title",
+            "Objects_Legend_ShowTitle_Description": "Show/hide legend title.",
+            "Objects_Legend_TitleText": "Title Text",
+            "Objects_Legend_TitleText_Description": "Specify text for the legend title.",
+            "Objects_Legend_FontColor": "Font Color",
+            "Objects_Legend_FontColor_Description": "Specify color for the legend font.",
+            "Objects_Legend_FontSize": "Text Size",
+            "Objects_Legend_FontSize_Description": "Specify the size of the legend font.",
+            "Objects_Legend_ShowCategories": "Show Categories",
+            "Objects_Legend_ShowCategories_Description": "Show or hide the categories on the legend.",
+            "Objects_Legend_ShowStatisticalPoints": "Show Statistical Data Indicators",
+            "Objects_Legend_ShowStatisticalPoints_Description": "Show or hide the statistical data indicators (mean, median, quartiles).",
+            "Objects_Legend_DataPointText": "Data Point Text",
+            "Objects_Legend_DataPointText_Description": "Text to display on the legend to indicate a single data point.",
+            "Objects_Legend_MedianText": "Median Text",
+            "Objects_Legend_MedianText_Description": "Text to display on the legend to indicate the median.",
+            "Objects_Legend_MeanText": "Mean Text",
+            "Objects_Legend_MeanText_Description": "Text to display on the legend to indicate the mean.",
+            "Objects_Legend_QuartileCombinedText": "1st & 3rd Quartiles Text",
+            "Objects_Legend_QuartileCombinedText_Description": "Text to display on the legend to indicate the 1st & 3rd quartiles (displayed when both quartile indicators have the same formatting).",
+            "Objects_Legend_Quartile1Text": "1st Quartile Text",
+            "Objects_Legend_Quartile1Text_Description": "Text to display on the legend to indicate the 1st quartile (displayed when both quartile indicators have differing formatting).",
+            "Objects_Legend_Quartile3Text": "3rd Quartile Text",
+            "Objects_Legend_Quartile3Text_Description": "Text to display on the legend to indicate the 3rd quartile (displayed when both quartile indicators have differing formatting).",
+            "Objects_Tooltip": "Default Tooltip Details",
+            "Objects_Tooltip_Description": "If using the default (traditional) tooltip, you can customise the display of data points using this menu.",
+            "Objects_Tooltip_NumberSamplesDisplayUnits": "# Samples Display Units",
+            "Objects_Tooltip_NumberSamplesDisplayUnits_Description": "Display unit formatting to apply to the # Samples tooltip data point.",
+            "Objects_Tooltip_NumberSamplesPrecision": "# Samples Decimal Places",
+            "Objects_Tooltip_NumberSamplesPrecision_Description": "If using display units for the # Samples data point, you can use to modify the number of decimal places.",
+            "Objects_Tooltip_MeasureDisplayUnits": "Measure Display Units",
+            "Objects_Tooltip_MeasureDisplayUnits_Description": "Display units to apply to data points utilizing the Measure Data.",
+            "Objects_Tooltip_MeasurePrecision": "Measure Decimal Places",
+            "Objects_Tooltip_MeasurePrecision_Description": "If using display units for the Measure Data, you can use to modify the number of decimal places.",
+            "Objects_Tooltip_ShowMaxMin": "Maximum & Minimum",
+            "Objects_Tooltip_ShowMaxMin_Description": "Show the series maximum and minimum values on the tooltip.",
+            "Objects_Tooltip_ShowSpan": "Span (Min to Max)",
+            "Objects_Tooltip_ShowSpan_Description": "Show the series span value (range) from minimum to maximum on the tooltip.",
+            "Objects_Tooltip_ShowMedian": "Median",
+            "Objects_Tooltip_ShowMedian_Description": "Show the series median value on the tooltip.",
+            "Objects_Tooltip_ShowMean": "Mean",
+            "Objects_Tooltip_ShowMean_Description": "Show the series mean value on the tooltip.",
+            "Objects_Tooltip_ShowDeviation": "Standard Deviation",
+            "Objects_Tooltip_ShowDeviation_Description": "Show the series standard deviation value on the tooltip.",
+            "Objects_Tooltip_ShowQuartiles": "Upper & Lower Quartiles",
+            "Objects_Tooltip_ShowQuartiles_Description": "Show the series upper and lower quartile values on the tooltip.",
+            "Objects_Tooltip_ShowIqr": "Inter Quartile Range",
+            "Objects_Tooltip_ShowIqr_Description": "Show the series inter quartile range value on the tooltip.",
+            "Objects_Tooltip_ShowConfidence": "Whisker (Confidence) Values",
+            "Objects_Tooltip_ShowConfidence_Description": "Show the series confidence values (or whisker values) on the tooltip.",
+            "Objects_Tooltip_ShowBandwidth": "KDE Bandwidth",
+            "Objects_Tooltip_ShowBandwidth_Description": "Show the bandwidth value applied to the series - used to calculate the violin line.",
+            "Objects_About": "About",
+            "Objects_About_Description": "Information about this custom visual",
+            "Objects_About_VisualName": "Visual Name",
+            "Objects_About_VisualName_Description": "The name of the custom visual.",
+            "Objects_About_Version": "Version",
+            "Objects_About_Version_Description": "Release version number.",
+            "Objects_About_DebugMode": "Debug",
+            "Objects_About_DebugMode_Description": "Enable/disable debugging.",
+            "Objects_About_DebugVisualUpdate": "Visual Update",
+            "Objects_About_DebugVisualUpdate_Description": "Enable/disable debugging of visual update events.",
+            "Objects_About_DebugTooltipEvents": "Tooltip Events",
+            "Objects_About_DebugTooltipEvents_Description": "Enable/disable debugging of tooltip events.",
+            "Objects_About_DebugProperties": "Properties",
+            "Objects_About_DebugProperties_Description": "Enable/disable debugging of property change events and values.",
+            "Enum_Violin_SamplingResolution_Standard": "Standard",
+            "Enum_Violin_SamplingResolution_High": "High",
+            "Enum_Violin_SamplingResolution_VeryHigh": "Very High",
+            "Enum_Violin_Kernel_Epanechnikov": "Epanechnikov",
+            "Enum_Violin_Kernel_Gaussian": "Gaussian",
+            "Enum_Violin_Kernel_Quartic": "Quartic",
+            "Enum_Violin_Kernel_Triweight": "Triweight",
+            "Enum_Sorting_By_Category": "Category",
+            "Enum_Sorting_By_Samples": "# Samples",
+            "Enum_Sorting_By_Median": "Median",
+            "Enum_Sorting_By_Mean": "Mean",
+            "Enum_Sorting_By_Max": "Maximum",
+            "Enum_Sorting_By_Min": "Minimum",
+            "Enum_Sorting_Order_Ascending": "Ascending",
+            "Enum_Sorting_Order_Descending": "Descending",
+            "Enum_ComboPlot_Type_Barcode": "Barcode (Strip)",
+            "Enum_ComboPlot_Type_Box": "Box",
+            "Enum_ComboPlot_Type_Column": "Column (Min/Max)",
+            "Enum_Line_Style_Dashed": "Dashed",
+            "Enum_Line_Style_Solid": "Solid",
+            "Enum_Line_Style_Dotted": "Dotted",
+            "Enum_Line_Style_DotDash": "Dot-Dash",
+            "Enum_TitleStyle_Title": "Show Title Only",
+            "Enum_TitleStyle_Unit": "Show Unit Only",
+            "Enum_TitleStyle_Both": "Show Both",
+            "Enum_FontFamily_Default": "Default",
+            "Enum_FontFamily_Arial": "Arial",
+            "Enum_FontFamily_ArialBlack": "Arial Black",
+            "Enum_FontFamily_ArialUnicode": "Arial Unicode MS",
+            "Enum_FontFamily_Calibri": "Calibri",
+            "Enum_FontFamily_Cambria": "Cambria",
+            "Enum_FontFamily_CambriaMath": "Cambria Math",
+            "Enum_FontFamily_Candara": "Candara",
+            "Enum_FontFamily_ComicSans": "Comic Sans MS",
+            "Enum_FontFamily_Consolas": "Consolas",
+            "Enum_FontFamily_Constantia": "Constantia",
+            "Enum_FontFamily_Corbel": "Corbel",
+            "Enum_FontFamily_CourierNew": "Courier New",
+            "Enum_FontFamily_Georgia": "Georgia",
+            "Enum_FontFamily_LucidaSansUnicode": "Lucida Sans Unicode",
+            "Enum_FontFamily_SegoeBold": "Segoe (Bold)",
+            "Enum_FontFamily_SegoeUI": "Segoe UI",
+            "Enum_FontFamily_SegoeUILight": "Segoe UI Light",
+            "Enum_FontFamily_Symbol": "Symbol",
+            "Enum_FontFamily_Tahoma": "Tahoma",
+            "Enum_FontFamily_TimesNewRoman": "Times New Roman",
+            "Enum_FontFamily_Trebuchet": "Trebuchet",
+            "Enum_FontFamily_Verdana": "Verdana",
+            "Enum_FontFamily_Wingdings": "Wingdings",
+            "Enum_Position_Top": "Top",
+            "Enum_Position_Bottom": "Bottom",
+            "Enum_Position_Left": "Left",
+            "Enum_Position_Right": "Right",
+            "Enum_Position_TopCenter": "Top Center",
+            "Enum_Position_BottomCenter": "Bottom Center",
+            "Enum_Position_LeftCenter": "Left Center",
+            "Enum_Position_RightCenter": "RightCenter",
+            "Placeholder_SpecifyNumber": "Specify Number",
+            "Placeholder_Auto": "Auto",
+            "Placeholder_MedianValue": "Median Value",
+            "Placeholder_MeanValue": "Mean Value",
+            "Placeholder_QuartileCombined": "1st & 3rd Quartiles",
+            "Placeholder_Quartile1": "1st Quartile",
+            "Placeholder_Quartile3": "3rd Quartile"
+        }
+    }
+}

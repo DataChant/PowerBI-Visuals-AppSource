@@ -1,0 +1,604 @@
+{
+    "visual": {
+        "name": "ForecastUsingNeuralNetworkByMAQSoftware",
+        "displayName": "Forecast using Neural Network by MAQ Software",
+        "guid": "ForecastUsingNeuralNetworkC3FF19A2F6084F9DB72C16B27773958",
+        "visualClassName": "ForecastingUsingNN",
+        "version": "3.0.6",
+        "description": "Uses neural network algorithm to forecast future values based on historical data.",
+        "supportUrl": "https://github.com/maqsoftware/PowerBI-visuals/issues",
+        "gitHubUrl": "https://github.com/maqsoftware/PowerBI-visuals/"
+    },
+    "apiVersion": "2.1.0",
+    "author": {
+        "name": "MAQ Software",
+        "email": "support@maqsoftware.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Series/Date",
+                "kind": "GroupingOrMeasure",
+                "name": "Category"
+            },
+            {
+                "displayName": "Values",
+                "kind": "GroupingOrMeasure",
+                "name": "Value"
+            }
+        ],
+        "sorting": {
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "Category",
+                        "direction": 1
+                    }
+                ]
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Value": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "Category"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Value"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {
+                                        "count": 30000
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "# Copyright (c) MAQ Software.  All rights reserved.\r\n\r\n# Third Party Programs. This software enables you to obtain software applications from other sources. \r\n# Those applications are offered and distributed by third parties under their own license terms.\r\n# MAQ Software is not developing, distributing or licensing those applications to you, but instead, \r\n# as a convenience, enables you to use this software to obtain those applications directly from \r\n# the application providers.\r\n# By using the software, you acknowledge and agree that you are obtaining the applications directly\r\n# from the third party providers and under separate license terms, and that it is your responsibility to locate, \r\n# understand and comply with those license terms.\r\n# Microsoft grants you no license rights for third-party software or applications that is obtained using this software.\r\n\r\n#\r\n# WARNINGS:   \r\n#\r\n# CREATION DATE: 06/12/2017\r\n#\r\n# LAST UPDATE: --/--/---\r\n#\r\n# VERSION: 3.0.0\r\n#\r\n# R VERSION TESTED: 3.4.2\r\n# \r\n# AUTHOR: MAQ Software\r\n\r\n############### Utility functions ###############\nlibraryRequireInstall = function(packageName, ...)\n{\n  if(!require(packageName, character.only = TRUE)) \n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\n}\n\nlibraryRequireInstall(\"XML\")\nlibraryRequireInstall(\"htmlwidgets\")\n\ninternalSaveWidget <- function(widget, fname)\n{\n  tempFname = paste(fname, \".tmp\", sep=\"\")\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\n  FlattenHTML(tempFname, fname)\n}\n\nFlattenHTML <- function(fnameIn, fnameOut)\n{\n  # Read and parse HTML file\n  # Embed all js and css files into one unified file\n  \n  if(!file.exists(fnameIn))\n    return(FALSE)\n  \n  dir = dirname(fnameIn)\n  html = htmlTreeParse(fnameIn, useInternal = TRUE)\n  top = xmlRoot(html)\n  \n  # extract all <script> tags with src value\n  srcNode=getNodeSet(top, '//script[@src]')\n  for (node in srcNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['src'])\n    alternateSrc = FindSrcReplacement(fname)\n    if (!is.null(alternateSrc))\n    {\n      s = alternateSrc\n      names(s) = 'src'\n      newNode = xmlNode(\"script\",attrs = s)\n      replaceNodes(node, newNode)\n    }else{\n      str=ReadFileForEmbedding(fname);\n      if (!is.null(str))\n      {      \n        newNode = xmlNode(\"script\", str, attrs = c(type = \"text/javascript\"))\n        replaceNodes(node, newNode)\n      }\n    }\n  }\n  \n  # extract all <link> tags with src value\n  linkNode=getNodeSet(top, '//link[@href]')\n  for (node in linkNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['href'])\n    str = ReadFileForEmbedding(fname, FALSE);\n    if (!is.null(str))\n    {\n      newNode = xmlNode(\"style\", str)\n      replaceNodes(node, newNode)\n    }\n  }\n  \n  saveXML(html, file = fnameOut)\n  return(TRUE)\n}\n\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\n{\n  data = ReadFullFile(fname)\n  if (is.null(data))\n    return(NULL)\n\n  str = paste(data, collapse ='\\n')\n  if (addCdata) {\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\n  }\n  return(str)\n}\n\nReadFullFile <- function(fname)\n{\n  if(!file.exists(fname))\n    return(NULL)\n  \n  con = file(fname, open = \"r\")\n  data = readLines(con)\n  close(con)\n  return(data)\n}\n\nFindSrcReplacement <- function(str)\n{\n  # finds reference to 'plotly' js and replaces with a version from CDN\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\n  str <- iconv(str, to=\"UTF-8\")\n  pattern = \"plotlyjs-(\\\\w.+)/plotly-latest.min.js\"\n  match1=regexpr(pattern, str)\n  attr(match1, 'useBytes') <- FALSE\n  strMatch=regmatches(str, match1, invert = FALSE)\n  if (length(strMatch) == 0) return(NULL)\n  \n  pattern2 = \"-(\\\\d.+)/\"\n  match2 = regexpr(pattern2, strMatch[1])\n  attr(match2, 'useBytes') <- FALSE\n  strmatch = regmatches(strMatch[1], match2)\n  if (length(strmatch) == 0) return(NULL)\n  \n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\n  # This matches the specific version used in the plotly package used.\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\n  return(str)\n}\n#################################################\n\r\n\r\n############### Library Declarations ###############\r\n####################################################\r\n#setting localization and language\r\nSys.setlocale(\"LC_ALL\",\"English\")\r\n#graphics libraries\r\nlibraryRequireInstall(\"plotly\")\r\n#forecast libraries\r\nlibraryRequireInstall(\"forecast\")\r\n\r\n#Set seed for random number generation\r\nset.seed (100)\r\n#Remove screenshot feature from plotly utilities\r\ndisabledButtonsList <- list('toImage', 'sendDataToCloud')\r\n###############################\r\ntryCatch({\r\n\r\n\r\nfeature<-data.frame(Value)\r\ntSeries<-data.frame(Category)\r\n###############################\r\n#forecast settings\r\nforecastUnits<-10\r\nif(exists(\"settings_units\") && settings_units > 0)\r\n{\r\n    forecastUnits<-settings_units\r\n}\r\n\r\ndecayRate<-0.009\r\nif(exists(\"settings_decay\") && settings_decay <= 1 && settings_decay >= 0)\r\n{\r\n    decayRate<-settings_decay\r\n}\r\nmaxitr<-200\r\nif(exists(\"settings_maxitr\") && settings_maxitr > 0)\r\n{\r\n    maxitr<-settings_maxitr\r\n}\r\n\r\nhnodes<-20\r\nif(exists(\"settings_size\") && settings_size >0)\r\n{\r\n    hnodes<-settings_size\r\n}\r\n\r\nepochs<-8\r\nif(exists(\"settings_epochs\") && settings_epochs >0)\r\n{\r\n    epochs<-settings_epochs\r\n}\r\n\r\nconfIntervals<- FALSE\r\nif(exists(\"settings_confInterval\"))\r\n{\r\n    confIntervals<-settings_confInterval\r\n}\r\n\r\nconfLevels<- 0.80\r\nif(exists(\"settings_confLevel\") && settings_confLevel >= 0 && settings_confLevel <= 1)\r\n{\r\n    confLevels<-settings_confLevel\r\n}\r\n\r\n######################################\r\n###########plot settings\r\nplotColor<-\"#FFFFFF\"\r\nif(exists(\"plotSettings_plotColor\"))\r\n{\r\n    plotColor<-plotSettings_plotColor\r\n}\r\n\r\nforecastLineCol<-\"#F2C80F\"\r\nif(exists(\"plotSettings_fline\"))\r\n{\r\n    forecastLineCol<-plotSettings_fline\r\n}\r\n\r\nhistoryLineCol<-\"#01B8AA\"\r\nif(exists(\"plotSettings_hline\"))\r\n{\r\n    historyLineCol<-plotSettings_hline\r\n}\r\n\r\nforecastLineText<-\"Predicted\"\r\nif(exists(\"plotSettings_flineText\"))\r\n{\r\n    forecastLineText<-plotSettings_flineText\r\n}\r\n\r\nhistoryLineText<-\"Observed\"\r\nif(exists(\"plotSettings_hlineText\"))\r\n{\r\n    historyLineText<-plotSettings_hlineText\r\n}\r\n\r\nconfCol<-\"Gray95\"\r\nif(exists(\"plotSettings_confCol\"))\r\n{\r\n    confCol<-plotSettings_confCol\r\n}\r\n\r\nConfText<-\"Confidence\"\r\nif(exists(\"plotSettings_confText\"))\r\n{\r\n    ConfText<-plotSettings_confText\r\n}\r\n###############################\r\n######### x axis settings######\r\n\r\nxTitle<-names(tSeries)[1]\r\nif(exists(\"xaxisSettings_xTitle\") && xaxisSettings_xTitle!= '')\r\n{\r\n    xTitle<-xaxisSettings_xTitle\r\n}\r\n\r\nxZeroline<-TRUE\r\nif(exists(\"xaxisSettings_xZeroline\"))\r\n{\r\n    xZeroline<-xaxisSettings_xZeroline\r\n}\r\n\r\nxLabels<-TRUE\r\nif(exists(\"xaxisSettings_xLabels\"))\r\n{\r\n    xLabels<-xaxisSettings_xLabels\r\n}\r\n\r\nxGrid<-TRUE\r\nif(exists(\"xaxisSettings_xGrid\"))\r\n{\r\n    xGrid<-xaxisSettings_xGrid\r\n}\r\n\r\nxGridCol<-\"#BFC4C5\"\r\nif(exists(\"xaxisSettings_xGridCol\"))\r\n{\r\n    xGridCol<-xaxisSettings_xGridCol\r\n}\r\n\r\nxGridWidth<-0.1\r\nif(exists(\"xaxisSettings_xGridWidth\") && xaxisSettings_xGridWidth <= 5 && xaxisSettings_xGridWidth >= 0.1)\r\n{\r\n    xGridWidth<-xaxisSettings_xGridWidth\r\n}\r\n\r\nxAxisBaseLine<-TRUE\r\nif(exists(\"xaxisSettings_xAxisBaseLine\"))\r\n{\r\n    xAxisBaseLine<-xaxisSettings_xAxisBaseLine\r\n}\r\n\r\nxAxisBaseLineCol<-\"#000000\"\r\nif(exists(\"xaxisSettings_xAxisBaseLineCol\"))\r\n{\r\n    xAxisBaseLineCol<-xaxisSettings_xAxisBaseLineCol\r\n}\r\n\r\nxAxisBaseLineWidth<-4\r\nif(exists(\"xaxisSettings_xAxisBaseLineWidth\") && xaxisSettings_xAxisBaseLineWidth <= 11 && xaxisSettings_xAxisBaseLineWidth >= 1)\r\n{\r\n    xAxisBaseLineWidth<-xaxisSettings_xAxisBaseLineWidth\r\n}\r\n\r\n##############################\r\n######y axis settings ########\r\n\r\nyTitle<-names(feature)[1]\r\nif(exists(\"yaxisSettings_yTitle\") && yaxisSettings_yTitle!='')\r\n{\r\n    yTitle<-yaxisSettings_yTitle\r\n}\r\n\r\nyZeroline<-TRUE\r\nif(exists(\"yaxisSettings_yZeroline\"))\r\n{\r\n    yZeroline<-yaxisSettings_yZeroline\r\n}\r\n\r\nyLabels<-TRUE\r\nif(exists(\"yaxisSettings_yLabels\"))\r\n{\r\n    yLabels<-yaxisSettings_yLabels\r\n}\r\n\r\nyGrid<-TRUE\r\nif(exists(\"yaxisSettings_yGrid\"))\r\n{\r\n    yGrid<-yaxisSettings_yGrid\r\n}\r\n\r\nyGridCol<-\"#BFC4C5\"\r\nif(exists(\"yaxisSettings_yGridCol\"))\r\n{\r\n    yGridCol<-yaxisSettings_yGridCol\r\n}\r\n\r\nyGridWidth<-0.1\r\nif(exists(\"yaxisSettings_yGridWidth\") && yaxisSettings_yGridWidth <= 5 && yaxisSettings_yGridWidth >= 0.1)\r\n{\r\n    yGridWidth<-yaxisSettings_yGridWidth\r\n}\r\n\r\nyAxisBaseLine<-TRUE\r\nif(exists(\"yaxisSettings_yAxisBaseLine\"))\r\n{\r\n    yAxisBaseLine<-yaxisSettings_yAxisBaseLine\r\n}\r\n\r\nyAxisBaseLineCol<-\"#000000\"\r\nif(exists(\"yaxisSettings_yAxisBaseLineCol\"))\r\n{\r\n    yAxisBaseLineCol<-yaxisSettings_yAxisBaseLineCol\r\n}\r\n\r\nyAxisBaseLineWidth<-4\r\nif(exists(\"yaxisSettings_yAxisBaseLineWidth\") && yaxisSettings_yAxisBaseLineWidth <= 11 && yaxisSettings_yAxisBaseLineWidth >= 1)\r\n{\r\n    yAxisBaseLineWidth<-yaxisSettings_yAxisBaseLineWidth\r\n}\r\n\r\n#################################\r\n###############################\r\n###############################\r\n#prepare dataset\r\n\r\ntsStart<-tSeries[1,]\r\nrows<-NROW(tSeries)\r\ntsEnd<-tSeries[rows,]\r\ntsSeries<-0\r\nh<-forecastUnits\r\n##creating list of plot settings#############\r\n\r\nxAesthetics <- list(\r\n     title = xTitle,\r\n     zeroline = xZeroline,\r\n     showticklabels = xLabels,\r\n     showgrid = xGrid,\r\n     gridcolor = toRGB(xGridCol),\r\n     gridwidth = xGridWidth,\r\n     showline = xAxisBaseLine,\r\n      linecolor=toRGB(xAxisBaseLineCol),\r\n      linewidth=xAxisBaseLineWidth\r\n     )\r\n     yAesthetics <- list(\r\n     title = yTitle,\r\n     zeroline = yZeroline,\r\n     showticklabels = yLabels,\r\n     showgrid = yGrid,\r\n     gridcolor = toRGB(yGridCol),\r\n     gridwidth = yGridWidth,\r\n     showline = yAxisBaseLine,\r\n      linecolor=toRGB(yAxisBaseLineCol),\r\n      linewidth=yAxisBaseLineWidth\r\n     )\r\n\r\n\r\n\r\n##############initiating try catch###############\r\n\r\ntryCatch({\r\n#form a time series\r\ntsSeries<-ts(data=feature, end = tsEnd, start=tsStart, frequency = 1)\r\n#initating procedure to coerce non date time data into series\r\n\r\npretsSeries<-data.frame(Category,Value)\r\n                        colnames(pretsSeries)<-c(\"seriesStamps\",\"dataValues\")\r\n                        x<-(pretsSeries$seriesStamps)\r\n\r\n                        tsSeries<-structure(list(y=c(pretsSeries$dataValues), date=c(x)))\r\n\r\n## arguments can be passed to nnet()\r\nfit <- nnetar(tsSeries$y, lambda=0.5)\r\nif(exists('settings_parameterSettings') && (settings_parameterSettings == 'Manual'))\r\n{\r\nfit <- nnetar(tsSeries$y, decay=decayRate, maxit=maxitr, repeats = epochs, size=hnodes, lambda=0.5)\r\n}\r\n\r\n#creating sequence\r\nforecastedDates <- seq((tsSeries$date[length(tsSeries$date)]),\r\n                  by=(tsSeries$date[length(tsSeries$date)] - tsSeries$date[length(tsSeries$date)-1]), len=h+1)\r\n\r\nforecastedDates<-forecastedDates[-1]\r\nforecastedValues<-forecast(fit,h,PI=confIntervals, level=confLevels)\r\n\r\nsegStartx<-tsSeries$date[NROW(tsSeries$date)]\r\nsegEndx<-forecastedDates[1]\r\nsegStarty<-tsSeries$y[NROW(tsSeries$y)]\r\nsegEndy<-forecastedValues$mean[1]\r\n\r\n\r\n###############################\r\n###############################\r\n# plotting for confidence intervals\r\nif(confIntervals==TRUE)\r\n{\r\n    ribX<-c(segStartx,segEndx)\r\n    ribYmin<-c(segStarty, forecastedValues$lower[1])\r\n    ribYmax<-c(segStarty, forecastedValues$upper[1])\r\n\r\n    ribbonFrame<-data.frame(forecastedDates,forecastedValues$lower,forecastedValues$upper)\r\n    colnames(ribbonFrame)<-c(\"xValues\",\"yMin\",\"yMax\")\r\n    \r\nplotOutput <- plot_ly() %>%\r\n  add_lines(x = (tsSeries$date), y = tsSeries$y,\r\n            color = I(historyLineCol), \r\n            name = historyLineText \r\n            ) %>% \r\n            add_ribbons(x = ribX, ymin = ribYmin, ymax = ribYmax,color = I(confCol), name = ConfText)%>%\r\n  add_ribbons(x = ribbonFrame$xValues, ymin = ribbonFrame$yMin, ymax = ribbonFrame$yMax, color = I(confCol), name = ConfText)%>%\r\n  add_segments(x = segStartx, xend = segEndx, y = segStarty, yend = segEndy, showlegend = FALSE, color = I(forecastLineCol)) %>%\r\n  add_lines(x = forecastedDates, y = forecastedValues$mean, color = I(forecastLineCol), name = forecastLineText)%>%\r\n  layout(title = '',\r\n         xaxis = xAesthetics, \r\n         yaxis = yAesthetics,\r\n         margin = list(l = 50,\r\n                       r=0,\r\n                       t=50,\r\n                       b=50),\r\n         plot_bgcolor=plotColor,\r\n         showlegend = FALSE\r\n  )\r\n}\r\nelse\r\n{\r\n#plotting without confidence intervals\r\nplotOutput <- plot_ly() %>%\r\n  add_lines(x = (tsSeries$date), y = tsSeries$y,\r\n            color = I(historyLineCol), \r\n            name = historyLineText \r\n            ) %>% \r\n\r\n           add_segments(x = segStartx, xend = segEndx, y = segStarty, yend = segEndy, showlegend = FALSE, color = I(forecastLineCol)) %>%\r\n  add_lines(x = forecastedDates, y = forecastedValues$mean, color = I(forecastLineCol), name = forecastLineText)%>%\r\n  layout(title = '',\r\n         xaxis = xAesthetics, \r\n         yaxis = yAesthetics,\r\n         margin = list(l = 50,\r\n                       r=0,\r\n                       t=50,\r\n                       b=50),\r\n         plot_bgcolor=plotColor,\r\n         showlegend = FALSE\r\n  )\r\n}\r\n\r\n\r\n###############################\r\nplotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\r\n#rendering plot to visual device\r\ninternalSaveWidget(config(plotOutput, collaborate = FALSE, displaylogo=FALSE), 'out.html');\r\nquit()\r\n\r\n},\r\nerror=function(e)\r\n{\r\n\r\n tryCatch({\r\n     #initiating date time extraction\r\n                        pretsSeries<-data.frame(Category,Value)\r\n                        colnames(pretsSeries)<-c(\"seriesStamps\",\"dataValues\")\r\n                        x<-as.POSIXct(pretsSeries$seriesStamps, origin = \"1960-10-01\")\r\n\r\n                        tsSeries<-structure(list(y=c(pretsSeries$dataValues), date=c(x)))\r\n\r\n\r\n## arguments can be passed to nnet()\r\nfit <- nnetar(tsSeries$y, lambda=0.5)\r\nif(exists('settings_parameterSettings') && (settings_parameterSettings == 'Manual'))\r\n{\r\nfit <- nnetar(tsSeries$y, decay=decayRate, maxit=maxitr, repeats = epochs, size=hnodes, lambda=0.5)\r\n}\r\n#creating date time series for forecast length\r\nforecastedDates <- seq(as.POSIXct(tsSeries$date[length(tsSeries$date)]),\r\n                  by=(tsSeries$date[length(tsSeries$date)] - tsSeries$date[length(tsSeries$date)-1]), len=h+1)\r\n\r\n                  forecastedDates<-forecastedDates[-1]\r\n\r\nforecastedValues<-forecast(fit,h,PI=confIntervals, level=confLevels)\r\n\r\nsegStartx<-tsSeries$date[NROW(tsSeries$date)]\r\nsegEndx<-forecastedDates[1]\r\nsegStarty<-tsSeries$y[NROW(tsSeries$y)]\r\nsegEndy<-forecastedValues$mean[1]\r\n\r\n\r\n###############################\r\n###############################\r\n\r\n#plotting with confidence intervals\r\nif(confIntervals==TRUE)\r\n{\r\n\r\n    ribX<-c(segStartx,segEndx)\r\n    ribYmin<-c(segStarty, forecastedValues$lower[1])\r\n    ribYmax<-c(segStarty, forecastedValues$upper[1])\r\n\r\n    ribbonFrame<-data.frame(forecastedDates,forecastedValues$lower,forecastedValues$upper)\r\n    colnames(ribbonFrame)<-c(\"xValues\",\"yMin\",\"yMax\")\r\n\r\nplotOutput <- plot_ly() %>%\r\n  add_lines(x = (tsSeries$date), y = tsSeries$y,\r\n            color = I(historyLineCol), \r\n            name = historyLineText \r\n            ) %>% \r\n            add_ribbons(x = ribX, ymin = ribYmin, ymax = ribYmax,color = I(confCol), name = ConfText)%>%\r\n  add_ribbons(x = ribbonFrame$xValues, ymin = ribbonFrame$yMin, ymax = ribbonFrame$yMax, color = I(confCol), name = ConfText)%>%\r\n   add_segments(x = segStartx, xend = segEndx, y = segStarty, yend = segEndy, showlegend = FALSE, color = I(forecastLineCol)) %>%\r\n  add_lines(x = forecastedDates, y = forecastedValues$mean, color = I(forecastLineCol), name = forecastLineText)%>%\r\n  layout(title = '',\r\n         xaxis = xAesthetics, \r\n         yaxis = yAesthetics,\r\n         margin = list(l = 50,\r\n                       r=0,\r\n                       t=50,\r\n                       b=50),\r\n         plot_bgcolor=plotColor,\r\n         showlegend = FALSE\r\n  )\r\n}\r\nelse\r\n{\r\n    #plotting without confidence intervals\r\nplotOutput <- plot_ly() %>%\r\n  add_lines(x = (tsSeries$date), y = tsSeries$y,\r\n            color = I(historyLineCol), \r\n            name = historyLineText \r\n            ) %>% \r\n\r\n  add_segments(x = segStartx, xend = segEndx, y = segStarty, yend = segEndy, showlegend = FALSE, color = I(forecastLineCol)) %>%\r\n  add_lines(x = forecastedDates, y = forecastedValues$mean, color = I(forecastLineCol), name = forecastLineText)%>%\r\n  layout(title = '',\r\n         xaxis = xAesthetics, \r\n         yaxis = yAesthetics,\r\n         margin = list(l = 50,\r\n                       r=0,\r\n                       t=50,\r\n                       b=50),\r\n         plot_bgcolor=plotColor,\r\n         showlegend = FALSE\r\n  )\r\n}\r\n\r\n###############################\r\n#Remove screenshot feature\r\ndisabledButtonsList <- list('toImage')\r\nplotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\r\n\r\n\r\n###############################\r\n###############################\r\n#rendering plot to visual device\r\ninternalSaveWidget(config(plotOutput, collaborate = FALSE, displaylogo=FALSE), 'out.html');\r\nquit()\r\n\r\n },\r\nerror=function(e)\r\n{\r\n    #catching errors for date time instances\r\nxAesthetics <- list(\r\n     title = sprintf(\"%s Please enter suitable date time\",e),\r\n     zeroline = FALSE,\r\n     showline = FALSE,\r\n     showticklabels = FALSE,\r\n     showgrid = FALSE\r\n     )\r\n     yAesthetics <- list(\r\n     title = \"\",\r\n     zeroline = FALSE,\r\n     showline = FALSE,\r\n     showticklabels = FALSE,\r\n     showgrid = FALSE\r\n     )\r\n     plotOutput <- plot_ly() %>%\r\n     layout(title = '',\r\n                     xaxis = xAesthetics, \r\n                     yaxis = yAesthetics)\r\n\r\n     plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\r\n     internalSaveWidget(plotOutput, 'out.html');\r\n     quit()\r\n})\r\n     \r\n})\r\n\r\n},\r\nerror=function(e)\r\n{\r\n    #catching error for invalid parameters and anything else\r\nxAesthetics <- list(\r\n     title = sprintf(\"%s Please use suitable values for input data and parameter\",e),\r\n     zeroline = FALSE,\r\n     showline = FALSE,\r\n     showticklabels = FALSE,\r\n     showgrid = FALSE\r\n     )\r\n     yAesthetics <- list(\r\n     title = \"\",\r\n     zeroline = FALSE,\r\n     showline = FALSE,\r\n     showticklabels = FALSE,\r\n     showgrid = FALSE\r\n     )\r\n     plotOutput <- plot_ly() %>%\r\n     layout(title = '',\r\n                     xaxis = xAesthetics, \r\n                     yaxis = yAesthetics)\r\n                     \r\n     plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\r\n     internalSaveWidget(plotOutput, 'out.html');\r\n     quit()\r\n}\r\n)"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "settings": {
+                "displayName": "Forecast settings",
+                "description": "Settings to control the forecast",
+                "properties": {
+                    "parameterSettings": {
+                        "displayName": "Parameter setting",
+                        "description": "Set the parameters for the forecasting model",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "Auto"
+                                },
+                                {
+                                    "displayName": "User defined",
+                                    "value": "Manual"
+                                }
+                            ]
+                        }
+                    },
+                    "units": {
+                        "displayName": "Units",
+                        "description": "Number of units up to which next values would be predicted",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "decay": {
+                        "displayName": "Decay",
+                        "description": "Decay in weights after each iteration, so that weights don't grow extremely large after successive computations",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0.009",
+                                    "displayName": "0.009"
+                                },
+                                {
+                                    "value": "0.01",
+                                    "displayName": "0.01"
+                                },
+                                {
+                                    "value": "0.25",
+                                    "displayName": "0.25"
+                                },
+                                {
+                                    "value": "0.5",
+                                    "displayName": "0.5"
+                                },
+                                {
+                                    "value": "0.75",
+                                    "displayName": "0.75"
+                                },
+                                {
+                                    "value": "0.9",
+                                    "displayName": "0.9"
+                                },
+                                {
+                                    "value": "0.99",
+                                    "displayName": "0.99"
+                                }
+                            ]
+                        }
+                    },
+                    "maxitr": {
+                        "displayName": "Max number of iterations",
+                        "description": "Maximum number of iterations to train the neural network in a defined duration called as epoch",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "150",
+                                    "displayName": "150"
+                                },
+                                {
+                                    "value": "200",
+                                    "displayName": "200"
+                                },
+                                {
+                                    "value": "300",
+                                    "displayName": "300"
+                                },
+                                {
+                                    "value": "500",
+                                    "displayName": "500"
+                                }
+                            ]
+                        }
+                    },
+                    "epochs": {
+                        "displayName": "Epochs",
+                        "description": "Duration having defined number of iterations for training the network",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "5",
+                                    "displayName": "5"
+                                },
+                                {
+                                    "value": "8",
+                                    "displayName": "8"
+                                },
+                                {
+                                    "value": "15",
+                                    "displayName": "15"
+                                },
+                                {
+                                    "value": "20",
+                                    "displayName": "20"
+                                }
+                            ]
+                        }
+                    },
+                    "size": {
+                        "displayName": "Size",
+                        "description": "Defines number of calculation performed to achieve output equation for the model in each iteration",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "4",
+                                    "displayName": "4"
+                                },
+                                {
+                                    "value": "8",
+                                    "displayName": "8"
+                                },
+                                {
+                                    "value": "12",
+                                    "displayName": "12"
+                                },
+                                {
+                                    "value": "20",
+                                    "displayName": "20"
+                                }
+                            ]
+                        }
+                    },
+                    "confLevel": {
+                        "displayName": "Confidence levels",
+                        "description": "Confidence levels for the plot",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0.1",
+                                    "displayName": "0.1"
+                                },
+                                {
+                                    "value": "0.2",
+                                    "displayName": "0.2"
+                                },
+                                {
+                                    "value": "0.4",
+                                    "displayName": "0.4"
+                                },
+                                {
+                                    "value": "0.5",
+                                    "displayName": "0.5"
+                                },
+                                {
+                                    "value": "0.75",
+                                    "displayName": "0.75"
+                                },
+                                {
+                                    "value": "0.8",
+                                    "displayName": "0.8"
+                                },
+                                {
+                                    "value": "0.85",
+                                    "displayName": "0.85"
+                                },
+                                {
+                                    "value": "0.95",
+                                    "displayName": "0.95"
+                                },
+                                {
+                                    "value": "0.99",
+                                    "displayName": "0.99"
+                                }
+                            ]
+                        }
+                    },
+                    "confInterval": {
+                        "displayName": "Confidence intervals",
+                        "description": "Turn confidence intervals true or false",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "plotSettings": {
+                "displayName": "Plot settings",
+                "description": "Settings for plot appereance",
+                "properties": {
+                    "plotColor": {
+                        "displayName": "Plot background color",
+                        "description": "Plot background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fline": {
+                        "displayName": "Forecast color",
+                        "description": "Forecast line color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hline": {
+                        "displayName": "Observed color",
+                        "description": "Observation line color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "flineText": {
+                        "displayName": "Forecast name",
+                        "description": "Forecast line name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "hlineText": {
+                        "displayName": "Observation name",
+                        "description": "Observation line name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "confText": {
+                        "displayName": "Confidence label",
+                        "description": "Label for confidence interval",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "confCol": {
+                        "displayName": "Confidence color",
+                        "description": "Color for confidence interval",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "xaxisSettings": {
+                "displayName": "X axis settings",
+                "description": "Appereance settings for x axis",
+                "properties": {
+                    "xTitle": {
+                        "displayName": "X title",
+                        "description": "X title",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "xZeroline": {
+                        "displayName": "X zeroline",
+                        "description": "X zeroline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xLabels": {
+                        "displayName": "X labels",
+                        "description": "X labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xGrid": {
+                        "displayName": "X gridlines",
+                        "description": "X gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xGridCol": {
+                        "displayName": "X grid color",
+                        "description": "Color of x grid lines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xGridWidth": {
+                        "displayName": "X grid width",
+                        "description": "Width of x grid lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xAxisBaseLine": {
+                        "displayName": "X base line",
+                        "description": "X base line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xAxisBaseLineCol": {
+                        "displayName": "X base line color",
+                        "description": "Color of x axis base line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xAxisBaseLineWidth": {
+                        "displayName": "X base line width",
+                        "description": "Width of x axis base line",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "yaxisSettings": {
+                "displayName": "Y axis settings",
+                "description": "Appereance settings for y axis",
+                "properties": {
+                    "yTitle": {
+                        "displayName": "Y title",
+                        "description": "Y title",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "yZeroline": {
+                        "displayName": "Y zeroline",
+                        "description": "Y zeroline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yLabels": {
+                        "displayName": "Y label",
+                        "description": "Y label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yGrid": {
+                        "displayName": "Y grid lines",
+                        "description": "Y grid lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yGridCol": {
+                        "displayName": "Y grid line color",
+                        "description": "Color of y grid lines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "yGridWidth": {
+                        "displayName": "Y grid line width",
+                        "description": "Width of y grid lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "yAxisBaseLine": {
+                        "displayName": "Y base line",
+                        "description": "Y base line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisBaseLineCol": {
+                        "displayName": "Y base line color",
+                        "description": "Color of y base line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "yAxisBaseLineWidth": {
+                        "displayName": "Y base line width",
+                        "description": "Width of y base line",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "XML",
+                "displayName": "XML",
+                "url": "https://cran.r-project.org/web/packages/XML/index.html"
+            },
+            {
+                "name": "corrplot",
+                "displayName": "corrplot",
+                "url": "https://cran.r-project.org/web/packages/corrplot/index.html"
+            },
+            {
+                "name": "dbscan",
+                "displayName": "dbscan",
+                "url": "https://cran.r-project.org/web/packages/dbscan/index.html"
+            },
+            {
+                "name": "forecast",
+                "displayName": "forecast",
+                "url": "https://cran.r-project.org/web/packages/forecast/index.html"
+            },
+            {
+                "name": "Rcpp",
+                "displayName": "Rcpp",
+                "url": "https://cran.r-project.org/web/packages/Rcpp/index.html"
+            },
+            {
+                "name": "graphics",
+                "displayName": "graphics",
+                "url": "https://cran.r-project.org/web/packages/graphics/index.html"
+            },
+            {
+                "name": "stats",
+                "displayName": "stats",
+                "url": "https://cran.r-project.org/web/packages/stats/index.html"
+            },
+            {
+                "name": "methods",
+                "displayName": "methods",
+                "url": "https://cran.r-project.org/web/packages/methods/index.html"
+            },
+            {
+                "name": "xts",
+                "displayName": "xts",
+                "url": "https://cran.r-project.org/web/packages/xts/index.html"
+            },
+            {
+                "name": "zoo",
+                "displayName": "zoo",
+                "url": "https://cran.r-project.org/web/packages/zoo/index.html"
+            }
+        ]
+    },
+    "stringResources": {}
+}

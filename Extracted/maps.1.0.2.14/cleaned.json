@@ -1,0 +1,3921 @@
+{
+    "visual": {
+        "name": "maps",
+        "displayName": "Maps",
+        "guid": "maps",
+        "visualClassName": "Visual",
+        "version": "1.0.2.14",
+        "description": "Maps",
+        "supportUrl": "https://www.pbi-berater.de",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Alexander Koch",
+        "email": "info@pbi-berater.de"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "de-DE": {}
+    },
+    "capabilities": {
+        "privileges": [],
+        "dataRoles": [
+            {
+                "displayName": "Location",
+                "description": "Use geo coordinates [latitude|longitude] to map points (e.g., cities), multiple geo coordinates, space seperated ([latitude|longitude] [latitude|longitude]), to map lines (e.g., shipping routes), or mapping attributes (e.g., country name, country code) to reference areas (e.g., countries, states). Check \"Mapping info for unmapped areas\" in Formatting->Map & projection->Map to display a map's mapping attributes.\n Assign multiple fields to create a drillable hierarchy. Hierarchies that consist of mapping attributes (e.g., continent->country name) will automatically be displayed. To create custom hierarchy nodes by combining mapping attributes (e.g. sales regions) use data mapping \"Hierarchy definition\"",
+                "name": "country",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "integer": true
+                    },
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "bool": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Color group",
+                "description": "Use to assign colors by group, instead of individually or by measure value. Will be used for both points and areas.",
+                "name": "legend",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "integer": true
+                    },
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "bool": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Color value",
+                "description": "Use to color areas by measure value.",
+                "name": "measure",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Label value",
+                "description": "Use measure to label points or areas.",
+                "name": "name",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Chart/size value",
+                "description": "Use measure for mini charts (circle size or column height).",
+                "name": "measure_chart",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Hierarchy definition",
+                "description": "Use to define components (mapping attributes, e.g. country codes) of custom hierarchy nodes (e.g., sales areas). Syntax: attribute|attribute|... (e.g., \"BE|NL|LU\" to create group benelux). Works with areas only.",
+                "name": "hierarchy",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Map",
+                "description": "Use to change map dynamically. Assigned measure will override selected map in Formatting->Map & projection->Map->Map. Use case: switch a more detailed map when drilling down a hierarchy (e.g., go from world map to US map when drilling down from the country to a single US state). Reference either map code or map name as in Formatting->Map & projection->Map->Map.",
+                "name": "map",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Image value",
+                "description": "Image to be used instead of marker",
+                "name": "image",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Hidden value",
+                "description": "Hidden measure, can be used for sorting",
+                "name": "hidden",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "country": {
+                            "min": 0
+                        },
+                        "legend": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "measure": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "name": {
+                            "min": 0
+                        },
+                        "measure_chart": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "hierarchy": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "map": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "image": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "hidden": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "country"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1500
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "legend",
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 50
+                                }
+                            },
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "measure"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "measure_chart"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "name"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "hierarchy"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "map"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "image"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "hidden"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ],
+        "drilldown": {
+            "roles": [
+                "country"
+            ]
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "canvas": true,
+                "default": true
+            },
+            "supportEnhancedTooltips": true
+        },
+        "sorting": {
+            "default": {}
+        },
+        "supportsKeyboardFocus": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsMultiVisualSelection": true,
+        "supportsHighlight": true,
+        "objects": {
+            "generalView": {
+                "displayName": "General",
+                "properties": {
+                    "license_key": {
+                        "displayName": "License key",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "map": {
+                        "displayName": "Map",
+                        "description": "Map to be used. Choose from two world maps, maps of single continents, many country maps, and two level 3 maps (US counties and German rural districts).",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "World",
+                                    "displayName": "(World) World"
+                                },
+                                {
+                                    "value": "World_gu",
+                                    "displayName": "(World_gu) World (Geo Units)"
+                                },
+                                {
+                                    "value": "C_AF",
+                                    "displayName": "(C_AF) Africa"
+                                },
+                                {
+                                    "value": "C_AS",
+                                    "displayName": "(C_AS) Asia"
+                                },
+                                {
+                                    "value": "C_EU",
+                                    "displayName": "(C_EU) Europe"
+                                },
+                                {
+                                    "value": "C_NA",
+                                    "displayName": "(C_NA) North America"
+                                },
+                                {
+                                    "value": "C_OC",
+                                    "displayName": "(C_OC) Oceania"
+                                },
+                                {
+                                    "value": "C_SA",
+                                    "displayName": "(C_SA) South America"
+                                },
+                                {
+                                    "value": "AF",
+                                    "displayName": "(AF) Afghanistan"
+                                },
+                                {
+                                    "value": "AL",
+                                    "displayName": "(AL) Albania"
+                                },
+                                {
+                                    "value": "AO",
+                                    "displayName": "(AO) Angola"
+                                },
+                                {
+                                    "value": "AR",
+                                    "displayName": "(AR) Argentina"
+                                },
+                                {
+                                    "value": "AM",
+                                    "displayName": "(AM) Armenia"
+                                },
+                                {
+                                    "value": "AU",
+                                    "displayName": "(AU) Australia"
+                                },
+                                {
+                                    "value": "AT",
+                                    "displayName": "(AT) Austria"
+                                },
+                                {
+                                    "value": "AZ",
+                                    "displayName": "(AZ) Azerbaijan"
+                                },
+                                {
+                                    "value": "BD",
+                                    "displayName": "(BD) Bangladesh"
+                                },
+                                {
+                                    "value": "BY",
+                                    "displayName": "(BY) Belarus"
+                                },
+                                {
+                                    "value": "BE",
+                                    "displayName": "(BE) Belgium"
+                                },
+                                {
+                                    "value": "BO",
+                                    "displayName": "(BO) Bolivia"
+                                },
+                                {
+                                    "value": "BA",
+                                    "displayName": "(BA) Bosnia and Herzegovina"
+                                },
+                                {
+                                    "value": "BR",
+                                    "displayName": "(BR) Brazil"
+                                },
+                                {
+                                    "value": "BG",
+                                    "displayName": "(BG) Bulgaria"
+                                },
+                                {
+                                    "value": "CM",
+                                    "displayName": "(CM) Cameroon"
+                                },
+                                {
+                                    "value": "CA",
+                                    "displayName": "(CA) Canada"
+                                },
+                                {
+                                    "value": "CL",
+                                    "displayName": "(CL) Chile"
+                                },
+                                {
+                                    "value": "CN",
+                                    "displayName": "(CN) China"
+                                },
+                                {
+                                    "value": "CN_HK_MO",
+                                    "displayName": "(CN_HK_MO) China, Hongkong and Macao"
+                                },
+                                {
+                                    "value": "CG",
+                                    "displayName": "(CG) Congo"
+                                },
+                                {
+                                    "value": "CD",
+                                    "displayName": "(CD) Congo (Dem. Rep. of)"
+                                },
+                                {
+                                    "value": "CO",
+                                    "displayName": "(CO) Colombia"
+                                },
+                                {
+                                    "value": "CR",
+                                    "displayName": "(CR) Costa Rica"
+                                },
+                                {
+                                    "value": "HR",
+                                    "displayName": "(HR) Croatia"
+                                },
+                                {
+                                    "value": "CU",
+                                    "displayName": "(CU) Cuba"
+                                },
+                                {
+                                    "value": "CZ",
+                                    "displayName": "(CZ) Czech Republic"
+                                },
+                                {
+                                    "value": "DK",
+                                    "displayName": "(DK) Denmark"
+                                },
+                                {
+                                    "value": "DO",
+                                    "displayName": "(DO) Dominican Republic"
+                                },
+                                {
+                                    "value": "EC",
+                                    "displayName": "(EC) Ecuador"
+                                },
+                                {
+                                    "value": "EG",
+                                    "displayName": "(EG) Egypt"
+                                },
+                                {
+                                    "value": "GQ",
+                                    "displayName": "(GQ) Equatorial Guinea"
+                                },
+                                {
+                                    "value": "EE",
+                                    "displayName": "(EE) Estonia"
+                                },
+                                {
+                                    "value": "ET",
+                                    "displayName": "(ET) Ethiopia"
+                                },
+                                {
+                                    "value": "FJ",
+                                    "displayName": "(FJ) Fiji"
+                                },
+                                {
+                                    "value": "FI",
+                                    "displayName": "(FI) Finland"
+                                },
+                                {
+                                    "value": "FR",
+                                    "displayName": "(FR) France"
+                                },
+                                {
+                                    "value": "DE",
+                                    "displayName": "(DE) Germany (States)"
+                                },
+                                {
+                                    "value": "DE_rural",
+                                    "displayName": "(DE_rural) Germany (Rural districts)"
+                                },
+                                {
+                                    "value": "GH",
+                                    "displayName": "(GH) Ghana"
+                                },
+                                {
+                                    "value": "GB",
+                                    "displayName": "(GB) Great Britain"
+                                },
+                                {
+                                    "value": "GR",
+                                    "displayName": "(GR) Greece"
+                                },
+                                {
+                                    "value": "GT",
+                                    "displayName": "(GT) Guatemala"
+                                },
+                                {
+                                    "value": "HT",
+                                    "displayName": "(HT) Haiti"
+                                },
+                                {
+                                    "value": "HN",
+                                    "displayName": "(HN) Honduras"
+                                },
+                                {
+                                    "value": "HK",
+                                    "displayName": "(HK) Hongkong"
+                                },
+                                {
+                                    "value": "HU",
+                                    "displayName": "(HU) Hungary"
+                                },
+                                {
+                                    "value": "IS",
+                                    "displayName": "(IS) Iceland"
+                                },
+                                {
+                                    "value": "IN",
+                                    "displayName": "(IN) India"
+                                },
+                                {
+                                    "value": "ID",
+                                    "displayName": "(ID) Indonesia"
+                                },
+                                {
+                                    "value": "IR",
+                                    "displayName": "(IR) Iran"
+                                },
+                                {
+                                    "value": "IQ",
+                                    "displayName": "(IQ) Iraq"
+                                },
+                                {
+                                    "value": "IE",
+                                    "displayName": "(IE) Ireland"
+                                },
+                                {
+                                    "value": "IL",
+                                    "displayName": "(IL) Israel"
+                                },
+                                {
+                                    "value": "IT",
+                                    "displayName": "(IT) Italia"
+                                },
+                                {
+                                    "value": "JM",
+                                    "displayName": "(JM) Jamaica"
+                                },
+                                {
+                                    "value": "JP",
+                                    "displayName": "(JP) Japan"
+                                },
+                                {
+                                    "value": "JO",
+                                    "displayName": "(JO) Jordan"
+                                },
+                                {
+                                    "value": "KZ",
+                                    "displayName": "(KZ) Kazakhstan"
+                                },
+                                {
+                                    "value": "KE",
+                                    "displayName": "(KE) Kenya"
+                                },
+                                {
+                                    "value": "KI",
+                                    "displayName": "(KI) Kiribati"
+                                },
+                                {
+                                    "value": "KW",
+                                    "displayName": "(KW) Kuwait"
+                                },
+                                {
+                                    "value": "KG",
+                                    "displayName": "(KG) Kyrgyzstan"
+                                },
+                                {
+                                    "value": "LV",
+                                    "displayName": "(LV) Latvia"
+                                },
+                                {
+                                    "value": "LB",
+                                    "displayName": "(LB) Lebanon"
+                                },
+                                {
+                                    "value": "LT",
+                                    "displayName": "(LT) Lithuania"
+                                },
+                                {
+                                    "value": "LU",
+                                    "displayName": "(LU) Luxembourg"
+                                },
+                                {
+                                    "value": "MG",
+                                    "displayName": "(MG) Madagascar"
+                                },
+                                {
+                                    "value": "MY",
+                                    "displayName": "(MY) Malaysia"
+                                },
+                                {
+                                    "value": "MX",
+                                    "displayName": "(MX) Mexico"
+                                },
+                                {
+                                    "value": "MD",
+                                    "displayName": "(MD) Moldova"
+                                },
+                                {
+                                    "value": "MN",
+                                    "displayName": "(MN) Mongolia"
+                                },
+                                {
+                                    "value": "ME",
+                                    "displayName": "(ME) Montenegro"
+                                },
+                                {
+                                    "value": "MA",
+                                    "displayName": "(MA) Morocco"
+                                },
+                                {
+                                    "value": "MZ",
+                                    "displayName": "(MZ) Mozambique"
+                                },
+                                {
+                                    "value": "MM",
+                                    "displayName": "(MM) Myanmar"
+                                },
+                                {
+                                    "value": "NA",
+                                    "displayName": "(NA) Namibia"
+                                },
+                                {
+                                    "value": "NP",
+                                    "displayName": "(NP) Nepal"
+                                },
+                                {
+                                    "value": "NL",
+                                    "displayName": "(NL) Netherlands"
+                                },
+                                {
+                                    "value": "NZ",
+                                    "displayName": "(NZ) New Zealand"
+                                },
+                                {
+                                    "value": "NI",
+                                    "displayName": "(NI) Nicaragua"
+                                },
+                                {
+                                    "value": "NG",
+                                    "displayName": "(NG) Nigeria"
+                                },
+                                {
+                                    "value": "MK",
+                                    "displayName": "(MK) North Macedonia"
+                                },
+                                {
+                                    "value": "NO",
+                                    "displayName": "(NO) Norway"
+                                },
+                                {
+                                    "value": "PK",
+                                    "displayName": "(PK) Pakistan"
+                                },
+                                {
+                                    "value": "PA",
+                                    "displayName": "(PA) Panama"
+                                },
+                                {
+                                    "value": "PG",
+                                    "displayName": "(PG) Papua New Guinea"
+                                },
+                                {
+                                    "value": "PY",
+                                    "displayName": "(PY) Paraguay"
+                                },
+                                {
+                                    "value": "PE",
+                                    "displayName": "(PE) Peru"
+                                },
+                                {
+                                    "value": "PH",
+                                    "displayName": "(PH) Philippines"
+                                },
+                                {
+                                    "value": "PL",
+                                    "displayName": "(PL) Poland"
+                                },
+                                {
+                                    "value": "PT",
+                                    "displayName": "(PT) Portugal"
+                                },
+                                {
+                                    "value": "QA",
+                                    "displayName": "(QA) Qatar"
+                                },
+                                {
+                                    "value": "RO",
+                                    "displayName": "(RO) Romania"
+                                },
+                                {
+                                    "value": "RU",
+                                    "displayName": "(RU) Russia"
+                                },
+                                {
+                                    "value": "SA",
+                                    "displayName": "(SA) Saudi Arabia"
+                                },
+                                {
+                                    "value": "SN",
+                                    "displayName": "(SN) Senegal"
+                                },
+                                {
+                                    "value": "RS",
+                                    "displayName": "(RS) Serbia"
+                                },
+                                {
+                                    "value": "SC",
+                                    "displayName": "(SC) Seychelles"
+                                },
+                                {
+                                    "value": "SL",
+                                    "displayName": "(SL) Sierra Leone"
+                                },
+                                {
+                                    "value": "SG",
+                                    "displayName": "(SG) Singapore"
+                                },
+                                {
+                                    "value": "SK",
+                                    "displayName": "(SK) Slovakia"
+                                },
+                                {
+                                    "value": "SI",
+                                    "displayName": "(SI) Slovenia"
+                                },
+                                {
+                                    "value": "ZA",
+                                    "displayName": "(ZA) South Africa"
+                                },
+                                {
+                                    "value": "KR",
+                                    "displayName": "(KR) South Korea"
+                                },
+                                {
+                                    "value": "ES",
+                                    "displayName": "(ES) Spain"
+                                },
+                                {
+                                    "value": "LK",
+                                    "displayName": "(LK) Sri Lanka"
+                                },
+                                {
+                                    "value": "SE",
+                                    "displayName": "(SE) Sweden"
+                                },
+                                {
+                                    "value": "CH",
+                                    "displayName": "(CH) Switzerland"
+                                },
+                                {
+                                    "value": "TW",
+                                    "displayName": "(TW) Taiwan"
+                                },
+                                {
+                                    "value": "TJ",
+                                    "displayName": "(TJ) Tajikistan"
+                                },
+                                {
+                                    "value": "TZ",
+                                    "displayName": "(TZ) Tanzania"
+                                },
+                                {
+                                    "value": "TH",
+                                    "displayName": "(TH) Thailand"
+                                },
+                                {
+                                    "value": "TN",
+                                    "displayName": "(TN) Tunisia"
+                                },
+                                {
+                                    "value": "TR",
+                                    "displayName": "(TR) Turkey"
+                                },
+                                {
+                                    "value": "TM",
+                                    "displayName": "(TM) Turkmenistan"
+                                },
+                                {
+                                    "value": "UG",
+                                    "displayName": "(UG) Uganda"
+                                },
+                                {
+                                    "value": "UA",
+                                    "displayName": "(UA) Ukraine"
+                                },
+                                {
+                                    "value": "AE",
+                                    "displayName": "(AE) United Arab Emirates"
+                                },
+                                {
+                                    "value": "US",
+                                    "displayName": "(US) United States (states)"
+                                },
+                                {
+                                    "value": "UY",
+                                    "displayName": "(UY) Uruguay"
+                                },
+                                {
+                                    "value": "UZ",
+                                    "displayName": "(UZ) Uzbekistan"
+                                },
+                                {
+                                    "value": "VU",
+                                    "displayName": "(VU) Vanuatu"
+                                },
+                                {
+                                    "value": "VE",
+                                    "displayName": "(VE) Venezuela"
+                                },
+                                {
+                                    "value": "VN",
+                                    "displayName": "(VN) Vietnam"
+                                },
+                                {
+                                    "value": "ZM",
+                                    "displayName": "(ZM) Zambia"
+                                },
+                                {
+                                    "value": "ZW",
+                                    "displayName": "(ZW) Zimbabwe"
+                                },
+                                {
+                                    "value": "DE-BB",
+                                    "displayName": "(DE-BB) DE Berlin/Brandenburg Landkreise"
+                                },
+                                {
+                                    "value": "DE-BW",
+                                    "displayName": "(DE-BW) DE Baden-W\u00fcrttemberg Landkreise"
+                                },
+                                {
+                                    "value": "DE-BY",
+                                    "displayName": "(DE-BY) DE Bayern Landkreise"
+                                },
+                                {
+                                    "value": "DE-HE",
+                                    "displayName": "(DE-HE) DE Hessen Landkreise"
+                                },
+                                {
+                                    "value": "DE-MV",
+                                    "displayName": "(DE-MV) DE Mecklenburg-Vorpommern Landkreise"
+                                },
+                                {
+                                    "value": "DE-NI",
+                                    "displayName": "(DE-NI) DE Niedersachsen Landkreise"
+                                },
+                                {
+                                    "value": "DE-NW",
+                                    "displayName": "(DE-NW) DE Nordrhein-Westfalen Landkreise"
+                                },
+                                {
+                                    "value": "DE-RP",
+                                    "displayName": "(DE-RP) DE Rheinland-Pfalz Landkreise"
+                                },
+                                {
+                                    "value": "DE-SH",
+                                    "displayName": "(DE-SH) DE Schleswig-Holstein Landkreise"
+                                },
+                                {
+                                    "value": "DE-SL",
+                                    "displayName": "(DE-SL) DE Saarland Landkreise"
+                                },
+                                {
+                                    "value": "DE-SN",
+                                    "displayName": "(DE-SN) DE Sachsen Landkreise"
+                                },
+                                {
+                                    "value": "DE-ST",
+                                    "displayName": "(DE-ST) DE Sachsen-Anhalt Landkreise"
+                                },
+                                {
+                                    "value": "DE-TH",
+                                    "displayName": "(DE-TH) DE Th\u00fcringen Landkreise"
+                                },
+                                {
+                                    "value": "US-AL",
+                                    "displayName": "(US-AL) US Alabama counties"
+                                },
+                                {
+                                    "value": "US-AK",
+                                    "displayName": "(US-AK) US Alaska counties"
+                                },
+                                {
+                                    "value": "US-AZ",
+                                    "displayName": "(US-AZ) US Arizona counties"
+                                },
+                                {
+                                    "value": "US-AR",
+                                    "displayName": "(US-AR) US Arkansas counties"
+                                },
+                                {
+                                    "value": "US-CA",
+                                    "displayName": "(US-CA) US California counties"
+                                },
+                                {
+                                    "value": "US-CO",
+                                    "displayName": "(US-CO) US Colorado counties"
+                                },
+                                {
+                                    "value": "US-CT",
+                                    "displayName": "(US-CT) US Connecticut counties"
+                                },
+                                {
+                                    "value": "US-DC",
+                                    "displayName": "(US-DC) US DC counties"
+                                },
+                                {
+                                    "value": "US-DE",
+                                    "displayName": "(US-DE) US Delaware counties"
+                                },
+                                {
+                                    "value": "US-FL",
+                                    "displayName": "(US-FL) US Florida counties"
+                                },
+                                {
+                                    "value": "US-GA",
+                                    "displayName": "(US-GA) US Georgia counties"
+                                },
+                                {
+                                    "value": "US-HI",
+                                    "displayName": "(US-HI) US Hawaii counties"
+                                },
+                                {
+                                    "value": "US-IA",
+                                    "displayName": "(US-IA) US Iowa counties"
+                                },
+                                {
+                                    "value": "US-ID",
+                                    "displayName": "(US-ID) US Idaho counties"
+                                },
+                                {
+                                    "value": "US-IL",
+                                    "displayName": "(US-IL) US Illinois counties"
+                                },
+                                {
+                                    "value": "US-IN",
+                                    "displayName": "(US-IN) US Indiana counties"
+                                },
+                                {
+                                    "value": "US-KS",
+                                    "displayName": "(US-KS) US Kansas counties"
+                                },
+                                {
+                                    "value": "US-KY",
+                                    "displayName": "(US-KY) US Kentucky counties"
+                                },
+                                {
+                                    "value": "US-LA",
+                                    "displayName": "(US-LA) US Louisiana counties"
+                                },
+                                {
+                                    "value": "US-MA",
+                                    "displayName": "(US-MA) US Massachusetts counties"
+                                },
+                                {
+                                    "value": "US-MI",
+                                    "displayName": "(US-MI) US Michigan counties"
+                                },
+                                {
+                                    "value": "US-MN",
+                                    "displayName": "(US-MN) US Minnesota counties"
+                                },
+                                {
+                                    "value": "US-MS",
+                                    "displayName": "(US-MS) US Mississippi counties"
+                                },
+                                {
+                                    "value": "US-MO",
+                                    "displayName": "(US-MO) US Missouri counties"
+                                },
+                                {
+                                    "value": "US-MT",
+                                    "displayName": "(US-MT) US Montana counties"
+                                },
+                                {
+                                    "value": "US-NE",
+                                    "displayName": "(US-NE) US Nebraska counties"
+                                },
+                                {
+                                    "value": "US-NV",
+                                    "displayName": "(US-NV) US Nevada counties"
+                                },
+                                {
+                                    "value": "US-NH",
+                                    "displayName": "(US-NH) US New Hampshire counties"
+                                },
+                                {
+                                    "value": "US-NJ",
+                                    "displayName": "(US-NJ) US New Jersey counties"
+                                },
+                                {
+                                    "value": "US-NM",
+                                    "displayName": "(US-NM) US New Mexico counties"
+                                },
+                                {
+                                    "value": "US-NY",
+                                    "displayName": "(US-NY) US New York counties"
+                                },
+                                {
+                                    "value": "US-NC",
+                                    "displayName": "(US-NC) US North Carolina counties"
+                                },
+                                {
+                                    "value": "US-ND",
+                                    "displayName": "(US-ND) US North Dakota counties"
+                                },
+                                {
+                                    "value": "US-OH",
+                                    "displayName": "(US-OH) US Ohio counties"
+                                },
+                                {
+                                    "value": "US-OK",
+                                    "displayName": "(US-OK) US Oklahoma counties"
+                                },
+                                {
+                                    "value": "US-OR",
+                                    "displayName": "(US-OR) US Oregon counties"
+                                },
+                                {
+                                    "value": "US-PA",
+                                    "displayName": "(US-PA) US Pennsylvania counties"
+                                },
+                                {
+                                    "value": "US-RI",
+                                    "displayName": "(US-RI) US Rhode Island counties"
+                                },
+                                {
+                                    "value": "US-SC",
+                                    "displayName": "(US-SC) US South Carolina counties"
+                                },
+                                {
+                                    "value": "US-SD",
+                                    "displayName": "(US-SD) US South Dakota counties"
+                                },
+                                {
+                                    "value": "US-TN",
+                                    "displayName": "(US-TN) US Tennessee counties"
+                                },
+                                {
+                                    "value": "US-TX",
+                                    "displayName": "(US-TX) US Texas counties"
+                                },
+                                {
+                                    "value": "US-UT",
+                                    "displayName": "(US-UT) US Utah counties"
+                                },
+                                {
+                                    "value": "US-VT",
+                                    "displayName": "(US-VT) US Vermont counties"
+                                },
+                                {
+                                    "value": "US-VA",
+                                    "displayName": "(US-VA) US Virginia counties"
+                                },
+                                {
+                                    "value": "US-WA",
+                                    "displayName": "(US-WA) US Washington counties"
+                                },
+                                {
+                                    "value": "US-WV",
+                                    "displayName": "(US-WV) US West Virginia counties"
+                                },
+                                {
+                                    "value": "US-WI",
+                                    "displayName": "(US-WI) US Wisconsin counties"
+                                },
+                                {
+                                    "value": "US-WY",
+                                    "displayName": "(US-WY) US Wyoming counties"
+                                },
+                                {
+                                    "value": "US-PR",
+                                    "displayName": "(US-PR) US Puerto Rico counties"
+                                },
+                                {
+                                    "value": "US-GU",
+                                    "displayName": "(US-GU) US Guam counties"
+                                },
+                                {
+                                    "value": "US-VI",
+                                    "displayName": "(US-VI) US Virgin Islands counties"
+                                },
+                                {
+                                    "value": "US-AS",
+                                    "displayName": "(US-AS) US American Samoa counties"
+                                },
+                                {
+                                    "value": "US-MP",
+                                    "displayName": "(US-MP) US Northern Mariana Islands counties"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_no_mercator": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_world": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_us": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "AlbersUSATerritories",
+                                    "displayName": "USA"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_eu": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ConicConformalEurope",
+                                    "displayName": "Europe"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_gb": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "AlbersUk",
+                                    "displayName": "UK"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_fr": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ConicConformalFrance",
+                                    "displayName": "France"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_es": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ConicConformalSpain",
+                                    "displayName": "Spain"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_jp": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ConicEquidistantJapan",
+                                    "displayName": "Japan"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_pt": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ConicConformalPortugal",
+                                    "displayName": "Portugal"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_nl": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ConicConformalNetherlands",
+                                    "displayName": "Netherlands"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_cl": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "TransverseMercatorChile",
+                                    "displayName": "Chile"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_ec": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "MercatorEcuador",
+                                    "displayName": "Ecuador"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_my": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "MercatorMalaysia",
+                                    "displayName": "Malaysia"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "projection_gq": {
+                        "displayName": "Projection",
+                        "description": "Projection to be used. Options depend on selected map. Some maps come with tailored projections for better display (e.g., US, France, Spain)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "MercatorEquatorialGuinea",
+                                    "displayName": "Equatorial Guinea"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                }
+                            ]
+                        }
+                    },
+                    "water_color": {
+                        "displayName": "Map color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "water_opacity": {
+                        "displayName": "Map opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "land_color": {
+                        "displayName": "Shape color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "land_opacity": {
+                        "displayName": "Shape opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "graticule_yn": {
+                        "displayName": "Graticule (y/n)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "graticule_color": {
+                        "displayName": "Graticule color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stroke_graticule": {
+                        "displayName": "Graticule width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borders_yn": {
+                        "displayName": "Borders (y/n)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borders_color": {
+                        "displayName": "Borders color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borders_stroke": {
+                        "displayName": "Borders width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "marker_style": {
+                        "displayName": "Marker style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                }
+                            ]
+                        }
+                    },
+                    "marker_style_image": {
+                        "displayName": "Marker style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "image",
+                                    "displayName": "Image"
+                                }
+                            ]
+                        }
+                    },
+                    "marker_size": {
+                        "displayName": "Marker size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Transparent opacity",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "show_nodata": {
+                        "displayName": "Show areas without data",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "show_nodata_meta": {
+                        "displayName": "Show mapping meta data ",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "point_charts_yn": {
+                        "displayName": "Show charts",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "point_charts_type": {
+                        "displayName": "Charts type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle",
+                                    "displayNameKey": "Circle"
+                                },
+                                {
+                                    "value": "column",
+                                    "displayName": "Column",
+                                    "displayNameKey": "Column"
+                                }
+                            ]
+                        }
+                    },
+                    "point_charts_type_image": {
+                        "displayName": "Charts type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle",
+                                    "displayNameKey": "Circle"
+                                },
+                                {
+                                    "value": "column",
+                                    "displayName": "Column",
+                                    "displayNameKey": "Column"
+                                },
+                                {
+                                    "value": "image",
+                                    "displayName": "Image",
+                                    "displayNameKey": "Image"
+                                }
+                            ]
+                        }
+                    },
+                    "point_charts_radius": {
+                        "displayName": "Charts max. radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_min_radius": {
+                        "displayName": "Charts min. radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_height": {
+                        "displayName": "Charts max. height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_min_height": {
+                        "displayName": "Charts min. height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_size": {
+                        "displayName": "Charts max. size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_min_size": {
+                        "displayName": "Charts min. size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_width": {
+                        "displayName": "Charts width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_custom_min_yn": {
+                        "displayName": "Charts custom min",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "point_charts_custom_min_value": {
+                        "displayName": "Charts custom min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_custom_max_yn": {
+                        "displayName": "Charts custom max",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "point_charts_custom_max_value": {
+                        "displayName": "Charts custom max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "point_charts_color": {
+                        "displayName": "Charts color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "point_charts_color_neg": {
+                        "displayName": "Charts negative color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "point_charts_opacity": {
+                        "displayName": "Charts opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fill_decimal_places": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "-1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "1",
+                                    "displayNameKey": "1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2",
+                                    "displayNameKey": "2"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "3",
+                                    "displayNameKey": "3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "4",
+                                    "displayNameKey": "4"
+                                }
+                            ]
+                        }
+                    },
+                    "fill_display_unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "1001",
+                                    "displayName": "thousand",
+                                    "displayNameKey": "thousand"
+                                },
+                                {
+                                    "value": "1000000",
+                                    "displayName": "million",
+                                    "displayNameKey": "million"
+                                },
+                                {
+                                    "value": "1000000000",
+                                    "displayName": "billion",
+                                    "displayNameKey": "billion"
+                                },
+                                {
+                                    "value": "100",
+                                    "displayName": "percent",
+                                    "displayNameKey": "percent"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_decimal_places": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "-1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "1",
+                                    "displayNameKey": "1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2",
+                                    "displayNameKey": "2"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "3",
+                                    "displayNameKey": "3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "4",
+                                    "displayNameKey": "4"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_display_unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "1001",
+                                    "displayName": "thousand",
+                                    "displayNameKey": "thousand"
+                                },
+                                {
+                                    "value": "1000000",
+                                    "displayName": "million",
+                                    "displayNameKey": "million"
+                                },
+                                {
+                                    "value": "1000000000",
+                                    "displayName": "billion",
+                                    "displayNameKey": "billion"
+                                },
+                                {
+                                    "value": "100",
+                                    "displayName": "percent",
+                                    "displayNameKey": "percent"
+                                }
+                            ]
+                        }
+                    },
+                    "shapes_fill_type_all": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "shapes_fill_type_value": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "shapes_fill_type_legend": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "shapes_fill_type_basic": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "shapes_fill_color": {
+                        "displayName": "Static shape color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "points_fill_type_legend": {
+                        "displayName": "Points fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "points_fill_type_basic": {
+                        "displayName": "Points fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "points_fill_type_value": {
+                        "displayName": "Points fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "points_fill_type_all": {
+                        "displayName": "Points fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "points_fill_color": {
+                        "displayName": "Static point chart color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lines_color_type_all": {
+                        "displayName": "Lines color type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "lines_color_type_value": {
+                        "displayName": "Lines color type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "lines_color_type_legend": {
+                        "displayName": "Lines color type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "lines_color_type_basic": {
+                        "displayName": "Lines color type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "lines_stroke_color": {
+                        "displayName": "Static line color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lines_stroke_width": {
+                        "displayName": "Line width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lines_stroke_style": {
+                        "displayName": "Line style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "solid",
+                                    "displayNameKey": "solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "dashed",
+                                    "displayNameKey": "dashed"
+                                }
+                            ]
+                        }
+                    },
+                    "lines_arrow_size": {
+                        "displayName": "Arrow size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lines_arrow_style": {
+                        "displayName": "Arrow style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "one way",
+                                    "displayNameKey": "one way"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "two way",
+                                    "displayNameKey": "two way"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_fill_type_all": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_fill_type_value": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "value",
+                                    "displayNameKey": "value"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_fill_type_legend": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "legend",
+                                    "displayName": "color group",
+                                    "displayNameKey": "color group"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_fill_type_basic": {
+                        "displayName": "Shapes fill type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "individual",
+                                    "displayName": "individual",
+                                    "displayNameKey": "individual"
+                                },
+                                {
+                                    "value": "static",
+                                    "displayName": "static",
+                                    "displayNameKey": "static"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_fill_color": {
+                        "displayName": "Static chart color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "lineWidths": {
+                "displayName": "Line widths",
+                "properties": {
+                    "data_width_yn": {
+                        "displayName": "Lines data width",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "data_width_max": {
+                        "displayName": "Lines max. width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "data_width_min": {
+                        "displayName": "Lines min. width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "custom_min_yn": {
+                        "displayName": "Widths custom min",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "custom_min_value": {
+                        "displayName": "Widths custom min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "custom_max_yn": {
+                        "displayName": "Widths custom max",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "custom_max_value": {
+                        "displayName": "Widths custom max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "shapeCharts": {
+                "displayName": "Shape charts",
+                "properties": {
+                    "charts_yn": {
+                        "displayName": "Show charts",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "charts_type": {
+                        "displayName": "Charts type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bubble",
+                                    "displayName": "Bubble",
+                                    "displayNameKey": "Bubble"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle",
+                                    "displayNameKey": "Circle"
+                                },
+                                {
+                                    "value": "column",
+                                    "displayName": "Column",
+                                    "displayNameKey": "Column"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_type_image": {
+                        "displayName": "Charts type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bubble",
+                                    "displayName": "Bubble",
+                                    "displayNameKey": "Bubble"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle",
+                                    "displayNameKey": "Circle"
+                                },
+                                {
+                                    "value": "column",
+                                    "displayName": "Column",
+                                    "displayNameKey": "Column"
+                                },
+                                {
+                                    "value": "image",
+                                    "displayName": "Image",
+                                    "displayNameKey": "Image"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_radius": {
+                        "displayName": "Charts max. radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_min_radius": {
+                        "displayName": "Charts min. radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_height": {
+                        "displayName": "Charts max. height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_min_height": {
+                        "displayName": "Charts min. height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_size": {
+                        "displayName": "Charts max. size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_min_size": {
+                        "displayName": "Charts min. size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_width": {
+                        "displayName": "Charts width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_custom_min_yn": {
+                        "displayName": "Charts custom min",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "charts_custom_min_value": {
+                        "displayName": "Charts custom min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_custom_max_yn": {
+                        "displayName": "Charts custom max",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "charts_custom_max_value": {
+                        "displayName": "Charts custom max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_color": {
+                        "displayName": "Charts color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "charts_color_neg": {
+                        "displayName": "Charts negative color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "charts_opacity": {
+                        "displayName": "Charts opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_separate_scales": {
+                        "displayName": "Separate scales",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "pointCharts": {
+                "displayName": "Point charts",
+                "properties": {
+                    "charts_yn": {
+                        "displayName": "Show charts",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "charts_type": {
+                        "displayName": "Charts type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bubble",
+                                    "displayName": "Bubble",
+                                    "displayNameKey": "Bubble"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle",
+                                    "displayNameKey": "Circle"
+                                },
+                                {
+                                    "value": "column",
+                                    "displayName": "Column",
+                                    "displayNameKey": "Column"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_type_image": {
+                        "displayName": "Charts type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bubble",
+                                    "displayName": "Bubble",
+                                    "displayNameKey": "Bubble"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle",
+                                    "displayNameKey": "Circle"
+                                },
+                                {
+                                    "value": "column",
+                                    "displayName": "Column",
+                                    "displayNameKey": "Column"
+                                },
+                                {
+                                    "value": "image",
+                                    "displayName": "Image",
+                                    "displayNameKey": "Image"
+                                }
+                            ]
+                        }
+                    },
+                    "charts_radius": {
+                        "displayName": "Charts max. radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_min_radius": {
+                        "displayName": "Charts min. radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_height": {
+                        "displayName": "Charts max. height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_min_height": {
+                        "displayName": "Charts min. height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_size": {
+                        "displayName": "Charts max. size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_min_size": {
+                        "displayName": "Charts min. size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_width": {
+                        "displayName": "Charts width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_custom_min_yn": {
+                        "displayName": "Charts custom min",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "charts_custom_min_value": {
+                        "displayName": "Charts custom min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_custom_max_yn": {
+                        "displayName": "Charts custom max",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "charts_custom_max_value": {
+                        "displayName": "Charts custom max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_color": {
+                        "displayName": "Charts color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "charts_color_neg": {
+                        "displayName": "Charts negative color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "charts_opacity": {
+                        "displayName": "Charts opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "charts_separate_scales": {
+                        "displayName": "Separate scales",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "shapeLabels": {
+                "displayName": "Shape labels",
+                "properties": {
+                    "labels_yn": {
+                        "displayName": "Label countries",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_color": {
+                        "displayName": "Labels color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labels_font_size": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labels_font_family": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labels_font_bold": {
+                        "displayName": "Labels bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_font_italic": {
+                        "displayName": "Labels italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_font_underline": {
+                        "displayName": "Labels underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_show_bg": {
+                        "displayName": "Label background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_bg_color": {
+                        "displayName": "Background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labels_bg_opacity": {
+                        "displayName": "Background opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labels_decimal_places": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "-1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "1",
+                                    "displayNameKey": "1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2",
+                                    "displayNameKey": "2"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "3",
+                                    "displayNameKey": "3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "4",
+                                    "displayNameKey": "4"
+                                }
+                            ]
+                        }
+                    },
+                    "labels_display_unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "1001",
+                                    "displayName": "thousand",
+                                    "displayNameKey": "thousand"
+                                },
+                                {
+                                    "value": "1000000",
+                                    "displayName": "million",
+                                    "displayNameKey": "million"
+                                },
+                                {
+                                    "value": "1000000000",
+                                    "displayName": "billion",
+                                    "displayNameKey": "billion"
+                                },
+                                {
+                                    "value": "100",
+                                    "displayName": "percent",
+                                    "displayNameKey": "percent"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "pointLabels": {
+                "displayName": "Point labels",
+                "properties": {
+                    "labels_yn": {
+                        "displayName": "Label points",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_color": {
+                        "displayName": "Labels color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labels_font_size": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labels_font_family": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labels_font_bold": {
+                        "displayName": "Labels bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_font_italic": {
+                        "displayName": "Labels italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_font_underline": {
+                        "displayName": "Labels underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_show_bg": {
+                        "displayName": "Label background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_bg_color": {
+                        "displayName": "Background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labels_bg_opacity": {
+                        "displayName": "Background opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labels_decimal_places": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "-1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "1",
+                                    "displayNameKey": "1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2",
+                                    "displayNameKey": "2"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "3",
+                                    "displayNameKey": "3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "4",
+                                    "displayNameKey": "4"
+                                }
+                            ]
+                        }
+                    },
+                    "labels_display_unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "1001",
+                                    "displayName": "thousand",
+                                    "displayNameKey": "thousand"
+                                },
+                                {
+                                    "value": "1000000",
+                                    "displayName": "million",
+                                    "displayNameKey": "million"
+                                },
+                                {
+                                    "value": "1000000000",
+                                    "displayName": "billion",
+                                    "displayNameKey": "billion"
+                                },
+                                {
+                                    "value": "100",
+                                    "displayName": "percent",
+                                    "displayNameKey": "percent"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "lineLabels": {
+                "displayName": "Line labels",
+                "properties": {
+                    "labels_yn": {
+                        "displayName": "Label lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_color": {
+                        "displayName": "Labels color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labels_font_size": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labels_font_family": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labels_font_bold": {
+                        "displayName": "Labels bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_font_italic": {
+                        "displayName": "Labels italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_font_underline": {
+                        "displayName": "Labels underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_show_bg": {
+                        "displayName": "Label background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labels_bg_color": {
+                        "displayName": "Background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labels_bg_opacity": {
+                        "displayName": "Background opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labels_decimal_places": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "-1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "1",
+                                    "displayNameKey": "1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2",
+                                    "displayNameKey": "2"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "3",
+                                    "displayNameKey": "3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "4",
+                                    "displayNameKey": "4"
+                                }
+                            ]
+                        }
+                    },
+                    "labels_display_unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "none",
+                                    "displayNameKey": "none"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "auto",
+                                    "displayNameKey": "auto"
+                                },
+                                {
+                                    "value": "1001",
+                                    "displayName": "thousand",
+                                    "displayNameKey": "thousand"
+                                },
+                                {
+                                    "value": "1000000",
+                                    "displayName": "million",
+                                    "displayNameKey": "million"
+                                },
+                                {
+                                    "value": "1000000000",
+                                    "displayName": "billion",
+                                    "displayNameKey": "billion"
+                                },
+                                {
+                                    "value": "100",
+                                    "displayName": "percent",
+                                    "displayNameKey": "percent"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "navigation": {
+                "displayName": "Navigation",
+                "properties": {
+                    "navigation_mode": {
+                        "displayName": "On-map navigation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "1",
+                                    "displayName": "active",
+                                    "displayNameKey": "active"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "passive",
+                                    "displayNameKey": "passive"
+                                }
+                            ]
+                        }
+                    },
+                    "dummy": {
+                        "displayName": "dummy",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom_yn": {
+                        "displayName": "Allow zooming",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pan_yn": {
+                        "displayName": "Allow panning",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selection_yn": {
+                        "displayName": "Allow selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "center_selection": {
+                        "displayName": "Center on map selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "center_slicer": {
+                        "displayName": "Center on slicer selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "center_highlight": {
+                        "displayName": "Center on highlighted data",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "interactivity_controls_yn": {
+                        "displayName": "Interactivity controls",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "interactivity_controls_size": {
+                        "displayName": "Interactivity controls size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "zoom_controls_yn": {
+                        "displayName": "Zoom controls",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom_controls_size": {
+                        "displayName": "Zoom controls size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "zoom_indicator_yn": {
+                        "displayName": "Show zoom level",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom_in": {
+                        "displayName": "Zoom in on selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom_in_highlight": {
+                        "displayName": "Zoom in on highlights",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "tooltips": {
+                "displayName": "Tooltip settings",
+                "properties": {
+                    "location_yn": {
+                        "displayName": "Show location",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "header_style": {
+                        "displayName": "Header style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "first",
+                                    "displayName": "1st label value"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "All label values"
+                                }
+                            ]
+                        }
+                    },
+                    "color_group_yn": {
+                        "displayName": "Show color group",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color_value_yn": {
+                        "displayName": "Show color value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "chart_value_yn": {
+                        "displayName": "Show chart value",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "shapeColors": {
+                "displayName": "Colors settings for shapes",
+                "properties": {
+                    "scale_type": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "linear",
+                                    "displayNameKey": "linear"
+                                },
+                                {
+                                    "value": "log",
+                                    "displayName": "logarithmic",
+                                    "displayNameKey": "logarithmic"
+                                },
+                                {
+                                    "value": "div",
+                                    "displayName": "diverging",
+                                    "displayNameKey": "diverging"
+                                }
+                            ]
+                        }
+                    },
+                    "color_max": {
+                        "displayName": "Max color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_max": {
+                        "displayName": "Custom max value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_max": {
+                        "displayName": "Max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_mid": {
+                        "displayName": "Mid color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_mid": {
+                        "displayName": "Custom mid value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_mid": {
+                        "displayName": "Mid value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_min": {
+                        "displayName": "Min color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_min": {
+                        "displayName": "Custom min value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_min": {
+                        "displayName": "Min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "chartColors": {
+                "displayName": "Colors settings for charts on shapes",
+                "properties": {
+                    "scale_type": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "linear",
+                                    "displayNameKey": "linear"
+                                },
+                                {
+                                    "value": "log",
+                                    "displayName": "logarithmic",
+                                    "displayNameKey": "logarithmic"
+                                },
+                                {
+                                    "value": "div",
+                                    "displayName": "diverging",
+                                    "displayNameKey": "diverging"
+                                }
+                            ]
+                        }
+                    },
+                    "color_max": {
+                        "displayName": "Max color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_max": {
+                        "displayName": "Custom max value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_max": {
+                        "displayName": "Max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_mid": {
+                        "displayName": "Mid color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_mid": {
+                        "displayName": "Custom mid value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_mid": {
+                        "displayName": "Mid value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_min": {
+                        "displayName": "Min color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_min": {
+                        "displayName": "Custom min value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_min": {
+                        "displayName": "Min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "pointColors": {
+                "displayName": "Colors settings for charts on points",
+                "properties": {
+                    "scale_type": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "linear",
+                                    "displayNameKey": "linear"
+                                },
+                                {
+                                    "value": "log",
+                                    "displayName": "logarithmic",
+                                    "displayNameKey": "logarithmic"
+                                },
+                                {
+                                    "value": "div",
+                                    "displayName": "diverging",
+                                    "displayNameKey": "diverging"
+                                }
+                            ]
+                        }
+                    },
+                    "color_max": {
+                        "displayName": "Max color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_max": {
+                        "displayName": "Custom max value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_max": {
+                        "displayName": "Max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_mid": {
+                        "displayName": "Mid color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_mid": {
+                        "displayName": "Custom mid value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_mid": {
+                        "displayName": "Mid value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_min": {
+                        "displayName": "Min color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_min": {
+                        "displayName": "Custom min value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_min": {
+                        "displayName": "Min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "lineColors": {
+                "displayName": "Color settings for lines",
+                "properties": {
+                    "scale_type": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "linear",
+                                    "displayNameKey": "linear"
+                                },
+                                {
+                                    "value": "log",
+                                    "displayName": "logarithmic",
+                                    "displayNameKey": "logarithmic"
+                                },
+                                {
+                                    "value": "div",
+                                    "displayName": "diverging",
+                                    "displayNameKey": "diverging"
+                                }
+                            ]
+                        }
+                    },
+                    "color_max": {
+                        "displayName": "Max color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_max": {
+                        "displayName": "Custom max value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_max": {
+                        "displayName": "Max value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_mid": {
+                        "displayName": "Mid color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_mid": {
+                        "displayName": "Custom mid value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_mid": {
+                        "displayName": "Mid value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_min": {
+                        "displayName": "Min color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "custom_value_min": {
+                        "displayName": "Custom min value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value_min": {
+                        "displayName": "Min value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "shapeColorLegend": {
+                "displayName": "Color legend settings for shapes",
+                "properties": {
+                    "legend_yn": {
+                        "displayName": "Legend yes/no",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_height": {
+                        "displayName": "Legend height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_width": {
+                        "displayName": "Legend width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_text_size": {
+                        "displayName": "Legend text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_ticks": {
+                        "displayName": "Legend number of ticks",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_text_color": {
+                        "displayName": "Legend text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legend_font_size": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "legend_font_family": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "legend_font_bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_font_italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_font_underline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_bg_color": {
+                        "displayName": "Legend background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legend_bg_opacity": {
+                        "displayName": "Legend background opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "pointColorLegend": {
+                "displayName": "Color legend settings for points",
+                "properties": {
+                    "legend_yn": {
+                        "displayName": "Legend yes/no",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_height": {
+                        "displayName": "Legend height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_width": {
+                        "displayName": "Legend width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_text_size": {
+                        "displayName": "Legend text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_ticks": {
+                        "displayName": "Legend number of ticks",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_text_color": {
+                        "displayName": "Legend text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legend_font_size": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "legend_font_family": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "legend_font_bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_font_italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_font_underline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_bg_color": {
+                        "displayName": "Legend background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legend_bg_opacity": {
+                        "displayName": "Legend background opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "lineColorLegend": {
+                "displayName": "Color legend settings for lines",
+                "properties": {
+                    "legend_yn": {
+                        "displayName": "Legend yes/no",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_height": {
+                        "displayName": "Legend height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_width": {
+                        "displayName": "Legend width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_text_size": {
+                        "displayName": "Legend text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_ticks": {
+                        "displayName": "Legend number of ticks",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend_text_color": {
+                        "displayName": "Legend text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legend_font_size": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "legend_font_family": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "legend_font_bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_font_italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_font_underline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legend_bg_color": {
+                        "displayName": "Legend background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legend_bg_opacity": {
+                        "displayName": "Legend background opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "images": {
+                "displayName": "Image settings",
+                "properties": {
+                    "use": {
+                        "displayName": "Selected map",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "marker",
+                                    "displayName": "Marker",
+                                    "displayNameKey": "marker"
+                                },
+                                {
+                                    "value": "chart",
+                                    "displayName": "Chart",
+                                    "displayNameKey": "chart"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "hidden": {
+                "displayName": "Hidden",
+                "properties": {
+                    "zoom_factor": {
+                        "displayName": "Zoom factor",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rotate_x": {
+                        "displayName": "Rotate x",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rotate_y": {
+                        "displayName": "Rotate y",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "position_x": {
+                        "displayName": "Position x",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "position_y": {
+                        "displayName": "Position y",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "map_selected": {
+                        "displayName": "Selected map",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection_selected": {
+                        "displayName": "Selected projection",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "shapes_individual": {
+                "displayName": "individual shape settings",
+                "properties": {
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

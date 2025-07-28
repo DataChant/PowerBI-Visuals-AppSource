@@ -1,0 +1,824 @@
+{
+    "visual": {
+        "name": "synopticPanelByOKViz",
+        "displayName": "Synoptic Panel by OKViz",
+        "guid": "PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A",
+        "visualClassName": "Visual",
+        "version": "1.5.0",
+        "description": "Synoptic Panel by OKViz allows you to present one or more images (called maps, not necessarily geographical maps), assigning a meaning to arbitrary parts of them (called areas). You can highlight and color these areas dynamically and display several information over them. To design maps you can use a vector graphic editor or Synoptic Designer, a companion web tool located at https://synoptic.design/",
+        "supportUrl": "http://okviz.com/synoptic-panel/",
+        "gitHubUrl": "https://github.com/okviz/synopticpanel"
+    },
+    "apiVersion": "1.11.0",
+    "author": {
+        "name": "OKViz - a trademark of SQLBI",
+        "email": "support@okviz.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "src/polylabel.js",
+        "src/jszip.min.js",
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.cultures.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-chartutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "name": "Category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Subcategory",
+                "name": "Series",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Measure",
+                "name": "Y",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Maps",
+                "name": "MapSeries",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Target",
+                "name": "target",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "States Measure",
+                "name": "State",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "States",
+                "name": "states",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 1
+                        },
+                        "Y": {
+                            "max": 1
+                        },
+                        "target": {
+                            "max": 1
+                        },
+                        "State": {
+                            "max": 1
+                        },
+                        "MapSeries": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "MapSeries"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000000
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "Series",
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "Y"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "target"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "State"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "states"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "tooltips"
+                                    }
+                                }
+                            ]
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "showUnmatched": {
+                        "displayName": "Unmatched areas",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "strictValidation": {
+                        "displayName": "SVG strict validation",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "imageData": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageSelected": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "toolbar": {
+                "displayName": "Toolbar",
+                "properties": {
+                    "keep": {
+                        "displayName": "Keep visible",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "filter": {
+                        "displayName": "Filter on map change",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom": {
+                        "displayName": "Zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataPoint": {
+                "displayName": "Data Colors",
+                "properties": {
+                    "unmatchedFill": {
+                        "displayName": "Unmatched color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "borders": {
+                        "displayName": "Borders",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "defaultFill": {
+                        "displayName": "Default color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showAll": {
+                        "displayName": "Show all",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "colorByCategory": {
+                        "displayName": "Use category colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "saturate": {
+                        "displayName": "Saturate",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "saturateMin": {
+                        "displayName": "Min saturation",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "saturateMax": {
+                        "displayName": "Max saturation",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "states": {
+                "displayName": "States",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "comparison": {
+                        "displayName": "Comparison",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": ">",
+                                    "value": ">"
+                                },
+                                {
+                                    "displayName": ">=",
+                                    "value": ">="
+                                },
+                                {
+                                    "displayName": "=",
+                                    "value": "="
+                                },
+                                {
+                                    "displayName": "<=",
+                                    "value": "<="
+                                },
+                                {
+                                    "displayName": "<",
+                                    "value": "<"
+                                }
+                            ]
+                        }
+                    },
+                    "calculate": {
+                        "displayName": "Value type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Absolute value",
+                                    "value": "absolute"
+                                },
+                                {
+                                    "displayName": "Percentage",
+                                    "value": "percentage"
+                                },
+                                {
+                                    "displayName": "Modifier",
+                                    "value": "modifier"
+                                }
+                            ]
+                        }
+                    },
+                    "baseFill": {
+                        "displayName": "Base color",
+                        "placeHolderText": "See Data Colors",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "manualState1Fill": {
+                        "displayName": "State A",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "manualState1": {
+                        "displayName": "State A value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "manualState2Fill": {
+                        "displayName": "State B",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "manualState2": {
+                        "displayName": "State B value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "manualState3Fill": {
+                        "displayName": "State C",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "manualState3": {
+                        "displayName": "State C value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "manualState4Fill": {
+                        "displayName": "State D",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "manualState4": {
+                        "displayName": "State D value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "manualState5Fill": {
+                        "displayName": "State E",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "manualState5": {
+                        "displayName": "State E value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data labels",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "unmatchedLabels": {
+                        "displayName": "Unmatched labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelStyle": {
+                        "displayName": "Display",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Data column",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "Data value",
+                                    "value": "value"
+                                },
+                                {
+                                    "displayName": "Area name",
+                                    "value": "area"
+                                },
+                                {
+                                    "displayName": "Column and value",
+                                    "value": "both"
+                                },
+                                {
+                                    "displayName": "Area and value",
+                                    "value": "both2"
+                                }
+                            ]
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top left",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Middle",
+                                    "value": "centroid"
+                                },
+                                {
+                                    "displayName": "Best",
+                                    "value": "best"
+                                }
+                            ]
+                        }
+                    },
+                    "enclose": {
+                        "displayName": "Enclose in area",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "wordWrap": {
+                        "displayName": "Word wrap",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "locale": {
+                        "displayName": "Culture code",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                },
+                                {
+                                    "displayName": "wf_standard-font",
+                                    "value": "wf_standard-font,helvetica,arial,sans-serif"
+                                }
+                            ]
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "precision": {
+                        "displayName": "Decimal places",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "zoomEnlarge": {
+                        "displayName": "Enlarge on zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "Top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "Bottom"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "Right"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "Left"
+                                },
+                                {
+                                    "displayName": "Top Center",
+                                    "value": "TopCenter"
+                                },
+                                {
+                                    "displayName": "Bottom Center",
+                                    "value": "BottomCenter"
+                                },
+                                {
+                                    "displayName": "Right Center",
+                                    "value": "RightCenter"
+                                },
+                                {
+                                    "displayName": "Left Center",
+                                    "value": "LeftCenter"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Legend name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "colorBlind": {
+                "displayName": "Color Blindness by OKViz",
+                "properties": {
+                    "vision": {
+                        "displayName": "Vision",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "Normal"
+                                },
+                                {
+                                    "displayName": "Protanopia",
+                                    "value": "Protanopia"
+                                },
+                                {
+                                    "displayName": "Protanomaly",
+                                    "value": "Protanomaly"
+                                },
+                                {
+                                    "displayName": "Deuteranopia",
+                                    "value": "Deuteranopia"
+                                },
+                                {
+                                    "displayName": "Deuteranomaly",
+                                    "value": "Deuteranomaly"
+                                },
+                                {
+                                    "displayName": "Tritanopia",
+                                    "value": "Tritanopia"
+                                },
+                                {
+                                    "displayName": "Tritanomaly",
+                                    "value": "Tritanomaly"
+                                },
+                                {
+                                    "displayName": "Achromatopsia",
+                                    "value": "Achromatopsia"
+                                },
+                                {
+                                    "displayName": "Achromatomaly",
+                                    "value": "Achromatomaly"
+                                },
+                                {
+                                    "displayName": "Low Contrast",
+                                    "value": "LowContrast"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "about": {
+                "displayName": "About",
+                "properties": {
+                    "version": {
+                        "displayName": "Version",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true
+    },
+    "stringResources": {}
+}

@@ -1,0 +1,365 @@
+{
+    "visual": {
+        "name": "pivotSlicer",
+        "displayName": "Pivot Slicer",
+        "description": "Pivot Slicer provides a unified 'list of lists' approach to viewing, navigating, and slicing data.",
+        "guid": "pivotSlicer41E30F8C22FE4E32A8D40848A54322CF",
+        "visualClassName": "Visual",
+        "supportUrl": ""
+    },
+    "apiVersion": "1.11.0",
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "NODE",
+                "displayName": "Item (required)",
+                "kind": "Grouping",
+                "description": "Name of an Item. Bind to [Item] to rank items by name. Other bindings depend on data tables: object format (Item | Item Linker ...) OR edge format (Item | Linked Item ...)"
+            },
+            {
+                "name": "NODE_TYPE",
+                "displayName": "Item Type",
+                "kind": "Grouping",
+                "description": "The type of the item. Bind to [Item, Item Type] to partition items by type. Default = \"Item\"."
+            },
+            {
+                "name": "NODE_LINKER",
+                "displayName": "Item Linker (object format)",
+                "kind": "Grouping",
+                "description": "An object identifier that creates implicit links between all associated items. Bind to [Item, Item Linker] to rank items by their count of linker objects. Do not bind the edge format fields below."
+            },
+            {
+                "name": "NODE_ATTRIBUTES",
+                "displayName": "Item Attributes (up to 10)",
+                "kind": "Grouping",
+                "description": "Numeric attributes of the item (positive or negative). Bind to [Item, Item Attributes] to rank items by their attribute values."
+            },
+            {
+                "name": "LINKED_NODE",
+                "displayName": "Linked Item (edge format)",
+                "kind": "Grouping",
+                "description": "An item linked to the source Item. Bind to [Item, Linked Item] to rank items by their count of linked items. Do not bind the object format field above."
+            },
+            {
+                "name": "LINKED_NODE_TYPE",
+                "displayName": "Linked Item Type (edge format)",
+                "kind": "Grouping",
+                "description": "The type of the linked item. Bind to [Item Type, Linked Item Type] to partition items by type. Do not bind the object format field above. Default = \"Item\"."
+            },
+            {
+                "name": "LINK_WEIGHT",
+                "displayName": "Link Weight (edge format)",
+                "kind": "Grouping",
+                "description": "The weight of the directed link to the Linked Item. Default = 1."
+            },
+            {
+                "name": "FILTER_KEY",
+                "displayName": "Item Filter Key",
+                "kind": "Grouping",
+                "description": "Optional column on which to slice (e.g., on compound Type-Item keys when the same Item has multiple types). Default = slice on Item column."
+            },
+            {
+                "name": "LINKED_FILTER_KEY",
+                "displayName": "Linked Item Filter Key (edge format)",
+                "kind": "Grouping",
+                "description": "Optional column on which to slice (e.g., on compound Type-Item keys when the same Item has multiple types). Default = slice on Linked Item column."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "NODE"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "NODE_ATTRIBUTES"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "NODE_TYPE"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "NODE_LINKER"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "LINKED_NODE"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "LINKED_NODE_TYPE"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "LINK_WEIGHT"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "FILTER_KEY"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "LINKED_FILTER_KEY"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 100000
+                            }
+                        }
+                    }
+                },
+                "conditions": [
+                    {
+                        "NODE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "NODE_ATTRIBUTES": {
+                            "min": 0,
+                            "max": 10
+                        },
+                        "NODE_TYPE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "NODE_LINKER": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "LINKED_NODE_TYPE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "LINKED_NODE": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "LINK_WEIGHT": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "FILTER_KEY": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ]
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "version": {
+                        "displayName": "Version",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "state": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "filter": {
+                        "displayName": "filter",
+                        "type": {
+                            "filter": true
+                        }
+                    }
+                }
+            },
+            "configuration": {
+                "displayName": "Configuration",
+                "properties": {
+                    "enablePinning": {
+                        "displayName": "Enable pinning",
+                        "description": "Whether to allow pinning selections as bookmarks",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showRelated": {
+                        "displayName": "Show Related",
+                        "description": "Whether to show related nodes on selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "wrapText": {
+                        "displayName": "Wrap Text",
+                        "description": "Whether to wrap text or truncate",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "description": "The size of text throughout the visual",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Text Color",
+                        "description": "The color of text throughout the visual",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "The background color of the visual",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "barColor": {
+                        "displayName": "Bar Color",
+                        "description": "The color of the value bars",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sectionColor": {
+                        "displayName": "Section Color",
+                        "description": "The color of the section headers for each item type",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bookmarkColor": {
+                        "displayName": "Bookmark Color",
+                        "description": "The color hue of the initial bookmark; range [0-360]",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bookmarkLightness": {
+                        "displayName": "Bookmark Lightness",
+                        "description": "The color lightness of all bookmarks; range [20-80]",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "barSize": {
+                        "displayName": "Bar Percentage",
+                        "description": "The percentage width of the value bars; range [0-80]",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "topCount": {
+                        "displayName": "Top Items Count",
+                        "description": "How many items to preview for each item type",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxCount": {
+                        "displayName": "Max Items Count",
+                        "description": "How many items to show for each item type",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodeTypeLabelLength": {
+                        "displayName": "Node Type Label Length",
+                        "description": "Create node type labels from the first N letters",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "attributeWeightDelta": {
+                        "displayName": "Attribute Weight Delta",
+                        "description": "How much to increment/decrement attribute weights",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "sectionOrder": {
+                        "displayName": "Section Order",
+                        "description": "The rank ordering of sections",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Item Values",
+                                    "displayNameKey": "Item Values",
+                                    "value": "Item Values"
+                                },
+                                {
+                                    "displayName": "Item Counts",
+                                    "displayNameKey": "Item Counts",
+                                    "value": "Item Counts"
+                                },
+                                {
+                                    "displayName": "Section Names (A-Z, 0-9)",
+                                    "displayNameKey": "Section Names (A-Z, 0-9)",
+                                    "value": "Section Names (A-Z, 0-9)"
+                                },
+                                {
+                                    "displayName": "Section Names (Z-A, 9-0)",
+                                    "displayNameKey": "Section Names (Z-A, 9-0)",
+                                    "value": "Section Names (Z-A, 9-0)"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "visualData": {
+                "displayNameKey": "visualData",
+                "displayName": "Visual Data",
+                "properties": {
+                    "data": {
+                        "displayNameKey": "data",
+                        "displayName": "Data",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,483 @@
+{
+    "visual": {
+        "name": "databarvisual",
+        "displayName": "Data bar KPI",
+        "guid": "databarKPIB8060E2B144244C5A38807466893C9F5",
+        "visualClassName": "databarvisual",
+        "version": "1.0.0",
+        "description": "This visual was designed to help you chart progress towards a target. It had one fundamental mission though, 'to take up the smallest amount of room possible'. Hence it was achieved, the data bar visual that is capable of fitting in just 2 boxes in a mobile report.",
+        "supportUrl": "https://community.powerbi.com/t5/Custom-Visuals-Community/ct-p/CustomVisuals",
+        "gitHubUrl": "https://github.com/tsansome/powerbi-databarkpivisual"
+    },
+    "apiVersion": "1.7.0",
+    "author": {
+        "name": "Travis Sansome",
+        "email": "travis.sansome@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/d3/d3.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "The category to split the bars across. (Optional - use for doing mutliple KPIs)"
+            },
+            {
+                "displayName": "Value",
+                "name": "value",
+                "kind": "Measure",
+                "description": "The value that represents how filled the bar is. Dependent on whether this exceeds the target, the color of the filled area will be different. The colors for this visual can becontrolled in the formattting under Colors - Indicators."
+            },
+            {
+                "displayName": "Target",
+                "name": "target",
+                "kind": "Measure",
+                "description": "The target that you're trying to view if the value passes. This is then used with a ratio against the max to draw where the line should be on the bar."
+            },
+            {
+                "displayName": "Max",
+                "name": "max",
+                "kind": "Measure",
+                "description": "This is the number that the visual will use to mark as the ending of the bar. It has to be greater than the target for it to be valid."
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": ""
+            }
+        ],
+        "objects": {
+            "itemsSettings": {
+                "displayName": "Items",
+                "properties": {
+                    "orientation": {
+                        "displayName": "Orientation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Vertical",
+                                    "value": "vertical",
+                                    "displayNameKey": "0"
+                                },
+                                {
+                                    "displayName": "Horizontal",
+                                    "value": "horizontal",
+                                    "displayNameKey": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "padding": {
+                        "displayName": "Padding",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minWidth": {
+                        "displayName": "Min width",
+                        "description": "Used for horizontal orientation",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minHeight": {
+                        "displayName": "Min height",
+                        "description": "Used for vertical orientation",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "sectionSettings": {
+                "displayName": "Categories",
+                "properties": {
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top",
+                                    "displayNameKey": "0"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left",
+                                    "displayNameKey": "1"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right",
+                                    "displayNameKey": "2"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom",
+                                    "displayNameKey": "2"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "margin_between": {
+                        "displayName": "Margin",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "textSettings": {
+                "displayName": "Data labels",
+                "properties": {
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Below",
+                                    "value": "below",
+                                    "displayNameKey": "0"
+                                },
+                                {
+                                    "displayName": "On bar",
+                                    "value": "onbar",
+                                    "displayNameKey": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display units in general",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "showValueText": {
+                        "displayName": "Show value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayUnitsForValue": {
+                        "displayName": "Display units for value",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "showMaxText": {
+                        "displayName": "Show max",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayUnitsForMax": {
+                        "displayName": "Display units for max",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "repPositiveGapAsNegativeNumber": {
+                        "displayName": "Less than gap as negative",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPercentagesOnGaps": {
+                        "displayName": "Show percentages on gaps",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ignoreFormattingForTooltips": {
+                        "displayName": "Ignore formatting on tooltips",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "treatBlanksAsZeros": {
+                        "displayName": "Treat blanks as zeros",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "colorSettings": {
+                "displayName": "Colors - Indicators",
+                "properties": {
+                    "defaultColorNoTargetFill": {
+                        "displayName": "Default Color for No Target fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColorNoTargetText": {
+                        "displayName": "Default Color for No Target text",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lessThanColor": {
+                        "displayName": "Less than",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "equalToColor": {
+                        "displayName": "Equal to",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "greaterThanColor": {
+                        "displayName": "Greater than",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "targetLineSettings": {
+                "displayName": "Target Line",
+                "properties": {
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "strokeWidth": {
+                        "displayName": "Width",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "solid",
+                                    "value": "solid",
+                                    "displayNameKey": "0"
+                                },
+                                {
+                                    "displayName": "dashed",
+                                    "value": "dashed",
+                                    "displayNameKey": "1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "outerBarSettings": {
+                "displayName": "Bar",
+                "properties": {
+                    "fillWhenNoTarget": {
+                        "displayName": "Fill 100% when no target",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "outlineColor": {
+                        "displayName": "Outline color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "headerSettings": {
+                "displayName": "Header",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top",
+                                    "displayNameKey": "0"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left",
+                                    "displayNameKey": "1"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right",
+                                    "displayNameKey": "2"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom",
+                                    "displayNameKey": "2"
+                                }
+                            ]
+                        }
+                    },
+                    "value": {
+                        "displayName": "Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "margin_between": {
+                        "displayName": "Margin between header and items",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "value": {
+                            "max": 1
+                        },
+                        "target": {
+                            "max": 1
+                        },
+                        "max": {
+                            "max": 1
+                        },
+                        "tooltips": {
+                            "max": 20
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "value"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "target"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "max"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "stringResources": {}
+}

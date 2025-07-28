@@ -1,0 +1,342 @@
+{
+    "visual": {
+        "name": "DumbbellChartByMAQSoftware",
+        "displayName": "Dumbbell Chart by MAQ Software",
+        "guid": "DumbbellChartB13A88DFEE724350B46BCF0EFA5B6E321",
+        "visualClassName": "DumbbellChart",
+        "version": "3.0.5",
+        "description": "Dumbbell Chart displays critical business measures and shows changes over a set duration or across various categories.",
+        "supportUrl": "https://github.com/maqsoftware/PowerBI-visuals/issues",
+        "gitHubUrl": "https://github.com/maqsoftware/PowerBI-visuals/"
+    },
+    "apiVersion": "2.1.0",
+    "author": {
+        "name": "MAQ Software",
+        "email": "support@maqsoftware.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "kind": "Grouping",
+                "name": "Category"
+            },
+            {
+                "displayName": "Measure",
+                "kind": "Measure",
+                "name": "Value"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Category": {
+                            "max": 1
+                        },
+                        "Value": {
+                            "max": 4
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "Category"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Value"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {
+                                        "count": 300
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "# Copyright (c) MAQ Software.  All rights reserved.\n\n# Third Party Programs. This software enables you to obtain software applications from other sources.\n# Those applications are offered and distributed by third parties under their own license terms.\n# MAQ Software is not developing, distributing or licensing those applications to you, but instead,\n# as a convenience, enables you to use this software to obtain those applications directly from\n# the application providers.\n# By using the software, you acknowledge and agree that you are obtaining the applications directly\n# from the third party providers and under separate license terms, and that it is your responsibility to locate,\n# understand and comply with those license terms.\n# Microsoft grants you no license rights for third-party software or applications that is obtained using this software.\n\n#\n# WARNINGS:\n#\n# CREATION DATE: 06/12/2017\n#\n# LAST UPDATE: --/--/---\n#\n# VERSION: 3.0.0\n#\n# R VERSION TESTED: 3.4.2\n#\n# AUTHOR: MAQ Software\n\n\n\n############### Utility functions ###############\nlibraryRequireInstall = function(packageName, ...)\n{\n  if(!require(packageName, character.only = TRUE)) \n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\n}\n\nlibraryRequireInstall(\"XML\")\nlibraryRequireInstall(\"htmlwidgets\")\n\ninternalSaveWidget <- function(widget, fname)\n{\n  tempFname = paste(fname, \".tmp\", sep=\"\")\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\n  FlattenHTML(tempFname, fname)\n}\n\nFlattenHTML <- function(fnameIn, fnameOut)\n{\n  # Read and parse HTML file\n  # Embed all js and css files into one unified file\n  \n  if(!file.exists(fnameIn))\n    return(FALSE)\n  \n  dir = dirname(fnameIn)\n  html = htmlTreeParse(fnameIn, useInternal = TRUE)\n  top = xmlRoot(html)\n  \n  # extract all <script> tags with src value\n  srcNode=getNodeSet(top, '//script[@src]')\n  for (node in srcNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['src'])\n    alternateSrc = FindSrcReplacement(fname)\n    if (!is.null(alternateSrc))\n    {\n      s = alternateSrc\n      names(s) = 'src'\n      newNode = xmlNode(\"script\",attrs = s)\n      replaceNodes(node, newNode)\n    }else{\n      str=ReadFileForEmbedding(fname);\n      if (!is.null(str))\n      {      \n        newNode = xmlNode(\"script\", str, attrs = c(type = \"text/javascript\"))\n        replaceNodes(node, newNode)\n      }\n    }\n  }\n  \n  # extract all <link> tags with src value\n  linkNode=getNodeSet(top, '//link[@href]')\n  for (node in linkNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['href'])\n    str = ReadFileForEmbedding(fname, FALSE);\n    if (!is.null(str))\n    {\n      newNode = xmlNode(\"style\", str)\n      replaceNodes(node, newNode)\n    }\n  }\n  \n  saveXML(html, file = fnameOut)\n  return(TRUE)\n}\n\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\n{\n  data = ReadFullFile(fname)\n  if (is.null(data))\n    return(NULL)\n\n  str = paste(data, collapse ='\\n')\n  if (addCdata) {\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\n  }\n  return(str)\n}\n\nReadFullFile <- function(fname)\n{\n  if(!file.exists(fname))\n    return(NULL)\n  \n  con = file(fname, open = \"r\")\n  data = readLines(con)\n  close(con)\n  return(data)\n}\n\nFindSrcReplacement <- function(str)\n{\n  # finds reference to 'plotly' js and replaces with a version from CDN\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\n  str <- iconv(str, to=\"UTF-8\")\n  pattern = \"plotlyjs-(\\\\w.+)/plotly-latest.min.js\"\n  match1=regexpr(pattern, str)\n  attr(match1, 'useBytes') <- FALSE\n  strMatch=regmatches(str, match1, invert = FALSE)\n  if (length(strMatch) == 0) return(NULL)\n  \n  pattern2 = \"-(\\\\d.+)/\"\n  match2 = regexpr(pattern2, strMatch[1])\n  attr(match2, 'useBytes') <- FALSE\n  strmatch = regmatches(strMatch[1], match2)\n  if (length(strmatch) == 0) return(NULL)\n  \n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\n  # This matches the specific version used in the plotly package used.\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\n  return(str)\n}\n#################################################\n\n\n####################################################\n############ Library declarations\n## Plotting libraries\nlibraryRequireInstall(\"ggplot2\")\n\nlibraryRequireInstall(\"plotly\")\n\nlibraryRequireInstall(\"ggplotly\")\n\nlibraryRequireInstall(\"gapminder\")\n\nlibraryRequireInstall(\"gsubfn\")\n## Datastream parsing library\nlibraryRequireInstall(\"magrittr\")\n\n## HTML function and output facilitator libraries\nlibraryRequireInstall(\"htmlwidgets\")\n\nlibraryRequireInstall(\"XML\")\n\n\n\n####################################################\n\ndisabledButtonsList <- list('toImage', 'sendDataToCloud')\nerrorText <- NULL\n####### Data validation\nReadFullFileReplaceString <- function(fnameIn, fnameOut, sourceString,targetString)\n{\n  if(!file.exists(fnameIn))\n    return(NULL)\n  \n  tx  <- readLines(fnameIn)\n  tx2  <- gsub(pattern = sourceString, replace = targetString, x = tx)\n  writeLines(tx2, con = fnameOut)\n}\nmodify_measuretext <- function(text_measure)\n{\n  var_text1 <- text_measure\n    text_tool1 <- substr(var_text1,1,20)\n    if(nchar(text_measure)< 20) \n    {\n      finaltext_measure1 <- text_tool1\n    } else {\n    finaltext_measure1 <- paste(text_tool1,\"...\")\n    }\n    return (finaltext_measure1)\n}\n###### Check if essential fields are given\nif ((!exists(\"Category\")) || (!exists(\"Value\")))\n{\n  xlayout <- list(\n    title = \"Please provide with the category and at least one measure\",\n    zeroline = FALSE,\n    showline = FALSE,\n    showticklabels = FALSE,\n    showgrid = FALSE\n  )\n  ylayout <- list(\n    title = \"\",\n    zeroline = FALSE,\n    showline = FALSE,\n    showticklabels = FALSE,\n    showgrid = FALSE\n  )\n  plotOutput <- plot_ly() %>% \n  layout(title = '',\n         xaxis = xlayout,\n         yaxis = ylayout)\n  plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n    \n    ##Render the plot in power bi visual window\n    internalSaveWidget(config(\n      plotOutput,\n      collaborate = FALSE,\n      displaylogo = FALSE\n    ),\n    'out.html')\n  \n  quit()\n}\n### Initiate error handling\ntryCatch({\n  ##### Converting user data to data frames\n  sourceData <- data.frame(Category, Value)\n  userDataColNames <- colnames(sourceData)\n  userDataColNames <- gsub(\".\", \" \", userDataColNames, fixed = TRUE)\n  numberofValues <- ncol(Value)\n  \n  ##### Initializing default properties\n  lineSegmentColor <- \"#5F6B6D\"\n  \n  lineSegment2Color <- \"#8AD4EB\"\n  \n  lineSegment3Color <- \"#374649\"\n  \n  value1Color <- \"#01B8AA\"\n  \n  value2Color <- \"#FD625E\"\n  \n  value3Color <- \"#A66999\"\n  \n  value4Color <- \"#F2C80F\"\n  \n  yColor <- \"grey\"\n  \n  xColor <- \"grey\"\n  \n  ytextColor <- \"black\"\n  \n  xtextColor <- \"black\"\n  \n  chartColor <- \"white\"\n  \n  plotColor <- \"white\"\n  \n  leftMargin <- 80\n  \n  xtick <- TRUE\n  \n  ytick <- TRUE\n\n  legend <- TRUE\n  \n  \n  ####### Check for user definition of properties and asign them to their respective variables\n  if (exists(\"legend_show\")) {\n    legend <- legend_show\n  }\n  if (exists(\"visualColors_segmentColor\")) {\n    lineSegmentColor <- visualColors_segmentColor\n  }\n  if (exists(\"visualColors_segment2Color\")) {\n    lineSegment2Color <- visualColors_segment2Color\n  }\n  if (exists(\"visualColors_segment3Color\")) {\n    lineSegment3Color <- visualColors_segment3Color\n  }\n  if (exists(\"yAxis_labelColor\")) {\n    ytextColor <- yAxis_labelColor\n  }\n  if (exists(\"xAxis_labelColor\")) {\n    xtextColor <- xAxis_labelColor\n  }\n  if (exists(\"visualColors_valueColor1\")) {\n    value1Color <- visualColors_valueColor1\n  }\n  if (exists(\"visualColors_valueColor2\")) {\n    value2Color <- visualColors_valueColor2\n  }\n  if (exists(\"visualColors_valueColor3\")) {\n    value3Color <- visualColors_valueColor3\n  }\n  if (exists(\"visualColors_valueColor4\")) {\n    value4Color <- visualColors_valueColor4\n  }\n  if (exists(\"yAxis_titleColor\")) {\n    yColor <- yAxis_titleColor\n  }\n  if (exists(\"xAxis_titleColor\")) {\n    xColor <- xAxis_titleColor\n  }\n  if (exists(\"visualColors_lMargin\")) {\n    leftMargin <- visualColors_lMargin\n  }\n  if (exists(\"visualColors_plotColor\")) {\n    plotColor <- visualColors_plotColor\n  }\n  if (exists(\"visualColors_chartColor\")) {\n    chartColor <- visualColors_chartColor\n  }\n  if (exists(\"xAxis_showLabel\")) {\n    xtick <- xAxis_showLabel\n  }\n  if (exists(\"yAxis_showLabel\")) {\n    ytick <- yAxis_showLabel\n  }\n  ### Creating stylings for axis text\n  \n  titlefontx <- list(family = \"Arial, sans-serif\",\n                     size = 18,\n                     color = xColor)\n  titlefonty <- list(family = \"Arial, sans-serif\",\n                     size = 18,\n                     color = yColor)\n  tickfonty <- list(family = \"Old Standard TT, serif\",\n                    size = 14,\n                    color = ytextColor)\n  tickfontx <- list(family = \"Old Standard TT, serif\",\n                    size = 14,\n                    color = xtextColor)\n  \n  ## declaring constants\n  marginLeftVal <- 100\n  marginRightVal <- 0\n  marginTopVal <- 0\n  marginBottomVal <- 50\n  \n  #### Initiating plot for 4 measures\n  \n  if (numberofValues == 4) {\n    yLegend <- sprintf(\"%s\", userDataColNames[1])\n    \n    xLegend <-\n      sprintf(\n        \"Difference between %s, %s, %s and %s\",\n        userDataColNames[2],\n        userDataColNames[3],\n        userDataColNames[4],\n        userDataColNames[5]\n      )\n    \n    \n    if (exists(\"yAxis_titleText\")) {\n      yLegend <- yAxis_titleText\n    }\n    if (exists(\"xAxis_titleText\")) {\n      xLegend <- xAxis_titleText\n    }\n    \n     ##code for ellipses for 4 measures\n    text1 <- userDataColNames[2]\n    text_fi1 <- modify_measuretext(text1)\n    #2nd measure\n    text2 <- userDataColNames[3]\n    text_fi2 <- modify_measuretext(text2)\n    #3rd measure\n    text3 <- userDataColNames[4]\n    text_fi3 <- modify_measuretext(text3)\n    #4th measure\n    text4 <- userDataColNames[5]\n    text_fi4 <- modify_measuretext(text4)\n    colnames(sourceData) <-\n      c(\"Category\", \"Value1\", \"Value2\", \"Value3\", \"Value4\")\n    sourceData$Category <-\n      factor(sourceData$Category, levels = sourceData$Category[order(sourceData$Value3)])\n    \n    plotOutput <- plot_ly(sourceData) %>%\n      ##Add segments\n      add_segments(\n        x = ~ Value1,\n        xend = ~ Value2,\n        y = ~ Category,\n        yend = ~ Category,\n        showlegend = FALSE,\n        color = I(lineSegmentColor)\n      ) %>%\n      add_segments(\n        x = ~ Value2,\n        xend = ~ Value3,\n        y = ~ Category,\n        yend = ~ Category,\n        showlegend = FALSE,\n        color = I(lineSegment2Color)\n      ) %>%\n      add_segments(\n        x = ~ Value3,\n        xend = ~ Value4,\n        y = ~ Category,\n        yend = ~ Category,\n        showlegend = FALSE,\n        color = I(lineSegment3Color)\n      ) %>%\n      ##Add markers for value 1\n      add_markers(\n        x = ~ Value1,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[2]),\n        color = I(value1Color),\n        text = ~ paste(Value1, '<br>', Category, '<br>', text_fi1),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      ##Add markers for value 2\n      add_markers(\n        x = ~ Value2,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[3]),\n        color = I(value2Color),\n        text = ~ paste(Value2, '<br>', Category, '<br>', text_fi2),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      ##Add markers for value 3\n      add_markers(\n        x = ~ Value3,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[4]),\n        color = I(value3Color),\n        text = ~ paste(Value3, '<br>', Category, '<br>', text_fi3),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      ##Add markers for value 4\n      add_markers(\n        x = ~ Value4,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[5]),\n        color = I(value4Color),\n        text = ~ paste(Value4, '<br>', Category, '<br>', text_fi4),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      layout(\n        xaxis = list(\n          title = xLegend,\n          titlefont = titlefontx,\n          showticklabels = xtick,\n          tickfont = tickfontx\n        ),\n        yaxis = list(\n          title = yLegend,\n          titlefont = titlefonty,\n          showticklabels = ytick,\n          tickfont = tickfonty\n        ),\n        margin = list(\n          l = marginLeftVal,\n          r = marginRightVal,\n          t = marginTopVal,\n          b = marginBottomVal\n        ),\n        plot_bgcolor = chartColor,\n        paper_bgcolor = plotColor\n      )\n    plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n    \n    ##Render the plot in power bi visual window\n    internalSaveWidget(config(\n      plotOutput,\n      collaborate = FALSE,\n      displaylogo = FALSE\n    ),\n    'out.html')\n    \n  }\n  \n  \n  ####Initiating plot for 3 measures\n  if (numberofValues == 3) {\n    \n    yLegend <- sprintf(\"%s\", userDataColNames[1])\n    \n    xLegend <-\n      sprintf(\n        \"Difference between %s, %s and %s\",\n        userDataColNames[2],\n        userDataColNames[3],\n        userDataColNames[4]\n      )\n    \n    \n    if (exists(\"yAxis_titleText\")) {\n      yLegend <- yAxis_titleText\n    }\n    if (exists(\"xAxis_titleText\")) {\n      xLegend <- xAxis_titleText\n    }\n     ##code for ellipses for 3 measures\n    text1 <- userDataColNames[2]\n    text_fi1 <- modify_measuretext(text1)\n    #2nd measure\n    text2 <- userDataColNames[3]\n    text_fi2 <- modify_measuretext(text2)\n    #3rd measure\n    text3 <- userDataColNames[4]\n    text_fi3 <- modify_measuretext(text3)\n    colnames(sourceData) <-\n      c(\"Category\", \"Value1\", \"Value2\", \"Value3\")\n    sourceData$Category <-\n      factor(sourceData$Category, levels = sourceData$Category[order(sourceData$Value3)])\n    \n    plotOutput <- plot_ly(sourceData) %>%\n      ##Add segments\n      add_segments(\n        x = ~ Value1,\n        xend = ~ Value2,\n        y = ~ Category,\n        yend = ~ Category,\n        showlegend = FALSE,\n        color = I(lineSegmentColor)\n      ) %>%\n      add_segments(\n        x = ~ Value2,\n        xend = ~ Value3,\n        y = ~ Category,\n        yend = ~ Category,\n        showlegend = FALSE,\n        color = I(lineSegment2Color)\n      ) %>%\n      ##Add markers for value 1\n      add_markers(\n        x = ~ Value1,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[2]),\n        color = I(value1Color),\n        text = ~ paste(Value1, '<br>', Category, '<br>', text_fi1),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      ##Add markers for value 2\n      add_markers(\n        x = ~ Value2,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[3]),\n        color = I(value2Color),\n        text = ~ paste(Value2, '<br>', Category, '<br>', text_fi2),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      ##Add markers for value 3\n      add_markers(\n        x = ~ Value3,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[4]),\n        color = I(value3Color),\n        text = ~ paste(Value3, '<br>', Category, '<br>', text_fi3),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      layout(\n        xaxis = list(\n          title = xLegend,\n          titlefont = titlefontx,\n          showticklabels = xtick,\n          tickfont = tickfontx\n        ),\n        yaxis = list(\n          title = yLegend,\n          titlefont = titlefonty,\n          showticklabels = ytick,\n          tickfont = tickfonty\n        ),\n        margin = list(\n          l = marginLeftVal,\n          r = marginRightVal,\n          t = marginTopVal,\n          b = marginBottomVal\n        ),\n        plot_bgcolor = chartColor,\n        paper_bgcolor = plotColor\n      )\n    \n    plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n    ##Render the plot in power bi visual window\n    internalSaveWidget(config(\n      plotOutput,\n      collaborate = FALSE,\n      displaylogo = FALSE\n    ),\n    'out.html')\n    \n  }\n  \n  ####Initiating plot for 2 measures\n  if (numberofValues == 2) {\n    yLegend <- sprintf(\"%s\", userDataColNames[1])\n    \n    xLegend <-\n      sprintf(\"Difference between %s and %s\",\n              userDataColNames[2],\n              userDataColNames[3])\n    \n    \n    if (exists(\"yAxis_titleText\")) {\n      yLegend <- yAxis_titleText\n    }\n    if (exists(\"xAxis_titleText\")) {\n      xLegend <- xAxis_titleText\n    }\n    ##code for ellipses for 2 measures\n    text1 <- userDataColNames[2]\n    text_fi1 <- modify_measuretext(text1)\n    #2nd measure\n    text2 <- userDataColNames[3]\n    text_fi2 <- modify_measuretext(text2)\n\n    colnames(sourceData) <- c(\"Category\", \"Value1\", \"Value2\")\n    sourceData$Category <-\n      factor(sourceData$Category, levels = sourceData$Category[order(sourceData$Category)])\n    sd <- ~ Value1\n     sizevw <- dev.size(\"px\")\n      if(sizevw < 500) {\n        showlegend: FALSE\n      }\n    plotOutput <- plot_ly(sourceData) %>%\n      ##Add segments\n      add_segments(\n        x = ~ Value1,\n        xend = ~ Value2,\n        y = ~ Category,\n        yend = ~ Category,\n        showlegend = FALSE,\n        color = I(lineSegmentColor)\n      ) %>%\n      ##Add markers for value 1\n      add_markers(\n        x = ~ Value1,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[2]),\n        color = I(value1Color),\n        text = ~ paste(Value1, '<br>', Category, '<br>', text_fi1),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      ##Add markers for value 2\n      add_markers(\n        x = ~ Value2,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[3]),\n        color = I(value2Color),\n        text = ~ paste(Value2, '<br>', Category, '<br>', text_fi2),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n     \n      layout(\n        xaxis = list(\n          title = xLegend,\n          titlefont = titlefontx,\n          showticklabels = xtick,\n          tickfont = tickfontx\n        ),\n        yaxis = list(\n          title = yLegend,\n          titlefont = titlefonty,\n          showticklabels = ytick,\n          tickfont = tickfonty\n        ),\n        margin = list(\n          l = marginLeftVal,\n          r = marginRightVal,\n          t = marginTopVal,\n          b = marginBottomVal\n        ),\n        plot_bgcolor = chartColor,\n        paper_bgcolor = plotColor                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \n      )\n    \n    plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n    ##Render the plot in power bi visual window\n    internalSaveWidget(config(\n      plotOutput,\n      collaborate = FALSE,\n      displaylogo = FALSE\n    ),\n    'out.html')\n    \n  }\n  \n  ####Initiating plot for 1 measure\n  if (numberofValues == 1) {\n    yLegend <- sprintf(\"%s\", userDataColNames[1])\n    \n    xLegend <- sprintf(\"%s\", userDataColNames[2])\n    \n    \n    if (exists(\"yAxis_titleText\")) {\n      yLegend <- yAxis_titleText\n    }\n    if (exists(\"xAxis_titleText\")) {\n      xLegend <- xAxis_titleText\n    }\n     #1st measure\n    text2 <- userDataColNames[2]\n    text_fi2 <- modify_measuretext(text2)\n    colnames(sourceData) <- c(\"Category\", \"Value1\")\n    sourceData$Category <-\n      factor(sourceData$Category, levels = sourceData$Category[order(sourceData$Value1)])\n    \n    plotOutput <-\n      plot_ly(sourceData, color = I(lineSegmentColor)) %>%\n      ##Add markers\n      add_markers(\n        x = ~ Value1,\n        y = ~ Category,\n        name = modify_measuretext(userDataColNames[2]),\n        color = I(value1Color),\n        text = ~ paste(Value1, '<br>', Category, '<br>', text_fi2),\n        type = 'scatter',\n        mode = 'markers',\n        showlegend = legend,\n        hoverinfo = \"text\"\n      ) %>%\n      \n      layout(\n        xaxis = list(\n          title = xLegend,\n          titlefont = titlefontx,\n          showticklabels = xtick,\n          tickfont = tickfontx\n        ),\n        yaxis = list(\n          title = yLegend,\n          titlefont = titlefonty,\n          showticklabels = ytick,\n          tickfont = tickfonty\n        ),\n        margin = list(\n          l = marginLeftVal,\n          r = marginRightVal,\n          t = marginTopVal,\n          b = marginBottomVal\n        ),\n        plot_bgcolor = chartColor,\n        paper_bgcolor = plotColor\n      )\n    \n    plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n    ##Render the plot in power bi visual window\n    internalSaveWidget(config(\n      plotOutput,\n      collaborate = FALSE,\n      displaylogo = FALSE\n    ),\n    'out.html')\n    \n  }\n},\n\n#######Handle error and display message\nerror = function(e) {\n  xlayout <- list(\n    title = sprintf(\"Error:%s: Please build the model again using suitable values\", e),\n    zeroline = FALSE,\n    showline = FALSE,\n    showticklabels = FALSE,\n    showgrid = FALSE\n  )\n  ylayout <- list(\n    title = \"\",\n    zeroline = FALSE,\n    showline = FALSE,\n    showticklabels = FALSE,\n    showgrid = FALSE\n  )\n  plotOutput <- plot_ly() %>%\n    layout(title = '',\n           xaxis = xlayout,\n           yaxis = ylayout)\n  \n  plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n  internalSaveWidget(plotOutput, 'out.html')\n  \n  quit()\n  \n})\nReadFullFileReplaceString('out.html', 'out.html', ',\"padding\":40,', ',\"padding\":0,')"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "visualColors": {
+                "displayName": "Colors",
+                "properties": {
+                    "valueColor1": {
+                        "displayName": "Measure 1",
+                        "description": "First measure color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "valueColor2": {
+                        "displayName": "Measure 2",
+                        "description": "Second measure color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "valueColor3": {
+                        "displayName": "Measure 3",
+                        "description": "Third measure color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "valueColor4": {
+                        "displayName": "Measure 4",
+                        "description": "Fourth measure color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segmentColor": {
+                        "displayName": "Connector 1",
+                        "description": "First connector color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segment2Color": {
+                        "displayName": "Connector 2",
+                        "description": "Second connector color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segment3Color": {
+                        "displayName": "Connector 3",
+                        "description": "Third connector color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartColor": {
+                        "displayName": "Plot background",
+                        "description": "Color of plot background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "plotColor": {
+                        "displayName": "Axis background",
+                        "description": "Color of axis backgroud",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "displayName": "X-axis",
+                "properties": {
+                    "titleText": {
+                        "displayName": "Title",
+                        "description": "Enter the title for x-axis",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": false
+                    },
+                    "showLabel": {
+                        "displayName": "Label",
+                        "description": "X-axis label",
+                        "type": {
+                            "bool": true
+                        },
+                        "suppressFormatPainterCopy": false
+                    },
+                    "labelColor": {
+                        "displayName": "Label color",
+                        "description": "Color of x-axis label",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title color",
+                        "description": "Color of legend text on x-axis",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Y-axis",
+                "properties": {
+                    "titleText": {
+                        "displayName": "Title",
+                        "description": "Enter the title for y-axis",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": false
+                    },
+                    "showLabel": {
+                        "displayName": "Label",
+                        "description": "Y-axis label",
+                        "type": {
+                            "bool": true
+                        },
+                        "suppressFormatPainterCopy": false
+                    },
+                    "labelColor": {
+                        "displayName": "Label color",
+                        "description": "Color of y-axis label",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title color",
+                        "description": "Color of legend text on y-axis",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "XML",
+                "displayName": "XML",
+                "url": "https://cran.r-project.org/web/packages/XML/index.html"
+            },
+            {
+                "name": "magrittr",
+                "displayName": "magrittr",
+                "url": "https://cran.r-project.org/web/packages/magrittr/index.html"
+            }
+        ]
+    },
+    "stringResources": {}
+}

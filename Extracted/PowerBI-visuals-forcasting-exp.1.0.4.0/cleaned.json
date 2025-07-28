@@ -1,0 +1,530 @@
+{
+    "visual": {
+        "name": "PowerBI-visuals-forcasting-exp",
+        "displayName": "Forecasting",
+        "guid": "PBI_CV_8EDDC07B_EE79_4418_A84C_D73897C0E21F_HTML_work",
+        "visualClassName": "Visual",
+        "version": "1.0.4",
+        "description": "<span>Time series forecasting is the use of a model to predict future values based on previously observed values. Current visual implements well known exponential smoothing method for the forecasting. The prediction is based on trend and seasonality modeling. You can control the algorithm parameters and the visual attributes to suit your needs.<br/><br/><span style='font-style:italic'>Service prerequisites:</span> R-powered custom visual is used in service seamlessly<br/><br /><span style='font-style:italic'>Desktop prerequisites:</span> To run R scripts in Power BI Desktop, you must separately install R on your local computer.<br />You can download and install R for free from the <a href='https://mran.revolutionanalytics.com/download/'>Revolution Open download page</a> or the <a href='https://cran.r-project.org/bin/windows/base/'>CRAN Repository</a><br /><br /> <span style='font-style:italic'> R package dependencies(auto-installed): </span> graphics, scales, forecast, zoo, ggplot2, htmlWidgets, XML, plotly  <br /><br /> <span style='font-style:italic'> Supports R versions: </span> R 3.3.1, R 3.3.0, R 3.4.1, MRO 3.3.1, MRO 3.3.0, MRO 3.2.2  <br /></span>",
+        "supportUrl": "http://community.powerbi.com/",
+        "gitHubUrl": "https://github.com/microsoft/PowerBI-visuals-forcasting-exp"
+    },
+    "apiVersion": "1.10.0",
+    "author": {
+        "name": "Microsoft",
+        "email": "pbicvsupport@microsoft.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Date",
+                "description": "Equally spaced date values",
+                "kind": "Grouping",
+                "name": "Date"
+            },
+            {
+                "displayName": "Value",
+                "description": "Numeric variable",
+                "kind": "Measure",
+                "name": "Value"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Date": {
+                            "max": 1
+                        },
+                        "Value": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "Date"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Value"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {}
+                                }
+                            }
+                        }
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "# Copyright (c) Microsoft Corporation.  All rights reserved.\r\n\r\n# Third Party Programs. This software enables you to obtain software applications from other sources. \r\n# Those applications are offered and distributed by third parties under their own license terms.\r\n# Microsoft is not developing, distributing or licensing those applications to you, but instead, \r\n# as a convenience, enables you to use this software to obtain those applications directly from \r\n# the application providers.\r\n# By using the software, you acknowledge and agree that you are obtaining the applications directly\r\n# from the third party providers and under separate license terms, and that it is your responsibility to locate, \r\n# understand and comply with those license terms.\r\n# Microsoft grants you no license rights for third-party software or applications that is obtained using this software.\r\n\r\n#\r\n# WARNINGS:   \r\n#\r\n# CREATION DATE: 24/7/2016\r\n#\r\n# LAST UPDATE: 16/03/2017\r\n#\r\n# VERSION: 1.0.3\r\n#\r\n# R VERSION TESTED: 3.2.2\r\n# \r\n# AUTHOR: pbicvsupport@microsoft.com\r\n#\r\n# REFERENCES: http://www.exponentialsmoothing.net/\r\n\r\n\r\n############### Utility functions ###############\r\nlibraryRequireInstall = function(packageName, ...)\r\n{\r\n  if(!require(packageName, character.only = TRUE)) \r\n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\r\n}\r\n\r\nlibraryRequireInstall(\"XML\")\r\nlibraryRequireInstall(\"htmlwidgets\")\r\n\r\ninternalSaveWidget <- function(widget, fname)\r\n{\r\n  tempFname = paste(fname, \".tmp\", sep=\"\")\r\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\r\n  FlattenHTML(tempFname, fname)\r\n}\r\n\r\nFlattenHTML <- function(fnameIn, fnameOut)\r\n{\r\n  # Read and parse HTML file\r\n  # Embed all js and css files into one unified file\r\n  \r\n  if(!file.exists(fnameIn))\r\n    return(FALSE)\r\n  \r\n  dir = dirname(fnameIn)\r\n  html = htmlTreeParse(fnameIn, useInternal = TRUE)\r\n  top = xmlRoot(html)\r\n  \r\n  # extract all <script> tags with src value\r\n  srcNode=getNodeSet(top, '//script[@src]')\r\n  for (node in srcNode)\r\n  {\r\n    b = xmlAttrs(node)\r\n    fname = file.path(dir, b['src'])\r\n    alternateSrc = FindSrcReplacement(fname)\r\n    if (!is.null(alternateSrc))\r\n    {\r\n      s = alternateSrc\r\n      names(s) = 'src'\r\n      newNode = xmlNode(\"script\",attrs = s)\r\n      replaceNodes(node, newNode)\r\n    }else{\r\n      str=ReadFileForEmbedding(fname);\r\n      if (!is.null(str))\r\n      {      \r\n        newNode = xmlNode(\"script\", str, attrs = c(type = \"text/javascript\"))\r\n        replaceNodes(node, newNode)\r\n      }\r\n    }\r\n  }\r\n  \r\n  # extract all <link> tags with src value\r\n  linkNode=getNodeSet(top, '//link[@href]')\r\n  for (node in linkNode)\r\n  {\r\n    b = xmlAttrs(node)\r\n    fname = file.path(dir, b['href'])\r\n    str = ReadFileForEmbedding(fname, FALSE);\r\n    if (!is.null(str))\r\n    {\r\n      newNode = xmlNode(\"style\", str)\r\n      replaceNodes(node, newNode)\r\n    }\r\n  }\r\n  \r\n  saveXML(html, file = fnameOut)\r\n  return(TRUE)\r\n}\r\n\r\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\r\n{\r\n  data = ReadFullFile(fname)\r\n  if (is.null(data))\r\n    return(NULL)\r\n\r\n  str = paste(data, collapse ='\\n')\r\n  if (addCdata) {\r\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\r\n  }\r\n  return(str)\r\n}\r\n\r\nReadFullFile <- function(fname)\r\n{\r\n  if(!file.exists(fname))\r\n    return(NULL)\r\n  \r\n  con = file(fname, open = \"r\")\r\n  data = readLines(con)\r\n  close(con)\r\n  return(data)\r\n}\r\n\r\nFindSrcReplacement <- function(str)\r\n{\r\n  # finds reference to 'plotly' js and replaces with a version from CDN\r\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\r\n  str <- iconv(str, to=\"UTF-8\")\r\n  pattern = \"plotlyjs-(\\\\w.+)/plotly-latest.min.js\"\r\n  match1=regexpr(pattern, str)\r\n  attr(match1, 'useBytes') <- FALSE\r\n  strMatch=regmatches(str, match1, invert = FALSE)\r\n  if (length(strMatch) == 0) return(NULL)\r\n  \r\n  pattern2 = \"-(\\\\d.+)/\"\r\n  match2 = regexpr(pattern2, strMatch[1])\r\n  attr(match2, 'useBytes') <- FALSE\r\n  strmatch = regmatches(strMatch[1], match2)\r\n  if (length(strmatch) == 0) return(NULL)\r\n  \r\n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\r\n  # This matches the specific version used in the plotly package used.\r\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\r\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\r\n  return(str)\r\n}\r\n#ReadFullFileReplaceString\r\nReadFullFileReplaceString <- function(fnameIn, fnameOut, sourceString,targetString)\r\n{\r\n  if(!file.exists(fnameIn))\r\n    return(NULL)\r\n  \r\n  tx  <- readLines(fnameIn)\r\n  tx2  <- gsub(pattern = sourceString, replace = targetString, x = tx)\r\n  writeLines(tx2, con = fnameOut)\r\n}\r\n#################################################\r\n\r\n\r\n############### Library Declarations ###############\r\nlibraryRequireInstall(\"ggplot2\")\r\nlibraryRequireInstall(\"plotly\")\r\nlibraryRequireInstall(\"caTools\")\r\n####################################################\r\n\r\nSys.setlocale(\"LC_ALL\",\"English\") # Internationalization \r\n\r\n############ User Parameters #########\r\n\r\n##PBI_PARAM: Should warnings text be displayed?\r\n#Type:logical, Default:TRUE, Range:NA, PossibleValues:NA, Remarks: NA\r\nshowWarnings=FALSE\r\nif(exists(\"settings_additional_params_showWarnings\"))\r\n  showWarnings = settings_additional_params_showWarnings\r\n\r\n\r\n\r\n##PBI_PARAM: Should additional info about the forcasting method be displayed?\r\n#Type:logical, Default:TRUE, Range:NA, PossibleValues:NA, Remarks: NA\r\nshowInfo=TRUE\r\nif(exists(\"settings_additional_params_showInfo\"))\r\n  showInfo = settings_additional_params_showInfo\r\n\r\n##PBI_PARAM: Forecast length\r\n#Type:integer, Default:NULL, Range:NA, PossibleValues:NA, Remarks: NULL means choose forecast length automatically\r\nforecastLength=10\r\nif(exists(\"settings_forecastPlot_params_forecastLength\"))\r\n{\r\n  forecastLength = as.numeric(settings_forecastPlot_params_forecastLength)\r\n  if(is.na(forecastLength))\r\n    forecastLength = 10\r\n  forecastLength = round(max(min(forecastLength,12000),1))\r\n}\r\n\r\n##PBI_PARAM Error type\r\n#Type: string, Default:\"Automatic\", Range:NA, PossibleValues:\"Automatic\",\"Multiplicative\",\"Additive\"\r\nerrorType = \"Automatic\"\r\nif(exists(\"settings_forecastPlot_params_errorType\"))\r\n  errorType = settings_forecastPlot_params_errorType\r\n\r\n##PBI_PARAM Trend type\r\n#Type: string, Default:\"Automatic\", Range:NA, PossibleValues:\"Automatic\",\"Multiplicative\",\"Additive\",\"None\"\r\ntrendType = \"Automatic\"\r\nif(exists(\"settings_forecastPlot_params_trendType\"))\r\n  trendType = settings_forecastPlot_params_trendType\r\n\r\n##PBI_PARAM Season type\r\n#Type: string, Default:\"Automatic\", Range:NA, PossibleValues:\"Automatic\",\"Multiplicative\",\"Additive\",\"None\"\r\nseasonType = \"Automatic\"\r\nif(exists(\"settings_forecastPlot_params_seasonType\"))\r\n  seasonType = settings_forecastPlot_params_seasonType\r\n\r\n\r\n##PBI_PARAM target Season\r\n#Type: string, Default:\"Automatic\", Range:NA, PossibleValues:\"Automatic\",\"Hour\",\"Day\",\"Week\", ...\r\ntargetSeason = \"Automatic\"\r\nif(exists(\"settings_forecastPlot_params_targetSeason\"))\r\n  targetSeason = settings_forecastPlot_params_targetSeason\r\n\r\n\r\n\r\n##PBI_PARAM Confidence level band display\r\n#Type:logical, Default:TRUE, Range:NA, PossibleValues:NA, Remarks: NA\r\ndrawConfidenceLevels = TRUE\r\nif(exists(\"settings_conf_params_show\"))\r\n  drawConfidenceLevels = settings_conf_params_show\r\n\r\n##PBI_PARAM: Confidence level\r\n#Type:enum, Default:\"0.8\", Range:NA, PossibleValues:0, 0.5 etc, Remarks: NA\r\nconfInterval1 = 0.8\r\nif(exists(\"settings_conf_params_confInterval1\"))\r\n{\r\n  confInterval1 = as.numeric(settings_conf_params_confInterval1)\r\n}\r\n\r\n\r\n##PBI_PARAM: Confidence level\r\n#Type:enum, Default:\"0.95\", Range:NA, PossibleValues:0, 0.5 etc, Remarks: NA\r\nconfInterval2 = 0.95\r\nif(exists(\"ssettings_conf_params_confInterval2\"))\r\n{\r\n  confInterval2 = as.numeric(settings_conf_params_confInterval2)\r\n}\r\n\r\n\r\nif(confInterval1 > confInterval2)\r\n{#switch places\r\n  temp = confInterval1\r\n  confInterval1 = confInterval2\r\n  confInterval2 = temp\r\n}\r\n\r\nlowerConfInterval = confInterval1\r\nupperConfInterval = confInterval2\r\n\r\n\r\nif(drawConfidenceLevels==FALSE)\r\n  lowerConfInterval=upperConfInterval=0\r\n\r\n##PBI_PARAM Color of time series line\r\n#Type:string, Default:\"orange\", Range:NA, PossibleValues:\"orange\",\"blue\",\"green\",\"black\"\r\npointsCol = \"orange\"\r\nif(exists(\"settings_graph_params_dataCol\"))\r\n  pointsCol = settings_graph_params_dataCol\r\n\r\n##PBI_PARAM Color of forecast line\r\n#Type:string, Default:\"red\", Range:NA, PossibleValues:\"red\",\"blue\",\"green\",\"black\"\r\nforecastCol = \"red\"\r\nif(exists(\"settings_graph_params_forecastCol\"))\r\n  forecastCol = settings_graph_params_forecastCol\r\n\r\n#PBI_PARAM Transparency of scatterplot points\r\n#Type:numeric, Default:0.4, Range:[0,1], PossibleValues:NA, Remarks: NA\r\ntransparency = 1\r\nif(exists(\"settings_graph_params_percentile\"))\r\n  transparency = as.numeric(settings_graph_params_percentile)/100\r\n\r\n#PBI_PARAM damping\r\n#Type:logical, Default: NULL, Remarks: NULL selects damped or undamped trend depending on which fits better\r\ndamped = NULL\r\nif(exists(\"settings_forecastPlot_params_dampingType\"))\r\n{\r\n  damped = as.logical(settings_forecastPlot_params_dampingType)\r\n  if(is.na(damped))\r\n    damped=NULL\r\n}\r\n\r\n#PBI_PARAM Size of points on the plot\r\n#Type:numeric, Default: 1 , Range:[0.1,5], PossibleValues:NA, Remarks: NA\r\npointCex = 1\r\nif(exists(\"settings_graph_params_weight\"))\r\n  pointCex = as.numeric(max(1,settings_graph_params_weight))/10\r\n\r\n#PBI_PARAM Size of subtitle on the plot\r\n#Type:numeric, Default: 0.75 , Range:[0.1,5], PossibleValues:NA, Remarks: NA\r\ncexSub = 0.75\r\nif(exists(\"settings_additional_params_textSize\"))\r\n  cexSub = as.numeric(settings_additional_params_textSize)/12\r\n\r\n##PBI_PARAM: export out data to HTML?\r\n#Type:logical, Default:FALSE, Range:NA, PossibleValues:NA, Remarks: NA\r\nkeepOutData = FALSE\r\nif(exists(\"settings_export_params_show\"))\r\n  keepOutData = settings_export_params_show \r\n\r\n##PBI_PARAM: method of export interface\r\n#Type: string , Default:\"copy\",  Range:NA, PossibleValues:\"copy\", \"download\",  Remarks: NA\r\nexportMethod = \"copy\"\r\nif(exists(\"settings_export_params_method\"))\r\n  exportMethod = settings_export_params_method \r\n\r\n##PBI_PARAM: limit the out table exported\r\n#Type: string , Default:1000,  Range:NA, PossibleValues:\"1000\", \"10000\", Inf,  Remarks: NA\r\nlimitExportSize = 1000\r\nif(exists(\"settings_export_params_limitExportSize\"))\r\n  limitExportSize = as.numeric(settings_export_params_limitExportSize)\r\n\r\n###############Internal parameters definitions#################\r\n\r\n#PBI_PARAM Minimal number of points\r\n#Type:integer, Default:7, Range:[0,], PossibleValues:NA, Remarks: NA\r\nminPoints = 7\r\n\r\n#PBI_PARAM Shaded band for confidence interval\r\n#Type:logical, Default:TRUE, Range:NA, PossibleValues:NA, Remarks: NA\r\nfillConfidenceLevels=TRUE\r\n\r\n#PBI_PARAM Size of labels on axes\r\n#Type:numeric , Default:12, Range:NA, PossibleValues:[1,50], Remarks: NA\r\nsizeLabel = 12\r\n\r\n#PBI_PARAM Size of warnings font\r\n#Type:numeric , Default:cexSub*12, Range:NA, PossibleValues:[1,50], Remarks: NA\r\nsizeWarn = cexSub*12\r\n\r\n#PBI_PARAM Size of ticks on axes \r\nsizeTicks = 8\r\n\r\n#PBI_PARAM opacity of conf interval color\r\ntransparencyConfInterval = 0.3 \r\n\r\n###############Library Declarations###############\r\n\r\nlibraryRequireInstall = function(packageName, ...)\r\n{\r\n  if(!require(packageName, character.only = TRUE)) \r\n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\",sep=\"\"))\r\n}\r\n\r\n#ets\r\nlibraryRequireInstall(\"graphics\")\r\nlibraryRequireInstall(\"scales\")\r\nlibraryRequireInstall(\"forecast\")\r\nlibraryRequireInstall(\"zoo\")\r\n\r\nlibraryRequireInstall(\"ggplot2\")\r\n\r\n###############Internal functions definitions#################\r\n\r\n# tiny function to deal with verl long strings on plot\r\ncutStr2Show = function(strText, strCex = 0.8, abbrTo = 100, isH = TRUE, maxChar = 3, partAvailable = 1)\r\n{\r\n  # partAvailable, wich portion of window is available, in [0,1]\r\n  if(is.null(strText))\r\n    return (NULL)\r\n  \r\n  SCL = 0.075*strCex/0.8\r\n  pardin = par()$din\r\n  gStand = partAvailable*(isH*pardin[1]+(1-isH)*pardin[2]) /SCL\r\n  \r\n  # if very very long abbreviate\r\n  if(nchar(strText)>abbrTo && nchar(strText)> 1)\r\n    strText = abbreviate(strText, abbrTo)\r\n  \r\n  # if looooooong convert to lo...\r\n  if(nchar(strText)>round(gStand) && nchar(strText)> 1)\r\n    strText = paste(substring(strText,1,floor(gStand)),\"...\",sep=\"\")\r\n  \r\n  # if shorter than maxChar remove \r\n  if(gStand<=maxChar)\r\n    strText = NULL\r\n  \r\n  return(strText) \r\n}\r\n\r\n\r\n# verify if \"perSeason\" is good for \"frequency\" parameter\r\nfreqSeason = function(seasons,perSeason)\r\n{\r\n  if((seasons > 5 && perSeason > 3) || (seasons>2 && perSeason > 7))\r\n    return (perSeason)\r\n  \r\n  return(1)\r\n}\r\n\r\n# find frequency using the dates, targetS is a \"recommended\" seasonality \r\nfindFreq = function(dates, targetS = \"Automatic\")\r\n{\r\n  freq = 1\r\n  N = length(dates)\r\n  nnn = c(\"Minute\",\"Hour\", \"Day\", \"Week\", \"Month\", \"Quarter\", \"Year\")\r\n  seasons = rep(NaN,7)\r\n  names(seasons) = nnn\r\n  perSeason = seasons\r\n  \r\n  seasons[\"Day\"]=round(as.numeric(difftime(dates[length(dates)],dates[1]),units=\"days\"))\r\n  seasons[\"Hour\"]=round(as.numeric(difftime(dates[length(dates)],dates[1]),units=\"hours\"))\r\n  seasons[\"Minute\"]=round(as.numeric(difftime(dates[length(dates)],dates[1]),units=\"mins\"))\r\n  seasons[\"Week\"]=round(as.numeric(difftime(dates[length(dates)],dates[1]),units=\"weeks\"))\r\n  seasons[\"Month\"] = seasons[\"Day\"]/30\r\n  seasons[\"Year\"] = seasons[\"Day\"]/365.25\r\n  seasons[\"Quarter\"] = seasons[\"Year\"]*4\r\n  \r\n  perSeason = N/seasons\r\n  \r\n  if(targetS!=\"Automatic\") # target \r\n    freq = perSeason[targetS]\r\n  \r\n  if(freq < 2 || round(freq)>24) # if TRUE, target season factor is not good \r\n    freq = 1\r\n  \r\n  for( s in rev(nnn)) # check year --> Quarter --> etc\r\n    if(freq==1 || round(freq)>24)\r\n      freq = freqSeason(seasons[s],perSeason[s])\r\n  \r\n  \r\n  if(round(freq)>24) # limit of exp smoothing R implementation\r\n    freq = 1\r\n  \r\n  return(freq)\r\n}\r\n\r\n# Find number of ticks on X axis \r\nFindTicksNum = function(n,f, flag_ggplot = TRUE)\r\n{\r\n  factorGG = (if(flag_ggplot) 0.525 else 1)\r\n  \r\n  tn = 10* factorGG # default minimum\r\n  mtn = 20 * factorGG # default max\r\n  \r\n  D = 2 # tick/inch\r\n  numCircles = n/f\r\n  xSize = par()$din[1]\r\n  tn = min(max(round(xSize*D*factorGG),tn),mtn)\r\n  return(tn) \r\n}\r\n\r\n#format labels on X-axis automatically \r\nflexFormat = function(dates, orig_dates, freq = 1, myformat = NULL)\r\n{\r\n  \r\n  days=(as.numeric(difftime(dates[length(dates)],dates[1]),units=\"days\"))\r\n  months = days/30\r\n  years = days/365.25\r\n  \r\n  \r\n  constHour = length(unique(orig_dates$hour))==1\r\n  constMin = length(unique(orig_dates$min))==1\r\n  constSec = length(unique(orig_dates$sec))==1\r\n  constMon = length(unique(orig_dates$mon))==1\r\n  \r\n  timeChange = any(!constHour,!constMin,!constSec)\r\n  \r\n  if(is.null(myformat))\r\n  {\r\n    if(years > 10){\r\n      if(constMon)\r\n      {\r\n        myformat = \"%Y\" #many years => only year :2001\r\n      }else{\r\n        myformat = \"%m/%y\" #many years + months :12/01\r\n      }\r\n    }else{\r\n      if(years > 1 && N < 50){\r\n        myformat = \"%b %d, %Y\" #several years, few samples:Jan 01, 2010\r\n      }else{\r\n        if(years > 1){\r\n          myformat = \"%m/%d/%y\" #several years, many samples: 01/20/10\r\n        }else{\r\n          if(years <= 1 && !timeChange)\r\n            myformat = \"%b %d\" #1 year,no time: Jan 01\r\n        }  \r\n      }\r\n    }\r\n  }\r\n  if(is.null(myformat) && timeChange)\r\n    if(years>1){\r\n      myformat = \"%m/%d/%y %H:%M\" # 01/20/10 12:00\r\n    }else{\r\n      if(days>1){\r\n        myformat = \"%b %d, %H:%M\" # Jan 01 12:00\r\n      }else{\r\n        if(days<=1){\r\n          myformat = \"%H:%M\" # Jan 01 12:00\r\n        }  \r\n      }\r\n    }\r\n  if(!is.null(myformat)){\r\n    if(myformat == \"%Y,Q%q\")\r\n      dates = as.yearqtr(dates)\r\n    dates1= format(dates,  myformat)\r\n  }else{\r\n    dates1 = as.character(1:length(dates)) # just id \r\n  }\r\n  return(dates1)\r\n}\r\n\r\n\r\ngetAngleXlabels = function(mylabels)\r\n{\r\n  NL = length(mylabels)\r\n  NC = nchar(mylabels[1])*1.1\r\n  \r\n  lenPerTick = par()$din[1]/(NL*NC)\r\n  \r\n  #lot of space -> 0 \r\n  if(lenPerTick > 0.15)\r\n    return(0)\r\n  \r\n  # no space --> -90\r\n  if(lenPerTick < 0.070)\r\n    return(90)\r\n  \r\n  # few space --> - 45\r\n  return(45)\r\n  \r\n}\r\n\r\nConvertDF64encoding = function (df, withoutEncoding = FALSE)\r\n{\r\n  header_row <- paste(names(df), collapse=\", \")\r\n  tab <- apply(df, 1, function(x)paste(x, collapse=\", \"))\r\n  \r\n  if(withoutEncoding){\r\n    text <- paste(c(header_row, tab), collapse=\"\\n\")\r\n    x <- text\r\n  }\r\n  else\r\n  {\r\n    text <- paste(c(header_row, tab), collapse=\"\\n\")\r\n    x <- caTools::base64encode(text)\r\n  }\r\n  return(x)\r\n}\r\n\r\n\r\nKeepOutDataInHTML = function(df, htmlFile = 'out.html', exportMethod = \"copy\", limitExportSize = 1000)\r\n{\r\n  if(nrow(df)>limitExportSize)\r\n    df = df[1:limitExportSize,]\r\n  \r\n  outDataString64 = ConvertDF64encoding(df)\r\n  \r\n  linkElem = '\\n<a href=\"\"  download=\"data.csv\"  style=\"position: absolute; top:0px; left: 0px; z-index: 20000;\" id = \"mydataURL\">export</a>\\n'\r\n  updateLinkElem = paste('<script>\\n link_element = document.getElementById(\"mydataURL\");link_element.href = outDataString64href;', '\\n</script> ', sep =' ')\r\n  var64 = paste('<script> outDataString64 =\"', outDataString64, '\"; </script>', sep =\"\")\r\n  var64href = paste('<script> outDataString64href =\"data:;base64,', outDataString64, '\"; </script>', sep =\"\")\r\n  \r\n  buttonElem = '<button style=\"position: absolute; top:0px; left: 0px; z-index: 20000;\"  onclick=\"myFunctionCopy(1)\">copy to clipboard</button>'\r\n  funcScript = '<script> \r\n  function myFunctionCopy(is64) \r\n  {\r\n  const el = document.createElement(\"textarea\");\r\n  if(is64)\r\n  {\r\n  el.value = atob(outDataString64);\r\n  }\r\n  else\r\n  {\r\n  el.value = outDataStringPlane;\r\n  }\r\n  document.body.appendChild(el);\r\n  el.select();\r\n  document.execCommand(\"copy\");\r\n  document.body.removeChild(el);};\t\r\n  </script>'\r\n  \r\n  if(exportMethod == \"copy\")\r\n    endOfBody = paste(var64,funcScript, buttonElem,'\\n</body>',sep =\"\")\r\n  else#\"download\"\r\n    endOfBody = paste(linkElem,var64, var64href,updateLinkElem,'\\n</body>',sep =\"\")\r\n  \r\n  ReadFullFileReplaceString('out.html', 'out.html', '</body>', endOfBody)\r\n  \r\n}\r\n\r\n\r\n\r\n###############Upfront input correctness validations (where possible)#################\r\n\r\npbiWarning = NULL\r\n\r\nif(!exists(\"Date\") || !exists(\"Value\"))\r\n{\r\n  dataset=data.frame()\r\n  pbiWarning  = cutStr2Show(\"Both 'Date' and 'Value' fields are required.\", strCex = 1.55)\r\n  timeSeries=ts()\r\n  showWarnings=TRUE\r\n}else{\r\n  dataset= cbind(Date,Value)\r\n  dataset<-dataset[complete.cases(dataset),] #remove corrupted rows\r\n  labTime = \"Time\"\r\n  labValue=names(dataset)[ncol(dataset)]\r\n  \r\n  \r\n  \r\n  N=nrow(dataset)\r\n  \r\n  if(N==0 && exists(\"Date\") && nrow(Date)>0 &&  exists(\"Value\")){\r\n    pbiWarning1  = cutStr2Show(\"Wrong date type.\", strCex = sizeWarn/6, partAvailable = 0.85)\r\n    pbiWarning2 = cutStr2Show(\"Only 'Date', 'Time', 'Date/Time' are allowed without hierarchy. \", strCex = sizeWarn/6, partAvailable = 0.85)\r\n    pbiWarning = paste(pbiWarning1, pbiWarning2, pbiWarning, sep =\"<br>\")\r\n    timeSeries=ts()\r\n    showWarnings=TRUE\r\n  }else {\r\n    if(N < minPoints)\r\n    {\r\n      timeSeries=ts()\r\n      showWarnings=TRUE\r\n    }\r\n    else\r\n      \r\n    { dataset = dataset[order(dataset[,1]),]\r\n    parsed_dates=strptime(dataset[,1],\"%Y-%m-%dT%H:%M:%S\",tz=\"UTC\")\r\n    labTime = names(Date)[1]\r\n    \r\n    if((any(is.na(parsed_dates))))\r\n    {\r\n      pbiWarning1  = cutStr2Show(\"Wrong or corrupted 'Date'.\", strCex = sizeWarn/6, partAvailable = 0.85)\r\n      pbiWarning2  = cutStr2Show(\"Only 'Date', 'Time', 'Date/Time' types are allowed without hierarchy\", strCex = sizeWarn/6, partAvailable = 0.85)\r\n      pbiWarning = paste(pbiWarning1, pbiWarning2, pbiWarning, sep =\"<br>\")\r\n      timeSeries=ts()\r\n      showWarnings=TRUE\r\n    }\r\n    else\r\n    {\r\n      \r\n      interval = difftime(parsed_dates[length(parsed_dates)],parsed_dates[1])/(length(parsed_dates)-1) # force equal spacing \r\n      myFreq = findFreq(parsed_dates, targetS = targetSeason)\r\n      timeSeries=ts(data = dataset[,2], start=1, frequency = round(myFreq))\r\n    }\r\n    }\r\n  }\r\n}\r\n##############Main Visualization script###########\r\n\r\npbiInfo = NULL\r\n\r\n\r\nif(length(timeSeries)>=minPoints) {\r\n  \r\n  ets_params = list(Automatic=\"Z\",Multiplicative=\"M\",Additive=\"A\",None=\"N\")\r\n  if(frequency(timeSeries) == 1)\r\n    seasonType = \"None\"\r\n  deModel = paste(ets_params[[errorType]],ets_params[[trendType]],ets_params[[seasonType]],sep=\"\")\r\n  \r\n  if(sum(deModel==c(\"ANM\",\"ZMA\",\"MMA\",\"AZM\",\"AMZ\",\"AMM\",\"AMA\",\"AMN\",\"AAM\")))# Forbidden model combination \r\n    deModel = \"ZZZ\"\r\n  \r\n  fit = ets(timeSeries, model=deModel,damped=damped)\r\n  \r\n  if (is.null(forecastLength))\r\n    prediction = forecast(fit, level=c(lowerConfInterval,upperConfInterval))\r\n  else\r\n    prediction = forecast(fit, level=c(lowerConfInterval,upperConfInterval), h=forecastLength)\r\n  \r\n  lastValue = tail(prediction$x,1)\r\n  \r\n  prediction$mean=ts(c(lastValue,prediction$mean), \r\n                     frequency = frequency(prediction$mean), \r\n                     end=end(prediction$mean))\r\n  \r\n  prediction$upper=ts(rbind(c(lastValue,lastValue),prediction$upper), \r\n                      frequency = frequency(prediction$upper), \r\n                      end=end(prediction$upper))\r\n  \r\n  prediction$lower=ts(rbind(c(lastValue,lastValue),prediction$lower), \r\n                      frequency = frequency(prediction$lower), \r\n                      end=end(prediction$lower))\r\n  \r\n  \r\n  \r\n  if(showInfo)\r\n  {\r\n    pbiInfo=paste(pbiInfo,\"Forecasts from \", fit$method, sep=\"\")\r\n    pbiInfo= cutStr2Show(pbiInfo, strCex = 2.0, isH = TRUE, partAvailable = 0.8)\r\n  }\r\n  \r\n  labTime = cutStr2Show(labTime, strCex = sizeLabel/6, isH = TRUE, partAvailable = 0.8)\r\n  labValue = cutStr2Show(labValue, strCex = sizeLabel/6, isH = FALSE, partAvailable = 0.8)\r\n  \r\n  \r\n  \r\n  NpF = (length(parsed_dates))+forecastLength\r\n  freq = frequency(timeSeries)\r\n  \r\n  #format  x_with_f\r\n  numTicks = FindTicksNum(NpF,freq) # find based on plot size\r\n  \r\n  x_with_f = as.POSIXlt(seq(from=parsed_dates[1], to = (parsed_dates[1]+interval*(length(parsed_dates)+forecastLength-1)), length.out = numTicks))\r\n  x_with_forcast_formatted = flexFormat(dates = x_with_f, orig_dates = parsed_dates, freq = freq)\r\n  \r\n  x_full = as.POSIXlt(seq(from=parsed_dates[1], to = tail(parsed_dates,1), length.out = length(parsed_dates)))\r\n  f_full = as.POSIXlt(seq(from=tail(parsed_dates,1), to = (tail(parsed_dates,1)+interval*(forecastLength)), length.out = forecastLength+1))\r\n  \r\n  correction = (NpF-1)/(numTicks-1) # needed due to subsampling of ticks\r\n  if(!showWarnings)\r\n  {\r\n    #historical data\r\n    x1 = seq(1,length(prediction$x))\r\n    y1 = as.numeric(prediction$x)\r\n    \r\n    p1a<-ggplot(data=NULL,aes(x=x1,y=y1) )\r\n    p1a<-p1a+geom_line(col=alpha(pointsCol,transparency), lwd = pointCex)\r\n    \r\n    #forecast\r\n    x2 = seq(length(prediction$x),length.out = length(prediction$mean))\r\n    y2 = as.numeric(prediction$mean)\r\n    \r\n    \r\n    p1a <- p1a + geom_line(inherit.aes = FALSE ,data = NULL, mapping = aes(x = x2, y = y2), col=alpha(forecastCol,transparency), lwd = pointCex)\r\n    \r\n    if(upperConfInterval>0.01)\r\n    {\r\n      lower1 = as.numeric(prediction$lower[,1])\r\n      upper1 = as.numeric(prediction$upper[,1])\r\n      lower2 = as.numeric(prediction$lower[,2])\r\n      upper2 = as.numeric(prediction$upper[,2])\r\n      id = x2\r\n      \r\n      names(lower1) = names(lower2) = names(upper1)= names(upper2) = names(f_full) = id   \r\n      cf_full = as.character(f_full)\r\n      \r\n      p1a <- p1a + geom_ribbon( inherit.aes = FALSE , mapping = aes(x = id, ymin = lower1 , ymax = upper1), fill = \"blue4\", alpha = 0.25)\r\n      p1a <- p1a + geom_ribbon( inherit.aes = FALSE , mapping = aes(x = id, ymin = lower2, ymax = upper2), fill = \"gray50\", alpha = 0.25)\r\n      \r\n    }\r\n    p1a <- p1a + labs (title = pbiInfo, caption = NULL) + theme_bw() \r\n    p1a <- p1a + xlab(labTime) + ylab(labValue) \r\n    p1a <- p1a + scale_x_continuous(breaks = seq(1,length(prediction$x) + length(prediction$mean)-1, length.out = numTicks), labels = x_with_forcast_formatted) \r\n    p1a <- p1a +  theme(axis.text.x  = element_text(angle = getAngleXlabels(x_with_forcast_formatted), \r\n                                                    hjust=1, size = sizeTicks, colour = \"gray60\"),\r\n                        axis.text.y  = element_text(vjust = 0.5, size = sizeTicks, colour = \"gray60\"),\r\n                        plot.title  = element_text(hjust = 0.5, size = sizeWarn), \r\n                        axis.title=element_text(size =  sizeLabel),\r\n                        axis.text=element_text(size =  sizeTicks),\r\n                        panel.border = element_blank()) \r\n  } \r\n} else{ #empty plot\r\n  showWarnings = TRUE\r\n  pbiWarning1  = cutStr2Show(\"Not enough data points\", strCex = sizeWarn/6, partAvailable = 0.85)\r\n  pbiWarning<-paste(pbiWarning, pbiWarning1 , sep=\"<br>\")\r\n}\r\n\r\n#add warning as subtitle\r\nif(showWarnings && !is.null(pbiWarning))\r\n{\r\n  p1a = ggplot() + labs (title = pbiWarning, caption = NULL) + theme_bw() +\r\n    theme(plot.title  = element_text(hjust = 0.5, size = sizeWarn), \r\n          axis.title=element_text(size =  sizeLabel),\r\n          axis.text=element_text(size =  sizeTicks),\r\n          panel.border = element_blank())\r\n  ggp <- plotly_build(p1a)\r\n}else{\r\n  \r\n  # massage some plot atributes to make transition from ggplot to plotly smooth \r\n  ggp <- plotly_build(p1a)\r\n  ggp$x$data[[1]]$text = paste(labTime, \": \", x_full, \"<br>\", labValue, \": \", round(y1,2) , sep =\"\" ) \r\n  ggp$x$data[[2]]$text = paste(labTime, \": \", f_full, \"<br>\", labValue, \": \", round(y2,2) , sep =\"\" ) \r\n  \r\n  if(length(ggp$x$data)>=3)\r\n  {\r\n    iii =  as.character(ggp$x$data[[3]]$x)\r\n    ggp$x$data[[3]]$text = paste(labTime, \": \", cf_full[iii], \"<br> lower: \", lower1[iii],\"<br> upper: \", upper1[iii], sep =\"\" ) \r\n  }\r\n  \r\n  if(length(ggp$x$data)>=4)\r\n  {\r\n    iii =  as.character(ggp$x$data[[4]]$x)\r\n    ggp$x$data[[4]]$text = paste(labTime, \": \", cf_full[iii], \"<br> lower: \", lower2[iii],\"<br> upper: \", upper2[iii], sep =\"\" ) \r\n  }\r\n  \r\n  \r\n  \r\n  ggp$x$layout$margin$l = ggp$x$layout$margin$l+10\r\n  #ggp$x$layout$margin$r = 0\r\n  if(ggp$x$layout$xaxis$tickangle < -40)\r\n    ggp$x$layout$margin$b = ggp$x$layout$margin$b+40\r\n  \r\n}\r\n\r\n\r\n############# Create and save widget ###############\r\n\r\np <- ggp\r\n\r\ndisabledButtonsList <- list('toImage', 'sendDataToCloud', 'zoom2d', 'pan', 'pan2d', 'select2d', 'lasso2d', 'hoverClosestCartesian', 'hoverCompareCartesian')\r\np$x$config$modeBarButtonsToRemove = disabledButtonsList\r\n\r\np <- config(p, staticPlot = FALSE, editable = FALSE, sendData = FALSE, showLink = FALSE,\r\n            displaylogo = FALSE,  collaborate = FALSE, cloud=FALSE)\r\n\r\ninternalSaveWidget(p, 'out.html')\r\n\r\n# resolve bug in plotly (margin of 40 px)\r\nReadFullFileReplaceString('out.html', 'out.html', ',\"padding\":40,', ',\"padding\":0,')\r\n\r\nif(keepOutData)\r\n{\r\n  padNA1 = rep(NA,length(x_full))\r\n  padNA2 = rep(NA,length(f_full))\r\n  if(!exists(\"lower1\"))\r\n    lower1 = lower2 = upper1 = upper2 = padNA2;\r\n\r\n  \r\n  lower1 = c(padNA1,lower1)\r\n  lower2 = c(padNA1,lower2)\r\n  upper1 = c(padNA1,upper1)\r\n  upper2 = c(padNA1,upper2)\r\n  \r\n  exportDF = data.frame(Date = as.character(c(x_full,f_full)),Value = c(y1,y2),\r\n                        lower1 = lower1,\r\n                        lower2 = lower2,\r\n                        upper1 = upper1,\r\n                        upper2 = upper2)\r\n  colnames(exportDF)[c(1,2)] = c(labTime,labValue)\r\n  \r\n  KeepOutDataInHTML(df = exportDF, htmlFile = 'out.html', exportMethod = exportMethod, limitExportSize = limitExportSize)\r\n}\r\n"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "settings_forecastPlot_params": {
+                "displayName": "Forecasting settings",
+                "description": "Basic decomposition models are:  1. Additive: x[t] = Trend + Seasonal + Remainder, 2. Multiplicative:  x[t] = Trend * Seasonal * Remainder. Hybrid models are allowed. Any forbiden model combination will be replaced by `Automatic`",
+                "properties": {
+                    "forecastLength": {
+                        "displayName": "Forecast length",
+                        "description": "Number of data points to predict",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "errorType": {
+                        "displayName": "Remainder component",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "value": "Automatic"
+                                },
+                                {
+                                    "displayName": "Multiplicative",
+                                    "value": "Multiplicative"
+                                },
+                                {
+                                    "displayName": "Additive",
+                                    "value": "Additive"
+                                }
+                            ]
+                        }
+                    },
+                    "trendType": {
+                        "displayName": "Trend component",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "value": "Automatic"
+                                },
+                                {
+                                    "displayName": "Multiplicative",
+                                    "value": "Multiplicative"
+                                },
+                                {
+                                    "displayName": "Additive",
+                                    "value": "Additive"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "None"
+                                }
+                            ]
+                        }
+                    },
+                    "seasonType": {
+                        "displayName": "Seasonal component",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "value": "Automatic"
+                                },
+                                {
+                                    "displayName": "Multiplicative",
+                                    "value": "Multiplicative"
+                                },
+                                {
+                                    "displayName": "Additive",
+                                    "value": "Additive"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "None"
+                                }
+                            ]
+                        }
+                    },
+                    "dampingType": {
+                        "displayName": "Trend with damping",
+                        "description": "Add a parameter that dampens the trend to a flat line at some point in the future",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "value": "Automatic"
+                                },
+                                {
+                                    "displayName": "TRUE",
+                                    "value": "TRUE"
+                                },
+                                {
+                                    "displayName": "FALSE",
+                                    "value": "FALSE"
+                                }
+                            ]
+                        }
+                    },
+                    "targetSeason": {
+                        "displayName": "Target seasonal factor",
+                        "description": "Specify, if time series is influenced by known seasonal factors. The the number of observations per season is limited by 24. Non compatible seasonality will be ignored",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "value": "Automatic"
+                                },
+                                {
+                                    "displayName": "Hour",
+                                    "value": "Hour"
+                                },
+                                {
+                                    "displayName": "Day",
+                                    "value": "Day"
+                                },
+                                {
+                                    "displayName": "Week",
+                                    "value": "Week"
+                                },
+                                {
+                                    "displayName": "Month",
+                                    "value": "Month"
+                                },
+                                {
+                                    "displayName": "Quarter",
+                                    "value": "Quarter"
+                                },
+                                {
+                                    "displayName": "Year",
+                                    "value": "Year"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "settings_conf_params": {
+                "displayName": "Confidence intervals",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "confInterval1": {
+                        "displayName": "Confidence level",
+                        "description": "Select first confidence interval",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "0",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "0.2",
+                                    "value": "0.2"
+                                },
+                                {
+                                    "displayName": "0.4",
+                                    "value": "0.4"
+                                },
+                                {
+                                    "displayName": "0.5",
+                                    "value": "0.5"
+                                },
+                                {
+                                    "displayName": "0.75",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "displayName": "0.8",
+                                    "value": "0.8"
+                                },
+                                {
+                                    "displayName": "0.9",
+                                    "value": "0.9"
+                                },
+                                {
+                                    "displayName": "0.95",
+                                    "value": "0.95"
+                                },
+                                {
+                                    "displayName": "0.975",
+                                    "value": "0.975"
+                                },
+                                {
+                                    "displayName": "0.98",
+                                    "value": "0.98"
+                                },
+                                {
+                                    "displayName": "0.99",
+                                    "value": "0.99"
+                                },
+                                {
+                                    "displayName": "0.995",
+                                    "value": "0.995"
+                                },
+                                {
+                                    "displayName": "0.999",
+                                    "value": "0.999"
+                                }
+                            ]
+                        }
+                    },
+                    "confInterval2": {
+                        "displayName": "Confidence level #2",
+                        "description": "Select additional confidence interval",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "0",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "0.2",
+                                    "value": "0.2"
+                                },
+                                {
+                                    "displayName": "0.4",
+                                    "value": "0.4"
+                                },
+                                {
+                                    "displayName": "0.5",
+                                    "value": "0.5"
+                                },
+                                {
+                                    "displayName": "0.75",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "displayName": "0.8",
+                                    "value": "0.8"
+                                },
+                                {
+                                    "displayName": "0.9",
+                                    "value": "0.9"
+                                },
+                                {
+                                    "displayName": "0.95",
+                                    "value": "0.95"
+                                },
+                                {
+                                    "displayName": "0.975",
+                                    "value": "0.975"
+                                },
+                                {
+                                    "displayName": "0.98",
+                                    "value": "0.98"
+                                },
+                                {
+                                    "displayName": "0.99",
+                                    "value": "0.99"
+                                },
+                                {
+                                    "displayName": "0.995",
+                                    "value": "0.995"
+                                },
+                                {
+                                    "displayName": "0.999",
+                                    "value": "0.999"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "settings_graph_params": {
+                "displayName": "Graphical parameters",
+                "properties": {
+                    "dataCol": {
+                        "displayName": "History data color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "forecastCol": {
+                        "displayName": "Forecast data color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "percentile": {
+                        "displayName": "Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "weight": {
+                        "displayName": "Line width",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "settings_additional_params": {
+                "displayName": "Additional parameters",
+                "properties": {
+                    "showInfo": {
+                        "displayName": "Show info",
+                        "description": "Display information about the selected model: (A)dditive, (M)ultiplicative, or (N)one",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Font size",
+                        "description": "Font size used to show information",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "settings_export_params": {
+                "displayName": "Export data",
+                "description": "Export result of clustering",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "limitExportSize": {
+                        "displayName": "Maximum exported rows",
+                        "description": "Limit number of rows",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "1000",
+                                    "value": "1000"
+                                },
+                                {
+                                    "displayName": "10000",
+                                    "value": "10000"
+                                },
+                                {
+                                    "displayName": "50000",
+                                    "value": "50000"
+                                },
+                                {
+                                    "displayName": "unlimited",
+                                    "value": "100000"
+                                }
+                            ]
+                        }
+                    },
+                    "method": {
+                        "displayName": "Method",
+                        "description": "Method",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "copy to clipboard",
+                                    "value": "copy"
+                                },
+                                {
+                                    "displayName": "download (only service)",
+                                    "value": "download"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "zoo",
+                "displayName": "zoo: S3 Infrastructure for Regular and Irregular Time Series",
+                "url": "https://cran.r-project.org/web/packages/zoo/index.html"
+            },
+            {
+                "name": "scales",
+                "displayName": "scales: Scale Functions for Visualization",
+                "url": "https://cran.r-project.org/web/packages/scales/index.html"
+            },
+            {
+                "name": "reshape2",
+                "displayName": "reshape2: Flexibly Reshape Data: A Reboot of the Reshape Package",
+                "url": "https://cran.r-project.org/web/packages/reshape2/index.html"
+            },
+            {
+                "name": "forecast",
+                "displayName": "forecast: Forecasting Functions for Time Series and Linear Models",
+                "url": "https://cran.r-project.org/web/packages/forecast/index.html"
+            },
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "XML",
+                "displayName": "XML",
+                "url": "https://cran.r-project.org/web/packages/XML/index.html"
+            },
+            {
+                "name": "caTools",
+                "displayName": "caTools",
+                "url": "https://cran.r-project.org/web/packages/caTools/index.html"
+            }
+        ]
+    },
+    "stringResources": {}
+}

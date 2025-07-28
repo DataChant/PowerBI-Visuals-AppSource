@@ -458,6 +458,7 @@ def extract_new_visual(filename: str) -> str:
     
     if json_path:
         extract_and_save(json_path, unzip_folder)
+        os.remove(json_path)  # Remove the pbiviz.json file after extraction
 
     return unzip_folder
 

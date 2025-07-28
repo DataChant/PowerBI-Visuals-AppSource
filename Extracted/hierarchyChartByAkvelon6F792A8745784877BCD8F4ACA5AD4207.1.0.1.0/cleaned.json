@@ -1,0 +1,397 @@
+{
+    "visual": {
+        "name": "HierarchyChart",
+        "displayName": "Hierarchy Chart by Akvelon",
+        "guid": "hierarchyChartByAkvelon6F792A8745784877BCD8F4ACA5AD4207",
+        "visualClassName": "HierarchyChartByAkvelon",
+        "version": "1.0.1",
+        "description": "Show any type of hierarchal data in a tree format such as organization trees, family trees, and more.",
+        "supportUrl": "http://akvelon.com/feedback",
+        "gitHubUrl": "https://github.com/akvelon/PowerBI-Hierarchy-Chart"
+    },
+    "apiVersion": "1.7.0",
+    "author": {
+        "name": "Akvelon Inc",
+        "email": "pbisupport@akvelon.com"
+    },
+    "assets": {
+        "icon": "assets/icon_2.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-colorutils/lib/index.js",
+        "node_modules/d3/d3.min.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "supportsHighlight": true,
+        "dataRoles": [
+            {
+                "displayName": "Id",
+                "name": "category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Title",
+                "name": "title",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Subtitle",
+                "name": "position",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Parent",
+                "name": "reportTo",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Type",
+                "name": "team",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Values",
+                "name": "values",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltip",
+                "name": "tooltip",
+                "kind": "Grouping"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "title": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "position": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "reportTo": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "team": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "values": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "tooltip": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "category"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "title"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "position"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "reportTo"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "team"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "values"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltip"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "levels": {
+                "displayName": "Levels",
+                "displayNameKey": "Visual_Levels",
+                "properties": {
+                    "controls": {
+                        "displayName": "Controls",
+                        "displayNameKey": "Visual_Controls",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isMaxDepth": {
+                        "displayName": "Depth Control",
+                        "displayNameKey": "Visual_Is_Max_Depth",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "maxDepth": {
+                        "displayName": "Max Depth",
+                        "displayNameKey": "Visual_Max_Depth",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "teams": {
+                "displayName": "Type Colors",
+                "properties": {
+                    "fill": {
+                        "displayName": "Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "nodes": {
+                "displayName": "Nodes",
+                "displayNameKey": "Visual_Nodes",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "displayNameKey": "Visual_Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayHeightAndWidth": {
+                        "displayName": "Display height and width",
+                        "displayNameKey": "Visual_Display_Height_And_Width",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "height": {
+                        "displayName": "Height",
+                        "displayNameKey": "Visual_Nodes_Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "width": {
+                        "displayName": "Width",
+                        "displayNameKey": "Visual_Nodes_Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Title size",
+                        "displayNameKey": "Visual_Title_Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontSubtitleSize": {
+                        "displayName": "Subtitle size",
+                        "displayNameKey": "Visual_Subtitle_Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "colorName": {
+                        "displayName": "Font color",
+                        "displayNameKey": "Visual_Color_Name",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "distanceBetweenTitleAndSubtitle": {
+                        "displayName": "Distance between Title and Subtitle",
+                        "displayNameKey": "Visual_Distance",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "shape": {
+                        "displayName": "Shape type",
+                        "displayNameKey": "Visual_Shape_Type",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "displayNameKey": "Visual_Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "displayNameKey": "Visual_Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "displayNameKey": "Visual_Legend_Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayNameKey": "Visual_Top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayNameKey": "Visual_Bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayNameKey": "Visual_Auto",
+                                    "displayName": "Auto"
+                                }
+                            ]
+                        }
+                    },
+                    "showLegend": {
+                        "displayName": "Title",
+                        "displayNameKey": "Visual_Show_Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleLegend": {
+                        "displayName": "Legend Name",
+                        "displayNameKey": "Visual_Title_Legend",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorLegend": {
+                        "displayName": "Color",
+                        "displayNameKey": "Visual_Color_Legend",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "displayNameKey": "Visual_Font_Legend_Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "links": {
+                "displayName": "Links",
+                "displayNameKey": "Visual_Links",
+                "properties": {
+                    "color": {
+                        "displayName": "Links Color",
+                        "displayNameKey": "Visual_Links_Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "warning": {
+                "displayName": "Warning",
+                "displayNameKey": "Visual_warning",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "displayNameKey": "Visual_Show",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "displayName": "Tooltip",
+                "displayNameKey": "Visual_tooltip",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "displayNameKey": "Visual_Show",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "wrap": {
+                "displayName": "Wrap Option",
+                "displayNameKey": "Visual_wrap",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "displayNameKey": "Visual_Show",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "stringResources": {}
+}

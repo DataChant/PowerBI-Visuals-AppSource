@@ -1,0 +1,575 @@
+{
+    "visual": {
+        "name": "KPI Chart by Akvelon",
+        "displayName": "KPI Chart by Akvelon",
+        "guid": "kPI0A9FD39FD55944609DA4A968BE175489",
+        "visualClassName": "Visual",
+        "version": "1.1.0",
+        "description": "This custom visual combines both line and column chart within the same visualization along with KPI ranges that can be set static or dynamic.",
+        "supportUrl": "http://akvelon.com/feedback/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "1.6.0",
+    "author": {
+        "name": "Akvelon",
+        "email": "pbisupport@akvelon.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-colorutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/lodash/lodash.min.js",
+        "node_modules/nvd3/build/nv.d3.min.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "XAxis",
+                "name": "axis",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Legend",
+                "name": "legend",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Line values",
+                "name": "lineValues",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Column values",
+                "name": "columnValues",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 1 Min values",
+                "name": "region1ValuesMin",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 1 Max values",
+                "name": "region1ValuesMax",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 2 Min values",
+                "name": "region2ValuesMin",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 2 Max values",
+                "name": "region2ValuesMax",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 3 Min values",
+                "name": "region3ValuesMin",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 3 Max values",
+                "name": "region3ValuesMax",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 4 Min values",
+                "name": "region4ValuesMin",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 4 Max values",
+                "name": "region4ValuesMax",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 5 Min values",
+                "name": "region5ValuesMin",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Region 5 Max values",
+                "name": "region5ValuesMax",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltipValue",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "axis": {
+                            "max": 1
+                        },
+                        "legend": {
+                            "max": 1
+                        },
+                        "lineValues": {
+                            "max": 1
+                        },
+                        "columnValues": {
+                            "max": 1
+                        },
+                        "region1ValuesMin": {
+                            "max": 1
+                        },
+                        "region1ValuesMax": {
+                            "max": 1
+                        },
+                        "region2ValuesMin": {
+                            "max": 1
+                        },
+                        "region2ValuesMax": {
+                            "max": 1
+                        },
+                        "region3ValuesMin": {
+                            "max": 1
+                        },
+                        "region3ValuesMax": {
+                            "max": 1
+                        },
+                        "region4ValuesMin": {
+                            "max": 1
+                        },
+                        "region4ValuesMax": {
+                            "max": 1
+                        },
+                        "region5ValuesMin": {
+                            "max": 1
+                        },
+                        "region5ValuesMax": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "axis"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltipValue"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "legend",
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "tooltipValue"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "lineValues"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "columnValues"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region1ValuesMin"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region1ValuesMax"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region2ValuesMin"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region2ValuesMax"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region3ValuesMin"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region3ValuesMax"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region4ValuesMin"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region4ValuesMax"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region5ValuesMin"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "region5ValuesMax"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 1000
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "linesSettings": {
+                "displayName": "Lines",
+                "properties": {
+                    "linesWidth": {
+                        "displayName": "Width of lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineType": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid line",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dotted line",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayName": "Dashed line",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dash-dot line",
+                                    "value": "dash-dot"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "columnsSettings": {
+                "displayName": "Columns",
+                "properties": {
+                    "columnsWidth": {
+                        "displayName": "Width of columns (in %)",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "columnsColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "axisesSettings": {
+                "displayName": "Axes",
+                "properties": {
+                    "LeftYAxisMaxValue": {
+                        "displayName": "Left Y Axis Max Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "LeftYAxisMinValue": {
+                        "displayName": "Left Y Axis Min Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "RightYAxisMaxValue": {
+                        "displayName": "Right Y Axis Max Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "RightYAxisMinValue": {
+                        "displayName": "Right Y Axis Min Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "RightYAxisLabelDisplayUnits": {
+                        "displayName": "Right Y Axis Display units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "RightYAxisLabelPrecision": {
+                        "displayName": "Right Y Axis Decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "LeftYAxisLabelDisplayUnits": {
+                        "displayName": "Left Y Axis Display units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "LeftYAxisLabelPrecision": {
+                        "displayName": "Left Y Axis Decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "regionsSettings": {
+                "displayName": "Regions",
+                "properties": {
+                    "region1Color": {
+                        "displayName": "Region 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "region2Color": {
+                        "displayName": "Region 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "region3Color": {
+                        "displayName": "Region 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "region4Color": {
+                        "displayName": "Region 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "region5Color": {
+                        "displayName": "Region 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "region1ValuesMin": {
+                        "displayName": "Reg. 1 Min value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region1ValuesMax": {
+                        "displayName": "Reg. 1 Max value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region2ValuesMin": {
+                        "displayName": "Reg. 2 Min value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region2ValuesMax": {
+                        "displayName": "Reg. 2 Max value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region3ValuesMin": {
+                        "displayName": "Reg. 3 Min value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region3ValuesMax": {
+                        "displayName": "Reg. 3 Max value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region4ValuesMin": {
+                        "displayName": "Reg. 4 Min value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region4ValuesMax": {
+                        "displayName": "Reg. 4 Max value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region5ValuesMin": {
+                        "displayName": "Reg. 5 Min value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "region5ValuesMax": {
+                        "displayName": "Reg. 5 Max value",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "stringResources": {}
+}

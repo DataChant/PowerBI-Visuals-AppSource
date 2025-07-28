@@ -1,0 +1,1235 @@
+{
+    "visual": {
+        "name": "iconMapV3",
+        "displayName": "iconMapV3",
+        "guid": "iconMapV34089C0EB522B416294AA926F71B4FDBB",
+        "visualClassName": "Visual",
+        "version": "3.2.0.0",
+        "description": "Map Visual for Power BI based on the Leaflet library. Provides the ability to draw images, lines, Well Known Text (WKT), GeoJson layers on a map with custom backgrounds, overlays with WMS support.",
+        "supportUrl": "https://icon-map.com/support",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "James Dales",
+        "email": "support@icon-map.com"
+    },
+    "apiVersion": "3.8.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "* Category (required)",
+                "description": "A unique ID to represent each object to display on the map",
+                "name": "category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Longitude",
+                "description": "Longitude of the image, svg or circle.",
+                "name": "Longitude",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Latitude",
+                "description": "Latitude of the image, svg or circle.",
+                "name": "Latitude",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "latitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Destination Longitude",
+                "description": "Longitude of a point to draw a line to.",
+                "name": "DestinationLongitude",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Destination Latitude",
+                "description": "Latitude of a point to draw a line to.",
+                "name": "DestinationLatitude",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "* Size (required)",
+                "description": "Size of the object. Required for all items. For GeoJSON shapes and WKT (except points) the size has no impact on the shapes, but must be present.",
+                "name": "Size",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "integer": true
+                    },
+                    {
+                        "numeric": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Daylight Date & Time",
+                "description": "Field of type Date & Time. Allows the daylight terminator overlay to display as it would at the given time, rather than the current time.",
+                "name": "Time",
+                "kind": "Measure"
+            }
+        ],
+        "drilldown": {
+            "roles": [
+                "category"
+            ]
+        },
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "category"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "icon"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "sample": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Longitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Latitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "DestinationLongitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "DestinationLatitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Size"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Time"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "crs": {
+                "displayName": "Coordinate Reference System",
+                "description": "",
+                "properties": {
+                    "CRS": {
+                        "displayName": "CRS",
+                        "description": "",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "EPSG3857",
+                                    "displayName": "EPSG3857 (default)"
+                                },
+                                {
+                                    "value": "EPSG3395",
+                                    "displayName": "EPSG3395"
+                                },
+                                {
+                                    "displayName": "EPSG4326",
+                                    "value": "EPSG4326"
+                                },
+                                {
+                                    "displayName": "EPSG27700 (British National Grid)",
+                                    "value": "EPSG27700"
+                                },
+                                {
+                                    "displayName": "EPSG3006",
+                                    "value": "EPSG3006"
+                                },
+                                {
+                                    "displayName": "EPSG3009",
+                                    "value": "EPSG3009"
+                                },
+                                {
+                                    "displayName": "Proj4",
+                                    "value": "Proj4"
+                                },
+                                {
+                                    "value": "Simple",
+                                    "displayName": "Simple (y,x)"
+                                }
+                            ]
+                        }
+                    },
+                    "boundsStartY": {
+                        "displayName": "Y Bounds Start",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "boundsStartX": {
+                        "displayName": "X Bounds Start",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "boundsEndY": {
+                        "displayName": "Y Bounds Extent",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "boundsEndX": {
+                        "displayName": "X Bounds Extent",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "flipYAxis": {
+                        "displayName": "Flip Y Axis",
+                        "description": "",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Minimum Zoom Level",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Maximum Zoom Level",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baseImage": {
+                        "displayName": "Base Image",
+                        "description": "",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Image Transparency",
+                        "description": "",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "customLayerProjectionCode": {
+                        "displayName": "Projection Code)",
+                        "placeHolderText": "EPSG:4326",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customLayerProjection": {
+                        "displayName": "Projection (Proj4)",
+                        "placeHolderText": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customLayerResolutions": {
+                        "displayName": "Resolutions",
+                        "placeHolderText": "8192, 4096, 2048, 1024, 512, 256, 128",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "reprojectMapObjects": {
+                        "displayName": "Reproject Coordinates to WGS84",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "customLayerOriginX": {
+                        "displayName": "Origin X",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "customLayerOriginY": {
+                        "displayName": "Origin Y",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "mapLayers": {
+                "displayName": "Background Layers",
+                "description": "Background layers appear under the map objects and usually contain sea, land, towns and streets etc.",
+                "properties": {
+                    "backgroundMapLayer": {
+                        "displayName": "Background Layer",
+                        "description": "The background layer of the map. To use Mapbox layers, you will need to enter your Mapbox access token in the box below. To use your own background layer select Custom URI.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Open Street Map - Standard",
+                                    "displayName": "Open Street Map - Standard"
+                                },
+                                {
+                                    "value": "Open Street Map - Humanitarian",
+                                    "displayName": "Open Street Map - Humanitarian"
+                                },
+                                {
+                                    "value": "Open Street Map - wmflabs OSM B&W",
+                                    "displayName": "Open Street Map - wmflabs OSM B&W"
+                                },
+                                {
+                                    "value": "Open Street Map - wmflabs OSM no labels",
+                                    "displayName": "Open Street Map - wmflabs OSM no labels"
+                                },
+                                {
+                                    "value": "OpenTopoMap",
+                                    "displayName": "OpenTopoMap"
+                                },
+                                {
+                                    "value": "Mapbox - Streets",
+                                    "displayName": "Mapbox - Streets"
+                                },
+                                {
+                                    "value": "Mapbox - Outdoors",
+                                    "displayName": "Mapbox - Outdoors"
+                                },
+                                {
+                                    "value": "Mapbox - Dark",
+                                    "displayName": "Mapbox - Dark"
+                                },
+                                {
+                                    "value": "Mapbox - Light",
+                                    "displayName": "Mapbox - Light"
+                                },
+                                {
+                                    "value": "Mapbox - Satellite",
+                                    "displayName": "Mapbox - Satellite"
+                                },
+                                {
+                                    "value": "Mapbox - Satellite Streets",
+                                    "displayName": "Mapbox - Satellite Streets"
+                                },
+                                {
+                                    "value": "Custom URI",
+                                    "displayName": "Custom URI"
+                                },
+                                {
+                                    "value": "None",
+                                    "displayName": "No Background"
+                                }
+                            ]
+                        }
+                    },
+                    "customLayerURI": {
+                        "displayName": "Custom Background URI",
+                        "description": "Enter the URL of the custom layers.",
+                        "placeHolderText": "https://a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Minimum Zoom",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Maximum Zoom",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "customLayerProjectionCode": {
+                        "displayName": "Custom Background Projection Code)",
+                        "placeHolderText": "EPSG:4326",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customLayerProjection": {
+                        "displayName": "Custom Background Projection (Proj4)",
+                        "placeHolderText": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customLayerResolutions": {
+                        "displayName": "Custom Background Resolutions",
+                        "placeHolderText": "8192, 4096, 2048, 1024, 512, 256, 128",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customLayerOrigin": {
+                        "displayName": "Custom Background Origin",
+                        "placeHolderText": "0,0",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "mapboxAccessToken": {
+                        "displayName": "Mapbox Access Token (required for Mapbox layers)",
+                        "description": "Access token to use Mapbox layers",
+                        "placeHolderText": "Mapbox Access Token",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "overlays": {
+                "displayName": "Overlays",
+                "description": "Overlays are a transparent layer that is added on top of the background layer to add additional information such as weather.",
+                "properties": {
+                    "customOverlay": {
+                        "displayName": "Custom Overlay",
+                        "description": "Display a custom transparent overlay on the map?",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "customOverlayURI": {
+                        "displayName": "Custom Overlay URI",
+                        "description": "Enter the URL of the custom layers.",
+                        "placeHolderText": "https://a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "daylightTerminator": {
+                        "description": "Realtime layer showing where is in darkness or daylight.",
+                        "displayName": "Daylight Terminator",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "seaLayer": {
+                        "description": "Nautical chart overlay from openseamap.org",
+                        "displayName": "OpenSeaMap",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "railLayer": {
+                        "displayName": "OpenRailMap",
+                        "description": "Railway overlay from openrailwaymap.org",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "formatting": {
+                "displayName": "Formatting",
+                "description": "Formatting options for map objects. Does not apply to images.",
+                "properties": {
+                    "fillColour": {
+                        "displayName": "Fill Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColour": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderTransparency": {
+                        "displayName": "Border Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "borderWidth": {
+                        "displayName": "Border Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fillTransparency": {
+                        "displayName": "Fill Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "dashArray": {
+                        "displayName": "Border Dash Array",
+                        "description": "Pattern for lines and circle, WKT and GeoJSON borders.",
+                        "placeHolderText": "2 4 4",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "points": {
+                "description": "Settings for the data bound objects on the map.",
+                "displayName": "Objects",
+                "properties": {
+                    "icon": {
+                        "displayName": "Image / WKT",
+                        "description": "Display an image from an HTTPS or DATA URL, or a WKT object. Use expression based formatting to select a field from your data.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "icon2": {
+                        "displayName": "Image at Line Destination",
+                        "description": "Display an image at the line destination coordinates. Use expression based formatting to select a field from your data.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageRotation": {
+                        "displayName": "Image Rotation",
+                        "description": "Amount to rotate the image by between 0 and 359",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "circleAndLines": {
+                        "displayName": "Include circle / image with lines",
+                        "description": "Include a circle (or image if specified above) at the origin of a line. (Does not apply to WKT)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTooltip": {
+                        "displayName": "Show Tooltip",
+                        "description": "Show a tooltip when the cursor moves over an object. Use expression based formatting to define this on an object by object basis.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Yes",
+                                    "displayName": "Yes"
+                                },
+                                {
+                                    "value": "No",
+                                    "displayName": "No"
+                                }
+                            ]
+                        }
+                    },
+                    "allowSelection": {
+                        "description": "Allow objects to be selected by clicking on them. Use expression based formatting to define this on an object by object basis.",
+                        "displayName": "Allow Selection",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Yes",
+                                    "displayName": "Yes"
+                                },
+                                {
+                                    "value": "No",
+                                    "displayName": "No"
+                                }
+                            ]
+                        }
+                    },
+                    "circleSizeType": {
+                        "displayName": "Circle Size",
+                        "description": "Whether the circles stay the same size when the map is zoomed, or whether they represent a diameter in meters.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Variable",
+                                    "displayName": "Static size when zoomed"
+                                },
+                                {
+                                    "value": "Fixed",
+                                    "displayName": "Diameter in meters"
+                                }
+                            ]
+                        }
+                    },
+                    "sizeBehaviour": {
+                        "displayName": "Size Behaviour (circles / images)",
+                        "description": "Size is based on the measure value starting at 0 pixels (explicit) or between a min and max value. If all values are the same the min value will be used.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Relative",
+                                    "displayName": "Relative"
+                                },
+                                {
+                                    "value": "Explicit",
+                                    "displayName": "Explicit"
+                                }
+                            ]
+                        }
+                    },
+                    "minSize": {
+                        "displayName": "Minimum Size",
+                        "description": "Minimum circle or image size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "maxSize": {
+                        "displayName": "Maximum Size",
+                        "description": "Maximum circle or image size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "iconWidth": {
+                        "displayName": "Image Width",
+                        "description": "Image Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "iconHeight": {
+                        "displayName": "Image Height",
+                        "description": "Image Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineBehaviour": {
+                        "description": "Straight lines or following the curvature of the Earth (geodesic)",
+                        "displayName": "Line behaviour",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Straight",
+                                    "displayName": "Straight"
+                                },
+                                {
+                                    "value": "Geodesic",
+                                    "displayName": "Geodesic"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "wms": {
+                "displayName": "WMS Layer",
+                "description": "Web Map Service (WMS) is an OCG protocol for serving maps from servers such as ESRI, MapServer and GeoServer. Layers must be hosted on an HTTPS URL and have CORS enabled.",
+                "properties": {
+                    "show": {
+                        "displayName": "Include WMS Layer",
+                        "description": "Show a WMS layer",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "url": {
+                        "description": "URL of the WMS server. See icon-map.com for more configuration information",
+                        "displayName": "WMS URL",
+                        "placeHolderText": "https://",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "layerName": {
+                        "description": "Name of the layer as returned by GetCapabilities. See icon-map.com for more configuration information",
+                        "displayName": "WMS Layer Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "format": {
+                        "description": "Image format such as image/png or image/svg.",
+                        "displayName": "Format (optional)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution (optional)",
+                        "description": "Additional attribution text to be shown at the bottom of the map.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "styles": {
+                        "displayName": "Styles (optional)",
+                        "type": {
+                            "text": false
+                        }
+                    },
+                    "transparency": {
+                        "description": "Transparency of the WMS layer",
+                        "displayName": "Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "controls": {
+                "description": "Zoom, scales and other map controls",
+                "displayName": "Map Controls",
+                "properties": {
+                    "zoom": {
+                        "description": "Display + / - zoom buttons",
+                        "displayName": "Zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scale": {
+                        "description": "Display a scale on the map",
+                        "displayName": "Scale",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lasso": {
+                        "description": "Provide lasso selection capability",
+                        "displayName": "Lasso Select",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "controlSize": {
+                        "description": "Size of the controls",
+                        "displayName": "Control Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Additional Attribution",
+                        "description": "Many map layers require attribution text to be displayed on the map. If your custom layer requires this, enter the text here.",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "geoJSON": {
+                "description": "Add an external GeoJSON layer to the map. GeoJSON layers must be hosted on an external web server using an HTTPS address and have CORS enabled. GeoJSON shapes are referenced by the category field in the dataset which should match a property value for each GeoJSON shape.",
+                "displayName": "GeoJSON",
+                "properties": {
+                    "show": {
+                        "displayName": "Show GeoJSON",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "noOfLevels": {
+                        "displayName": "Number of Levels",
+                        "description": "Provide multiple geoJSON files for each level of drilldown.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "geoJSON1": {
+                        "displayName": "GeoJSON URL",
+                        "description": "URL to an external GeoJSON file. URL must use HTTPS and the have the WGS84 / EPSG:4326 coordinate system.",
+                        "placeHolderText": "GeoJSON file URL",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "geoJSON2": {
+                        "displayName": "GeoJSON URL (level 2)",
+                        "description": "URL to an external GeoJSON file. URL must use HTTPS and the have the WGS84 / EPSG:4326 coordinate system.",
+                        "placeHolderText": "GeoJSON file URL",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "geoJSON3": {
+                        "displayName": "GeoJSON URL (level 3)",
+                        "description": "URL to an external GeoJSON file. URL must use HTTPS and the have the WGS84 / EPSG:4326 coordinate system.",
+                        "placeHolderText": "GeoJSON file URL",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "geoJSON4": {
+                        "displayName": "GeoJSON URL (level 4)",
+                        "description": "URL to an external GeoJSON file. URL must use HTTPS and the have the WGS84 / EPSG:4326 coordinate system.",
+                        "placeHolderText": "GeoJSON file URL",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "geoJSON5": {
+                        "displayName": "GeoJSON URL (level 5)",
+                        "description": "URL to an external GeoJSON file. URL must use HTTPS and the have the WGS84 / EPSG:4326 coordinate system.",
+                        "placeHolderText": "GeoJSON file URL",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "autoZoomInactivePolygons": {
+                        "displayName": "Include inactive GeoJSON shapes in auto zoom",
+                        "description": "Include GeoJSON shapes not referenced in the data when zooming?",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideMissing": {
+                        "displayName": "Hide shapes with no values",
+                        "description": "Hide shapes not referenced in the data?",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "missingLineColor": {
+                        "description": "Border color of shapes that are not referenced by a data item. Other shapes can be configured in the formatting options.",
+                        "displayName": "Line Color of inactive shapes",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "missingFillColor": {
+                        "description": "Fill color of shapes that are not referenced by a data item. Other shapes can be configured in the formatting options.",
+                        "displayName": "Fill Color of inactive shapes",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "description": "Width of the shape borders. This setting is overridden if a field is included in the Line  Border Width field well.",
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderTransparency": {
+                        "displayName": "Border Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillTransparency": {
+                        "displayName": "Fill Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "dashArray": {
+                        "displayName": "Border Dash Array",
+                        "description": "Pattern for borders",
+                        "placeHolderText": "2 4 4",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "vectorLayer": {
+                "description": "Add a vector layer to the map, which can be referenced by items in your dataset.",
+                "displayName": "Vector Tile Layer",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Vector Layer",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "url": {
+                        "displayName": "Vector Layer URL",
+                        "description": "URL Template for the vector layer",
+                        "placeHolderText": "Vector Layer URL",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Minimum Zoom Level",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Maximum Zoom Level",
+                        "description": "",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "missingLineColor": {
+                        "description": "Border color of shapes that are not referenced by a data item. Other shapes can be configured in the formatting options.",
+                        "displayName": "Line Color of inactive shapes",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "missingFillColor": {
+                        "description": "Fill color of shapes that are not referenced by a data item. Other shapes can be configured in the formatting options.",
+                        "displayName": "Fill Color of inactive shapes",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "description": "Width of the shape borders. This setting is overridden if a field is included in the Line  Border Width field well.",
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderTransparency": {
+                        "displayName": "Border Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillTransparency": {
+                        "displayName": "Fill Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "dashArray": {
+                        "displayName": "Border Dash Array",
+                        "description": "Pattern for borders",
+                        "placeHolderText": "2 4 4",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "coordinateUse": {
+                        "displayName": "Coordinates as Bounds/Centroids",
+                        "description": "Use coordinates as bounds for vector layers.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Yes",
+                                    "displayName": "Yes"
+                                },
+                                {
+                                    "value": "No",
+                                    "displayName": "No"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "displayName": "Labels",
+                "description": "Show a label for each object",
+                "properties": {
+                    "show": {
+                        "displayName": "Display Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "text": {
+                        "displayName": "Text",
+                        "description": "Text to show. Use expression based formatting to select a field from your data",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "alignment": {
+                        "displayName": "Alignment",
+                        "type": {
+                            "formatting": {
+                                "alignment": false
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fillColor": {
+                        "displayName": "Fill Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "displayName": "Border Width",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "borderRadius": {
+                        "displayName": "Rounded Corners Radius",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "padding": {
+                        "displayName": "Padding",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "highlighting": {
+                "displayName": "Highlighting",
+                "description": "Control the formatting when objects are selected or cross-highlighted from another visual.",
+                "properties": {
+                    "highlightTransparency": {
+                        "displayName": "Transparency of selected items",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "unhighlightTransparency": {
+                        "displayName": "Transparency of unselected items",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "includeLabels": {
+                        "description": "Apply the above options to labels as well as objects",
+                        "displayName": "Highlight labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "zoom": {
+                "displayName": "Zoom",
+                "description": "Control how zooming of the map behaves",
+                "properties": {
+                    "includeInZoom": {
+                        "description": "Automatically zoom the map to the data bound map objects. Use expression based formatting to determine which objects should be included or not. If you select No, the map position and zoom level will be retained when saving the report.",
+                        "displayName": "Zoom map to objects",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Yes",
+                                    "displayName": "Yes"
+                                },
+                                {
+                                    "value": "No",
+                                    "displayName": "No"
+                                }
+                            ]
+                        }
+                    },
+                    "zoomOnSelect": {
+                        "description": "When you select an object on the map, should the map automatically zoom into that object?",
+                        "displayName": "Auto zoom to items selected on the map",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomOnHighlight": {
+                        "description": "When cross-highlighting objects from another visual, should the map zoom into those highlighted objects?",
+                        "displayName": "Zoom map to cross-highlighted items",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomOnSingleItem": {
+                        "displayName": "Zoom when single item",
+                        "description": "Zoom the map when there is only one item present",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomOnSingleLevel": {
+                        "displayName": "Zoom level for single item",
+                        "description": "Zoom level when there is only one item present",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "zoomIncrement": {
+                        "description": "Amount that the map zooms in or out",
+                        "displayName": "Zoom Increment",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lockMap": {
+                        "description": "Prevent the map from being dragged",
+                        "displayName": "Lock Map",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "defaultLatitude": {
+                        "description": "Default latitude to center the map. This value can be updated by moving the map.",
+                        "displayName": "Default Latitude",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "defaultLongitude": {
+                        "description": "Default longitude to center the map. This value can be updated by moving the map.",
+                        "displayName": "Default Longitude",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "defaultZoom": {
+                        "description": "Default zoom level to center the map. This value can be updated by moving the map.",
+                        "displayName": "Default Zoom Level",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "sorting": {
+            "default": {}
+        },
+        "supportsHighlight": true,
+        "suppressDefaultTitle": true,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true,
+                "supportEnhancedTooltips": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        }
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

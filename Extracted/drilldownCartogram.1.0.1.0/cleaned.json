@@ -1,0 +1,470 @@
+{
+    "visual": {
+        "name": "drilldownCartogram",
+        "displayName": "Drilldown cartogram",
+        "guid": "drilldownCartogramD5E1077C70074FFCB26AFC2A636614BF",
+        "visualClassName": "Visual",
+        "version": "1.0.1",
+        "description": "Map draws cartogram (circles) for each location, User can control size and color of circle to represents two different dimension together. This visual supports muli-level hierachy (Maximum of 3 levels).",
+        "supportUrl": "https://aka.ms/customvisualscommunity",
+        "gitHubUrl": "https://github.com/Microsoft/powerbi-visuals-drilldown-cartogram"
+    },
+    "apiVersion": "1.6.0",
+    "author": {
+        "name": "Microsoft",
+        "email": "pbicvsupport@microsoft.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.js",
+        "node_modules/d3/d3.js",
+        "node_modules/lodash/lodash.js",
+        "node_modules/topojson/dist/topojson.min.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-chartutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Locations",
+                "name": "category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Size Values",
+                "name": "Size",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Color Values",
+                "name": "Color",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltip",
+                "name": "Tooltip",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Legend",
+                "name": "Legend",
+                "kind": "GroupingOrMeasure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "min": 0,
+                            "max": 3
+                        },
+                        "Size": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "Color": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "Legend": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 80000
+                            }
+                        },
+                        "for": {
+                            "in": "category"
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Size"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Color"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Tooltip"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Legend"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "drilldown": {
+            "roles": [
+                "category"
+            ]
+        },
+        "supportsHighlight": true,
+        "objects": {
+            "legendproperties": {
+                "displayName": "Legend",
+                "description": "Controls legend orientation and styles",
+                "properties": {
+                    "show": {
+                        "displayName": "Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Legend Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "leftCenter",
+                                    "displayName": "LeftCenter"
+                                },
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "rightCenter",
+                                    "displayName": "RightCenter"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                },
+                                {
+                                    "value": "bottomCenter",
+                                    "displayName": "BottomCenter"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "topCenter",
+                                    "displayName": "TopCenter"
+                                },
+                                {
+                                    "value": "top",
+                                    "displayName": "Top"
+                                }
+                            ]
+                        }
+                    },
+                    "title": {
+                        "displayName": "Title",
+                        "description": "Show or hide legend title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "description": "Legend text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontsize": {
+                        "displayName": "Font Size",
+                        "description": "Legend text font size",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "categorycolorselector": {
+                "displayName": "Data colors",
+                "description": "Linear gradient colors",
+                "properties": {
+                    "mincolor": {
+                        "displayName": "Minimum",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxcolor": {
+                        "displayName": "Maximum",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "centercolor": {
+                        "displayName": "Center",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minvalue": {
+                        "displayName": "Min Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxvalue": {
+                        "displayName": "Max Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "centervalue": {
+                        "displayName": "Center Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "ordinalcolors": {
+                "displayName": "Data color",
+                "properties": {
+                    "datacolor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "countryselector": {
+                "displayName": "Shape",
+                "description": "Choose shape to draw",
+                "properties": {
+                    "projection": {
+                        "displayName": "Projection",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "albers",
+                                    "displayName": "Albers"
+                                },
+                                {
+                                    "value": "albersUSA",
+                                    "displayName": "albersUSA"
+                                },
+                                {
+                                    "value": "Mercator",
+                                    "displayName": "Mercator"
+                                },
+                                {
+                                    "value": "Orthographic",
+                                    "displayName": "Orthographic"
+                                },
+                                {
+                                    "value": "Equirectangular",
+                                    "displayName": "Equirectangular"
+                                }
+                            ]
+                        }
+                    },
+                    "level0": {
+                        "displayName": "Level 1",
+                        "description": "TopoJSON for level 1",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "level1": {
+                        "displayName": "Level 2",
+                        "description": "TopoJSON for level 2",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "level2": {
+                        "displayName": "Level 3",
+                        "description": "TopoJSON for level 3",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "id0": {
+                        "displayName": "ID 1 (For level 1)",
+                        "description": "ID for level 1(optional)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "id1": {
+                        "displayName": "ID 2 (For level 2)",
+                        "description": "ID for level 2(optional)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "id2": {
+                        "displayName": "ID 3 (For level3)",
+                        "description": "ID for level 3(optional)",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "defaultSelector": {
+                "displayName": "Default color",
+                "properties": {
+                    "mapcolor": {
+                        "displayName": "Map",
+                        "description": "Background map color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "circlecolor": {
+                        "displayName": "Circle",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "path": {
+                        "displayName": "Show map",
+                        "description": "Shows map background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width": {
+                        "displayName": "Border thickness",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "strokecolor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "circlesettings": {
+                "displayName": "Circle settings",
+                "properties": {
+                    "size": {
+                        "displayName": "Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Stroke color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "border": {
+                        "displayName": "Circle stroke",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "zoomselector": {
+                "displayName": "Zoom",
+                "properties": {
+                    "Autozoom": {
+                        "displayName": "Auto zoom",
+                        "description": "Zooms on selection on another visual ",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "Selectionzoom": {
+                        "displayName": "Selection zoom",
+                        "description": "Zooms on selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "Manualzoom": {
+                        "displayName": "Manual zoom",
+                        "description": "Zoom and pan",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "collisionselector": {
+                "displayName": "Collision",
+                "description": "Unpack overlapping circles",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "stringResources": {}
+}

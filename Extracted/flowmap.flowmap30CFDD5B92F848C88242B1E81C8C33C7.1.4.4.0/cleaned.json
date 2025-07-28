@@ -1,0 +1,982 @@
+{
+    "visual": {
+        "name": "flowmap",
+        "displayName": "Flow map",
+        "guid": "flowmap30CFDD5B92F848C88242B1E81C8C33C7",
+        "visualClassName": "Visual",
+        "version": "1.4.4",
+        "description": "Flowmap is a diagram that visualizes the movement of objects from one location to another.",
+        "supportUrl": "https://weiweicui.github.io/PowerBI-Flowmap/",
+        "gitHubUrl": "https://github.com/weiweicui/PowerBI-Flowmap/"
+    },
+    "author": {
+        "name": "Weiwei Cui",
+        "email": "weiweicui@outlook.com"
+    },
+    "apiVersion": "2.6.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Origin",
+                "description": "Addresses/labels to differentiate origin locations",
+                "name": "Origin",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Destination",
+                "description": "Addresses/labels to differentiate destination locations",
+                "name": "Dest",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Width",
+                "description": "Non-negative values moving between origins and destinations",
+                "name": "width",
+                "kind": "GroupingOrMeasure"
+            },
+            {
+                "displayName": "Color",
+                "description": "(Optional) Categorical values mapped to colors",
+                "name": "color",
+                "kind": "GroupingOrMeasure"
+            },
+            {
+                "displayName": "Origin latitude",
+                "description": "(Optional) Latitudes of the corresponding origins",
+                "name": "OLati",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "geography": {
+                            "latitude": true,
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Origin longitude",
+                "description": "(Optional) Longitudes of the corresponding origins",
+                "name": "OLong",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "geography": {
+                            "latitude": true,
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Destination latitude",
+                "description": "(Optional) Latitudes of the corresponding destinations",
+                "name": "DLati",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "geography": {
+                            "latitude": true,
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Destination longitude",
+                "description": "(Optional) The longitudes of the corresponding destinations",
+                "name": "DLong",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "geography": {
+                            "latitude": true,
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Origin name",
+                "description": "(Optional) Friendly origin names to display in tooltips. The \"Origin\" field is used by default.",
+                "name": "OName",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Destination name",
+                "description": "(Optional) Friendly destination names to display in tooltips. The \"Destination\" field is used by default.",
+                "name": "DName",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltip",
+                "description": "(Optional) Content to show when hovering flows.",
+                "name": "Tooltip",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Label",
+                "description": "(Optional) Content to show when clicking icons.",
+                "name": "Label",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "color": {
+                            "max": 1
+                        },
+                        "Origin": {
+                            "max": 1
+                        },
+                        "Dest": {
+                            "max": 1
+                        },
+                        "width": {
+                            "max": 1
+                        },
+                        "OLati": {
+                            "max": 1
+                        },
+                        "OLong": {
+                            "max": 1
+                        },
+                        "DLati": {
+                            "max": 1
+                        },
+                        "DLong": {
+                            "max": 1
+                        },
+                        "OName": {
+                            "max": 1
+                        },
+                        "DName": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Origin"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "color"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Dest"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "width"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 100000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "OLati"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "OLong"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "DLati"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "DLong"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Tooltip"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Label"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "OName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "DName"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "style": {
+                "displayName": "Visual style",
+                "properties": {
+                    "style": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Straight line",
+                                    "value": "straight"
+                                },
+                                {
+                                    "displayName": "Flow",
+                                    "value": "flow"
+                                },
+                                {
+                                    "displayName": "Great circle",
+                                    "value": "arc"
+                                }
+                            ]
+                        }
+                    },
+                    "direction": {
+                        "displayName": "> Group by",
+                        "description": "Merge lines based on origin or destination",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Destination",
+                                    "value": "in"
+                                },
+                                {
+                                    "displayName": "Origin",
+                                    "value": "out"
+                                }
+                            ]
+                        }
+                    },
+                    "limit": {
+                        "displayName": "> Limit",
+                        "description": "Maximum number of flows displayed simultaneously",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bot"
+                                }
+                            ]
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color legend",
+                        "description": "visibility of color legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "width": {
+                        "displayName": "Width legend",
+                        "description": "visibility of width legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color_default": {
+                        "displayName": "> (Autofill)",
+                        "description": "Show default labels if unspecified",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width_default": {
+                        "displayName": "> (Autofill)",
+                        "description": "Show default labels if unspecified",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width_label": {
+                        "displayName": "> Label",
+                        "description": "Edit label, (hidden when empty)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "color_label": {
+                        "displayName": "> Label",
+                        "description": "Edit label, (hidden when empty)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Legend Persist",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "color": {
+                "displayName": "Color",
+                "properties": {
+                    "customize": {
+                        "displayName": "Specify individually",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autofill": {
+                        "displayName": "> (Autofill)",
+                        "description": "Choose distinct colors if unspecified",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "item": {
+                        "displayName": "Default",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "min": {
+                        "displayName": "Min",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "max": {
+                        "displayName": "Max",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Color Persist",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "width": {
+                "displayName": "Width",
+                "properties": {
+                    "customize": {
+                        "displayName": "Specify individually",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "item": {
+                        "displayName": "Default",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "scale": {
+                        "displayName": "Scale",
+                        "description": "Scale for the width field",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Log",
+                                    "value": "log"
+                                },
+                                {
+                                    "displayName": "Linear",
+                                    "value": "linear"
+                                }
+                            ]
+                        }
+                    },
+                    "unit": {
+                        "displayName": "> Unit",
+                        "description": "Unit width for all lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "max": {
+                        "displayName": "> Max",
+                        "description": "Maximum width for all lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "min": {
+                        "displayName": "> Min",
+                        "description": "Minimum width for all lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "persist": {
+                        "displayName": "Width Persist",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "bubble": {
+                "displayName": "Bubble",
+                "properties": {
+                    "for": {
+                        "displayName": "For",
+                        "description": "How to show bubbles",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Origin",
+                                    "value": "origin"
+                                },
+                                {
+                                    "displayName": "Destination",
+                                    "value": "dest"
+                                }
+                            ]
+                        }
+                    },
+                    "slice": {
+                        "displayName": "Show slice",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bubbleColor": {
+                        "displayName": "> Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "scale": {
+                        "displayName": "Scale",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "label": {
+                        "displayName": "Tooltip",
+                        "description": "How to show labels",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Hide",
+                                    "value": "hide",
+                                    "description": "hide labels"
+                                },
+                                {
+                                    "displayName": "All",
+                                    "value": "all",
+                                    "description": "Show all labels"
+                                },
+                                {
+                                    "displayName": "By click",
+                                    "value": "manual",
+                                    "description": "Click to show/hide"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "none",
+                                    "description": "Show no labels"
+                                }
+                            ]
+                        }
+                    },
+                    "labelOpacity": {
+                        "displayName": "> Background opacity",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "> Background color",
+                        "description": "Change the background colors",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "valueFormat": {
+                "displayName": "Detail format",
+                "description": "Change the format of values shown in tooltips, etc.",
+                "properties": {
+                    "sort": {
+                        "displayName": "Sort",
+                        "description": "Sorting by the Width field",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Ascending",
+                                    "value": "asc"
+                                },
+                                {
+                                    "displayName": "Descending",
+                                    "value": "des"
+                                }
+                            ]
+                        }
+                    },
+                    "top": {
+                        "displayName": "Top",
+                        "description": "Truncate the list",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "notation": {
+                        "displayName": "Number format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Decimal (SI)",
+                                    "value": "decSi"
+                                },
+                                {
+                                    "displayName": "Decimal",
+                                    "value": "dec"
+                                },
+                                {
+                                    "displayName": "Exponent",
+                                    "value": "exp"
+                                },
+                                {
+                                    "displayName": "Percentage",
+                                    "value": "per"
+                                }
+                            ]
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Thousands",
+                                    "value": "K"
+                                },
+                                {
+                                    "displayName": "Millions",
+                                    "value": "M"
+                                },
+                                {
+                                    "displayName": "Billions",
+                                    "value": "bn"
+                                },
+                                {
+                                    "displayName": "Trillions",
+                                    "value": "T"
+                                }
+                            ]
+                        }
+                    },
+                    "precFix": {
+                        "displayName": "Precision",
+                        "description": "The number of digits that follow the decimal point",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "precSig": {
+                        "displayName": "Precision",
+                        "description": "The number of significant digits",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fix": {
+                        "displayName": "Fixed point",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "comma": {
+                        "displayName": "Comma for thousands",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "prefix": {
+                        "displayName": "Prefix",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "postfix": {
+                        "displayName": "Postfix",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "mapControl": {
+                "displayName": "Map control",
+                "properties": {
+                    "type": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Aerial",
+                                    "value": "aerial"
+                                },
+                                {
+                                    "displayName": "Color",
+                                    "value": "road"
+                                },
+                                {
+                                    "displayName": "Gray",
+                                    "value": "grayscale"
+                                },
+                                {
+                                    "displayName": "Dark",
+                                    "value": "canvasDark"
+                                },
+                                {
+                                    "displayName": "Light",
+                                    "value": "canvasLight"
+                                },
+                                {
+                                    "displayName": "Hidden",
+                                    "value": "hidden"
+                                }
+                            ]
+                        }
+                    },
+                    "lang": {
+                        "displayName": "Language",
+                        "description": "The language used in the map",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "Chinese",
+                                    "value": "zh-HK"
+                                },
+                                {
+                                    "displayName": "Czech",
+                                    "value": "cs-CZ"
+                                },
+                                {
+                                    "displayName": "Danish",
+                                    "value": "da-DK"
+                                },
+                                {
+                                    "displayName": "Dutch",
+                                    "value": "nl-NL"
+                                },
+                                {
+                                    "displayName": "English",
+                                    "value": "en-US"
+                                },
+                                {
+                                    "displayName": "Finnish",
+                                    "value": "fi-FI"
+                                },
+                                {
+                                    "displayName": "French",
+                                    "value": "fr-FR"
+                                },
+                                {
+                                    "displayName": "German",
+                                    "value": "de-DE"
+                                },
+                                {
+                                    "displayName": "Italian",
+                                    "value": "it-IT"
+                                },
+                                {
+                                    "displayName": "Japanese",
+                                    "value": "ja-JP"
+                                },
+                                {
+                                    "displayName": "Korean",
+                                    "value": "Ko-KR"
+                                },
+                                {
+                                    "displayName": "Norwegian(Bokmal)",
+                                    "value": "nb-NO"
+                                },
+                                {
+                                    "displayName": "Polish",
+                                    "value": "pl-PL"
+                                },
+                                {
+                                    "displayName": "Portuguese",
+                                    "value": "pt-BR"
+                                },
+                                {
+                                    "displayName": "Russian",
+                                    "value": "ru-RU"
+                                },
+                                {
+                                    "displayName": "Spanish",
+                                    "value": "es-ES"
+                                },
+                                {
+                                    "displayName": "Swedish",
+                                    "value": "sv-SE"
+                                }
+                            ]
+                        }
+                    },
+                    "pan": {
+                        "displayName": "Pan",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom": {
+                        "displayName": "Zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoFit": {
+                        "displayName": "Auto fit",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "mapElement": {
+                "displayName": "Map element",
+                "properties": {
+                    "forest": {
+                        "displayName": "Forest",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "road": {
+                        "displayName": "Road",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "color"
+                                },
+                                {
+                                    "displayName": "Gray w/ labels",
+                                    "value": "gray_label"
+                                },
+                                {
+                                    "displayName": "Gray w/o labels",
+                                    "value": "gray"
+                                },
+                                {
+                                    "displayName": "Hidden",
+                                    "value": "hidden"
+                                }
+                            ]
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "city": {
+                        "displayName": "City",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "icon": {
+                        "displayName": "Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "building": {
+                        "displayName": "Building",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "area": {
+                        "displayName": "Area",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "advance": {
+                "displayName": "Advanced",
+                "properties": {
+                    "cache": {
+                        "displayName": "Cache",
+                        "description": "Cache geocoding results for next time",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "relocate": {
+                        "displayName": "Relocate",
+                        "description": "Drag/Drop to manually change geo-locations",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "located": {
+                        "displayName": "> Known",
+                        "description": "Addresses with geo-locations",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "unlocated": {
+                        "displayName": "> Unknown",
+                        "description": "Addresses without geo-locations",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "persist": {
+                "displayName": "Value to persist",
+                "properties": {
+                    "map": {
+                        "displayName": "Persist coding",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "manual": {
+                        "displayName": "Persist coding",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "geocoding": {
+                        "displayName": "Persist coding",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "banner": {
+                        "displayName": "Persist for Bubble",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

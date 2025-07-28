@@ -1,0 +1,341 @@
+{
+    "visual": {
+        "name": "TimeBrush",
+        "displayName": "Time Brush",
+        "guid": "TimeBrush1450434005853",
+        "visualClassName": "TimeBrush",
+        "description": "This visual is experimental and not actively being developed, only major issues will be addressed. Time Brush lets you filter a time-based dataset by directly dragging or brushing over a time period of interest. The initial display is a helpful overview that shows the frequency of items in each pre-defined time bucket (e.g., hours, days, years) as a vertical bar chart. Whenever you select a time period, any linked visuals are automatically filtered to display only those records with time attributes in the selected period.",
+        "supportUrl": "",
+        "githubUrl": "https://github.com/Microsoft/PowerBI-visuals-TimeBrush"
+    },
+    "author": {
+        "name": "Microsoft (experimental)",
+        "email": "msrvizsupport@microsoft.com"
+    },
+    "apiVersion": "1.11.0",
+    "assets": {
+        "icon": "assets/icon.svg",
+        "screenshot": "assets/screenshot.png",
+        "thumbnail": "assets/thumbnail.png"
+    },
+    "style": "src/css/TimeBrushVisual.scss",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Times",
+                "kind": 0,
+                "displayName": "Date"
+            },
+            {
+                "name": "Values",
+                "kind": 1,
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "displayName": "With Values"
+            },
+            {
+                "name": "Series",
+                "kind": 0,
+                "displayName": "Segmented By"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Times": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 0
+                        }
+                    },
+                    {
+                        "Times": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 0
+                        },
+                        "Values": {
+                            "max": 1,
+                            "min": 0
+                        }
+                    },
+                    {
+                        "Times": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "Values": {
+                            "max": 1,
+                            "min": 1
+                        }
+                    },
+                    {
+                        "Times": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "max": 0
+                        },
+                        "Values": {
+                            "min": 0
+                        }
+                    },
+                    {
+                        "Times": {
+                            "max": 1
+                        },
+                        "Series": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "Values": {
+                            "max": 0
+                        }
+                    }
+                ],
+                "categorical": {
+                    "dataVolume": 4,
+                    "categories": {
+                        "for": {
+                            "in": "Times"
+                        },
+                        "dataReductionAlgorithm": {
+                            "sample": {}
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "Series",
+                            "select": [
+                                {
+                                    "for": {
+                                        "in": "Values"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {}
+                            }
+                        }
+                    },
+                    "rowCount": {
+                        "preferred": {
+                            "min": 2
+                        },
+                        "supported": {
+                            "min": 0
+                        }
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    },
+                    "version": {
+                        "displayName": "Version",
+                        "description": "The version of TimeBrush",
+                        "type": {
+                            "text": {}
+                        }
+                    }
+                }
+            },
+            "dataPoint": {
+                "objectName": "dataPoint",
+                "displayName": "Data Point",
+                "properties": {
+                    "defaultBarColor": {
+                        "displayName": "Bar Color",
+                        "description": "Bar color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill": {
+                        "displayName": "fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorMode": {
+                        "displayName": "Color Mode",
+                        "description": "Determines how the individual bars within the time brush are colored",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": 1,
+                                    "displayName": "Gradient"
+                                },
+                                {
+                                    "value": 2,
+                                    "displayName": "Instance"
+                                }
+                            ]
+                        }
+                    },
+                    "startColor": {
+                        "displayName": "Start color",
+                        "description": "The start color of the gradient",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "endColor": {
+                        "displayName": "End color",
+                        "description": "The end color of the gradient",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "startValue": {
+                        "displayName": "Start Value",
+                        "description": "The value to use as the start value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "endValue": {
+                        "displayName": "End Value",
+                        "description": "The value to use as the end value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "selection": {
+                "objectName": "selection",
+                "displayName": "Selection",
+                "properties": {
+                    "clearSelectionAfterDataChange": {
+                        "displayName": "Clear selection after data changed",
+                        "description": "Setting this to true will clear the selection after the data is changed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selectedRange": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "display": {
+                "objectName": "display",
+                "displayName": "Display",
+                "properties": {
+                    "reverseBars": {
+                        "displayName": "Reverse Bar Order",
+                        "description": "If true, the bar display order will be reversed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "barWidth": {
+                        "displayName": "Bar Width",
+                        "description": "The size of the bars",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "objectName": "legend",
+                "displayName": "Legend",
+                "properties": {
+                    "showLegend": {
+                        "displayName": "Legend",
+                        "description": "If true, the legend will be displayed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "y-Axis": {
+                "objectName": "y-Axis",
+                "displayName": "Y-Axis",
+                "properties": {
+                    "showYAxis": {
+                        "displayName": "Show",
+                        "description": "If true, the Y-Axis will be displayed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showReferenceLines": {
+                        "displayName": "Show Reference lines",
+                        "description": "If true, the Y-Axis will be displayed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisPosition": {
+                        "displayName": "Position",
+                        "description": "The position of the Y-Axis",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": 1,
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": 2,
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "output": "dist/TimeBrush.pbiviz"
+}

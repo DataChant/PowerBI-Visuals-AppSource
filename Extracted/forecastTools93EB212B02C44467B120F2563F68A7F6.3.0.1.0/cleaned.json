@@ -1,0 +1,802 @@
+{
+    "visual": {
+        "name": "ForecastUsingMultipleModelsbyMAQSoftware",
+        "displayName": "Forecast Using Multiple Models by MAQ Software",
+        "guid": "forecastTools93EB212B02C44467B120F2563F68A7F6",
+        "visualClassName": "Visual",
+        "version": "3.0.1",
+        "description": "This tool enables users to derive forecasts for time series data using four different models: Exponential Smoothing, Linear Regression, Neural Networks & ARIMA.",
+        "supportUrl": "https://github.com/maqsoftware/PowerBI-visuals/issues",
+        "gitHubUrl": "https://github.com/maqsoftware/PowerBI-visuals/"
+    },
+    "apiVersion": "2.1.0",
+    "author": {
+        "name": "MAQ Software",
+        "email": "support@maqsoftware.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Series/Date",
+                "kind": "GroupingOrMeasure",
+                "name": "Value1"
+            },
+            {
+                "displayName": "Values",
+                "kind": "GroupingOrMeasure",
+                "name": "Value2"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Value1": {
+                            "max": 1
+                        },
+                        "Value2": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "Value1"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Value2"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {}
+                                }
+                            }
+                        }
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "\r\n\r\n\r\n####################################################\r\n# Library Declarations \r\nif(TRUE){\r\n\r\n############### Utility functions ###############\r\nlibraryRequireInstall = function(packageName, ...)\r\n{\r\n  if(!require(packageName, character.only = TRUE)) \r\n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\r\n}\r\n\r\nlibraryRequireInstall(\"XML\")\r\nlibraryRequireInstall(\"htmlwidgets\")\r\n\r\ninternalSaveWidget <- function(widget, fname)\r\n{\r\n  tempFname = paste(fname, \".tmp\", sep=\"\")\r\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\r\n  FlattenHTML(tempFname, fname)\r\n}\r\n\r\nFlattenHTML <- function(fnameIn, fnameOut)\r\n{\r\n  # Read and parse HTML file\r\n  # Embed all js and css files into one unified file\r\n  \r\n  if(!file.exists(fnameIn))\r\n    return(FALSE)\r\n  \r\n  dir = dirname(fnameIn)\r\n  html = htmlTreeParse(fnameIn, useInternal = TRUE)\r\n  top = xmlRoot(html)\r\n  \r\n  # extract all <script> tags with src value\r\n  srcNode=getNodeSet(top, '//script[@src]')\r\n  for (node in srcNode)\r\n  {\r\n    b = xmlAttrs(node)\r\n    fname = file.path(dir, b['src'])\r\n    alternateSrc = FindSrcReplacement(fname)\r\n    if (!is.null(alternateSrc))\r\n    {\r\n      s = alternateSrc\r\n      names(s) = 'src'\r\n      newNode = xmlNode(\"script\",attrs = s)\r\n      replaceNodes(node, newNode)\r\n    }else{\r\n      str=ReadFileForEmbedding(fname);\r\n      if (!is.null(str))\r\n      {      \r\n        newNode = xmlNode(\"script\", str, attrs = c(type = \"text/javascript\"))\r\n        replaceNodes(node, newNode)\r\n      }\r\n    }\r\n  }\r\n  \r\n  # extract all <link> tags with src value\r\n  linkNode=getNodeSet(top, '//link[@href]')\r\n  for (node in linkNode)\r\n  {\r\n    b = xmlAttrs(node)\r\n    fname = file.path(dir, b['href'])\r\n    str = ReadFileForEmbedding(fname, FALSE);\r\n    if (!is.null(str))\r\n    {\r\n      newNode = xmlNode(\"style\", str)\r\n      replaceNodes(node, newNode)\r\n    }\r\n  }\r\n  \r\n  saveXML(html, file = fnameOut)\r\n  return(TRUE)\r\n}\r\n\r\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\r\n{\r\n  data = ReadFullFile(fname)\r\n  if (is.null(data))\r\n    return(NULL)\r\n\r\n  str = paste(data, collapse ='\\n')\r\n  if (addCdata) {\r\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\r\n  }\r\n  return(str)\r\n}\r\n\r\nReadFullFile <- function(fname)\r\n{\r\n  if(!file.exists(fname))\r\n    return(NULL)\r\n  \r\n  con = file(fname, open = \"r\")\r\n  data = readLines(con)\r\n  close(con)\r\n  return(data)\r\n}\r\n\r\nFindSrcReplacement <- function(str)\r\n{\r\n  # finds reference to 'plotly' js and replaces with a version from CDN\r\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\r\n  str <- iconv(str, to=\"UTF-8\")\r\n  pattern = \"plotlyjs-(\\\\w.+)/plotly-latest.min.js\"\r\n  match1=regexpr(pattern, str)\r\n  attr(match1, 'useBytes') <- FALSE\r\n  strMatch=regmatches(str, match1, invert = FALSE)\r\n  if (length(strMatch) == 0) return(NULL)\r\n  \r\n  pattern2 = \"-(\\\\d.+)/\"\r\n  match2 = regexpr(pattern2, strMatch[1])\r\n  attr(match2, 'useBytes') <- FALSE\r\n  strmatch = regmatches(strMatch[1], match2)\r\n  if (length(strmatch) == 0) return(NULL)\r\n  \r\n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\r\n  # This matches the specific version used in the plotly package used.\r\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\r\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\r\n  return(str)\r\n}\r\n#################################################\r\n\r\n    Sys.setlocale(\"LC_ALL\",\"English\")    \r\n    \r\n    libraryRequireInstall(\"zoo\")\r\n    libraryRequireInstall(\"plotly\")\r\n    libraryRequireInstall(\"forecast\")  \r\n    libraryRequireInstall(\"lubridate\")\r\n\r\n}\r\n\r\n\r\n\r\n####################################################\r\n# Display Error Message\r\ndefaultMessage = function(e){\r\n  \r\n    ax <- list(\r\n        title          = sprintf(\"ERROR: %s\",e),\r\n        zeroline       = FALSE,\r\n        showline       = FALSE,\r\n        showticklabels = FALSE,\r\n        showgrid       = FALSE\r\n    )\r\n    \r\n    ay <- list(\r\n        title          = \"\",\r\n        zeroline       = FALSE,\r\n        showline       = FALSE,\r\n        showticklabels = FALSE,\r\n        showgrid       = FALSE\r\n    )\r\n    \r\n    p <- plot_ly(      \r\n    )%>%\r\n    layout(\r\n        title = '',\r\n        xaxis = ax, \r\n        yaxis = ay\r\n    )\r\n    \r\n    internalSaveWidget(p, 'out.html');\r\n    quit()\r\n  \r\n}\r\n\r\n\r\n\r\n#-------------------------------------------------------------------------------------------------------------------\r\n\r\n\r\n\r\n####################################################\r\n# Settings\r\nif(TRUE){\r\n\r\n    tryCatch(\r\n        {\r\n\r\n            ####################################################\r\n            # Date Settings\r\n            if(TRUE){\r\n                \r\n                tryCatch(\r\n                    {\r\n                        \r\n                        ####################################################\r\n                        # Parse date\r\n                        parseDate = function(date){\r\n                            \r\n                            date    <- trimws(date)\r\n\r\n\r\n                            ####################################################\r\n                            # Try Daily               \r\n                            if(TRUE){\r\n\r\n                                dateDaily = list(\r\n\r\n                                    c(\"17-11-2018 00:00\" , \"%d/%m/%Y 00:00\"),                                    \r\n                                    \r\n                                    c(\"17/11/2018\"       , \"%d/%m/%Y\"),\r\n                                    c(\"17/11/18\"         , \"%d/%m/%y\"),    #Which century?\r\n                                    \r\n                                    c(\"2018/11/17\"       , \"%Y/%m/%d\"),\r\n                                    c(  \"18/11/17\"       , \"%y/%m/%d\"),    #Which century?\r\n                                    \r\n                                    c(\"11/17/2018\"       , \"%m/%d/%Y\"),\r\n                                    c(\"11/17/18\"         , \"%m/%d/%y\"),    #Which century?\r\n                                    \r\n                                    c(\"17/Nov/2018\"      , \"%d/%b/%Y\"),\r\n                                    c(\"17/Nov/18\"        , \"%d/%b/%y\"),\r\n                                    \r\n                                    c(\"17/November/2018\" , \"%d/%B/%Y\"),\r\n                                    c(\"17/November/18\"   , \"%d/%B/%y\"),\r\n                                    \r\n                                    \r\n                                    c(\"17-11-2018\"       , \"%d-%m-%Y\"),\r\n                                    c(\"17-11-18\"         , \"%d-%m-%y\"),    #Which century?\r\n                                    \r\n                                    c(\"2018-11-17\"       , \"%Y-%m-%d\"),\r\n                                    c(  \"18-11-17\"       , \"%y-%m-%d\"),    #Which century?\r\n                                    \r\n                                    c(\"11-17-2018\"       , \"%m-%d-%Y\"),\r\n                                    c(\"11-17-18\"         , \"%m-%d-%y\"),    #Which century?\r\n                                    \r\n                                    c(\"17-Nov-2018\"      , \"%d-%b-%Y\"),\r\n                                    c(\"17-Nov-18\"        , \"%d-%b-%y\"),\r\n                                    \r\n                                    c(\"17-November-2018\" , \"%d-%B-%Y\"),\r\n                                    c(\"17-November-18\"   , \"%d-%B-%y\"),\r\n                                    \r\n                                    \r\n                                    c(     \"17Nov,2018\"  , \"%d%b,%Y\"),\r\n                                    c(\"17November,2018\"  , \"%d%B,%Y\")                    \r\n                                )\r\n                                \r\n                                for(i in 1:length(dateDaily)){\r\n                                    format <- dateDaily[[i]][2]\r\n                                    parsedDate <- as.POSIXct(strptime(date,format = format))\r\n                                    \r\n                                    if(!is.na(parsedDate)){\r\n                                        return(parsedDate)\r\n                                    }\r\n                                }\r\n                                \r\n                            }\r\n\r\n\r\n                            ####################################################\r\n                            # Try Month\r\n                            if(TRUE){\r\n\r\n                                dateMon = list(\r\n                                    c(\"2018M11\"       , \"%YM%m\" ),\r\n                                    c(\"2018-11\"       , \"%Y-%m\" ),\r\n                                    c(\"2018-Nov\"      , \"%Y-%b\" ),\r\n                                    c(\"2018-November\" , \"%Y-%B\" ),\r\n                                    \r\n                                    c(      \"11-2018\" , \"%m-%Y\" ),\r\n                                    c(     \"Nov-2018\" , \"%b-%Y\" ),\r\n                                    c(\"November-2018\" , \"%B-%Y\" ),\r\n                                    \r\n                                    c(\"2018/11\"       , \"%Y/%m\" ),\r\n                                    c(\"2018/Nov\"      , \"%Y/%b\" ),\r\n                                    c(\"2018/November\" , \"%Y/%B\" ),\r\n                                    \r\n                                    c(      \"11/2018\" , \"%m/%Y\" ),\r\n                                    c(     \"Nov/2018\" , \"%b/%Y\" ),\r\n                                    c(\"November/2018\" , \"%B/%Y\" ),\r\n                                    \r\n                                    c(     \"Nov,2018\" , \"%b,%Y\" ),\r\n                                    c(\"November,2018\" , \"%B,%Y\" ),\r\n                                    \r\n                                    c(\"2018,Nov\"      , \"%Y,%b\" ),\r\n                                    c(\"2018,November\" , \"%Y,%B\" )                    \r\n                                )\r\n                                \r\n                                for(i in 1:length(dateMon)){\r\n                                    format  <- dateMon[[i]][2]                    \r\n                                    parsedDate <- as.Date(as.yearmon(date,format),units=\"day\")\r\n                                \r\n                                    if(!is.na(parsedDate)){\r\n                                        return(parsedDate)\r\n                                    }\r\n                                }\r\n                            }  \r\n                            \r\n\r\n                            ####################################################\r\n                            # Try Quarter\r\n                            if(TRUE){\r\n\r\n                                dateQtr = list(\r\n                                    c(\"2018 q1\"       , \"%Y q%q\"       ),\r\n                                    c(\"2018Q1\"        , \"%YQ%q\"       ),\r\n                                    c(\"2018 Q1\"       , \"%Y Q%q\"       ),\r\n                                    c(\"2018 quarter1\" , \"%Y quarter%q\" ),\r\n                                    c(\"2018 Quarter1\" , \"%Y Quarter%q\" ),\r\n                                    \r\n                                    c(\"2018/q1\"       , \"%Y/q%q\"       ),\r\n                                    c(\"2018/Q1\"       , \"%Y/Q%q\"       ),\r\n                                    c(\"2018/quarter1\" , \"%Y/quarter%q\" ),\r\n                                    c(\"2018/Quarter1\" , \"%Y/Quarter%q\" ),\r\n                                    \r\n                                    c(\"2018-q1\"       , \"%Y-q%q\"       ),\r\n                                    c(\"2018-Q1\"       , \"%Y-Q%q\"       ),\r\n                                    c(\"2018-quarter1\" , \"%Y-quarter%q\" ),\r\n                                    c(\"2018-Quarter1\" , \"%Y-Quarter%q\" )                    \r\n                                )\r\n                                \r\n                                for(i in 1:length(dateQtr)){\r\n                                    format  <- dateQtr[[i]][2]\r\n                                    parsedDate <- as.Date(as.yearqtr(date,format),units=\"day\")\r\n                                \r\n                                    if(!is.na(parsedDate)){\r\n                                        return(parsedDate)\r\n                                    }\r\n                                }\r\n\r\n                            }  \r\n                                                       \r\n\r\n                            ####################################################\r\n                            # Try Week\r\n                            if(TRUE){\r\n\r\n                                dateWeek = list( \r\n                                    c(\"2018-W36\"       , \"%Y-W%U%u\"    ),\r\n                                    c(\"2018-w36\"       , \"%Y-w%U%u\"    ),\r\n                                    c(\"2018-Week36\"    , \"%Y-Week%U%u\" ),\r\n                                    c(\"2018-week36\"    , \"%Y-week%U%u\" ),\r\n                                    \r\n                                    c(\"2018/W36\"       , \"%Y/W%U%u\"    ),\r\n                                    c(\"2018/w36\"       , \"%Y/w%U%u\"    ),\r\n                                    c(\"2018/Week36\"    , \"%Y/Week%U%u\" ),\r\n                                    c(\"2018/week36\"    , \"%Y/week%U%u\" )                    \r\n                                )\r\n                                \r\n                                for(i in 1:length(dateWeek)){\r\n                                    date    <- paste(date,'1',sep=\"\")\r\n                                    format  <- dateWeek[[i]][2]\r\n                                    parsedDate <- as.Date(date,format)\r\n                                    \r\n                                    if(!is.na(parsedDate)){\r\n                                        return(parsedDate)\r\n                                    }\r\n                                }\r\n\r\n                            }  \r\n                          \r\n                            \r\n                            return(NA)\r\n                        }\r\n\r\n\r\n                        ####################################################\r\n                        # Calculate Frequency\r\n                        calFreq = function(Time){\r\n                            \r\n                            date1 <- as.POSIXct(parseDate(Time[1,]))\r\n                            date2 <- as.POSIXct(parseDate(Time[2,]))\r\n                            \r\n\r\n                            if(is.na(date1) || is.na(date2)){\r\n                                defaultMessage(\"Please enter a valid date format.\")\r\n                            }\r\n\r\n                            diff <- abs(\r\n                                as.numeric(\r\n                                difftime(date1,date2),\r\n                                units=\"days\"\r\n                                )\r\n                            )\r\n                            \r\n                            season     <- c(120,30,7,1)\r\n                            frequency  <- c(4,12,52,365)\r\n                            diffSeason <- abs(season-diff)\r\n                            minDiff    <- min(diffSeason)\r\n                            \r\n                            tsFreq    <- frequency[match(minDiff,diffSeason)]\r\n                            StartOff  <- 1\r\n                            Start     <- format(date1,\"%Y\")\r\n                            \r\n                            \r\n                            if(tsFreq == 4){\r\n                                StartOff  <- quarter(date1)\r\n                            }else if(tsFreq == 12){\r\n                                StartOff  <- month(date1)\r\n                            }else if(tsFreq == 52){\r\n                                StartOff  <- week(date1)\r\n                            }else if(tsFreq == 365){\r\n                                StartOff  <- yday(date1)\r\n                            }\r\n                            \r\n                            dateSettings <- c(tsFreq,StartOff,Start)\r\n                            \r\n                            return(dateSettings)\r\n\r\n                        }\r\n\r\n\r\n                        dateSettings <- calFreq(Value1)\r\n\r\n                        tsFreq    <- as.numeric(dateSettings[1]) \r\n                        StartOff  <- as.numeric(dateSettings[2])\r\n                        Start     <- as.numeric(dateSettings[3])\r\n\r\n                    },\r\n                    error=function(e){    \r\n                        defaultMessage(e) \r\n                    }\r\n                )\r\n\r\n            }\r\n            \r\n\r\n            ####################################################\r\n            # Forecast Settings\r\n            if(TRUE){\r\n                \r\n                algorithm <- \"LR\";\r\n                if(exists(\"forecastSettings_method\")){\r\n                    algorithm <- forecastSettings_method\r\n                }\r\n\r\n\r\n                split <- 0.75\r\n                if(exists(\"forecastSettings_split\")){\r\n                    split <- as.numeric(forecastSettings_split)       \r\n                }\r\n\r\n                total_Rows <- NROW(Value1)\r\n                train_Rows <- floor(split*total_Rows)\r\n                test_Rows  <- total_Rows - train_Rows\r\n\r\n\r\n                units <- max(test_Rows,tsFreq)\r\n                if(exists(\"forecastSettings_units\") && forecastSettings_units > 0){\r\n                    units <- max(min(forecastSettings_units,500),10)\r\n                }\r\n\r\n\r\n                confInterval <- FALSE\r\n                if(exists(\"forecastSettings_confInterval\")){\r\n                    confInterval <-forecastSettings_confInterval\r\n                }\r\n\r\n                \r\n                confLevel <- 0.80\r\n                if(exists(\"forecastSettings_confLevel\")){\r\n                    confLevel <- as.numeric(forecastSettings_confLevel)\r\n                }\r\n\r\n\r\n                ts_biasAdj <- FALSE\r\n                if(exists(\"forecastSettings_biasAdj\")){\r\n                    ts_biasAdj <-forecastSettings_biasAdj\r\n                }\r\n\r\n            }\r\n\r\n\r\n            ####################################################\r\n            # Model Tuning \r\n            if(TRUE){\r\n\r\n                modelTuning <- \"auto\"\r\n                if(exists(\"modelSettings_modelTuning\")){\r\n                    modelTuning <- modelSettings_modelTuning\r\n                }\r\n\r\n\r\n                ####################################################\r\n                # Exponential Smoothing\r\n                if(TRUE){\r\n\r\n                    es_errorType <- 'Z'\r\n                    if(exists(\"modelSettings_errorType\")){\r\n                        es_errorType <- modelSettings_errorType\r\n                    }\r\n\r\n\r\n                    es_trendType <- 'Z'\r\n                    if(exists(\"modelSettings_trendType\")){\r\n                        es_trendType <- modelSettings_trendType\r\n                    }\r\n                    es_ets <- paste(es_errorType,es_trendType,'N',sep=\"\")\r\n\r\n\r\n                    es_sWindow <- \"periodic\"\r\n                    if(exists(\"modelSettings_sWindow\")){\r\n                        if(modelSettings_sWindow == \"numeric\"){\r\n                            \r\n                            es_sWindow <- 10\r\n                            if(exists(\"modelSettings_sWindowValue\")){\r\n                                es_sWindow <- modelSettings_sWindowValue\r\n                            }\r\n\r\n                        }else{\r\n                            es_sWindow <- \"periodic\"\r\n                        }\r\n                    }\r\n\r\n\r\n                    es_tWindow <- NULL\r\n                    if(exists(\"modelSettings_tWindow\")){\r\n                        if(modelSettings_tWindow == \"numeric\"){\r\n                            \r\n                            es_tWindow <- 10\r\n                            if(exists(\"modelSettings_tWindowValue\")){\r\n                                es_tWindow <- modelSettings_tWindowValue\r\n                            }\r\n\r\n                        }else{\r\n                            es_tWindow <- NULL\r\n                        }\r\n                    }\r\n\r\n\r\n                    es_robust <- \"false\"                \r\n                    if(exists(\"modelSettings_robust\")){\r\n                        es_robust <- modelSettings_robust                                     \r\n                    }                \r\n\r\n                }\r\n\r\n\r\n                ####################################################\r\n                # Neural Networks\r\n                if(TRUE){\r\n\r\n                    nn_decay <- 0.009\r\n                    if(exists(\"modelSettings_decay\") && modelSettings_decay <= 1 && modelSettings_decay >= 0){\r\n                        nn_decay <- modelSettings_decay\r\n                    }\r\n\r\n\r\n                    nn_maxit <- 200\r\n                    if(exists(\"modelSettings_maxit\") && modelSettings_maxit > 0){\r\n                        nn_maxit <- modelSettings_maxit\r\n                    }\r\n\r\n\r\n                    nn_size <- 20\r\n                    if(exists(\"modelSettings_size\") && modelSettings_size >0){\r\n                        nn_size <- modelSettings_size\r\n                    }\r\n\r\n\r\n                    nn_repeats <- 20\r\n                    if(exists(\"modelSettings_repeats\") && modelSettings_repeats >0){\r\n                        nn_repeats <- modelSettings_repeats\r\n                    }\r\n                \r\n                }\r\n\r\n\r\n                ####################################################\r\n                # ARIMA\r\n                if(TRUE){\r\n\r\n                    ####################################################\r\n\r\n                    ar_maxp  <- 3\r\n                    if(exists(\"modelSettings_maxp\")){\r\n                        ar_maxp <- modelSettings_maxp\r\n                    }\r\n\r\n\r\n                    ar_maxq  <- 3\r\n                    if(exists(\"modelSettings_maxq\")){\r\n                        ar_maxq <- modelSettings_maxq\r\n                    }\r\n\r\n\r\n                    ar_maxd  <- 2\r\n                    if(exists(\"modelSettings_maxd\")){\r\n                        ar_maxd <- modelSettings_maxd\r\n                    } \r\n\r\n                    ####################################################\r\n\r\n                    ar_maxP <- 2\r\n                    if(exists(\"modelSettings_maxP\")){\r\n                        ar_maxP <- modelSettings_maxP\r\n                    }\r\n\r\n\r\n                    ar_maxQ  <- 2\r\n                    if(exists(\"modelSettings_maxQ\")){\r\n                        ar_maxQ <- modelSettings_maxQ\r\n                    }\r\n\r\n\r\n                    ar_maxD  <- 1\r\n                    if(exists(\"modelSettings_maxD\")){\r\n                        ar_maxD <- modelSettings_maxD\r\n                    } \r\n\r\n                    ####################################################\r\n\r\n                    ar_seasonal  <- TRUE\r\n                    if(exists(\"modelSettings_seasonal\")){\r\n                        ar_seasonal <- modelSettings_seasonal\r\n                    }\r\n                        \r\n\r\n                    ar_allowDrift <- FALSE\r\n                    if(exists(\"modelSettings_allowDrift\")){\r\n                        ar_allowDrift <- modelSettings_allowDrift\r\n                    }\r\n\r\n\r\n                    ar_allowMean <- FALSE\r\n                    if(exists(\"modelSettings_allowMean\")){\r\n                        ar_allowMean <- modelSettings_allowMean\r\n                    }\r\n\r\n\r\n                    ar_stepWise <- TRUE  \r\n                    if(exists(\"modelSettings_stepWise\")){\r\n                        ar_stepWise <- modelSettings_stepWise\r\n                    }\r\n\r\n                }\r\n\r\n            }\r\n\r\n\r\n            ####################################################\r\n            # Plot Settings \r\n            if(TRUE){\r\n\r\n                ####################################################\r\n                # Plot Settings \r\n                if(TRUE){\r\n\r\n                    title <- 'Forecast'\r\n                    if(exists(\"plotSettings_title\")){\r\n                        title <- plotSettings_title\r\n                    }\r\n\r\n\r\n                    plotColor <- \"#FFFFFF\"\r\n                    if(exists(\"plotSettings_plotColor\")){\r\n                        plotColor <- plotSettings_plotColor\r\n                    }                \r\n\r\n                    ####################################################\r\n\r\n                    forecastLineCol <- \"#F2C80F\"\r\n                    if(exists(\"plotSettings_fline\")){\r\n                        forecastLineCol <- plotSettings_fline\r\n                    }\r\n\r\n\r\n                    historyLineCol <- \"#01B8AA\"\r\n                    if(exists(\"plotSettings_hline\")){\r\n                        historyLineCol <- plotSettings_hline\r\n                    }\r\n\r\n                   confRibCol <- \"#F9F9F9\"\r\n                    if(exists(\"plotSettings_cline\")){\r\n                        confRibCol <- plotSettings_cline\r\n                    }\r\n\r\n                    ####################################################\r\n\r\n                    forecastLineText <- \"Predicted\"\r\n                    if(exists(\"plotSettings_flineText\")){\r\n                        forecastLineText <- plotSettings_flineText\r\n                    }\r\n\r\n\r\n                    historyLineText <- \"Observed\"\r\n                    if(exists(\"plotSettings_hlineText\")){\r\n                        historyLineText <- plotSettings_hlineText\r\n                    }\r\n\r\n                }\r\n\r\n\r\n                ####################################################\r\n                # X axis settings\r\n                if(TRUE){\r\n\r\n                    xTitle <- 'Time'\r\n                    if(exists(\"xaxisSettings_xTitle\")){\r\n                        xTitle <- xaxisSettings_xTitle\r\n                    }\r\n\r\n\r\n                    xZeroline <- TRUE\r\n                    if(exists(\"xaxisSettings_xZeroline\")){\r\n                        xZeroline <- xaxisSettings_xZeroline\r\n                    }\r\n\r\n\r\n                    xLabels <- TRUE\r\n                    if(exists(\"xaxisSettings_xLabels\")){\r\n                        xLabels <- xaxisSettings_xLabels\r\n                    }\r\n\r\n                    ####################################################\r\n\r\n                    xGrid <- TRUE\r\n                    if(exists(\"xaxisSettings_xGrid\")){\r\n                        xGrid <- xaxisSettings_xGrid\r\n                    }\r\n\r\n\r\n                    xGridCol <- \"#BFC4C5\"\r\n                    if(exists(\"xaxisSettings_xGridCol\")){\r\n                        xGridCol <- xaxisSettings_xGridCol\r\n                    }\r\n\r\n\r\n                    xGridWidth <- 0.1\r\n                    if(exists(\"xaxisSettings_xGridWidth\")){\r\n                        xGridWidth <- min(xaxisSettings_xGridWidth,20)\r\n                    }\r\n\r\n                    ####################################################\r\n\r\n                    xAxisBaseLine <- TRUE\r\n                    if(exists(\"xaxisSettings_xAxisBaseLine\")){\r\n                        xAxisBaseLine <- xaxisSettings_xAxisBaseLine\r\n                    }\r\n\r\n\r\n                    xAxisBaseLineCol <- \"#000000\"\r\n                    if(exists(\"xaxisSettings_xAxisBaseLineCol\")){\r\n                        xAxisBaseLineCol <- xaxisSettings_xAxisBaseLineCol\r\n                    }\r\n\r\n\r\n                    xAxisBaseLineWidth <- 4\r\n                    if(exists(\"xaxisSettings_xAxisBaseLineWidth\")){\r\n                        xAxisBaseLineWidth <- min(xaxisSettings_xAxisBaseLineWidth,20)\r\n                    }\r\n\r\n                }\r\n\r\n\r\n                ####################################################\r\n                # Y axis settings \r\n                if(TRUE){\r\n\r\n                    yTitle <- 'Values'\r\n                    if(exists(\"yaxisSettings_yTitle\")){\r\n                        yTitle <- yaxisSettings_yTitle\r\n                    }                     \r\n\r\n\r\n                    yZeroline <- TRUE\r\n                    if(exists(\"yaxisSettings_yZeroline\")){\r\n                        yZeroline <- yaxisSettings_yZeroline\r\n                    }\r\n\r\n\r\n                    yLabels <- TRUE\r\n                    if(exists(\"yaxisSettings_yLabels\")){\r\n                        yLabels <- yaxisSettings_yLabels\r\n                    }\r\n\r\n                    ####################################################\r\n\r\n                    yGrid <- TRUE\r\n                    if(exists(\"yaxisSettings_yGrid\")){\r\n                        yGrid <- yaxisSettings_yGrid\r\n                    }\r\n\r\n\r\n                    yGridCol <- \"#BFC4C5\"\r\n                    if(exists(\"yaxisSettings_yGridCol\")){\r\n                        yGridCol <- yaxisSettings_yGridCol\r\n                    }\r\n\r\n\r\n                    yGridWidth <- 0.1\r\n                    if(exists(\"yaxisSettings_yGridWidth\")){\r\n                        yGridWidth <- min(yaxisSettings_yGridWidth,20)\r\n                    }\r\n\r\n                    ####################################################\r\n\r\n                    yAxisBaseLine <- TRUE\r\n                    if(exists(\"yaxisSettings_yAxisBaseLine\")){\r\n                        yAxisBaseLine <- yaxisSettings_yAxisBaseLine\r\n                    }\r\n\r\n\r\n                    yAxisBaseLineCol <- \"#000000\"\r\n                    if(exists(\"yaxisSettings_yAxisBaseLineCol\")){\r\n                        yAxisBaseLineCol <- yaxisSettings_yAxisBaseLineCol\r\n                    }\r\n\r\n\r\n                    yAxisBaseLineWidth <- 4\r\n                    if(exists(\"yaxisSettings_yAxisBaseLineWidth\")){\r\n                        yAxisBaseLineWidth <- min(yaxisSettings_yAxisBaseLineWidth,20)\r\n                    }\r\n\r\n                }\r\n\r\n\r\n                ####################################################\r\n                #Define axis aesthetics\r\n                if(TRUE){\r\n\r\n                    ax <- list(\r\n                        title          = xTitle,\r\n                        zeroline       = xZeroline,\r\n                        showticklabels = xLabels,\r\n                        \r\n                        showgrid       = xGrid,\r\n                        gridcolor      = toRGB(xGridCol),\r\n                        gridwidth      = xGridWidth,\r\n                        \r\n                        showline       = xAxisBaseLine,\r\n                        linecolor      = toRGB(xAxisBaseLineCol),\r\n                        linewidth      = xAxisBaseLineWidth\r\n                    )\r\n\r\n\r\n                    ay <- list(\r\n                        title          = yTitle,\r\n                        zeroline       = yZeroline,\r\n                        showticklabels = yLabels,\r\n                        \r\n                        showgrid       = yGrid,\r\n                        gridcolor      = toRGB(yGridCol),\r\n                        gridwidth      = yGridWidth,\r\n                        \r\n                        showline       = yAxisBaseLine,\r\n                        linecolor      = toRGB(yAxisBaseLineCol),\r\n                        linewidth      = yAxisBaseLineWidth\r\n                    )\r\n\r\n                }\r\n\r\n            }\r\n\r\n        },\r\n        error=function(e){    \r\n            defaultMessage(e) \r\n        }  \r\n    )\r\n\r\n}\r\n\r\n\r\n\r\n####################################################\r\n# Common code\r\nif(TRUE){\r\n\r\n    tryCatch(\r\n        {\r\n\r\n            ####################################################\r\n            # Prepare Time Sries      \r\n            if(TRUE){\r\n\r\n                tsSeries <- ts(\r\n                    data      = Value2[1:train_Rows,],\r\n                    start     = c(Start,StartOff),\r\n                    frequency = tsFreq\r\n                )                \r\n\r\n                tsSeriesNew <- ts(\r\n                    data      = Value2,\r\n                    start     = c(Start,StartOff),\r\n                    frequency = tsFreq\r\n                )\r\n\r\n            }\r\n\r\n\r\n            ####################################################\r\n            # Calculate Forecasted Dates\r\n            if(TRUE){\r\n\r\n                tsLength  <- length(tsSeries)\r\n\r\n                forecastedDates <- seq(\r\n                    time(tsSeries)[tsLength],\r\n                    by  = time(tsSeries)[tsLength] - time(tsSeries)[tsLength-1], \r\n                    len = units+1\r\n                )\r\n                \r\n            }\r\n\r\n\r\n            ####################################################\r\n            # Calculate Box Cox Transformation parameter\r\n            if(TRUE){\r\n\r\n                ts_lambda <- NULL\r\n                if(exists(\"forecastSettings_lambda\")){\r\n\r\n                    if(forecastSettings_lambda == \"NULL\"){\r\n                        ts_lambda <- NULL\r\n                    }else if(forecastSettings_lambda == \"auto\"){\r\n                        ts_lambda <- BoxCox.lambda(\r\n                            tsSeries,\r\n                            method = \"loglik\", \r\n                            lower  = -1, \r\n                            upper  = 2\r\n                        )\r\n                    }else{\r\n                        if(exists(\"forecastSettings_lambdaValue\")){\r\n                            ts_lambda <- max(-5,min(forecastSettings_lambdaValue,5))\r\n                        }\r\n                    }             \r\n\r\n                }\r\n\r\n            }\r\n\r\n        },\r\n        error=function(e){    \r\n            defaultMessage(e) \r\n        } \r\n    )\r\n\r\n}\r\n\r\n\r\n\r\n#-------------------------------------------------------------------------------------------------------------------\r\n\r\n\r\n\r\n####################################################\r\n# Exponential Smoothing\r\nif(algorithm == \"ES\"){\r\n\r\n    tryCatch(\r\n        {\r\n\r\n            ####################################################\r\n            # Less than 2 periods\r\n            if(length(tsSeries) <= tsFreq*2){\r\n                defaultMessage(\"Not enough data points (should be more than 2*frequency) \\n Increase split point or provide more data.\")\r\n            }\r\n\r\n\r\n            ####################################################\r\n            # Train model and make prediction\r\n            if(TRUE){\r\n\r\n                if(modelTuning == \"auto\"){\r\n\r\n                    tsPred <- stlf(\r\n                        tsSeries,\r\n                        \r\n                        h     = units,\r\n                        level = confLevel,\r\n\r\n                        lambda  = ts_lambda,\r\n                        biasadj = ts_biasAdj\r\n                    )\r\n\r\n                }else{\r\n\r\n                    tsPred <- stlf(\r\n                        tsSeries,\r\n                        \r\n                        etsmodel = es_ets,\r\n                        s.window = es_sWindow,\r\n                        t.window = es_tWindow,\r\n                        robust   = es_robust,\r\n                        \r\n                        h     = units,\r\n                        level = confLevel,\r\n\r\n                        lambda  = ts_lambda,\r\n                        biasadj = ts_biasAdj\r\n                    )\r\n\r\n                }      \r\n\r\n            } \r\n            \r\n        },\r\n        error=function(e){    \r\n            defaultMessage(e)        \r\n        }\r\n    )\r\n\r\n}\r\n\r\n\r\n\r\n####################################################\r\n# Linear Regression\r\nif(algorithm == \"LR\"){\r\n\r\n    tryCatch(\r\n        {\r\n            \r\n            ####################################################\r\n            # Train model and make prediction\r\n            if(TRUE){\r\n\r\n                tsModel <- tslm(\r\n                    tsSeries ~ (0+trend+season),\r\n\r\n                    lambda  = ts_lambda,\r\n                    biasadj = ts_biasAdj\r\n                )\r\n\r\n                tsPred  <- forecast(\r\n                    tsModel,\r\n                    h     = units,\r\n                    level = confLevel\r\n                )\r\n\r\n            }\r\n            \r\n        },\r\n        error=function(e){    \r\n            defaultMessage(e)        \r\n        }\r\n    )\r\n\r\n}\r\n\r\n\r\n\r\n####################################################\r\n# Neural Networks\r\nif(algorithm == \"NN\"){\r\n\r\n    tryCatch(\r\n        {\r\n            \r\n            ####################################################\r\n            # Train model and make prediction\r\n            if(TRUE){\r\n                \r\n                if(modelTuning == \"auto\"){\r\n\r\n                    tsModel <- nnetar(\r\n                        tsSeries,\r\n\r\n                        lambda  = ts_lambda,\r\n                        biasadj = ts_biasAdj\r\n                    )\r\n                    \r\n                }else{\r\n\r\n                    tsModel  <- nnetar(\r\n                        tsSeries,\r\n\r\n                        decay   = nn_decay,\r\n                        maxit   = nn_maxit,\r\n                        size    = nn_size,\r\n                        repeats = nn_repeats,     \r\n\r\n                        lambda  = ts_lambda,\r\n                        biasadj = ts_biasAdj\r\n                    )\r\n\r\n                }\r\n                \r\n                tsPred  <- forecast(\r\n                    tsModel,\r\n                    h     = units,\r\n                    PI    = confInterval,\r\n                    level = confLevel\r\n                )\r\n\r\n            }\r\n    \r\n        },\r\n        error=function(e){    \r\n            defaultMessage(e)        \r\n        }\r\n    )\r\n\r\n}\r\n\r\n\r\n\r\n####################################################\r\n# ARIMA \r\nif(algorithm == \"ARIMA\"){\r\n\r\n    tryCatch(\r\n        {\r\n\r\n            ####################################################\r\n            # Train model and make prediction\r\n            if(TRUE){\r\n\r\n                if(modelTuning == \"auto\"){\r\n\r\n                    tsModel <- auto.arima(\r\n                        tsSeries,\r\n\r\n                        lambda  = ts_lambda,\r\n                        biasadj = ts_biasAdj\r\n                    )\r\n\r\n                }else{\r\n\r\n                    tsModel <- auto.arima(\r\n                        tsSeries, \r\n                        \r\n                        max.p = ar_maxp,\r\n                        max.q = ar_maxq, \r\n                        max.d = ar_maxd, \r\n                        \r\n                        max.P = ar_maxP, \r\n                        max.Q = ar_maxQ,\r\n                        max.D = ar_maxD,\r\n                        \r\n                        seasonal   = ar_seasonal,\r\n                        allowdrift = ar_allowDrift, \r\n                        allowmean  = ar_allowMean,        \r\n                        stepwise = ar_stepWise,\r\n\r\n                        lambda  = ts_lambda,\r\n                        biasadj = ts_biasAdj\r\n                    )\r\n\r\n                }         \r\n                \r\n                tsPred  <- forecast(\r\n                    tsModel,\r\n                    h     = units,\r\n                    level = confLevel\r\n                )\r\n\r\n            }            \r\n\r\n        },\r\n        error=function(e){    \r\n            defaultMessage(e)        \r\n        }\r\n    )\r\n\r\n}\r\n\r\n\r\n\r\n#-------------------------------------------------------------------------------------------------------------------\r\n\r\n\r\n\r\n####################################################\r\n#Plot\r\nif(TRUE){\r\n\r\n    tryCatch(\r\n        {\r\n\r\n            ####################################################\r\n            # Calculate Accuracy\r\n            if(TRUE){\r\n\r\n                if(test_Rows==0){\r\n                    titleText <- paste(title,' (',algorithm,')',sep=\"\")\r\n                }else{\r\n                    actual <- tsSeriesNew[train_Rows+1:test_Rows]\r\n                    pred   <- tsPred$mean\r\n                    \r\n                    len    <- min(length(actual),length(pred))\r\n                    actual <- actual[1:len]\r\n                    pred   <- pred[1:len]\r\n                    \r\n                    \r\n                    a  <- round(accuracy(pred,actual),2)\r\n                    \r\n                    MEAN   <- round(mean(tsSeriesNew),2)\r\n                    RMSE   <- a[2]\r\n                    MAPE   <- a[5]\r\n\r\n                    titleText <- paste(title,' (',algorithm,')',sep=\"\")\r\n                    titleText <- paste(titleText,'\\nERROR: ',MEAN,' +/- ',RMSE,sep=\"\")\r\n                    titleText <- paste(titleText,'\\nMAPE: ' ,MAPE,sep=\"\")\r\n                }\r\n\r\n            }\r\n\r\n\r\n            ####################################################\r\n            # Plot Parameters\r\n            if(TRUE){\r\n        \r\n                len <- length(tsPred$mean)\r\n                \r\n                tsPredMean          <- list(rep(0,len+1))\r\n                tsPredMean          <- tsPredMean[[1]]\r\n                tsPredMean[1]       <- tsSeries[tsLength] \r\n                tsPredMean[1:len+1] <- tsPred$mean\r\n\r\n                if(confInterval == TRUE){\r\n                    \r\n                    tsPredLower          <- list(rep(0,len+1))\r\n                    tsPredLower          <- tsPredLower[[1]]\r\n                    tsPredLower[1]       <- tsSeries[tsLength] \r\n                    tsPredLower[1:len+1] <- tsPred$lower\r\n                    \r\n                    tsPredUpper          <- list(rep(0,len+1))\r\n                    tsPredUpper          <- tsPredUpper[[1]]\r\n                    tsPredUpper[1]       <- tsSeries[tsLength] \r\n                    tsPredUpper[1:len+1] <- tsPred$upper\r\n                \r\n                    ribbonFrame           <- data.frame(forecastedDates,tsPredLower,tsPredUpper)\r\n                    colnames(ribbonFrame) <- c(\"xValues\",\"yMin\",\"yMax\") \r\n\r\n                }\r\n                \r\n            }                \r\n           \r\n            \r\n            ####################################################\r\n            # Plot \r\n            if(TRUE){\r\n\r\n                if(confInterval == TRUE){\r\n\r\n                    p <- plot_ly(\r\n                    )%>%                      \r\n                    add_ribbons(\r\n                        x     = ribbonFrame$xValues,\r\n                        ymin  = ribbonFrame$yMin,\r\n                        ymax  = ribbonFrame$yMax,\r\n                        color = I(confRibCol),\r\n                        name  = \"Confidence\"\r\n                    )%>%     \r\n                    add_lines(\r\n                        x     = time(tsSeries), \r\n                        y     = tsSeries,\r\n                        color = I(historyLineCol), \r\n                        name  = historyLineText \r\n                    )%>%             \r\n                    add_lines(\r\n                        x     = forecastedDates, \r\n                        y     = tsPredMean, \r\n                        color = I(forecastLineCol), \r\n                        name  = forecastLineText\r\n                    )%>%                    \r\n                    layout(\r\n                        title  = titleText,\r\n                        titlefont = list(\r\n                            size = 12\r\n                        ),\r\n                        xaxis  = ax, \r\n                        yaxis  = ay,\r\n                        textposition = 'middle',\r\n                        margin = list(\r\n                            l = 60,\r\n                            r = 0,\r\n                            t = 80,\r\n                            b = 60\r\n                        ),   \r\n                        font = list(\r\n                            family = \"Arial\",\r\n                            size = 10\r\n                        ),           \r\n                        plot_bgcolor = plotColor\r\n                    )\r\n\r\n                }else{\r\n\r\n                    p <- plot_ly(\r\n\r\n                    )%>%\r\n                    add_lines(\r\n                        x     = time(tsSeries), \r\n                        y     = tsSeries,\r\n                        color = I(historyLineCol), \r\n                        name  = historyLineText \r\n                    )%>% \r\n                    add_lines(\r\n                        x     = forecastedDates, \r\n                        y     = tsPredMean, \r\n                        color = I(forecastLineCol), \r\n                        name  = forecastLineText\r\n                    )%>%\r\n                    layout(\r\n                        title  = titleText,\r\n                        titlefont = list(\r\n                            size = 12\r\n                        ),\r\n                        xaxis  = ax, \r\n                        yaxis  = ay,\r\n                        textposition = 'middle',\r\n                        margin = list(\r\n                            l = 60,\r\n                            r = 0,\r\n                            t = 80,\r\n                            b = 60\r\n                        ),   \r\n                        font = list(\r\n                            family = \"Arial\",\r\n                            size = 10\r\n                        ),           \r\n                        plot_bgcolor = plotColor\r\n                    )                     \r\n\r\n                }\r\n\r\n                internalSaveWidget(p, 'out.html');\r\n                quit()\r\n\r\n            }\r\n        \r\n        },\r\n        error=function(e){    \r\n            defaultMessage(e)        \r\n        }\r\n    )\r\n\r\n}   "
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "forecastSettings": {
+                "displayName": "Forecast Settings",
+                "description": "Settings to control the forecast",
+                "properties": {
+                    "method": {
+                        "displayName": "Algorithm",
+                        "description": "Method of forecast",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Exponential Smoothing",
+                                    "value": "ES"
+                                },
+                                {
+                                    "displayName": "Linear Regression",
+                                    "value": "LR"
+                                },
+                                {
+                                    "displayName": "Neural Networks",
+                                    "value": "NN"
+                                },
+                                {
+                                    "displayName": "ARIMA",
+                                    "value": "ARIMA"
+                                }
+                            ]
+                        }
+                    },
+                    "units": {
+                        "displayName": "Forecast Units",
+                        "description": "Number of units till which data values would be predicted.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "split": {
+                        "displayName": "Split Point",
+                        "description": "The point from which forecast has to be started.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "0.50",
+                                    "value": "0.5"
+                                },
+                                {
+                                    "displayName": "0.55",
+                                    "value": "0.55"
+                                },
+                                {
+                                    "displayName": "0.60",
+                                    "value": "0.6"
+                                },
+                                {
+                                    "displayName": "0.65",
+                                    "value": "0.65"
+                                },
+                                {
+                                    "displayName": "0.70",
+                                    "value": "0.7"
+                                },
+                                {
+                                    "displayName": "0.75",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "displayName": "0.80",
+                                    "value": "0.8"
+                                },
+                                {
+                                    "displayName": "0.85",
+                                    "value": "0.85"
+                                },
+                                {
+                                    "displayName": "0.90",
+                                    "value": "0.9"
+                                },
+                                {
+                                    "displayName": "0.95",
+                                    "value": "0.95"
+                                },
+                                {
+                                    "displayName": "1.00",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "confLevel": {
+                        "displayName": "Confidence levels",
+                        "description": "Confidence levels for the plot",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "50%",
+                                    "value": "0.5"
+                                },
+                                {
+                                    "displayName": "55%",
+                                    "value": "0.55"
+                                },
+                                {
+                                    "displayName": "60%",
+                                    "value": "0.6"
+                                },
+                                {
+                                    "displayName": "65%",
+                                    "value": "0.65"
+                                },
+                                {
+                                    "displayName": "70%",
+                                    "value": "0.7"
+                                },
+                                {
+                                    "displayName": "75%",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "displayName": "80%",
+                                    "value": "0.8"
+                                },
+                                {
+                                    "displayName": "85%",
+                                    "value": "0.85"
+                                },
+                                {
+                                    "displayName": "90%",
+                                    "value": "0.9"
+                                },
+                                {
+                                    "displayName": "95%",
+                                    "value": "0.95"
+                                },
+                                {
+                                    "displayName": "99%",
+                                    "value": "0.99"
+                                }
+                            ]
+                        }
+                    },
+                    "confInterval": {
+                        "displayName": "Confidence intervals",
+                        "description": "Turn confidence intervals true or false",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lambda": {
+                        "displayName": "Lambda",
+                        "description": "Lambda is the Box-Cox transformation parameter. Apply this transformation if the seasonality varies with the trend of the series.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Manual",
+                                    "value": "manual"
+                                },
+                                {
+                                    "displayName": "NULL",
+                                    "value": "NULL"
+                                }
+                            ]
+                        }
+                    },
+                    "lambdaValue": {
+                        "displayName": "Lambda Value",
+                        "description": "Enter the Box-Cox transformation parameter.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "biasAdj": {
+                        "displayName": "Bias Adjusted",
+                        "description": "When using Box-Cox transformation, a regular back transformation will result in median forecasts. Set Bias Adjusted = TRUE, to produce mean forecasts.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "modelSettings": {
+                "displayName": "Model Settings",
+                "description": "Choose model parameters",
+                "properties": {
+                    "modelTuning": {
+                        "displayName": "Model Tuning",
+                        "description": "Select model tuning option",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Manual",
+                                    "value": "manual"
+                                }
+                            ]
+                        }
+                    },
+                    "decay": {
+                        "displayName": "Decay",
+                        "description": "Decay in weights after each iteration, so that weights don't grow extremely large after successive computations. Should be between 0 to 1.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxit": {
+                        "displayName": "Maximum Iterations",
+                        "description": "Maximum number of iterations to train the neural network in each epoch.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "size": {
+                        "displayName": "Size",
+                        "description": "Number of nodes in the hidden layer",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "repeats": {
+                        "displayName": "Repeats",
+                        "description": "Number of epochs for training the network.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxp": {
+                        "displayName": "max.p",
+                        "description": "The maximal order of the autoregressive part",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxq": {
+                        "displayName": "max.q",
+                        "description": "The maximal order of the moving average component",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxd": {
+                        "displayName": "max.d",
+                        "description": "The maximal degree of the differentiation",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxP": {
+                        "displayName": "max.P",
+                        "description": "The maximal order of the seasonal autoregressive component",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxQ": {
+                        "displayName": "max.Q",
+                        "description": "The maximal order of the seasonal moving average component",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxD": {
+                        "displayName": "max.D",
+                        "description": "The maximal degree of the seasonal differentiation",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "seasonal": {
+                        "displayName": "Seasonal",
+                        "description": "If FALSE, restricts search to non-seasonal models.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "allowDrift": {
+                        "displayName": "Allow Drift",
+                        "description": "If TRUE, models with drift terms are considered.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "allowMean": {
+                        "displayName": "Allow Mean",
+                        "description": "If TRUE, models with a non-zero mean are considered.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "stepWise": {
+                        "displayName": "Stepwise Selection",
+                        "description": "If TRUE, will do stepwise selection (faster). Otherwise, it searches over all models. Non-stepwise selection can be very slow, especially for seasonal models.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "errorType": {
+                        "displayName": "Error Type",
+                        "description": "This option controls how the effect of the nearest prior periods is modeled.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "Z"
+                                },
+                                {
+                                    "displayName": "Additive",
+                                    "value": "A"
+                                },
+                                {
+                                    "displayName": "Multiplicative",
+                                    "value": "M"
+                                }
+                            ]
+                        }
+                    },
+                    "trendType": {
+                        "displayName": "Trend Type",
+                        "description": " This controls how the effect of trend is modeled.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "Z"
+                                },
+                                {
+                                    "displayName": "Additive",
+                                    "value": "A"
+                                },
+                                {
+                                    "displayName": "Multiplicative",
+                                    "value": "M"
+                                }
+                            ]
+                        }
+                    },
+                    "sWindow": {
+                        "displayName": "s.window",
+                        "description": "Either the character string \"periodic\" or the span (in lags) of the loess window for seasonal extraction.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Periodic",
+                                    "value": "periodic"
+                                },
+                                {
+                                    "displayName": "Numeric",
+                                    "value": "numeric"
+                                }
+                            ]
+                        }
+                    },
+                    "sWindowValue": {
+                        "displayName": "s.window Value",
+                        "description": "Numeric Value for s.window",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tWindow": {
+                        "displayName": "t.window",
+                        "description": "A number to control the smoothness of the trend.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "NULL",
+                                    "value": "NULL"
+                                },
+                                {
+                                    "displayName": "Numeric",
+                                    "value": "numeric"
+                                }
+                            ]
+                        }
+                    },
+                    "tWindowValue": {
+                        "displayName": "t.window Value",
+                        "description": "Numeric Value for t.window",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "robust": {
+                        "displayName": "Robust",
+                        "description": "Logical indicating if robust fitting be used in the loess procedure.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "plotSettings": {
+                "displayName": "Plot Settings",
+                "description": "Settings plot appereance",
+                "properties": {
+                    "title": {
+                        "displayName": "Title",
+                        "description": "Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "plotColor": {
+                        "displayName": "Plot background color",
+                        "description": "Plot background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hline": {
+                        "displayName": "Observed",
+                        "description": "Observation line color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fline": {
+                        "displayName": "Predicted",
+                        "description": "Forecast line color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cline": {
+                        "displayName": "Confidence",
+                        "description": "Confidence ribbon color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hlineText": {
+                        "displayName": "Observation name",
+                        "description": "Observation line name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "flineText": {
+                        "displayName": "Prediction name",
+                        "description": "Prediction line name",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "xaxisSettings": {
+                "displayName": "X axis Settings",
+                "description": "Appereance settings for x axis",
+                "properties": {
+                    "xTitle": {
+                        "displayName": "X title",
+                        "description": "X title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "xZeroline": {
+                        "displayName": "X zeroline",
+                        "description": "X zeroline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xLabels": {
+                        "displayName": "X labels",
+                        "description": "X labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xGrid": {
+                        "displayName": "X gridlines",
+                        "description": "X gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xGridCol": {
+                        "displayName": "X grid color",
+                        "description": "color of x grid lines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xGridWidth": {
+                        "displayName": "X grid width",
+                        "description": "Width of x grid lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xAxisBaseLine": {
+                        "displayName": "X base line",
+                        "description": "X base line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xAxisBaseLineCol": {
+                        "displayName": "X base line color",
+                        "description": "Color of x axis base line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xAxisBaseLineWidth": {
+                        "displayName": "X base line width",
+                        "description": "Width of x axis base line",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "yaxisSettings": {
+                "displayName": "Y axis Settings",
+                "description": "Appereance settings for y axis",
+                "properties": {
+                    "yTitle": {
+                        "displayName": "Y title",
+                        "description": "Y title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "yZeroline": {
+                        "displayName": "Y zeroline",
+                        "description": "Y zeroline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yLabels": {
+                        "displayName": "Y label",
+                        "description": "Y label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yGrid": {
+                        "displayName": "Y grid lines",
+                        "description": "Y grid lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yGridCol": {
+                        "displayName": "Y grid line color",
+                        "description": "Color of y grid lines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "yGridWidth": {
+                        "displayName": "Y grid line width",
+                        "description": "Width of y grid lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "yAxisBaseLine": {
+                        "displayName": "Y base line",
+                        "description": "Y base line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisBaseLineCol": {
+                        "displayName": "Y base line color",
+                        "description": "Color of y base line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "yAxisBaseLineWidth": {
+                        "displayName": "Y base line width",
+                        "description": "Width of y base line",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "XML",
+                "displayName": "XML",
+                "url": "https://cran.r-project.org/web/packages/XML/index.html"
+            },
+            {
+                "name": "corrplot",
+                "displayName": "corrplot",
+                "url": "https://cran.r-project.org/web/packages/corrplot/index.html"
+            },
+            {
+                "name": "dbscan",
+                "displayName": "dbscan",
+                "url": "https://cran.r-project.org/web/packages/dbscan/index.html"
+            },
+            {
+                "name": "forecast",
+                "displayName": "forecast",
+                "url": "https://cran.r-project.org/web/packages/forecast/index.html"
+            },
+            {
+                "name": "Rcpp",
+                "displayName": "Rcpp",
+                "url": "https://cran.r-project.org/web/packages/Rcpp/index.html"
+            },
+            {
+                "name": "graphics",
+                "displayName": "graphics",
+                "url": "https://cran.r-project.org/web/packages/graphics/index.html"
+            },
+            {
+                "name": "stats",
+                "displayName": "stats",
+                "url": "https://cran.r-project.org/web/packages/stats/index.html"
+            },
+            {
+                "name": "methods",
+                "displayName": "methods",
+                "url": "https://cran.r-project.org/web/packages/methods/index.html"
+            },
+            {
+                "name": "xts",
+                "displayName": "xts",
+                "url": "https://cran.r-project.org/web/packages/xts/index.html"
+            },
+            {
+                "name": "zoo",
+                "displayName": "zoo",
+                "url": "https://cran.r-project.org/web/packages/zoo/index.html"
+            },
+            {
+                "name": "lubridate",
+                "displayName": "lubridate",
+                "url": "https://cran.r-project.org/web/packages/lubridate/index.html"
+            }
+        ]
+    },
+    "stringResources": {}
+}

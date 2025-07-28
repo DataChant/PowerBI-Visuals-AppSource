@@ -1,0 +1,232 @@
+{
+    "visual": {
+        "name": "FacetKey",
+        "displayName": "Facet Key",
+        "guid": "FacetKey1642434105454",
+        "visualClassName": "FacetsVisual",
+        "description": "This visual is currently in beta testing and is undergoing active development. Facet Key (right) displays the most common matches in facets of a document set, indicating how many documents match each facet value. It can also be used to interpret icon mappings in linked visuals. Click facet values to highlight matches in linked visuals, or invoke highlighting from a linked visual to see top matches in the highlighted set. Facet Key is designed for use with Cluster Map (left) and Strippet Browser.",
+        "supportUrl": "http://community.powerbi.com",
+        "gitHubUrl": "https://github.com/Microsoft/PowerBI-visuals-FacetKey"
+    },
+    "author": {
+        "name": "Microsoft (experimental)",
+        "email": "msrvizsupport@microsoft.com"
+    },
+    "apiVersion": "1.11.0",
+    "assets": {
+        "icon": "assets/icon.svg",
+        "thumbnail": "assets/thumbnail.png",
+        "screenshot": "assets/screenshot.png"
+    },
+    "style": "style/facets.scss",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "facet",
+                "kind": 0,
+                "displayName": "Facet",
+                "description": "Facet instances are grouped by this field."
+            },
+            {
+                "name": "facetInstance",
+                "kind": 0,
+                "displayName": "Instance",
+                "description": "Facet instance."
+            },
+            {
+                "name": "count",
+                "kind": 1,
+                "displayName": "Count",
+                "description": "Count of the facet instance.",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "rangeValue",
+                "kind": 2,
+                "displayName": "Range Value",
+                "description": "Value to be used as the horizontal axis of the histogram with Count as the vertical axis."
+            },
+            {
+                "name": "bucket",
+                "kind": 0,
+                "displayName": "Segmented By",
+                "description": "Each facet instance is segmented by this field."
+            },
+            {
+                "name": "sparklineData",
+                "kind": 0,
+                "displayName": "Sparkline Axis",
+                "description": "A field to render on the horizontal axis as a sparkline."
+            },
+            {
+                "name": "facetInstanceColor",
+                "kind": 0,
+                "displayName": "Color",
+                "description": "Color of each facet instance."
+            },
+            {
+                "name": "iconClass",
+                "kind": 0,
+                "displayName": "Icon Class",
+                "description": "CSS Class for each facet instance icon."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "facet": {
+                            "max": 1
+                        },
+                        "facetInstance": {
+                            "max": 1
+                        },
+                        "count": {
+                            "max": 1
+                        },
+                        "rangeValue": {
+                            "max": 5
+                        },
+                        "bucket": {
+                            "max": 1
+                        },
+                        "sparklineData": {
+                            "max": 1
+                        },
+                        "iconClass": {
+                            "max": 1
+                        },
+                        "facetInstanceColor": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "facetInstance"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 5000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "facet"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "count"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "rangeValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "bucket"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "sparklineData"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "facetInstanceColor"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "iconClass"
+                                }
+                            }
+                        ]
+                    },
+                    "rowCount": {
+                        "preferred": {
+                            "min": 2
+                        },
+                        "supported": {
+                            "min": 0
+                        }
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "custom": {},
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "count",
+                        "direction": 2
+                    }
+                ]
+            }
+        },
+        "objects": {
+            "facetState": {
+                "properties": {
+                    "rangeFacet": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "normalFacet": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "display": {
+                "displayName": "Display",
+                "description": "Facet display option",
+                "properties": {
+                    "selectionCount": {
+                        "displayName": "Selection Count",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "facetCount": {
+                "displayName": "Facet Count",
+                "description": "Configure how many facets are loaded",
+                "properties": {
+                    "initial": {
+                        "displayName": "Initial",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "increment": {
+                        "displayName": "Increment",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true
+    },
+    "output": "dist/essex.widget.facetkey.pbiviz"
+}

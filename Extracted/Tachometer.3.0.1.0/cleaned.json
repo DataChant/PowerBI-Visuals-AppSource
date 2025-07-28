@@ -1,0 +1,646 @@
+{
+    "visual": {
+        "name": "Tachometer",
+        "displayName": "Tachometer",
+        "guid": "Tachometer1474636471549",
+        "visualClassName": "Tachometer",
+        "version": "3.0.1",
+        "description": "The Tachometer is a flexible gauge that allows you to quickly convey detailed information in a way that can be intuitively understood.  Many customizable features are included to configure the look and feel as well as behavior, for example, variable start and end angles, configurable orientation, colors, labels, and axis scale.  This is an ideal visual for communicating measures against low, acceptable, and high components such as team performance against targets, error rates, test coverage, and customer satisfaction. \n\nYouTube video description of the visual https://www.youtube.com/watch?v=C3OXdETbS9o \n\nGitHub with detailed descriptions of the 9 capability option groups https://github.com/ChamaraIC/Tachometer/blob/master/README.md\n",
+        "supportUrl": "https://www.annik.com/pbisupport/",
+        "gitHubUrl": "https://github.com/ChamaraIC/Tachometer/"
+    },
+    "apiVersion": "1.4.0",
+    "author": {
+        "name": "Indika Chamara Ranasinghe",
+        "email": "PBISupport@annik.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/lodash/lodash.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-chartutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Y",
+                "kind": "Measure",
+                "displayName": "Value",
+                "description": "Data field that define the value you want to plot"
+            },
+            {
+                "name": "StartValue",
+                "kind": "Measure",
+                "displayName": "Start Value",
+                "description": "Data field that define start value"
+            },
+            {
+                "name": "EndValue",
+                "kind": "Measure",
+                "displayName": "End Value",
+                "description": "Data field that define end value"
+            },
+            {
+                "name": "TargetValue",
+                "kind": "Measure",
+                "displayName": "Target Value",
+                "description": "Data field that define target value"
+            },
+            {
+                "name": "Range2StartValue",
+                "kind": "Measure",
+                "displayName": "Range2 Start Value",
+                "description": "Start value of Range2"
+            },
+            {
+                "name": "Range3StartValue",
+                "kind": "Measure",
+                "displayName": "Range3 Start Value",
+                "description": "Start value of Range3"
+            },
+            {
+                "name": "DisplayFilter",
+                "kind": "Measure",
+                "displayName": "Display Filter",
+                "description": "Hide gauge if value evaluates to zero or blank"
+            }
+        ],
+        "objects": {
+            "axis": {
+                "displayName": "Gauge Axis",
+                "properties": {
+                    "startAngle": {
+                        "displayName": "Start Angle",
+                        "description": "Angle in Degrees from verticle to startValue",
+                        "placeHolderText": "-120",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "endAngle": {
+                        "displayName": "End Angle",
+                        "description": "Angle in Degrees from verticle to endValue",
+                        "placeHolderText": "120",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startValue": {
+                        "displayName": "Start Value",
+                        "description": "Fixed start value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "endValue": {
+                        "displayName": "End Value",
+                        "description": "Fixed end value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisScaleType": {
+                        "displayName": "Scale",
+                        "description": "Scale to measure data in the gauge",
+                        "placeHolderText": "Linear",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "Log",
+                                    "displayName": "Log"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "range1": {
+                "displayName": "Range 1",
+                "properties": {
+                    "rangeColor": {
+                        "displayName": "Color",
+                        "description": "Range1 arc color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "thickness": {
+                        "displayName": "Thickness",
+                        "description": "Range1 thickness as a fraction of gauge radius",
+                        "placeHolderText": "50%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startValue": {
+                        "displayName": "Start Value",
+                        "description": "Range1 start value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "range2": {
+                "displayName": "Range 2",
+                "properties": {
+                    "rangeColor": {
+                        "displayName": "Color",
+                        "description": "Range2 arc color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "thickness": {
+                        "displayName": "Thickness",
+                        "description": "Range2 thickness as percentage of gauge radius",
+                        "placeHolderText": "50%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startValue": {
+                        "displayName": "Start Value",
+                        "description": "Range2 start value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "range3": {
+                "displayName": "Range 3",
+                "properties": {
+                    "rangeColor": {
+                        "displayName": "Color",
+                        "description": "Range3 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "thickness": {
+                        "displayName": "Thickness",
+                        "description": "Range3 thickness as percentage of gauge radius",
+                        "placeHolderText": "50%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startValue": {
+                        "displayName": "Start Value",
+                        "description": "Range3 start value",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "target": {
+                "displayName": "Target",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "value": {
+                        "displayName": "Value",
+                        "description": "Constant value as target",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "description": "Target line color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "innerRadiusRatio": {
+                        "displayName": "Length",
+                        "description": "Length of target line as percentage of gauge radius",
+                        "placeHolderText": "50%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "TextSize",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "indicator": {
+                "displayName": "Indicator",
+                "properties": {
+                    "pointerColor": {
+                        "displayName": "Needle Color",
+                        "description": "Color of the needle",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pointerSizeFactor": {
+                        "displayName": "Needle Size",
+                        "description": "Distance to needle tip as percentage of gauge radius",
+                        "placeHolderText": "70%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baseColor": {
+                        "displayName": "Base Color",
+                        "description": "Color of indicator base arc",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "baseThicknessFactor": {
+                        "displayName": "Base Thickness",
+                        "description": "Thickness of indicator base as percentage of its radius",
+                        "placeHolderText": "30%",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "displayName": "Axis Labels",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display Units",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Precision",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "round": {
+                        "displayName": "Round",
+                        "description": "Round label values for better visualization",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "count": {
+                        "displayName": "Count",
+                        "description": "Approximate count of labels to display",
+                        "placeHolderText": "4 Approximately",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "reduce": {
+                        "displayName": "Reduce",
+                        "description": "Reduce the number of labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "calloutValue": {
+                "displayName": "Callout Value",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display Units",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Precision",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xOffset": {
+                        "displayName": "X Offset",
+                        "description": "Horizontal percent displacement of Callout Value from default position",
+                        "placeHolderText": "0%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "yOffset": {
+                        "displayName": "Y Offset",
+                        "description": "Vertical percent displacement of Callout Value from default position",
+                        "placeHolderText": "0%",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "calloutPercent": {
+                "displayName": "Callout Percent",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "TextSize",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Precision",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xOffset": {
+                        "displayName": "X Offset",
+                        "description": "Horizontal percent displacement of Callout Percent from default position",
+                        "placeHolderText": "0%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "yOffset": {
+                        "displayName": "Y Offset",
+                        "description": "Vertical percent displacement of Callout Percent from default position",
+                        "placeHolderText": "0%",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "percentType": {
+                        "displayName": "100% ",
+                        "description": "The base of 100%",
+                        "placeHolderText": "EndValue",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "EndValue",
+                                    "displayName": "End Value"
+                                },
+                                {
+                                    "value": "Target",
+                                    "displayName": "Target"
+                                },
+                                {
+                                    "value": "Range2Start",
+                                    "displayName": "Range 2 Start"
+                                },
+                                {
+                                    "value": "Range3Start",
+                                    "displayName": "Range 3 Start"
+                                }
+                            ]
+                        }
+                    },
+                    "invert": {
+                        "displayName": "Invert",
+                        "description": "Invert the percentage value",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "margins": {
+                "displayName": "Margins",
+                "properties": {
+                    "top": {
+                        "displayName": "Top",
+                        "description": "Top Margin",
+                        "placeHolderText": "0",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bottom": {
+                        "displayName": "Bottom",
+                        "description": "Bottom Margin",
+                        "placeHolderText": "0",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "left": {
+                        "displayName": "Left",
+                        "description": "Left Margin",
+                        "placeHolderText": "0",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "right": {
+                        "displayName": "Right",
+                        "description": "Right Margin",
+                        "placeHolderText": "0",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Y": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "StartValue": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "EndValue": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "TargetValue": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "Range2StartValue": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "Range3StartValue": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "DisplayFilter": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Y"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "StartValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "EndValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "TargetValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Range2StartValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Range3StartValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "DisplayFilter"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}

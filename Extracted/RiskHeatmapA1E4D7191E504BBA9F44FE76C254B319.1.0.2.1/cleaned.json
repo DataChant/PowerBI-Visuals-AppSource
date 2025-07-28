@@ -1,0 +1,914 @@
+{
+    "visual": {
+        "name": "Leaplytics Risk Heatmap",
+        "displayName": "Risk Heatmap",
+        "guid": "RiskHeatmapA1E4D7191E504BBA9F44FE76C254B319",
+        "visualClassName": "Visual",
+        "version": "1.0.2.1",
+        "description": "Risk Heatmap / Matrix",
+        "supportUrl": "info@leaplytics.de",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "LeapLytics GmbH",
+        "email": "info@leaplytics.de"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [
+            {
+                "name": "ExportContent",
+                "essential": true
+            }
+        ],
+        "dataRoles": [
+            {
+                "displayName": "Risk ID",
+                "name": "risk_id",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Horizontal Axis",
+                "name": "x_axis",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Vertical Axis",
+                "name": "y_axis",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltip (optional)",
+                "name": "tooltip",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Custom Colors (optional)",
+                "name": "custom_colors",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Horizontal Labels (optional)",
+                "name": "horizontal_labels",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Vertical Labels (optional)",
+                "name": "vertical_labels",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "risk_id": {
+                            "max": 1
+                        },
+                        "x_axis": {
+                            "max": 12
+                        },
+                        "y_axis": {
+                            "max": 12
+                        },
+                        "tooltip": {
+                            "max": 1
+                        },
+                        "custom_colors": {
+                            "max": 1
+                        },
+                        "horizontal_labels": {
+                            "max": 1
+                        },
+                        "vertical_labels": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "risk_id"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltip"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "custom_colors"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "horizontal_labels"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "vertical_labels"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 2000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "x_axis"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "y_axis"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "license": {
+                "displayNameKey": "License",
+                "descriptionKey": "License_Description",
+                "displayName": "License",
+                "description": "Enter PRO-License Key",
+                "properties": {
+                    "license": {
+                        "displayName": "License",
+                        "description": "License Code",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "hostname": {
+                        "displayName": "Hostname",
+                        "description": "Hostname",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "grid": {
+                "displayNameKey": "Grid Settings",
+                "descriptionKey": "Grid_Settings_Description",
+                "displayName": "Grid Settings",
+                "description": "Change Grid Settings",
+                "properties": {
+                    "gridX": {
+                        "displayNameKey": "X-Size",
+                        "descriptionKey": "X_Size_Description",
+                        "displayName": "Horizontal Size",
+                        "description": "Change Horizontal Size of Grid",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gridY": {
+                        "displayNameKey": "Y-Size",
+                        "descriptionKey": "Y_Size_Description",
+                        "displayName": "Vertical Size",
+                        "description": "Change Vertical Size of Grid",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxNumberRisks": {
+                        "displayNameKey": "Max number of risks",
+                        "descriptionKey": "Max_number_Risks_Description",
+                        "displayName": "Max # Risks per Tile",
+                        "description": "Maximum number of risks in each tile",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "selectByTiles": {
+                        "displayNameKey": "Select by Tiles",
+                        "descriptionKey": "Select_Tiles_Description",
+                        "displayName": "Select by Tiles",
+                        "description": "Click on tile to select risks within.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "invertColors": {
+                        "displayNameKey": "Invert Colors",
+                        "descriptionKey": "Invert_Colors_Description",
+                        "displayName": "Invert Colors",
+                        "description": "Invert the colors of the grid.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridBorderVisible": {
+                        "displayNameKey": "Border Visible",
+                        "descriptionKey": "Border_Visible_Description",
+                        "displayName": "Border Visible",
+                        "description": "Change Border Visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderThickness": {
+                        "displayNameKey": "Border Width",
+                        "descriptionKey": "Border_Width_Description",
+                        "displayName": "Border Width",
+                        "description": "Change Border Width of Grid",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "gridBorderColor": {
+                        "displayName": "Border Color",
+                        "description": "The color of the borders.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayNameKey": "Transparency",
+                        "descriptionKey": "Transparency_Description",
+                        "displayName": "Transparency",
+                        "description": "Change Transparency of the Grid.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "axis": {
+                "displayNameKey": "Axis Settings",
+                "descriptionKey": "Axis_Settings_Description",
+                "displayName": "Axis Settings",
+                "description": "Change Axis Settings",
+                "properties": {
+                    "axisVisible": {
+                        "displayNameKey": "Axis Visible",
+                        "descriptionKey": "Axis_Visible_Description",
+                        "displayName": "Axis Visible",
+                        "description": "Change Axis Visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisTicksVisible": {
+                        "displayNameKey": "Axis Ticks Visible",
+                        "descriptionKey": "Axis_Tick_Visible_Description",
+                        "displayName": "Axis Ticks Visible",
+                        "description": "Change Axis Ticks Visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tickTextVisible": {
+                        "displayNameKey": "Tick Text Visible",
+                        "descriptionKey": "Tick_Text_Visible_Description",
+                        "displayName": "Tick Text Visible",
+                        "description": "Change Tick Text Visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisTextVisible": {
+                        "displayNameKey": "Dimension Name Visible",
+                        "descriptionKey": "Text_Visible_Description",
+                        "displayName": "Dimension Name Visible",
+                        "description": "Change Text Visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisTextStyle": {
+                        "displayNameKey": "Text Style",
+                        "descriptionKey": "Text_Style_Description",
+                        "displayName": "Text Style",
+                        "description": "Change Text Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Normal",
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayNameKey": "Bold",
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    },
+                    "textSize": {
+                        "displayNameKey": "Text Size",
+                        "descriptionKey": "Text_Size_Description",
+                        "displayName": "Text Size",
+                        "description": "Change Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "axisFontFamily": {
+                        "displayNameKey": "Font Family",
+                        "descriptionKey": "Font_Family_Description",
+                        "displayName": "Font Family",
+                        "description": "Change Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "axisTextColor": {
+                        "displayName": "Axis Text Color",
+                        "description": "The color of the axis text.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "horizontal_labels": {
+                "displayNameKey": "Horizontal Labels",
+                "descriptionKey": "Horizontal_Labels_Description",
+                "displayName": "Horizontal Labels",
+                "description": "Change Horizontal Labels",
+                "properties": {
+                    "first_value": {
+                        "displayNameKey": "First Value",
+                        "descriptionKey": "First_Value_Description",
+                        "displayName": "First Value",
+                        "description": "Change First Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "second_value": {
+                        "displayNameKey": "Second Value",
+                        "descriptionKey": "Second_Value_Description",
+                        "displayName": "Second Value",
+                        "description": "Change Second Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "third_value": {
+                        "displayNameKey": "Thrid Value",
+                        "descriptionKey": "Third_Value_Description",
+                        "displayName": "Third Value",
+                        "description": "Change Third Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fourth_value": {
+                        "displayNameKey": "Fourth Value",
+                        "descriptionKey": "Fourth_Value_Description",
+                        "displayName": "Fourth Value",
+                        "description": "Change Fourth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fifth_value": {
+                        "displayNameKey": "Fifth Value",
+                        "descriptionKey": "Fifth_Value_Description",
+                        "displayName": "Fifth Value",
+                        "description": "Change Fifth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "sixth_value": {
+                        "displayNameKey": "Sixth Value",
+                        "descriptionKey": "Sixth_Value_Description",
+                        "displayName": "Sixth Value",
+                        "description": "Change Sixth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "seventh_value": {
+                        "displayNameKey": "Seventh Value",
+                        "descriptionKey": "Seventh_Value_Description",
+                        "displayName": "Seventh Value",
+                        "description": "Change Seventh Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "eighth_value": {
+                        "displayNameKey": "Eighth Value",
+                        "descriptionKey": "Eighth_Value_Description",
+                        "displayName": "Eighth Value",
+                        "description": "Change Eighth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "nineth_value": {
+                        "displayNameKey": "Nineth Value",
+                        "descriptionKey": "Nineth_Value_Description",
+                        "displayName": "Nineth Value",
+                        "description": "Change Nineth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "tenth_value": {
+                        "displayNameKey": "Tenth Value",
+                        "descriptionKey": "Tenth_Value_Description",
+                        "displayName": "Tenth Value",
+                        "description": "Change Tenth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "horizontalTickStyle": {
+                        "displayNameKey": "Text Style",
+                        "descriptionKey": "Text_Style_Description",
+                        "displayName": "Text Style",
+                        "description": "Change Text Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Normal",
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayNameKey": "Bold",
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    },
+                    "textSize": {
+                        "displayNameKey": "Text Size",
+                        "descriptionKey": "Text_Size_Description",
+                        "displayName": "Text Size",
+                        "description": "Change Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "horizontalFontFamily": {
+                        "displayNameKey": "Font Family",
+                        "descriptionKey": "Font_Family_Description",
+                        "displayName": "Font Family",
+                        "description": "Change Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "horizontalTickColor": {
+                        "displayName": "Tick Text Color",
+                        "description": "The color of the axis ticks.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "vertical_labels": {
+                "displayNameKey": "Vertical Labels",
+                "descriptionKey": "Vertical_Labels_Description",
+                "displayName": "Vertical Labels",
+                "description": "Change Vertical Labels",
+                "properties": {
+                    "first_value": {
+                        "displayNameKey": "First Value",
+                        "descriptionKey": "First_Value_Description",
+                        "displayName": "First Value",
+                        "description": "Change First Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "second_value": {
+                        "displayNameKey": "Second Value",
+                        "descriptionKey": "Second_Value_Description",
+                        "displayName": "Second Value",
+                        "description": "Change Second Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "third_value": {
+                        "displayNameKey": "Thrid Value",
+                        "descriptionKey": "Third_Value_Description",
+                        "displayName": "Third Value",
+                        "description": "Change Third Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fourth_value": {
+                        "displayNameKey": "Fourth Value",
+                        "descriptionKey": "Fourth_Value_Description",
+                        "displayName": "Fourth Value",
+                        "description": "Change Fourth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fifth_value": {
+                        "displayNameKey": "Fifth Value",
+                        "descriptionKey": "Fifth_Value_Description",
+                        "displayName": "Fifth Value",
+                        "description": "Change Fifth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "sixth_value": {
+                        "displayNameKey": "Sixth Value",
+                        "descriptionKey": "Sixth_Value_Description",
+                        "displayName": "Sixth Value",
+                        "description": "Change Sixth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "seventh_value": {
+                        "displayNameKey": "Seventh Value",
+                        "descriptionKey": "Seventh_Value_Description",
+                        "displayName": "Seventh Value",
+                        "description": "Change Seventh Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "eighth_value": {
+                        "displayNameKey": "Eighth Value",
+                        "descriptionKey": "Eighth_Value_Description",
+                        "displayName": "Eighth Value",
+                        "description": "Change Eighth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "nineth_value": {
+                        "displayNameKey": "Nineth Value",
+                        "descriptionKey": "Nineth_Value_Description",
+                        "displayName": "Nineth Value",
+                        "description": "Change Nineth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "tenth_value": {
+                        "displayNameKey": "Tenth Value",
+                        "descriptionKey": "Tenth_Value_Description",
+                        "displayName": "Tenth Value",
+                        "description": "Change Tenth Value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "verticalTickStyle": {
+                        "displayNameKey": "Text Style",
+                        "descriptionKey": "Text_Style_Description",
+                        "displayName": "Text Style",
+                        "description": "Change Text Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Normal",
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayNameKey": "Bold",
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    },
+                    "textSize": {
+                        "displayNameKey": "Text Size",
+                        "descriptionKey": "Text_Size_Description",
+                        "displayName": "Text Size",
+                        "description": "Change Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "verticalFontFamily": {
+                        "displayNameKey": "Font Family",
+                        "descriptionKey": "Font_Family_Description",
+                        "displayName": "Font Family",
+                        "description": "Change Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "verticalTickColor": {
+                        "displayName": "Axis Tick Color",
+                        "description": "The color of the axis ticks.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "indicator": {
+                "displayNameKey": "Indicator Settings",
+                "descriptionKey": "IndicatorSettings_Description",
+                "displayName": "Indicator Settings",
+                "description": "Change Indicator Settings",
+                "properties": {
+                    "sum_symbol": {
+                        "displayNameKey": "Sum Symbol",
+                        "descriptionKey": "Sum_Symbol_Description",
+                        "displayName": "Sum Symbol",
+                        "description": "Change Sum Symbol",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "\u2211",
+                                    "displayName": "\u2211",
+                                    "value": "\u2211"
+                                },
+                                {
+                                    "displayNameKey": "None",
+                                    "displayName": "None",
+                                    "value": ""
+                                }
+                            ]
+                        }
+                    },
+                    "indicatorBorderVisible": {
+                        "displayNameKey": "Border Visible",
+                        "descriptionKey": "Border_Visible_Description",
+                        "displayName": "Border Visible",
+                        "description": "Change Border Visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderThickness": {
+                        "displayNameKey": "Border Width",
+                        "descriptionKey": "Border_Width_Description",
+                        "displayName": "Border Width",
+                        "description": "Change Border Width of Grid",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayNameKey": "Circle Transparency",
+                        "descriptionKey": "Circle_Transparency_Description",
+                        "displayName": "Circle Transparency",
+                        "description": "Change Circle Transparency",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "indicatorTextVisible": {
+                        "displayNameKey": "Text Visible",
+                        "descriptionKey": "Text_Visible_Description",
+                        "displayName": "Text Visible",
+                        "description": "Change Text Visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "textSize": {
+                        "displayNameKey": "Text Size",
+                        "descriptionKey": "Text_Size_Description",
+                        "displayName": "Text Size",
+                        "description": "Change Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "indicatorTextStyle": {
+                        "displayNameKey": "Text Style",
+                        "descriptionKey": "Text_Style_Description",
+                        "displayName": "Text Style",
+                        "description": "Change Text Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Normal",
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayNameKey": "Bold",
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    },
+                    "indicatorFontFamily": {
+                        "displayNameKey": "Font Family",
+                        "descriptionKey": "Font_Family_Description",
+                        "displayName": "Font Family",
+                        "description": "Change Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "indicatorBorderColor": {
+                        "displayName": "Border Color",
+                        "description": "The color of the indicator borders.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Text Color",
+                        "description": "The color of the text.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor": {
+                        "displayName": "Default Color",
+                        "description": "Default color for all datapoints.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showAll": {
+                        "displayNameKey": "showAll",
+                        "descriptionKey": "show_All_Description",
+                        "displayName": "Show all datapoints",
+                        "description": "Show all datapoints individually.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "progress": {
+                "displayNameKey": "Progress",
+                "descriptionKey": "Progress_Description",
+                "displayName": "Progress",
+                "description": "Progress of a Risk",
+                "properties": {
+                    "riskDirection": {
+                        "displayNameKey": "Invert Risk Direction",
+                        "descriptionKey": "Risk_Direction_Description",
+                        "displayName": "Invert Risk Direction",
+                        "description": "Invert Risk Direction",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderThickness": {
+                        "displayNameKey": "Line Width",
+                        "descriptionKey": "Line_Width_Description",
+                        "displayName": "Line Width",
+                        "description": "Change Line Width",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "about": {
+                "displayNameKey": "About",
+                "descriptionKey": "About_Description",
+                "displayName": "About",
+                "description": "About This Visual",
+                "properties": {
+                    "about1": {
+                        "displayNameKey": "About1",
+                        "descriptionKey": "About1_Description",
+                        "displayName": "Developed by:",
+                        "description": "This PowerBI Custom Visual is developed by LeapLytics GmbH",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "about2": {
+                        "displayNameKey": "About2",
+                        "descriptionKey": "About2_Description",
+                        "displayName": "Version:",
+                        "description": "Version:",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "about3": {
+                        "displayNameKey": "About3",
+                        "descriptionKey": "About3_Description",
+                        "displayName": "Documentation:",
+                        "description": "Documentation:",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "sorting": {
+            "default": {}
+        },
+        "suppressDefaultTitle": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "Tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

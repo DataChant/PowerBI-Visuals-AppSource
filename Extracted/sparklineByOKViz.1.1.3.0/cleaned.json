@@ -1,0 +1,749 @@
+{
+    "visual": {
+        "name": "sparklineByOKViz",
+        "displayName": "Sparkline by OKViz",
+        "guid": "PBI_CV_25997FEB_F466_44FA_B562_AC4063283C4C",
+        "visualClassName": "Visual",
+        "version": "1.1.3",
+        "description": "Sparkline by OKViz allows you to represent the trend of multiple measures or category items over a line. It takes great care to the use of real estate and includes several useful options: for example, you can display the highest/lowest data points, the last value (or the sum of the values in the series or the average value), a target line/area, and you can change the chart color, the line appearance, and more.",
+        "supportUrl": "https://okviz.com/sparkline/",
+        "gitHubUrl": "https://github.com/okviz/sparkline"
+    },
+    "apiVersion": "1.11.0",
+    "author": {
+        "name": "OKViz - a trademark of SQLBI",
+        "email": "support@okviz.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.cultures.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Axis",
+                "name": "axis",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Category",
+                "name": "category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Values",
+                "name": "measure",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Target Value",
+                "name": "target",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Target Area Min",
+                "name": "targetRangeMin",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Target Area Max",
+                "name": "targetRangeMax",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "axis": {
+                            "max": 1
+                        },
+                        "category": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "measure": {
+                            "max": 1
+                        },
+                        "target": {
+                            "max": 1
+                        },
+                        "targetRangeMin": {
+                            "max": 1
+                        },
+                        "targetRangeMax": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "axis": {
+                            "max": 1
+                        },
+                        "category": {
+                            "max": 0
+                        },
+                        "target": {
+                            "max": 1
+                        },
+                        "targetRangeMin": {
+                            "max": 1
+                        },
+                        "targetRangeMax": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000000
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "axis",
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "measure"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "target"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "targetRangeMin"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "targetRangeMax"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "tooltips"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 1000000
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "label": {
+                "displayName": "Category Label",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "text": {
+                        "displayName": "Text",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "autoSize": {
+                        "displayName": "Auto fit",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "value": {
+                "displayName": "Value Label",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "aggregate": {
+                        "displayName": "Display value",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Last value",
+                                    "value": "cur"
+                                },
+                                {
+                                    "displayName": "Sum values",
+                                    "value": "sum"
+                                },
+                                {
+                                    "displayName": "Average value",
+                                    "value": "avg"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                },
+                                {
+                                    "displayName": "wf_standard-font",
+                                    "value": "wf_standard-font,helvetica,arial,sans-serif"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "precision": {
+                        "displayName": "Decimal places",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "locale": {
+                        "displayName": "Culture code",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "line": {
+                "displayName": "Line",
+                "properties": {
+                    "axis": {
+                        "displayName": "Missing data points",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Ignore",
+                                    "value": "ignore"
+                                },
+                                {
+                                    "displayName": "Set to zero",
+                                    "value": "setToZero"
+                                },
+                                {
+                                    "displayName": "Set to null",
+                                    "value": "setToNull"
+                                }
+                            ]
+                        }
+                    },
+                    "start": {
+                        "displayName": "Y-Axis Start",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "end": {
+                        "displayName": "Y-Axis End",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baseline": {
+                        "displayName": "Baseline at 0",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "kind": {
+                        "displayName": "Appearance",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Straight",
+                                    "value": "linear"
+                                },
+                                {
+                                    "displayName": "Monotone",
+                                    "value": "monotone"
+                                },
+                                {
+                                    "displayName": "Smooth",
+                                    "value": "cardinal"
+                                },
+                                {
+                                    "displayName": "Step",
+                                    "value": "step-before"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "weight": {
+                        "displayName": "Weight",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "minHeight": {
+                        "displayName": "Mininum category width",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "area": {
+                "displayName": "Area",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "target": {
+                "displayName": "Target",
+                "properties": {
+                    "fill": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rangeFill": {
+                        "displayName": "Area Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "hiLoPoints": {
+                "displayName": "Points",
+                "properties": {
+                    "showAllPoints": {
+                        "displayName": "Show all",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hiShow": {
+                        "displayName": "Highest point",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hiFill": {
+                        "displayName": "Highest point color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "loShow": {
+                        "displayName": "Lowest point",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "loFill": {
+                        "displayName": "Lowest point color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "curShow": {
+                        "displayName": "Current point",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "curFill": {
+                        "displayName": "Current point color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "colorBlind": {
+                "displayName": "Color Blindness by OKViz",
+                "properties": {
+                    "vision": {
+                        "displayName": "Vision",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "Normal"
+                                },
+                                {
+                                    "displayName": "Protanopia",
+                                    "value": "Protanopia"
+                                },
+                                {
+                                    "displayName": "Protanomaly",
+                                    "value": "Protanomaly"
+                                },
+                                {
+                                    "displayName": "Deuteranopia",
+                                    "value": "Deuteranopia"
+                                },
+                                {
+                                    "displayName": "Deuteranomaly",
+                                    "value": "Deuteranomaly"
+                                },
+                                {
+                                    "displayName": "Tritanopia",
+                                    "value": "Tritanopia"
+                                },
+                                {
+                                    "displayName": "Tritanomaly",
+                                    "value": "Tritanomaly"
+                                },
+                                {
+                                    "displayName": "Achromatopsia",
+                                    "value": "Achromatopsia"
+                                },
+                                {
+                                    "displayName": "Achromatomaly",
+                                    "value": "Achromatomaly"
+                                },
+                                {
+                                    "displayName": "Low Contrast",
+                                    "value": "LowContrast"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "about": {
+                "displayName": "About",
+                "properties": {
+                    "version": {
+                        "displayName": "Version",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "sorting": {
+            "default": {}
+        },
+        "suppressDefaultTitle": true
+    },
+    "stringResources": {}
+}

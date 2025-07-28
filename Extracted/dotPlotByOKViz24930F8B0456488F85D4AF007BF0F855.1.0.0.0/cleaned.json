@@ -1,0 +1,417 @@
+{
+    "visual": {
+        "name": "dotPlotByOKViz",
+        "displayName": "Dot Plot by OKViz",
+        "guid": "dotPlotByOKViz24930F8B0456488F85D4AF007BF0F855",
+        "visualClassName": "Visual",
+        "version": "1.0.0",
+        "description": "Dot Plot by OKViz allows you to compare multiple measures by their magnitude, representing each data point with a simple dot.",
+        "supportUrl": "http://okviz.com/dot-plot/",
+        "gitHubUrl": "https://github.com/okviz/dotplot"
+    },
+    "apiVersion": "1.5.0",
+    "author": {
+        "name": "OKViz - a trademark of SQLBI",
+        "email": "support@okviz.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/lodash/lodash.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-chartutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Axis",
+                "name": "axis",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Legend",
+                "name": "legend",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Values",
+                "name": "values",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "legend": {
+                            "max": 1
+                        },
+                        "values": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "legend": {
+                            "max": 0
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "axis"
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "legend",
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "values"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "dataPoint": {
+                "displayName": "Data Colors",
+                "properties": {
+                    "fillShapes": {
+                        "displayName": "Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "defaultFill": {
+                        "displayName": "Default color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showAll": {
+                        "displayName": "Show all",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "displayName": "X-Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridline": {
+                        "displayName": "Gridline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "type": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Continuous",
+                                    "value": "continuous"
+                                },
+                                {
+                                    "displayName": "Categorical",
+                                    "value": "categorical"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Y-Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "start": {
+                        "displayName": "Start",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "end": {
+                        "displayName": "End",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "precision": {
+                        "displayName": "Decimal places",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data labels",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "precision": {
+                        "displayName": "Decimal places",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "Top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "Bottom"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "Right"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "Left"
+                                },
+                                {
+                                    "displayName": "Top Center",
+                                    "value": "TopCenter"
+                                },
+                                {
+                                    "displayName": "Bottom Center",
+                                    "value": "BottomCenter"
+                                },
+                                {
+                                    "displayName": "Right Center",
+                                    "value": "RightCenter"
+                                },
+                                {
+                                    "displayName": "Left Center",
+                                    "value": "LeftCenter"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Legend name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "colorBlind": {
+                "displayName": "Color Blindness by OKViz",
+                "properties": {
+                    "vision": {
+                        "displayName": "Vision",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "Normal"
+                                },
+                                {
+                                    "displayName": "Protanopia",
+                                    "value": "Protanopia"
+                                },
+                                {
+                                    "displayName": "Protanomaly",
+                                    "value": "Protanomaly"
+                                },
+                                {
+                                    "displayName": "Deuteranopia",
+                                    "value": "Deuteranopia"
+                                },
+                                {
+                                    "displayName": "Deuteranomaly",
+                                    "value": "Deuteranomaly"
+                                },
+                                {
+                                    "displayName": "Tritanopia",
+                                    "value": "Tritanopia"
+                                },
+                                {
+                                    "displayName": "Tritanomaly",
+                                    "value": "Tritanomaly"
+                                },
+                                {
+                                    "displayName": "Achromatopsia",
+                                    "value": "Achromatopsia"
+                                },
+                                {
+                                    "displayName": "Achromatomaly",
+                                    "value": "Achromatomaly"
+                                },
+                                {
+                                    "displayName": "Low Contrast",
+                                    "value": "LowContrast"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "t": {
+                "properties": {
+                    "u": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "sorting": {
+            "default": {}
+        },
+        "drilldown": {
+            "roles": [
+                "axis"
+            ]
+        }
+    },
+    "stringResources": {}
+}

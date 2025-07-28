@@ -1,0 +1,383 @@
+/* ==========================================================================
+   #Custom HTML5 Video Player
+   ========================================================================== */
+:root {
+  --youtube-red: #FE0900;
+}
+html {
+  box-sizing: border-box;
+  font-family: "YouTube Noto", Roboto, Arial, Helvetica, sans-serif;
+  height: 100%;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+body {
+  height: 100%;
+}
+.hidden {
+  display: none !important;
+}
+/* ==========================================================================
+   # Player
+   ========================================================================== */
+.player-container {
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.player-container .video-container {
+  width: 100%;
+  height: 100%;
+  /*width: 800px;*/
+  border-radius: 4px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  /*flex-direction: column;*/
+  justify-content: center;
+}
+.player-container video {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+.player-container .video-controls {
+  right: 0;
+  left: 0;
+  padding: 10px;
+  position: absolute;
+  bottom: 0;
+  transition: all 0.2s ease;
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+}
+.player-container .video-controls.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.player-container .video-progress {
+  position: relative;
+  height: 8.4px;
+  margin-bottom: 10px;
+}
+.player-container progress {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 2px;
+  width: 100%;
+  height: 8.4px;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+}
+.player-container progress::-webkit-progress-bar {
+  background-color: #474545;
+  border-radius: 2px;
+}
+.player-container progress::-webkit-progress-value {
+  background: var(--youtube-red);
+  border-radius: 2px;
+}
+.player-container progress::-moz-progress-bar {
+  border: 1px solid var(--youtube-red);
+  background: var(--youtube-red);
+}
+.player-container .seek {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  cursor: pointer;
+  margin: 0;
+}
+.player-container .seek:hover + .seek-tooltip {
+  display: block;
+}
+.player-container .seek-tooltip {
+  display: none;
+  position: absolute;
+  top: -50px;
+  margin-left: -20px;
+  font-size: 12px;
+  padding: 3px;
+  content: attr(data-title);
+  font-weight: bold;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.player-container .bottom-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.player-container .left-controls {
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+.player-container .volume-controls {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+.player-container .volume-controls input {
+  width: 100px;
+  opacity: 1;
+  transition: all 0.4s ease;
+}
+.player-container .volume-controls:hover input,
+.player-container .volume-controls input:focus {
+  width: 100px;
+  opacity: 1;
+}
+.player-container button {
+  cursor: pointer;
+  position: relative;
+  margin-right: 7px;
+  font-size: 12px;
+  padding: 3px;
+  border: none;
+  outline: none;
+  background-color: transparent;
+}
+.player-container button * {
+  pointer-events: none;
+}
+.player-container button::before {
+  content: attr(data-title);
+  position: absolute;
+  display: none;
+  right: 0;
+  top: -50px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-weight: bold;
+  padding: 4px 6px;
+  word-break: keep-all;
+  white-space: pre;
+}
+.player-container button:hover::before {
+  display: inline-block;
+}
+.player-container .fullscreen-button {
+  display: none;
+  margin-right: 0;
+}
+.player-container .pip-button svg {
+  width: 26px;
+  height: 26px;
+}
+.player-container .playback-animation {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -40px;
+  margin-top: -40px;
+  width: 80px;
+  height: 80px;
+  border-radius: 80px;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+}
+.player-container input[type=range] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: 8.4px;
+  background: transparent;
+  cursor: pointer;
+}
+.player-container input[type=range]:focus {
+  outline: none;
+}
+.player-container input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  cursor: pointer;
+  border-radius: 1.3px;
+  -webkit-appearance: none;
+  transition: all 0.4s ease;
+}
+.player-container input[type=range]::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 16px;
+  background: var(--youtube-red);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-left: -1px;
+}
+.player-container input[type=range]:focus::-webkit-slider-runnable-track {
+  background: transparent;
+}
+.player-container input[type=range].volume {
+  height: 5px;
+  background-color: #fff;
+}
+.player-container input[type=range].volume::-webkit-slider-runnable-track {
+  background-color: transparent;
+}
+.player-container input[type=range].volume::-webkit-slider-thumb {
+  margin-left: 0;
+  height: 14px;
+  width: 14px;
+  background: #fff;
+}
+.player-container input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 1.3px;
+}
+.player-container input[type=range]::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  border-radius: 50px;
+  border: 1px solid var(--youtube-red);
+  background: var(--youtube-red);
+  cursor: pointer;
+  margin-top: 5px;
+}
+.player-container input[type=range]:focus::-moz-range-track {
+  outline: none;
+}
+.player-container input[type=range].volume::-moz-range-thumb {
+  border: 1px solid #fff;
+  background: #fff;
+}
+.player-container .hidden {
+  display: none;
+}
+.player-container svg {
+  width: 28px;
+  height: 28px;
+  fill: #fff;
+  stroke: #fff;
+  cursor: pointer;
+}
+/* ==========================================================================
+   # Search
+   ========================================================================== */
+@font-face {
+  font-family: 'Muli';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/muli/v29/7Aulp_0qiz-aVz7u3PJLcUMYOFnOkEk30e0.ttf) format('truetype');
+}
+.search-container {
+  font-family: 'Muli', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  /* ==-====-===-==== */
+}
+.search-container .box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 95%;
+  height: 58px;
+  background-color: #fff;
+  margin: 15px auto;
+  /*box-shadow: 0 2px 33px rgba(0, 0, 0, .77)*/
+}
+.search-container .search-bar {
+  width: 90%;
+  margin: 40px auto;
+  line-height: 56px;
+  position: relative;
+}
+.search-container input[type="text"] {
+  width: 89%;
+  padding: 0 10px;
+  color: #000;
+  border: 1px solid #BEBEBE;
+  border-radius: 2px 0 0 2px;
+  z-index: 2;
+  height: 80px;
+  font-size: 30px;
+}
+.search-container input:focus {
+  border: 1.1px solid #1c62b9;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.search-container button {
+  position: absolute;
+  width: 92px;
+  height: 80px;
+  border: 1px solid #BEBEBE;
+  border-left: 0;
+  top: 0px;
+  right: 0;
+  border-radius: 0px 2px 2px 0;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  background-color: #f0f0f0;
+  z-index: 1;
+}
+.search-container h2 {
+  color: #d10101;
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: bolder;
+  font-size: 20px;
+  margin-top: 22px;
+}
+.search-container .magnifying-glass {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  background-color: aliceblue;
+  border: 5px solid slategray;
+  border-radius: 50%;
+  left: 20%;
+}
+.search-container .magnifying-glass:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 5px;
+  background-color: slategray;
+  border-radius: 0 7.5px 7.5px 0;
+  transform-origin: 0 50%;
+  transform: translateX(100%) rotate(45deg);
+}
+/* ==========================================================================
+   # Search
+   ========================================================================== */
+.error-banner-container {
+  font-family: 'Muli', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+.error-banner-container h2 {
+  color: #d10101;
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: bolder;
+  font-size: 20px;
+  margin-top: 22px;
+}
+

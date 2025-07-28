@@ -1,0 +1,2671 @@
+{
+    "visual": {
+        "name": "datamap",
+        "displayName": "Data Map",
+        "guid": "datamap8FEE960E90FB4AF6BD5F829E8460D340",
+        "visualClassName": "Visual",
+        "version": "1.0.0",
+        "description": "Data to map, made simple. Provide a new dimension to your data. Generate high impact stunning maps from your data in minutes.",
+        "supportUrl": "https://www.dtyp.com.au",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "dTyp Technologies Pty Ltd",
+        "email": "support@dtyp.com.au"
+    },
+    "apiVersion": "3.8.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "Unique ID for features on the map, used to join data with external datasources."
+            },
+            {
+                "displayName": "Longitude / X-Coordinates",
+                "name": "longitude",
+                "kind": "Measure",
+                "description": "Longitude or X coordinate for displaying point features on map.",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Latitude / Y-Coordinates",
+                "name": "latitude",
+                "kind": "Measure",
+                "description": "Latitude or Y coordinate for displaying point features on map.",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "displayName": "Well-known text",
+                "name": "wkt",
+                "kind": "Measure",
+                "description": "Well-known text for displaying geometries on map.",
+                "preferredTypes": [
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltip",
+                "kind": "Measure",
+                "description": "Additional data fields to display as tooltip when hovered over map."
+            }
+        ],
+        "drilldown": {
+            "roles": [
+                "category"
+            ]
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "pointIcon"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "pointSize"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "label"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "tooltip"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "longitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "latitude"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "wkt"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "map": {
+                "displayName": "Map",
+                "description": "General map configuration such as base map and number of layers.",
+                "properties": {
+                    "baseMap": {
+                        "displayName": "Base Map",
+                        "description": "A reference map on which data is displayed to provide visual context.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "osm",
+                                    "displayName": "Open Street Map"
+                                },
+                                {
+                                    "value": "osm_light",
+                                    "displayName": "Open Street Map Light"
+                                },
+                                {
+                                    "value": "osm_dark",
+                                    "displayName": "Open Street Map Dark"
+                                },
+                                {
+                                    "value": "maptiler_bright",
+                                    "displayName": "MapTiler Bright"
+                                },
+                                {
+                                    "value": "maptiler_toner",
+                                    "displayName": "MapTiler Toner"
+                                },
+                                {
+                                    "value": "maptiler_pastel",
+                                    "displayName": "MapTiler Pastel"
+                                },
+                                {
+                                    "value": "maptiler_voyager",
+                                    "displayName": "MapTiler Voyager"
+                                },
+                                {
+                                    "value": "maptiler_topo",
+                                    "displayName": "MapTiler Topo"
+                                },
+                                {
+                                    "value": "mapbox_light",
+                                    "displayName": "Mapbox Light"
+                                },
+                                {
+                                    "value": "mapbox_dark",
+                                    "displayName": "Mapbox Dark"
+                                },
+                                {
+                                    "value": "mapbox_streets",
+                                    "displayName": "Mapbox Streets"
+                                },
+                                {
+                                    "value": "mapbox_satellite",
+                                    "displayName": "Mapbox Satellite"
+                                },
+                                {
+                                    "value": "mapbox_navigation_day",
+                                    "displayName": "Mapbox Navigation Day"
+                                },
+                                {
+                                    "value": "mapbox_navigation_night",
+                                    "displayName": "Mapbox Navigation Night"
+                                }
+                            ]
+                        }
+                    },
+                    "baseMapAPIKey": {
+                        "displayName": "API Key",
+                        "description": "API key or access token to access protected base maps from Maptiler and mapbox.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "numberOfLayers": {
+                        "displayName": "Number of Data Layers",
+                        "description": "Number of data layers for the map, ideally should be same as number of category fields. Controls number of data layer properties displayed.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "projection": {
+                "displayName": "Map Projection",
+                "description": "Projection, center and extent constraints configuration for map control.",
+                "properties": {
+                    "showExtentsPanel": {
+                        "displayName": "Show Extent Values",
+                        "description": "Applicable in Edit mode only. Displays a panel with current map center, zoom level and extent values. These values can be used to populate settings in this section.",
+                        "type": {
+                            "bool": true
+                        },
+                        "placeHolderText": "false"
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system in which the map is displayed, should be an EPSG projection code. Valid values can be looked up at https://epsg.io/. \nMap will be clipped to the projection's well defined extent.",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "3857"
+                    },
+                    "centerLongitude": {
+                        "displayName": "Map Center X",
+                        "description": "Longitude or X coordinate at which the map is centered, should be in same coordinate systems as Projection. 'Show Extent Values' can be used to get current map center coordinates.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "centerLatitude": {
+                        "displayName": "Map Center Y",
+                        "description": "Latitude or Y coordinate at which the map is centered, should be in same coordinate systems as Projection. 'Show Extent Values' can be used to get current map center coordinates.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "defaultZoomLevel": {
+                        "displayName": "Zoom Level",
+                        "description": "Zoom level at which map is initates, should be between 0 and 20.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "constraintZoom": {
+                        "displayName": "Constrain Map Extent",
+                        "description": "Prevent users from navigating the map beyond specified map extent.",
+                        "type": {
+                            "bool": true
+                        },
+                        "placeHolderText": "false"
+                    },
+                    "constraintXMin": {
+                        "displayName": "Map Extent X Min",
+                        "description": "Minimum longitude or X coordinate to constrain the map, should be in the same coordinate systems as Projection. 'Show Extent Values' can be used to get current map extent values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "constraintYMin": {
+                        "displayName": "Map Extent Y Min",
+                        "description": "Minimum latitude or Y coordinate to constrain the map, should be in the same coordinate systems as Projection. 'Show Extent Values' can be used to get current map extent values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "constraintXMax": {
+                        "displayName": "Map Extent X Max",
+                        "description": "Maximum longitude or X coordinate to constrain the map, should be in the same coordinate systems as Projection. 'Show Extent Values' can be used to get current map extent values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "constraintYMax": {
+                        "displayName": "Map Extent Y Max",
+                        "description": "Maximum latitude or Y coordinate to constrain the map, should be in the same coordinate systems as Projection. 'Show Extent Values' can be used to get current map extent values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "mapControls": {
+                "displayName": "Map Controls",
+                "description": "Configure controls displayed on the map such as zoom, selection and scale bar.",
+                "properties": {
+                    "colour": {
+                        "displayName": "Colour",
+                        "description": "Foreground colour for controls",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColour": {
+                        "displayName": "Background Colour",
+                        "description": "Background colour for controls",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showZoom": {
+                        "displayName": "Show Zoom",
+                        "description": "Show zoom in and zoom out controls on map.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSelection": {
+                        "displayName": "Show Selection",
+                        "description": "Show freehand selection control on map.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showScalebar": {
+                        "displayName": "Show Scalebar",
+                        "description": "Show scalebar control on map.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scaleUnits": {
+                        "displayName": "Scalebar Units",
+                        "description": "Units in which the scale bar is displayed.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "metric",
+                                    "displayName": "Metric"
+                                },
+                                {
+                                    "value": "us",
+                                    "displayName": "International Mile"
+                                },
+                                {
+                                    "value": "nautical",
+                                    "displayName": "Nautical Mile"
+                                },
+                                {
+                                    "value": "degrees",
+                                    "displayName": "Degrees"
+                                }
+                            ]
+                        }
+                    },
+                    "attributionExpanded": {
+                        "displayName": "Expand Attribution",
+                        "description": "Attribution control to display data attributions are expanded by default.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "mapBehaviour": {
+                "displayName": "Map Behaviour",
+                "description": "Configure map behaviour for various events.",
+                "properties": {
+                    "zoomToVisible": {
+                        "displayName": "Zoom to visible data",
+                        "description": "Sets map extent to show all visible data when there are no highlights.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomToHighlight": {
+                        "displayName": "Zoom to highlight",
+                        "description": "Sets map extent to show only highlighted data when cross selection is made on other visuals.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomLevel": {
+                        "displayName": "Max Zoom level",
+                        "description": "Limits maximum allowed zoom level when map zooms to visible or highlighted data. Map will not zoom closer than this value",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "highlightOnHover": {
+                        "displayName": "Highlight on hover",
+                        "description": "Highlight features when mouse is hovered over them.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "highlightSelected": {
+                        "displayName": "Highlight selected",
+                        "description": "Highlight features when they are selected by clicking on them or using selection tool.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "allowInteraction": {
+                        "displayName": "Allow Interaction",
+                        "description": "Allow user interaction to zoom and pan on the map, when disabled users cannot change map extent.\nZoom interaction using zoom control, selection interactions like click and selection control are still allowed.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selectOnClick": {
+                        "displayName": "Select on click",
+                        "description": "Allow users to select features on the map by clicking on them.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lassoEnabled": {
+                        "displayName": "Selection Enabled",
+                        "description": "Freehand selection is enabled by default, users won't have to click selection tool to enable selection.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "style": {
+                "displayName": "Data Style",
+                "description": "Configure data style applied to all data layers. Individual layer styles can be configure from their respective data layer settings.",
+                "properties": {
+                    "pointStyle": {
+                        "displayName": "Point Style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point Symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Colour Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Point Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "labelstyle": {
+                "displayName": "Label",
+                "description": "Configure label style applied to all data layers",
+                "properties": {
+                    "labelMinZoom": {
+                        "displayName": "Zoom Level",
+                        "description": "Minimum zoom level at which labels will be visible.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "labelFontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelFontColour": {
+                        "displayName": "Font Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "labelBorderColour": {
+                        "displayName": "Border Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "labelBorderWidth": {
+                        "displayName": "Border Width",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "labelAlignment": {
+                        "displayName": "Alignment",
+                        "description": "Horizontal alignment of label relative to symbol",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "labelBaseline": {
+                        "displayName": "Baseline",
+                        "description": "Vertical alignment of label relative to symbol",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "alphabetic",
+                                    "displayName": "Alphabetic"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "hanging",
+                                    "displayName": "Hanging"
+                                },
+                                {
+                                    "value": "ideographic",
+                                    "displayName": "Ideographic"
+                                },
+                                {
+                                    "value": "middle",
+                                    "displayName": "Middle"
+                                },
+                                {
+                                    "value": "top",
+                                    "displayName": "Top"
+                                }
+                            ]
+                        }
+                    },
+                    "labelOffsetX": {
+                        "displayName": "Offset X",
+                        "description": "Offset label position in X direction, in pixel units",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "labelOffsetY": {
+                        "displayName": "Offset Y",
+                        "description": "Offset Label position in Y direction, in pixel units",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "labelLongTexts": {
+                        "displayName": "Text Overflow",
+                        "description": "Configure how long label texts are handled. \nShorten - Texts over 12 characters are trimmed. \nWrap - Texts over 16 characters are wrapped. \nNormal - Texts are displayed as is with no changes.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "normal",
+                                    "displayName": "Normal"
+                                },
+                                {
+                                    "value": "shorten",
+                                    "displayName": "Shorten"
+                                },
+                                {
+                                    "value": "wrap",
+                                    "displayName": "Wrap"
+                                }
+                            ]
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "description": "Transarency of labels displayed",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "unmatchedstyle": {
+                "displayName": "Unmatched Style",
+                "description": "Symbol used to draw unmatched point features on map.",
+                "properties": {
+                    "pointSymbol": {
+                        "displayName": "Point Symbol",
+                        "description": "Point symbol type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer0": {
+                "displayName": "Measures Data Layer",
+                "description": "Configure data layer properties for representing Latitude / Longitude and WKT measure fields",
+                "properties": {
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system of data in this data layer, should be an EPSG projection code. Valid values can be looked up at https://epsg.io/. \nNot required to be same as map projection, data will be projected to map projection on the fly.",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer1": {
+                "displayName": "Data Layer 1",
+                "description": "Configure properties for data Layer to be mapped with first category column",
+                "properties": {
+                    "dataLayer": {
+                        "displayName": "Datasource URL",
+                        "description": "URL to a remote service providing data for this data layer. Supports ArcGIS feature service layer, GeoJson and KML. \nData should be served over HTTPS and have CORS enabled",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "joinField": {
+                        "displayName": "Join Field Name",
+                        "description": "ID field from this data layer used to join with catgeory field. Consider this as a left join with this data layer on the left.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system of data in this data layer, should be an EPSG projection code. Valid values can be looked up at https://epsg.io/. \nNot required to be same as map projection, data will be projected to map projection on the fly.",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "dataStrategy": {
+                        "displayName": "Data Load Strategy",
+                        "description": "Defines how data is loaded from remote source. Applicable only for ArcGIS feature service layer.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bbox",
+                                    "displayName": "Bounding box"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Load all features"
+                                },
+                                {
+                                    "value": "tile",
+                                    "displayName": "Tiles"
+                                },
+                                {
+                                    "value": "dynamictile",
+                                    "displayName": "Dynamic Tiles"
+                                }
+                            ]
+                        }
+                    },
+                    "maxFeatures": {
+                        "displayName": "Maximum Features",
+                        "description": "Maximum number of features to load from remote source for this layer. Applicable only for ArcGIS feature service layer.",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "1000"
+                    },
+                    "showUnmatched": {
+                        "displayName": "Show unmatched",
+                        "description": "Show features which were not matched to a catgeory on the map. Features will be symbolised using 'Unmatched Style' properties",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer2": {
+                "displayName": "Data Layer 2",
+                "description": "Configure properties for data Layer to be mapped with second category field.",
+                "properties": {
+                    "dataLayer": {
+                        "displayName": "Datasource URL",
+                        "description": "URL to a remove service providing map data. Supports ArcGIS Feature Service, WFS etc.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "joinField": {
+                        "displayName": "Join Field Name",
+                        "description": "ID field to relate this data layer to catgeory field",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system for this data, should be an EPSG code (https://epsg.io/)",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "dataStrategy": {
+                        "displayName": "Data Load Strategy",
+                        "description": "Loading strategy for loading data to map.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bbox",
+                                    "displayName": "Bounding box"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Load all features"
+                                },
+                                {
+                                    "value": "tile",
+                                    "displayName": "Tiles"
+                                },
+                                {
+                                    "value": "dynamictile",
+                                    "displayName": "Dynamic Tiles"
+                                }
+                            ]
+                        }
+                    },
+                    "maxFeatures": {
+                        "displayName": "Maximum Features",
+                        "description": "Maximum Features to load for this layer",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "1000"
+                    },
+                    "showUnmatched": {
+                        "displayName": "Show unmatched",
+                        "description": "Show unmatched features not referenced by catgeory on the map. Features will be symbolised using 'Unmatched Style' properties",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer3": {
+                "displayName": "Data Layer 3",
+                "description": "Configure properties for data Layer to be mapped with third category field.",
+                "properties": {
+                    "dataLayer": {
+                        "displayName": "Datasource URL",
+                        "description": "URL to a remove service providing map data. Supports ArcGIS Feature Service, WFS etc.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "joinField": {
+                        "displayName": "Join Field Name",
+                        "description": "ID field to relate this data layer to catgeory field",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system for this data, should be an EPSG code (https://epsg.io/)",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "dataStrategy": {
+                        "displayName": "Data Load Strategy",
+                        "description": "Loading strategy for loading data to map.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bbox",
+                                    "displayName": "Bounding box"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Load all features"
+                                },
+                                {
+                                    "value": "tile",
+                                    "displayName": "Tiles"
+                                },
+                                {
+                                    "value": "dynamictile",
+                                    "displayName": "Dynamic Tiles"
+                                }
+                            ]
+                        }
+                    },
+                    "maxFeatures": {
+                        "displayName": "Maximum Features",
+                        "description": "Maximum Features to load for this layer",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "1000"
+                    },
+                    "showUnmatched": {
+                        "displayName": "Show unmatched",
+                        "description": "Show unmatched features not referenced by catgeory on the map. Features will be symbolised using 'Unmatched Style' properties",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer4": {
+                "displayName": "Data Layer 4",
+                "description": "Configure properties for data Layer to be mapped with fourth category field.",
+                "properties": {
+                    "dataLayer": {
+                        "displayName": "Datasource URL",
+                        "description": "URL to a remove service providing map data. Supports ArcGIS Feature Service, WFS etc.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "joinField": {
+                        "displayName": "Join Field Name",
+                        "description": "ID field to relate this data layer to catgeory field",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system for this data, should be an EPSG code (https://epsg.io/)",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "dataStrategy": {
+                        "displayName": "Data Load Strategy",
+                        "description": "Loading strategy for loading data to map.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bbox",
+                                    "displayName": "Bounding box"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Load all features"
+                                },
+                                {
+                                    "value": "tile",
+                                    "displayName": "Tiles"
+                                },
+                                {
+                                    "value": "dynamictile",
+                                    "displayName": "Dynamic Tiles"
+                                }
+                            ]
+                        }
+                    },
+                    "maxFeatures": {
+                        "displayName": "Maximum Features",
+                        "description": "Maximum Features to load for this layer",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "1000"
+                    },
+                    "showUnmatched": {
+                        "displayName": "Show unmatched",
+                        "description": "Show unmatched features not referenced by catgeory on the map. Features will be symbolised using 'Unmatched Style' properties",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer5": {
+                "displayName": "Data Layer 5",
+                "description": "Configure properties for data Layer to be mapped with fifth category field.",
+                "properties": {
+                    "dataLayer": {
+                        "displayName": "Datasource URL",
+                        "description": "URL to a remove service providing map data. Supports ArcGIS Feature Service, WFS etc.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "joinField": {
+                        "displayName": "Join Field Name",
+                        "description": "ID field to relate this data layer to catgeory field",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system for this data, should be an EPSG code (https://epsg.io/)",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "dataStrategy": {
+                        "displayName": "Data Load Strategy",
+                        "description": "Loading strategy for loading data to map.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bbox",
+                                    "displayName": "Bounding box"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Load all features"
+                                },
+                                {
+                                    "value": "tile",
+                                    "displayName": "Tiles"
+                                },
+                                {
+                                    "value": "dynamictile",
+                                    "displayName": "Dynamic Tiles"
+                                }
+                            ]
+                        }
+                    },
+                    "maxFeatures": {
+                        "displayName": "Maximum Features",
+                        "description": "Maximum Features to load for this layer",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "1000"
+                    },
+                    "showUnmatched": {
+                        "displayName": "Show unmatched",
+                        "description": "Show unmatched features not referenced by catgeory on the map. Features will be symbolised using 'Unmatched Style' properties",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer6": {
+                "displayName": "Data Layer 6",
+                "description": "Configure properties for data Layer to be mapped with sixth category field.",
+                "properties": {
+                    "dataLayer": {
+                        "displayName": "Datasource URL",
+                        "description": "URL to a remove service providing map data. Supports ArcGIS Feature Service, WFS etc.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "joinField": {
+                        "displayName": "Join Field Name",
+                        "description": "ID field to relate this data layer to catgeory field",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system for this data, should be an EPSG code (https://epsg.io/)",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "dataStrategy": {
+                        "displayName": "Data Load Strategy",
+                        "description": "Loading strategy for loading data to map.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bbox",
+                                    "displayName": "Bounding box"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Load all features"
+                                },
+                                {
+                                    "value": "tile",
+                                    "displayName": "Tiles"
+                                },
+                                {
+                                    "value": "dynamictile",
+                                    "displayName": "Dynamic Tiles"
+                                }
+                            ]
+                        }
+                    },
+                    "maxFeatures": {
+                        "displayName": "Maximum Features",
+                        "description": "Maximum Features to load for this layer",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "1000"
+                    },
+                    "showUnmatched": {
+                        "displayName": "Show unmatched",
+                        "description": "Show unmatched features not referenced by catgeory on the map. Features will be symbolised using 'Unmatched Style' properties",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dataLayer7": {
+                "displayName": "Data Layer 7",
+                "description": "Configure properties for data Layer to be mapped with seventh category field.",
+                "properties": {
+                    "dataLayer": {
+                        "displayName": "Datasource URL",
+                        "description": "URL to a remove service providing map data. Supports ArcGIS Feature Service, WFS etc.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "joinField": {
+                        "displayName": "Join Field Name",
+                        "description": "ID field to relate this data layer to catgeory field",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "projection": {
+                        "displayName": "Projection (EPSG code)",
+                        "description": "Projection system for this data, should be an EPSG code (https://epsg.io/)",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "4326"
+                    },
+                    "dataStrategy": {
+                        "displayName": "Data Load Strategy",
+                        "description": "Loading strategy for loading data to map.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bbox",
+                                    "displayName": "Bounding box"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Load all features"
+                                },
+                                {
+                                    "value": "tile",
+                                    "displayName": "Tiles"
+                                },
+                                {
+                                    "value": "dynamictile",
+                                    "displayName": "Dynamic Tiles"
+                                }
+                            ]
+                        }
+                    },
+                    "maxFeatures": {
+                        "displayName": "Maximum Features",
+                        "description": "Maximum Features to load for this layer",
+                        "type": {
+                            "numeric": true
+                        },
+                        "placeHolderText": "1000"
+                    },
+                    "showUnmatched": {
+                        "displayName": "Show unmatched",
+                        "description": "Show unmatched features not referenced by catgeory on the map. Features will be symbolised using 'Unmatched Style' properties",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "attribution": {
+                        "displayName": "Attribution",
+                        "description": "Provide attribution to this data source, will be included in attribution control when this layer is visible",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "description": "Display label for features on the map. \nCluster point style will always display number of features in the cluster.\nLabels are not displayed when point style is heatmap.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "description": "Label text, use expression to specify field value.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overrideStyle": {
+                        "displayName": "Override Default Style",
+                        "description": "Customize this data layer style by overriding default style.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointStyle": {
+                        "displayName": "Point style",
+                        "description": "Display style for point data.\nCluster - Spatially group points into clusters.\nHeatmap - Display density/magnitude of features on map as heatmap",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "standard",
+                                    "displayName": "Standard"
+                                },
+                                {
+                                    "value": "clustered",
+                                    "displayName": "Cluster"
+                                },
+                                {
+                                    "value": "heatmap",
+                                    "displayName": "Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "pointSymbol": {
+                        "displayName": "Point symbol",
+                        "description": "Symbol used to draw point features on map.\nColour Icon along with fill colour setting can be used to colour code icons, use a black icon image with transparent background.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Icon"
+                                },
+                                {
+                                    "value": "coloricon",
+                                    "displayName": "Color Icon"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "pointIcon": {
+                        "displayName": "Icon Source",
+                        "description": "URL / Base64 string / SVG XML of an image to represent points on the map. Image URLs should be served over HTTPS and have CORS enabled.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconRotation": {
+                        "displayName": "Icon Rotation",
+                        "description": "Number of degrees to rotate point symbol in clockwise direction from the north. Useful to represent orientation of points",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointSize": {
+                        "displayName": "Point Size",
+                        "description": "Size of the symbol in pixel units used to represent points. Should be a positive value, negative values will be parsed to positive values.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Border/Line Width",
+                        "description": "Line width in pixel units used to represent lines, polygon and point borders",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColour": {
+                        "displayName": "Border/Line Colour",
+                        "description": "Colour used to represent lines, polygon and point borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineTransparency": {
+                        "displayName": "Border/Line Transparency (%)",
+                        "description": "Transparency of lines, polygon and point borders",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fillColour": {
+                        "displayName": "Fill Colour",
+                        "description": "Fill colour used to represent polygon and point symbols. When point symbol is set to colour icon, icons are shaded using this colour.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Fill Transparency (%)",
+                        "description": "Transparency of polygon and point symbols",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapWeight": {
+                        "displayName": "Heatmap Weight",
+                        "description": "Weight of each data point on the intensity of heatmap apperance.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "heatmapRadius": {
+                        "displayName": "Heatmap Radius",
+                        "description": "Radius of data points in pixel. Higher radius will spread heatmap to greater distance.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "heatmapBlur": {
+                        "displayName": "Heatmap Blur",
+                        "description": "Blur distance for each data point in pixel. Higher blur will produce smoother heatmap.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": false,
+        "supportsHighlight": true
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

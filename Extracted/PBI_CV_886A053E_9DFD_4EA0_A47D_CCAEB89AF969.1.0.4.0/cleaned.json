@@ -1,0 +1,671 @@
+{
+    "visual": {
+        "name": "candlestickByOKViz",
+        "displayName": "Candlestick by OKViz",
+        "guid": "PBI_CV_886A053E_9DFD_4EA0_A47D_CCAEB89AF969",
+        "visualClassName": "Visual",
+        "version": "1.0.4",
+        "description": "Candlestick by OKViz is used to describe price movements of a security, derivative, or currency. Each candle in the chart typically shows four price values: high, low, open, and close. This visual allows you to define multiple trend lines for analysis purposes, such as the Bollinger Bands.",
+        "supportUrl": "https://okviz.com/candlestick/",
+        "gitHubUrl": "https://github.com/okviz/candlestick"
+    },
+    "apiVersion": "1.11.0",
+    "author": {
+        "name": "OKViz - a trademark of SQLBI",
+        "email": "support@okviz.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.cultures.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-chartutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Axis",
+                "name": "Category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Open",
+                "name": "open",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Close",
+                "name": "close",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "High",
+                "name": "high",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Low",
+                "name": "low",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Trend Lines",
+                "name": "trends",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "open": {
+                            "max": 1
+                        },
+                        "close": {
+                            "max": 1
+                        },
+                        "high": {
+                            "max": 1
+                        },
+                        "low": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "Category"
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "open"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "close"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "high"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "low"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "trends"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "dataPoint": {
+                "displayName": "Candles",
+                "properties": {
+                    "highLowCaps": {
+                        "displayName": "High/Low caps",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showShadowsColor": {
+                        "displayName": "Borders",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "shadowsFill": {
+                        "displayName": "Borders color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bullishFill": {
+                        "displayName": "Bullish color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bearishFill": {
+                        "displayName": "Bearish color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "trendLines": {
+                "displayName": "Trend lines",
+                "properties": {
+                    "weight": {
+                        "displayName": "Weight",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "interpolation": {
+                        "displayName": "Appearance",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Straight",
+                                    "value": "linear"
+                                },
+                                {
+                                    "displayName": "Monotone",
+                                    "value": "monotone"
+                                },
+                                {
+                                    "displayName": "Smooth",
+                                    "value": "cardinal"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "displayName": "X-Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridline": {
+                        "displayName": "Gridline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "type": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Continuous",
+                                    "value": "continuous"
+                                },
+                                {
+                                    "displayName": "Categorical",
+                                    "value": "categorical"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Y-Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "start": {
+                        "displayName": "Start",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "end": {
+                        "displayName": "End",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Arial Black",
+                                    "value": "\"Arial Black\""
+                                },
+                                {
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "\"Arial Unicode MS\""
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayName": "Cambria Math",
+                                    "value": "\"Cambria Math\""
+                                },
+                                {
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "\"Comic Sans MS\""
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "\"Courier New\""
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "\"Lucida Sans Unicode\""
+                                },
+                                {
+                                    "displayName": "Segoe (Bold)",
+                                    "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Segoe UI Light",
+                                    "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "\"Times New Roman\""
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "\"Trebuchet MS\""
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Display unit",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "precision": {
+                        "displayName": "Decimal places",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "Top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "Bottom"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "Right"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "Left"
+                                },
+                                {
+                                    "displayName": "Top Center",
+                                    "value": "TopCenter"
+                                },
+                                {
+                                    "displayName": "Bottom Center",
+                                    "value": "BottomCenter"
+                                },
+                                {
+                                    "displayName": "Right Center",
+                                    "value": "RightCenter"
+                                },
+                                {
+                                    "displayName": "Left Center",
+                                    "value": "LeftCenter"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Legend name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "colorBlind": {
+                "displayName": "Color Blindness by OKViz",
+                "properties": {
+                    "vision": {
+                        "displayName": "Vision",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "Normal"
+                                },
+                                {
+                                    "displayName": "Protanopia",
+                                    "value": "Protanopia"
+                                },
+                                {
+                                    "displayName": "Protanomaly",
+                                    "value": "Protanomaly"
+                                },
+                                {
+                                    "displayName": "Deuteranopia",
+                                    "value": "Deuteranopia"
+                                },
+                                {
+                                    "displayName": "Deuteranomaly",
+                                    "value": "Deuteranomaly"
+                                },
+                                {
+                                    "displayName": "Tritanopia",
+                                    "value": "Tritanopia"
+                                },
+                                {
+                                    "displayName": "Tritanomaly",
+                                    "value": "Tritanomaly"
+                                },
+                                {
+                                    "displayName": "Achromatopsia",
+                                    "value": "Achromatopsia"
+                                },
+                                {
+                                    "displayName": "Achromatomaly",
+                                    "value": "Achromatomaly"
+                                },
+                                {
+                                    "displayName": "Low Contrast",
+                                    "value": "LowContrast"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "about": {
+                "displayName": "About",
+                "properties": {
+                    "version": {
+                        "displayName": "Version",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "sorting": {
+            "default": {}
+        },
+        "drilldown": {
+            "roles": [
+                "Category"
+            ]
+        }
+    },
+    "stringResources": {}
+}

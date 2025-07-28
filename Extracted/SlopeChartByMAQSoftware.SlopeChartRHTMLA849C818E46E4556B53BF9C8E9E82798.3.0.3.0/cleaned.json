@@ -1,0 +1,257 @@
+{
+    "visual": {
+        "name": "SlopeChartByMAQSoftware",
+        "displayName": "Slope chart by MAQ Software",
+        "guid": "SlopeChartRHTMLA849C818E46E4556B53BF9C8E9E82798",
+        "visualClassName": "SlopeChart",
+        "version": "3.0.3",
+        "description": "Slope Chart is an excellent tool for illustrating the change between two data points. This visual is commonly used to show upward or downward trends.",
+        "supportUrl": "https://github.com/maqsoftware/PowerBI-visuals/issues",
+        "gitHubUrl": "https://github.com/maqsoftware/PowerBI-visuals/"
+    },
+    "apiVersion": "2.1.0",
+    "author": {
+        "name": "MAQ Software",
+        "email": "support@maqsoftware.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "kind": "Grouping",
+                "name": "category"
+            },
+            {
+                "displayName": "Measure",
+                "kind": "Measure",
+                "name": "measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "measure": {
+                            "max": 2
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "category"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "measure"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {}
+                                }
+                            }
+                        }
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "# Copyright (c) MAQ Software.  All rights reserved.\n\n# Third Party Programs. This software enables you to obtain software applications from other sources. \n# Those applications are offered and distributed by third parties under their own license terms.\n# MAQ Software is not developing, distributing or licensing those applications to you, but instead, \n# as a convenience, enables you to use this software to obtain those applications directly from \n# the application providers.\n# By using the software, you acknowledge and agree that you are obtaining the applications directly\n# from the third party providers and under separate license terms, and that it is your responsibility to locate, \n# understand and comply with those license terms.\n# Microsoft grants you no license rights for third-party software or applications that is obtained using this software.\n\n#\n# WARNINGS:   \n#\n# CREATION DATE: 06/12/2017\n#\n# LAST UPDATE: --/--/---\n#\n# VERSION: 3.0.0\n#\n# R VERSION TESTED: 3.4.2\n# \n# AUTHOR: MAQ Softwaqre\n\n############### Utility functions ###############\nlibraryRequireInstall = function(packageName, ...)\n{\n  if(!require(packageName, character.only = TRUE)) \n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\n}\n\nlibraryRequireInstall(\"XML\")\nlibraryRequireInstall(\"htmlwidgets\")\n\ninternalSaveWidget <- function(widget, fname)\n{\n  tempFname = paste(fname, \".tmp\", sep=\"\")\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\n  FlattenHTML(tempFname, fname)\n}\n\nFlattenHTML <- function(fnameIn, fnameOut)\n{\n  # Read and parse HTML file\n  # Embed all js and css files into one unified file\n  \n  if(!file.exists(fnameIn))\n    return(FALSE)\n  \n  dir = dirname(fnameIn)\n  html = htmlTreeParse(fnameIn, useInternal = TRUE)\n  top = xmlRoot(html)\n  \n  # extract all <script> tags with src value\n  srcNode=getNodeSet(top, '//script[@src]')\n  for (node in srcNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['src'])\n    alternateSrc = FindSrcReplacement(fname)\n    if (!is.null(alternateSrc))\n    {\n      s = alternateSrc\n      names(s) = 'src'\n      newNode = xmlNode(\"script\",attrs = s)\n      replaceNodes(node, newNode)\n    }else{\n      str=ReadFileForEmbedding(fname);\n      if (!is.null(str))\n      {      \n        newNode = xmlNode(\"script\", str, attrs = c(type = \"text/javascript\"))\n        replaceNodes(node, newNode)\n      }\n    }\n  }\n  \n  # extract all <link> tags with src value\n  linkNode=getNodeSet(top, '//link[@href]')\n  for (node in linkNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['href'])\n    str = ReadFileForEmbedding(fname, FALSE);\n    if (!is.null(str))\n    {\n      newNode = xmlNode(\"style\", str)\n      replaceNodes(node, newNode)\n    }\n  }\n  \n  saveXML(html, file = fnameOut)\n  return(TRUE)\n}\n\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\n{\n  data = ReadFullFile(fname)\n  if (is.null(data))\n    return(NULL)\n\n  str = paste(data, collapse ='\\n')\n  if (addCdata) {\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\n  }\n  return(str)\n}\n\nReadFullFile <- function(fname)\n{\n  if(!file.exists(fname))\n    return(NULL)\n  \n  con = file(fname, open = \"r\")\n  data = readLines(con)\n  close(con)\n  return(data)\n}\n\nFindSrcReplacement <- function(str)\n{\n  # finds reference to 'plotly' js and replaces with a version from CDN\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\n  str <- iconv(str, to=\"UTF-8\")\n  pattern = \"plotlyjs-(\\\\w.+)/plotly-latest.min.js\"\n  match1=regexpr(pattern, str)\n  attr(match1, 'useBytes') <- FALSE\n  strMatch=regmatches(str, match1, invert = FALSE)\n  if (length(strMatch) == 0) return(NULL)\n  \n  pattern2 = \"-(\\\\d.+)/\"\n  match2 = regexpr(pattern2, strMatch[1])\n  attr(match2, 'useBytes') <- FALSE\n  strmatch = regmatches(strMatch[1], match2)\n  if (length(strmatch) == 0) return(NULL)\n  \n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\n  # This matches the specific version used in the plotly package used.\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\n  return(str)\n}\n#################################################\n\n\n############### Library Declarations ###############\n\n## Plotting libraries \nlibraryRequireInstall(\"ggplot2\");\nlibraryRequireInstall(\"plotly\");\n\n## Datastream parsing library\nlibraryRequireInstall(\"magrittr\");\n\n## HTML function and output facilitator libraries\nlibraryRequireInstall(\"htmlwidgets\");\nlibraryRequireInstall(\"XML\");\n\n\n\n########### Display Error Messag #################\n\ndefaultMessage = function(e){\n  \n    ax <- list(\n        title          = sprintf(\"%s\\n\",e),\n        zeroline       = FALSE,\n        showline       = FALSE,\n        showticklabels = FALSE,\n        showgrid       = FALSE\n    )\n\n    ay <- list(\n        title          = \"\",\n        zeroline       = FALSE,\n        showline       = FALSE,\n        showticklabels = FALSE,\n        showgrid       = FALSE\n    )\n\n    plotOutput <- plot_ly(\n\n    )%>%\n    layout(\n        title = '',\n        xaxis = ax, \n        yaxis = ay\n    )\n\n    plotOutput = ggplotly(plotOutput, tooltip=NULL);\n\n    disabledButtonsList <- list('hoverCompareCartesian')\n    plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n\n    internalSaveWidget(config(plotOutput, collaborate = FALSE, displaylogo=FALSE), 'out.html');\n    quit()\n  \n}\n\n\n\n################### Actual code ####################\n\n##Error handeling\ntryCatch(\n    {\n        \n        ################### Defining properties ####################\n        \n        upColor = '#00ba38'\n        if(exists(\"SlopeColor_upColor\")){\n            upColor = SlopeColor_upColor\n        }\n\n        downColor = '#f8766d'\n        if(exists(\"SlopeColor_downColor\")){\n            downColor = SlopeColor_downColor\n        }\n\n        neutralColor = '#F2C80F'\n        if(exists(\"SlopeColor_neutralColor\")){\n            neutralColor = SlopeColor_neutralColor\n        }\n\n\n\n        intercept1Title<-colnames(measure[1])\n        if(exists(\"intercept_intercept1Title\") && intercept_intercept1Title != ''){\n            intercept1Title = intercept_intercept1Title\n        }\n\n        intercept2Title<-colnames(measure[2])\n        if(exists(\"intercept_intercept2Title\") && intercept_intercept2Title != ''){\n            intercept2Title = intercept_intercept2Title\n        }\n\n\n\n        intercept1Color = 'black'\n        if(exists(\"intercept_intercept1Color\")){\n            intercept1Color = intercept_intercept1Color\n        }\n\n        intercept2Color = 'black'\n        if(exists(\"intercept_intercept2Color\")){\n            intercept2Color = intercept_intercept2Color\n        }\n\n\n\n        yTitle = 'Trend'\n        if(exists(\"yAxis_yTitle\") && yAxis_yTitle != ''){\n            yTitle = yAxis_yTitle\n        }\n\n        yGrid = FALSE\n        if(exists(\"yAxis_yGrid\")){\n            yGrid = yAxis_yGrid\n        }\n\n        yGridCol = \"Gray50\"\n        if(exists(\"yAxis_yGridCol\")){\n            yGridCol = yAxis_yGridCol\n        }\n\n\n        ################### Prepare data ####################\n\n        categoryName = c(category)\n        value1       = c(measure[1])\n        value2       = c(measure[2])\n\n        df = data.frame(categoryName,value1,value2)\n        colnames(df) <- c(\"categoryName\", \"value1\", \"value2\")\n        \n        rows <- NROW(df)\n        if(rows>1000){\n            defaultMessage(\"Data exceeds 1000 rows.\")\n        }\n\n\n        left_label  <- paste(df$categoryName, df$value1,sep=\", \")\n        right_label <- paste(df$categoryName, df$value2,sep=\", \")\n\n        df$class <- ifelse((df$value2 - df$value1) < 0, \n                        \"Down\", \n                    (ifelse((df$value2 - df$value1) == 0, \n                        \"Neutral\",\n                        \"Up\")))\n\n        x <- geom_segment(\n            aes(\n                text  = paste(df$categoryName), \n                x     = 1, \n                xend  = 2, \n                y     = value1, \n                yend  = value2, \n                col   = class\n            ), \n            size = .75,\n            show.legend = F\n        )\n\n        ################### Plot ####################\n\n        plotOutput <- \n            ggplot(df) +\n            x + \n            geom_vline(xintercept=1, linetype=\"dashed\", size=.1, color=I(intercept1Color)) + \n            geom_vline(xintercept=2, linetype=\"dashed\", size=.1, color=I(intercept2Color)) +\n            scale_color_manual(labels = c(\"Up\", \"Down\", \"Neutral\"),\n                            values = c(\"Up\"=upColor, \"Down\"=downColor, \"Neutral\"=neutralColor)) +  # color of lines\n            labs(x=\"\", y=yTitle) +                                                                 # Axis labels\n            xlim(.5, 2.5) + \n            ylim(0,(1.1*(max(df$value1, df$value2))))                                              # X and Y axis limits\n\n        #Add texts\n        plotOutput <- plotOutput + geom_text(label=left_label, y=df$value1, x=rep(.78, NROW(df)), hjust=-0.1, size=3.5)\n        plotOutput <- plotOutput + geom_text(label=right_label, y=df$value2, x=rep(2.22, NROW(df)), hjust=-0.1, size=3.5)\n        plotOutput <- plotOutput + geom_text(label=intercept1Title, x=.78, y=1.1*(max(df$value1, df$value2)), hjust=1.2, size=5)    # title\n        plotOutput <- plotOutput + geom_text(label=intercept2Title, x=2.22, y=1.1*(max(df$value1, df$value2)), hjust=-0.1, size=5)  # title\n\n        #Minify theme\n        plotOutput <- plotOutput + theme(panel.background = element_blank())\n        plotOutput <- plotOutput + theme(axis.ticks = element_blank())\n        plotOutput <- plotOutput + theme(axis.text.x = element_blank())\n        plotOutput <- plotOutput + theme(panel.border = element_blank())\n\n        if(yGrid==TRUE)\n        {\n            plotOutput <- plotOutput + theme(panel.grid.major.y = element_line(colour = I(yGridCol), size=0.25))\n            plotOutput <- plotOutput + theme(panel.grid.minor.y = element_line(colour = I(yGridCol), size=0.25))\n        }\n\n        ############# Create and save widget ###############\n\n        plotOutput = ggplotly(plotOutput, tooltip=NULL);\n\n        disabledButtonsList <- list('hoverCompareCartesian')\n        plotOutput$x$config$modeBarButtonsToRemove = disabledButtonsList\n\n        internalSaveWidget(config(plotOutput, collaborate = FALSE, displaylogo=FALSE), 'out.html');\n        \n    },\n    error = function(e) {\n        \n        xLayout <- list(\n            title = sprintf(\"Please provide correct input data\"),\n            zeroline = FALSE,\n            showline = FALSE,\n            showticklabels = FALSE,\n            showgrid = FALSE\n        )\n\n        yLayout <- list(\n            title = \"\",\n            zeroline = FALSE,\n            showline = FALSE,\n            showticklabels = FALSE,\n            showgrid = FALSE\n        )\n\n        plotOutput <- plot_ly(\n\n        )%>%\n        layout(\n            title = '',\n            xaxis = xLayout, \n            yaxis = yLayout\n        )\n\n        internalSaveWidget(plotOutput, 'out.html');\n        quit()\n\n    }\n)"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "SlopeColor": {
+                "displayName": "Slope color",
+                "properties": {
+                    "upColor": {
+                        "displayName": "Up color",
+                        "description": "Color of upward slope",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "downColor": {
+                        "displayName": "Down color",
+                        "description": "Color of downward slope",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "neutralColor": {
+                        "displayName": "Neutral color",
+                        "description": "Color of neutral line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Axis",
+                "properties": {
+                    "yTitle": {
+                        "displayName": "Y title",
+                        "description": "Enter the title for y-axis",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": false
+                    },
+                    "yGrid": {
+                        "displayName": "Y grid line",
+                        "description": "Turn grid lines for y-axis on or off",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yGridCol": {
+                        "displayName": "Y grid color",
+                        "description": "Choose the color for y-axis grid lines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "intercept": {
+                "displayName": "Intercepts",
+                "properties": {
+                    "intercept1Title": {
+                        "displayName": "Intercept 1 title",
+                        "description": "Title of first intercept",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": false
+                    },
+                    "intercept2Title": {
+                        "displayName": "Intercept 2 title",
+                        "description": "Title of second intercept",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": false
+                    },
+                    "intercept1Color": {
+                        "displayName": "Intercept 1 color",
+                        "description": "Color of first intercept",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "intercept2Color": {
+                        "displayName": "Intercept 2 color",
+                        "description": "Color of second intercept",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "scales",
+                "displayName": "scales",
+                "url": "https://cran.r-project.org/web/packages/scales/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "XML",
+                "displayName": "XML",
+                "url": "https://cran.r-project.org/web/packages/XML/index.html"
+            },
+            {
+                "name": "ggrepel",
+                "displayName": "ggrepel",
+                "url": "https://cran.r-project.org/web/packages/ggrepel/index.html"
+            }
+        ]
+    },
+    "stringResources": {}
+}

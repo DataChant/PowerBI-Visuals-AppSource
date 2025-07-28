@@ -1,0 +1,1672 @@
+{
+    "visual": {
+        "name": "Multi target KPI",
+        "displayName": "Multi target KPI",
+        "guid": "Multi_target_KPI",
+        "visualClassName": "CardKPI",
+        "version": "1.3.3.3",
+        "description": "This card is designed to display the main indicator with several deviation indicators with advanced color formatting settings.",
+        "supportUrl": "https://data-2-speak.com/",
+        "gitHubUrl": "https://github.com/MYDS2024/Multi-Target-KPI"
+    },
+    "author": {
+        "name": "Alex Kolokolov",
+        "email": "ak@data2speak.com"
+    },
+    "apiVersion": "5.3.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "ru-RU": {}
+    },
+    "capabilities": {
+        "privileges": [],
+        "dataRoles": [
+            {
+                "displayName": "Main measure",
+                "description": "(Required). Set the measure display in the field. You can only add one value.",
+                "displayNameKey": "Main Measure",
+                "name": "Main Measure",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Category",
+                "description": "You can set a field that will split the card and all values (main measure, additional and tooltips) into several. Keep in mind that if some values cannot be divided into categories, then the same value will be output for all cards.",
+                "displayNameKey": "category",
+                "name": "category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Additional measures",
+                "description": "Add additional measures for which you can configure conditional color formatting. These can be indicators of deviations. You can add no more than 3 measures.",
+                "displayNameKey": "additionalMeasures",
+                "name": "additional",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Bullet target",
+                "displayNameKey": "bulletTarget",
+                "name": "bulletTarget",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltips",
+                "description": "Add additional measures that will be included in the tooltip of the card.",
+                "displayNameKey": "tooltips",
+                "name": "tooltips",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Main Measure": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "category": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "additional": {
+                            "max": 3
+                        },
+                        "bulletTarget": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Main Measure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltips"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "additional"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "bulletTarget"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "grid": {
+                "displayNameKey": "grid",
+                "properties": {
+                    "percentageWidth": {
+                        "displayName": "Percentage width",
+                        "description": "The percentage width allows you to adjust the proportion of width occupied by the main measure. Takes a value from 10 to 90.",
+                        "displayNameKey": "percentageWidth",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "wireframe": {
+                        "displayName": "Wireframe",
+                        "description": "The framework defines the location type of the value and title of the Main measure. Choose 1 of 2 types: To the left of the block with additional measures, or Above the block with additional measures.",
+                        "displayNameKey": "wireframe",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "displayNameKey": "left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Top",
+                                    "displayNameKey": "top",
+                                    "value": "top"
+                                }
+                            ]
+                        }
+                    },
+                    "showMeasureName": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelAsMeasurename": {
+                        "displayName": "Show measure name instead of category",
+                        "description": "\u0415nable this field If you need to replace the category names with the name of the main measure. For example, when it is necessary to rename categories.",
+                        "displayNameKey": "labelAsMeasurename",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position main measure name",
+                        "description": "Set up the alignment constraint: the name of the Main Measure or Category will be located in the area of the Main Measure section or across the entire width of the card.",
+                        "displayNameKey": "position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "The entire width",
+                                    "displayNameKey": "topCenter",
+                                    "value": "topCenter"
+                                },
+                                {
+                                    "displayName": "Above main label",
+                                    "displayNameKey": "aboveMainMeasure",
+                                    "value": "aboveMainMeasure"
+                                }
+                            ]
+                        }
+                    },
+                    "cardsPerRow": {
+                        "displayName": "Cards per row",
+                        "description": "The maximum allowed number of cards in one row is 15. The rest are transferred to the second and subsequent rows.",
+                        "displayNameKey": "cardsPerRow",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "cardsMargin": {
+                        "displayName": "Space between cards",
+                        "description": "The maximum distance between individual cards is 100.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "layoutType": {
+                        "displayName": "Layout type",
+                        "description": "Select a vertical or horizontal arrangement of categories and values of additional measures.",
+                        "displayNameKey": "layoutType",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Horizontal",
+                                    "displayNameKey": "horizontal",
+                                    "value": "horizontal"
+                                },
+                                {
+                                    "displayName": "Vertical",
+                                    "displayNameKey": "vertical",
+                                    "value": "vertical"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "alignment": {
+                "displayNameKey": "alignment",
+                "properties": {
+                    "vertical": {
+                        "displayName": "Vertical",
+                        "description": "Vertical alignment sets the type of location of the element according to the height of the card. Choose 1 of 3 types: Top, Middle, Bottom.",
+                        "displayNameKey": "vertical",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "horizontal": {
+                        "displayName": "Horizontal",
+                        "description": "Set 1 of 3 element alignment types: Left, Center, Right.",
+                        "displayNameKey": "horizontal",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "show_additional_vertical": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "show_additional_horizontal": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "verticalMainMeasure": {
+                        "displayName": "Main measure value",
+                        "description": "Main measure.",
+                        "displayNameKey": "verticalMainMeasure",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "horizontalMainMeasure": {
+                        "displayName": "Main measure name",
+                        "description": "Main measure name.",
+                        "displayNameKey": "verticalMainMeasure",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "verticalAdditionalMeasure": {
+                        "displayNameKey": "verticalAdditionalMeasure",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "verticalAdditionalMeasureName": {
+                        "displayName": "Position additional measure names",
+                        "description": "Change the position of the Additional Measures names. Set 1 of 4 element alignment types: Top, Bottom, Left, Right.",
+                        "displayNameKey": "verticalAdditionalMeasureName",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "displayNameKey": "left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "displayNameKey": "right",
+                                    "value": "right"
+                                },
+                                {
+                                    "displayName": "Top",
+                                    "displayNameKey": "top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "displayNameKey": "bottom",
+                                    "value": "bottom"
+                                }
+                            ]
+                        }
+                    },
+                    "horizontalAdditionalMeasureName": {
+                        "displayName": "Additional measure name",
+                        "description": "Additional Measure names.",
+                        "displayNameKey": "horizontalAdditionalMeasureName",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "horizontalAdditionalMeasureValue": {
+                        "displayName": "Additional measure value",
+                        "description": "Additional Measure values.",
+                        "displayNameKey": "horizontalAdditionalMeasureValue",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "horizontalCategory": {
+                        "displayName": "Category",
+                        "description": "Category.",
+                        "displayNameKey": "horizontalCategory",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "verticalCategory": {
+                        "displayName": "Category",
+                        "description": "Category.",
+                        "displayNameKey": "verticalCategory",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    }
+                }
+            },
+            "background": {
+                "properties": {
+                    "layoutShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backFill": {
+                        "displayName": "Background color",
+                        "description": "Background color for the visual element.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "description": "Set background transparency from 0 to 100%.",
+                        "displayNameKey": "transparency",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderFill": {
+                        "displayName": "Border color",
+                        "description": "Set the border color of the card.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWeight": {
+                        "displayName": "Border weight",
+                        "description": "Set the rounding of the border edges. The value should be from 1 to 30.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "roundEdges": {
+                        "displayName": "Round edges",
+                        "description": "Set the width of the border line. The value should be from 1 to 30.",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "font": {
+                "properties": {
+                    "color": {
+                        "displayName": "Main measure color",
+                        "description": "Color for main measure",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor": {
+                        "displayName": "Category color",
+                        "description": "Color for category",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "additionalCategoryColor": {
+                        "displayName": "Additional category color",
+                        "description": "Color for additional category",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "additionalValueColor": {
+                        "displayName": "Additional measure color",
+                        "description": "Color for additional measure",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "allColor": {
+                        "displayName": "Main measure color",
+                        "description": "Color for main measure",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "allCategoryColor": {
+                        "displayName": "Category color",
+                        "description": "Color for category",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "allAdditionalCategoryColor": {
+                        "displayName": "Additional category color",
+                        "description": "Color for additional category",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isUnderline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "wordWrap_": {
+                        "displayName": "Word wrap",
+                        "description": "Label text wrap is disabled by default. Enable this field if you want to change that.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "categoryFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "categoryTextSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "categoryIsBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "categoryIsItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "categoryIsUnderline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "categoryWordWrap_": {
+                        "displayName": "Word wrap",
+                        "description": "Label text wrap is disabled by default. Enable this field if you want to change that.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mainFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "mainTextSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "mainIsBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mainIsItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mainIsUnderline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalNameFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "additionalNameTextSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "additionalNameIsBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalNameIsItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalNameIsUnderline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalNameWordWrap_": {
+                        "displayName": "Word wrap",
+                        "description": "Label text wrap is disabled by default. Enable this field if you want to change that.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalValueFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "additionalValueTextSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "additionalValueIsBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalValueIsItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalValueIsUnderline": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "format": {
+                "properties": {
+                    "additionalShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mainShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayUnit": {
+                        "displayName": "Display Unit",
+                        "description": "Specify the display unit.",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal places",
+                        "description": "Specify decimal places for decimal number.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "suppressBlankAndNaN": {
+                        "displayName": "Suppress '(Blank)' and '(NaN)'",
+                        "description": "Enable this field if you want to replace the value of the additional measure with another text in the case of Blank or NaN.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "blankAndNaNReplaceText": {
+                        "displayName": "'(Blank)' and '(NaN)' replace text",
+                        "description": "Specify the text or symbol to replace the Blank or NaN values. It can be '0', '\u2014' or a warning symbol.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "mainDisplayUnit": {
+                        "displayName": "Display Unit",
+                        "description": "Specify the display unit.",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "mainDecimalPlaces": {
+                        "displayName": "Decimal places",
+                        "description": "Specify decimal places for decimal number.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "mainSuppressBlankAndNaN": {
+                        "displayName": "Suppress '(Blank)' and '(NaN)'",
+                        "description": "Enable this field if you want to replace the value of the additional measure with another text in the case of Blank or NaN.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mainBlankAndNaNReplaceText": {
+                        "displayName": "'(Blank)' and '(NaN)' replace text",
+                        "description": "Specify the text or symbol to replace the Blank or NaN values. It can be '0', '\u2014' or a warning symbol.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "componentType": {
+                        "displayName": "Component type",
+                        "description": "It is possible for an additional measure to output not only its value, but also a deviation from the main measure. Choose one of the 4 options for each measure.",
+                        "displayNameKey": "componentType",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Measure",
+                                    "displayNameKey": "measure",
+                                    "value": "measure"
+                                },
+                                {
+                                    "displayName": "Change over Main Measure",
+                                    "displayNameKey": "changeOver",
+                                    "value": "changeOver"
+                                },
+                                {
+                                    "displayName": "Percentage over Main Measure",
+                                    "displayNameKey": "percentageOver",
+                                    "value": "percentageOver"
+                                },
+                                {
+                                    "displayName": "Percentage change over Main Measure",
+                                    "displayNameKey": "percentageChangeOver",
+                                    "value": "percentageChangeOver"
+                                }
+                            ]
+                        }
+                    },
+                    "mainInvertVariance": {
+                        "displayName": "Invert Variance",
+                        "description": "Changes the calculation order for an additional measure value",
+                        "displayNameKey": "invertVariance",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mainComponentType": {
+                        "displayName": "Component type",
+                        "description": "It is possible for an additional measure to output not only its value, but also a deviation from the main measure. Choose one of the 4 options for each measure.",
+                        "displayNameKey": "componentType",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Measure",
+                                    "displayNameKey": "measure",
+                                    "value": "measure"
+                                },
+                                {
+                                    "displayName": "Change over Main Measure",
+                                    "displayNameKey": "changeOver",
+                                    "value": "changeOver"
+                                },
+                                {
+                                    "displayName": "Percentage over Main Measure",
+                                    "displayNameKey": "percentageOver",
+                                    "value": "percentageOver"
+                                },
+                                {
+                                    "displayName": "Percentage change over Main Measure",
+                                    "displayNameKey": "percentageChangeOver",
+                                    "value": "percentageChangeOver"
+                                }
+                            ]
+                        }
+                    },
+                    "invertVariance": {
+                        "displayName": "Invert Variance",
+                        "description": "Changes the calculation order for an additional measure value",
+                        "displayNameKey": "invertVariance",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "color": {
+                "properties": {
+                    "mainColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "mainShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "additionalShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "unmatchedColor": {
+                        "displayName": "Unmatched state color",
+                        "description": "The default color of the additional measure. If you use conditional formatting and none of the conditions are met, then this color will be visible.",
+                        "displayNameKey": "unmatchedColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "conditionFormatting": {
+                        "displayName": "Condition formatting",
+                        "description": "Enable this field if you want to add conditional formatting for individual elements.",
+                        "displayNameKey": "conditionFormatting",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "componentType": {
+                        "displayName": "Component type",
+                        "description": "Select the relative value itself or the deviation you need to adjust the color formatting.",
+                        "displayNameKey": "componentType",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Measure",
+                                    "displayNameKey": "measure",
+                                    "value": "measure"
+                                },
+                                {
+                                    "displayName": "Change over Main Measure",
+                                    "displayNameKey": "changeOver",
+                                    "value": "changeOver"
+                                },
+                                {
+                                    "displayName": "Percentage over Main Measure",
+                                    "displayNameKey": "percentageOver",
+                                    "value": "percentageOver"
+                                },
+                                {
+                                    "displayName": "Percentage change over Main Measure",
+                                    "displayNameKey": "percentageChangeOver",
+                                    "value": "percentageChangeOver"
+                                }
+                            ]
+                        }
+                    },
+                    "invertVariance": {
+                        "displayName": "Invert Variance",
+                        "description": "Change the order of calculation for an additional measure value",
+                        "displayNameKey": "invertVariance",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "condition1": {
+                        "displayName": "Condition 1",
+                        "description": "Enable this field if you want to add a conditional formatting",
+                        "displayNameKey": "condition1",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "comparisonOperator1": {
+                        "displayName": "Comparison operator",
+                        "description": "Select a logical condition from the list for comparison.",
+                        "displayNameKey": "comparisonOperator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Greater than (>)",
+                                    "displayNameKey": ">",
+                                    "value": ">"
+                                },
+                                {
+                                    "displayName": "Greater than or equal to (>=)",
+                                    "displayNameKey": ">=",
+                                    "value": ">="
+                                },
+                                {
+                                    "displayName": "Equal to (=)",
+                                    "displayNameKey": "=",
+                                    "value": "="
+                                },
+                                {
+                                    "displayName": "Less than or equal to (<=)",
+                                    "displayNameKey": "<=",
+                                    "value": "<="
+                                },
+                                {
+                                    "displayName": "Less than (<)",
+                                    "displayNameKey": "<",
+                                    "value": "<"
+                                }
+                            ]
+                        }
+                    },
+                    "value1": {
+                        "displayName": "Value",
+                        "description": "Enter a numeric value to limit the condition.",
+                        "displayNameKey": "value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "assignColor1": {
+                        "displayName": "The assign the color",
+                        "description": "Set the color value of the additional measure for this condition.",
+                        "displayNameKey": "assignColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "condition2": {
+                        "displayName": "Condition 2",
+                        "description": "Enable this field if you want to add a conditional formatting",
+                        "displayNameKey": "condition2",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "comparisonOperator2": {
+                        "displayName": "Comparison operator",
+                        "description": "Select a logical condition from the list for comparison.",
+                        "displayNameKey": "comparisonOperator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Greater than (>)",
+                                    "displayNameKey": ">",
+                                    "value": ">"
+                                },
+                                {
+                                    "displayName": "Greater than or equal to (>=)",
+                                    "displayNameKey": ">=",
+                                    "value": ">="
+                                },
+                                {
+                                    "displayName": "Equal to (=)",
+                                    "displayNameKey": "=",
+                                    "value": "="
+                                },
+                                {
+                                    "displayName": "Less than or equal to (<=)",
+                                    "displayNameKey": "<=",
+                                    "value": "<="
+                                },
+                                {
+                                    "displayName": "Less than (<)",
+                                    "displayNameKey": "<",
+                                    "value": "<"
+                                }
+                            ]
+                        }
+                    },
+                    "value2": {
+                        "displayName": "Value",
+                        "description": "Enter a numeric value to limit the condition.",
+                        "displayNameKey": "value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "assignColor2": {
+                        "displayName": "The assign the color",
+                        "description": "Set the color value of the additional measure for this condition.",
+                        "displayNameKey": "assignColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "condition3": {
+                        "displayName": "Condition 3",
+                        "description": "Enable this field if you want to add a conditional formatting",
+                        "displayNameKey": "condition3",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "comparisonOperator3": {
+                        "displayName": "Comparison operator",
+                        "description": "Select a logical condition from the list for comparison.",
+                        "displayNameKey": "comparisonOperator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Greater than (>)",
+                                    "displayNameKey": ">",
+                                    "value": ">"
+                                },
+                                {
+                                    "displayName": "Greater than or equal to (>=)",
+                                    "displayNameKey": ">=",
+                                    "value": ">="
+                                },
+                                {
+                                    "displayName": "Equal to (=)",
+                                    "displayNameKey": "=",
+                                    "value": "="
+                                },
+                                {
+                                    "displayName": "Less than or equal to (<=)",
+                                    "displayNameKey": "<=",
+                                    "value": "<="
+                                },
+                                {
+                                    "displayName": "Less than (<)",
+                                    "displayNameKey": "<",
+                                    "value": "<"
+                                }
+                            ]
+                        }
+                    },
+                    "value3": {
+                        "displayName": "Value",
+                        "description": "Enter a numeric value to limit the condition.",
+                        "displayNameKey": "value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "assignColor3": {
+                        "displayName": "The assign the color",
+                        "description": "Set the color value of the additional measure for this condition.",
+                        "displayNameKey": "assignColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "emoji1": {
+                        "displayName": "Emoji",
+                        "displayNameKey": "emoji",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-",
+                                    "value": "-"
+                                },
+                                {
+                                    "displayName": "\ud83d\udd34",
+                                    "displayNameKey": "\ud83d\udd34",
+                                    "value": "\ud83d\udd34"
+                                },
+                                {
+                                    "displayName": "\ud83d\udfe2",
+                                    "displayNameKey": "\ud83d\udfe2",
+                                    "value": "\ud83d\udfe2"
+                                },
+                                {
+                                    "displayName": "\ud83d\udfe1",
+                                    "displayNameKey": "\ud83d\udfe1",
+                                    "value": "\ud83d\udfe1"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc4d",
+                                    "displayNameKey": "\ud83d\udc4d",
+                                    "value": "\ud83d\udc4d"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc4e",
+                                    "displayNameKey": "\ud83d\udc4e",
+                                    "value": "\ud83d\udc4e"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude00",
+                                    "displayNameKey": "\ud83d\ude00",
+                                    "value": "\ud83d\ude00"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd28",
+                                    "displayNameKey": "\ud83e\udd28",
+                                    "value": "\ud83e\udd28"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude41",
+                                    "displayNameKey": "\ud83d\ude41",
+                                    "value": "\ud83d\ude41"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd11",
+                                    "displayNameKey": "\ud83e\udd11",
+                                    "value": "\ud83e\udd11"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude10",
+                                    "displayNameKey": "\ud83d\ude10",
+                                    "value": "\ud83d\ude10"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude21",
+                                    "displayNameKey": "\ud83d\ude21",
+                                    "value": "\ud83d\ude21"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude0d",
+                                    "displayNameKey": "\ud83d\ude0d",
+                                    "value": "\ud83d\ude0d"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd14",
+                                    "displayNameKey": "\ud83e\udd14",
+                                    "value": "\ud83e\udd14"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd73",
+                                    "displayNameKey": "\ud83e\udd73",
+                                    "value": "\ud83e\udd73"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude14",
+                                    "displayNameKey": "\ud83d\ude14",
+                                    "value": "\ud83d\ude14"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude2d",
+                                    "displayNameKey": "\ud83d\ude2d",
+                                    "value": "\ud83d\ude2d"
+                                },
+                                {
+                                    "displayName": "\u25b2",
+                                    "displayNameKey": "\u25b2",
+                                    "value": "\u25b2"
+                                },
+                                {
+                                    "displayName": "\u25bc",
+                                    "displayNameKey": "\u25bc",
+                                    "value": "\u25bc"
+                                }
+                            ]
+                        }
+                    },
+                    "emoji2": {
+                        "displayName": "Emoji",
+                        "displayNameKey": "emoji",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-",
+                                    "value": "-"
+                                },
+                                {
+                                    "displayName": "\ud83d\udd34",
+                                    "displayNameKey": "\ud83d\udd34",
+                                    "value": "\ud83d\udd34"
+                                },
+                                {
+                                    "displayName": "\ud83d\udfe2",
+                                    "displayNameKey": "\ud83d\udfe2",
+                                    "value": "\ud83d\udfe2"
+                                },
+                                {
+                                    "displayName": "\ud83d\udfe1",
+                                    "displayNameKey": "\ud83d\udfe1",
+                                    "value": "\ud83d\udfe1"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc4d",
+                                    "displayNameKey": "\ud83d\udc4d",
+                                    "value": "\ud83d\udc4d"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc4e",
+                                    "displayNameKey": "\ud83d\udc4e",
+                                    "value": "\ud83d\udc4e"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude00",
+                                    "displayNameKey": "\ud83d\ude00",
+                                    "value": "\ud83d\ude00"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd28",
+                                    "displayNameKey": "\ud83e\udd28",
+                                    "value": "\ud83e\udd28"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude41",
+                                    "displayNameKey": "\ud83d\ude41",
+                                    "value": "\ud83d\ude41"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd11",
+                                    "displayNameKey": "\ud83e\udd11",
+                                    "value": "\ud83e\udd11"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude10",
+                                    "displayNameKey": "\ud83d\ude10",
+                                    "value": "\ud83d\ude10"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude21",
+                                    "displayNameKey": "\ud83d\ude21",
+                                    "value": "\ud83d\ude21"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude0d",
+                                    "displayNameKey": "\ud83d\ude0d",
+                                    "value": "\ud83d\ude0d"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd14",
+                                    "displayNameKey": "\ud83e\udd14",
+                                    "value": "\ud83e\udd14"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd73",
+                                    "displayNameKey": "\ud83e\udd73",
+                                    "value": "\ud83e\udd73"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude14",
+                                    "displayNameKey": "\ud83d\ude14",
+                                    "value": "\ud83d\ude14"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude2d",
+                                    "displayNameKey": "\ud83d\ude2d",
+                                    "value": "\ud83d\ude2d"
+                                },
+                                {
+                                    "displayName": "\u25b2",
+                                    "displayNameKey": "\u25b2",
+                                    "value": "\u25b2"
+                                },
+                                {
+                                    "displayName": "\u25bc",
+                                    "displayNameKey": "\u25bc",
+                                    "value": "\u25bc"
+                                }
+                            ]
+                        }
+                    },
+                    "emoji3": {
+                        "displayName": "Emoji",
+                        "displayNameKey": "emoji",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-",
+                                    "value": "-"
+                                },
+                                {
+                                    "displayName": "\ud83d\udd34",
+                                    "displayNameKey": "\ud83d\udd34",
+                                    "value": "\ud83d\udd34"
+                                },
+                                {
+                                    "displayName": "\ud83d\udfe2",
+                                    "displayNameKey": "\ud83d\udfe2",
+                                    "value": "\ud83d\udfe2"
+                                },
+                                {
+                                    "displayName": "\ud83d\udfe1",
+                                    "displayNameKey": "\ud83d\udfe1",
+                                    "value": "\ud83d\udfe1"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc4d",
+                                    "displayNameKey": "\ud83d\udc4d",
+                                    "value": "\ud83d\udc4d"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc4e",
+                                    "displayNameKey": "\ud83d\udc4e",
+                                    "value": "\ud83d\udc4e"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude00",
+                                    "displayNameKey": "\ud83d\ude00",
+                                    "value": "\ud83d\ude00"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd28",
+                                    "displayNameKey": "\ud83e\udd28",
+                                    "value": "\ud83e\udd28"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude41",
+                                    "displayNameKey": "\ud83d\ude41",
+                                    "value": "\ud83d\ude41"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd11",
+                                    "displayNameKey": "\ud83e\udd11",
+                                    "value": "\ud83e\udd11"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude10",
+                                    "displayNameKey": "\ud83d\ude10",
+                                    "value": "\ud83d\ude10"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude21",
+                                    "displayNameKey": "\ud83d\ude21",
+                                    "value": "\ud83d\ude21"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude0d",
+                                    "displayNameKey": "\ud83d\ude0d",
+                                    "value": "\ud83d\ude0d"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd14",
+                                    "displayNameKey": "\ud83e\udd14",
+                                    "value": "\ud83e\udd14"
+                                },
+                                {
+                                    "displayName": "\ud83e\udd73",
+                                    "displayNameKey": "\ud83e\udd73",
+                                    "value": "\ud83e\udd73"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude14",
+                                    "displayNameKey": "\ud83d\ude14",
+                                    "value": "\ud83d\ude14"
+                                },
+                                {
+                                    "displayName": "\ud83d\ude2d",
+                                    "displayNameKey": "\ud83d\ude2d",
+                                    "value": "\ud83d\ude2d"
+                                },
+                                {
+                                    "displayName": "\u25b2",
+                                    "displayNameKey": "\u25b2",
+                                    "value": "\u25b2"
+                                },
+                                {
+                                    "displayName": "\u25bc",
+                                    "displayNameKey": "\u25bc",
+                                    "value": "\u25bc"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "bulletChart": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mainColor": {
+                        "displayName": "Main color",
+                        "displayNameKey": "bulletMainColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "mainColor2": {
+                        "displayName": "Main color 2",
+                        "displayNameKey": "bulletMainColor2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "targetColor": {
+                        "displayName": "Target color",
+                        "displayNameKey": "bulletTargetColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderFill": {
+                        "displayName": "Border color",
+                        "description": "Set the border color of the card.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWeight": {
+                        "displayName": "Border weight",
+                        "description": "Set the rounding of the border edges. The value should be from 1 to 30.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "roundEdges": {
+                        "displayName": "Round edges",
+                        "description": "Set the width of the border line. The value should be from 1 to 30.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "targetLineColor": {
+                        "displayName": "Target line color",
+                        "displayNameKey": "targetLineColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "targetLineShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "targetLineWeight": {
+                        "displayName": "Target line weight",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "targetLineHeight": {
+                        "displayName": "Percentage target line height",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "percentageHeight": {
+                        "displayName": "Percentage height",
+                        "displayNameKey": "percentageHeight",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "description": "Set background transparency from 0 to 100%.",
+                        "displayNameKey": "transparency",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "percentageBulletHeight": {
+                        "displayName": "Percentage bullet height",
+                        "displayNameKey": "percentageBulletHeight",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "template": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "applyTemplate": {
+                        "displayName": "Apply the template",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "theme": {
+                        "displayName": "Theme base",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-",
+                                    "value": "-"
+                                },
+                                {
+                                    "displayName": "Winter",
+                                    "displayNameKey": "winter",
+                                    "value": "winter"
+                                },
+                                {
+                                    "displayName": "Autumn",
+                                    "displayNameKey": "autumn",
+                                    "value": "autumn"
+                                },
+                                {
+                                    "displayName": "Forest",
+                                    "displayNameKey": "forest",
+                                    "value": "forest"
+                                }
+                            ]
+                        }
+                    },
+                    "themeType": {
+                        "displayName": "Theme type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-",
+                                    "value": "-"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "displayNameKey": "Bold",
+                                    "value": "bold"
+                                },
+                                {
+                                    "displayName": "Light",
+                                    "displayNameKey": "Light",
+                                    "value": "light"
+                                },
+                                {
+                                    "displayName": "Dark",
+                                    "displayNameKey": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "displayName": "Smooth",
+                                    "displayNameKey": "Smooth",
+                                    "value": "smooth"
+                                }
+                            ]
+                        }
+                    },
+                    "currentTheme": {
+                        "displayName": "Theme base",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-",
+                                    "value": "-"
+                                },
+                                {
+                                    "displayName": "Winter",
+                                    "displayNameKey": "winter",
+                                    "value": "winter"
+                                },
+                                {
+                                    "displayName": "Autumn",
+                                    "displayNameKey": "autumn",
+                                    "value": "autumn"
+                                },
+                                {
+                                    "displayName": "Forest",
+                                    "displayNameKey": "forest",
+                                    "value": "forest"
+                                }
+                            ]
+                        }
+                    },
+                    "currentThemeType": {
+                        "displayName": "Theme type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-",
+                                    "value": "-"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "displayNameKey": "Bold",
+                                    "value": "bold"
+                                },
+                                {
+                                    "displayName": "Light",
+                                    "displayNameKey": "Light",
+                                    "value": "light"
+                                },
+                                {
+                                    "displayName": "Dark",
+                                    "displayNameKey": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "displayName": "Smooth",
+                                    "displayNameKey": "Smooth",
+                                    "value": "smooth"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "themeSetting": {
+                "properties": {
+                    "theme": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "themeType": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "paidVersion": {
+                "properties": {
+                    "isPaidVersion": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "sorting": {
+            "default": {}
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "suppressDefaultTitle": true,
+        "supportsMultiVisualSelection": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

@@ -1,0 +1,997 @@
+{
+    "visual": {
+        "name": "PBIFunnels",
+        "displayName": "Funnel Plots",
+        "guid": "PBIFUN",
+        "visualClassName": "Visual",
+        "version": "1.5.2.1",
+        "description": "A PowerBI custom visual for funnel plots",
+        "supportUrl": "https://github.com/AUS-DOH-Safety-and-Quality/PowerBI-Funnels",
+        "gitHubUrl": "https://github.com/AUS-DOH-Safety-and-Quality/PowerBI-Funnels"
+    },
+    "author": {
+        "name": "HQIU - WA Health",
+        "email": "safetyandquality@health.wa.gov.au"
+    },
+    "apiVersion": "4.7.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "sorting": {
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "key",
+                        "direction": 1
+                    }
+                ]
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "privileges": [],
+        "dataRoles": [
+            {
+                "displayName": "Numerator",
+                "name": "numerators",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Denominator",
+                "name": "denominators",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Groups",
+                "name": "key",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure"
+            }
+        ],
+        "objects": {
+            "funnel": {
+                "displayName": "Data Settings",
+                "properties": {
+                    "chart_type": {
+                        "displayName": "Chart Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Indirectly Standardised (HSMR)",
+                                    "value": "SR"
+                                },
+                                {
+                                    "displayName": "Proportion",
+                                    "value": "PR"
+                                },
+                                {
+                                    "displayName": "Rate",
+                                    "value": "RC"
+                                }
+                            ]
+                        }
+                    },
+                    "od_adjust": {
+                        "displayName": "OD Adjustment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Yes",
+                                    "value": "yes"
+                                },
+                                {
+                                    "displayName": "No",
+                                    "value": "no"
+                                }
+                            ]
+                        }
+                    },
+                    "multiplier": {
+                        "displayName": "Multiplier",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "sig_figs": {
+                        "displayName": "Decimals to Report:",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "perc_labels": {
+                        "displayName": "Report as percentage",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "value": "Automatic"
+                                },
+                                {
+                                    "displayName": "Yes",
+                                    "value": "Yes"
+                                },
+                                {
+                                    "displayName": "No",
+                                    "value": "No"
+                                }
+                            ]
+                        }
+                    },
+                    "transformation": {
+                        "displayName": "Transformation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Natural Log (y+1)",
+                                    "value": "ln"
+                                },
+                                {
+                                    "displayName": "Log10 (y+1)",
+                                    "value": "log10"
+                                },
+                                {
+                                    "displayName": "Square-Root",
+                                    "value": "sqrt"
+                                }
+                            ]
+                        }
+                    },
+                    "ll_truncate": {
+                        "displayName": "Truncate Lower Limits at:",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ul_truncate": {
+                        "displayName": "Truncate Upper Limits at:",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ttip_show_numerator": {
+                        "displayName": "Show Numerator in Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_label_numerator": {
+                        "displayName": "Numerator Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ttip_show_denominator": {
+                        "displayName": "Show Denominator in Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_label_denominator": {
+                        "displayName": "Denominator Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ttip_show_value": {
+                        "displayName": "Show Value in Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_label_value": {
+                        "displayName": "Value Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "outliers": {
+                "displayName": "Outlier Highlighting",
+                "properties": {
+                    "process_flag_type": {
+                        "displayName": "Type of Change to Flag",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Both",
+                                    "value": "both"
+                                },
+                                {
+                                    "displayName": "Improvement (Imp.)",
+                                    "value": "improvement"
+                                },
+                                {
+                                    "displayName": "Deterioration (Det.)",
+                                    "value": "deterioration"
+                                }
+                            ]
+                        }
+                    },
+                    "improvement_direction": {
+                        "displayName": "Improvement Direction",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Increase",
+                                    "value": "increase"
+                                },
+                                {
+                                    "displayName": "Neutral",
+                                    "value": "neutral"
+                                },
+                                {
+                                    "displayName": "Decrease",
+                                    "value": "decrease"
+                                }
+                            ]
+                        }
+                    },
+                    "three_sigma": {
+                        "displayName": "Three Sigma Outliers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "two_sigma": {
+                        "displayName": "Two Sigma Outliers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "three_sigma_colour_improvement": {
+                        "displayName": "Imp. Three Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "three_sigma_colour_deterioration": {
+                        "displayName": "Det. Three Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "three_sigma_colour_neutral_low": {
+                        "displayName": "Neutral (Low) Three Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "three_sigma_colour_neutral_high": {
+                        "displayName": "Neutral (High) Three Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "two_sigma_colour_improvement": {
+                        "displayName": "Imp. Two Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "two_sigma_colour_deterioration": {
+                        "displayName": "Det. Two Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "two_sigma_colour_neutral_low": {
+                        "displayName": "Neutral (Low) Two Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "two_sigma_colour_neutral_high": {
+                        "displayName": "Neutral (High) Two Sigma Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "canvas": {
+                "displayName": "Canvas Settings",
+                "properties": {
+                    "show_errors": {
+                        "displayName": "Show Errors on Canvas",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lower_padding": {
+                        "displayName": "Padding Below Plot (pixels):",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "upper_padding": {
+                        "displayName": "Padding Above Plot (pixels):",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "left_padding": {
+                        "displayName": "Padding Left of Plot (pixels):",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "right_padding": {
+                        "displayName": "Padding Right of Plot (pixels):",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "scatter": {
+                "displayName": "Scatter Settings",
+                "properties": {
+                    "use_group_text": {
+                        "displayName": "Use Group Text",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scatter_text_font": {
+                        "displayName": "Group Text Font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "scatter_text_size": {
+                        "displayName": "Group Text Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "scatter_text_colour": {
+                        "displayName": "Group Text Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "scatter_text_opacity": {
+                        "displayName": "Group Text Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "scatter_text_opacity_unselected": {
+                        "displayName": "Group Text Opacity if Unselected",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "size": {
+                        "displayName": "Dot Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity_unselected": {
+                        "displayName": "Opacity if Unselected",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "colour": {
+                        "displayName": "Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "lines": {
+                "displayName": "Line Settings",
+                "properties": {
+                    "show_99": {
+                        "displayName": "Show 99.8% Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "show_95": {
+                        "displayName": "Show 95% Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "show_68": {
+                        "displayName": "Show 68% Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "show_target": {
+                        "displayName": "Show Target Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "show_alt_target": {
+                        "displayName": "Show Alt. Target Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width_99": {
+                        "displayName": "99.8% Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "width_95": {
+                        "displayName": "95% Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "width_68": {
+                        "displayName": "68% Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "width_target": {
+                        "displayName": "Target Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "width_alt_target": {
+                        "displayName": "Alternative Target Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "type_99": {
+                        "displayName": "99.8% Line Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "10 0"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "10 10"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "2 5"
+                                }
+                            ]
+                        }
+                    },
+                    "type_95": {
+                        "displayName": "95% Line Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "10 0"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "10 10"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "2 5"
+                                }
+                            ]
+                        }
+                    },
+                    "type_68": {
+                        "displayName": "68% Line Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "10 0"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "10 10"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "2 5"
+                                }
+                            ]
+                        }
+                    },
+                    "type_target": {
+                        "displayName": "Target Line Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "10 0"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "10 10"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "2 5"
+                                }
+                            ]
+                        }
+                    },
+                    "type_alt_target": {
+                        "displayName": "Alternative Target Line Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "10 0"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "10 10"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "2 5"
+                                }
+                            ]
+                        }
+                    },
+                    "colour_99": {
+                        "displayName": "99.8% Line Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colour_95": {
+                        "displayName": "95% Line Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colour_68": {
+                        "displayName": "68% Line Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colour_target": {
+                        "displayName": "Target Line Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colour_alt_target": {
+                        "displayName": "Alternative Target Line Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ttip_show_99": {
+                        "displayName": "Show value in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_show_95": {
+                        "displayName": "Show value in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_show_68": {
+                        "displayName": "Show value in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_show_target": {
+                        "displayName": "Show value in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_show_alt_target": {
+                        "displayName": "Show value in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ttip_label_99": {
+                        "displayName": "Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ttip_label_95": {
+                        "displayName": "Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ttip_label_68": {
+                        "displayName": "Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ttip_label_target": {
+                        "displayName": "Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ttip_label_alt_target": {
+                        "displayName": "Tooltip Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "alt_target": {
+                        "displayName": "Additional Target Value:",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "x_axis": {
+                "displayName": "X-Axis Settings",
+                "properties": {
+                    "xlimit_colour": {
+                        "displayName": "Axis Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xlimit_ticks": {
+                        "displayName": "Draw Ticks",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xlimit_tick_font": {
+                        "displayName": "Tick Font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "xlimit_tick_size": {
+                        "displayName": "Tick Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "xlimit_tick_colour": {
+                        "displayName": "Tick Font Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xlimit_tick_rotation": {
+                        "displayName": "Tick Rotation (Degrees)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xlimit_tick_count": {
+                        "displayName": "Maximum Ticks",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xlimit_label": {
+                        "displayName": "Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "xlimit_label_font": {
+                        "displayName": "Label Font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "xlimit_label_size": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "xlimit_label_colour": {
+                        "displayName": "Label Font Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xlimit_l": {
+                        "displayName": "Lower Limit",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xlimit_u": {
+                        "displayName": "Upper Limit",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "y_axis": {
+                "displayName": "Y-Axis Settings",
+                "properties": {
+                    "ylimit_colour": {
+                        "displayName": "Axis Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ylimit_ticks": {
+                        "displayName": "Draw Ticks",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ylimit_sig_figs": {
+                        "displayName": "Tick Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ylimit_tick_font": {
+                        "displayName": "Tick Font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "ylimit_tick_size": {
+                        "displayName": "Tick Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "ylimit_tick_colour": {
+                        "displayName": "Tick Font Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ylimit_tick_rotation": {
+                        "displayName": "Tick Rotation (Degrees)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ylimit_tick_count": {
+                        "displayName": "Maximum Ticks",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ylimit_label": {
+                        "displayName": "Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ylimit_label_font": {
+                        "displayName": "Label Font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "ylimit_label_size": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "ylimit_label_colour": {
+                        "displayName": "Label Font Colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ylimit_l": {
+                        "displayName": "Lower Limit",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ylimit_u": {
+                        "displayName": "Upper Limit",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "key": {
+                            "max": 1
+                        },
+                        "numerators": {
+                            "max": 1
+                        },
+                        "denominators": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "key"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {}
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "numerators"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "denominators"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

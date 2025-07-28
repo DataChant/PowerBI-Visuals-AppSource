@@ -1,0 +1,1083 @@
+{
+    "visual": {
+        "name": "InnofallsDeltaCharts",
+        "displayName": "Innofalls",
+        "guid": "InnofallsDeltaCharts",
+        "visualClassName": "InnofallsVisual",
+        "version": "1.2.13.0",
+        "description": "Explorative Waterfall Charts",
+        "supportUrl": "https://www.innofalls.com/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Jonas Volger",
+        "email": "jonas.volger@innofalls.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Levels *",
+                "name": "rowCategory",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Stack / Columns",
+                "name": "colCategory",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Values *",
+                "name": "Values",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Values From",
+                "name": "ValuesFrom",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Delta 1",
+                "name": "DeltaOne",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Delta 2",
+                "name": "DeltaTwo",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Delta 3",
+                "name": "DeltaThree",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            }
+        ],
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "rowCategory",
+                "colCategory"
+            ]
+        },
+        "supportsHighlight": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "advancedEditModeSupport": 1,
+        "supportsMultiVisualSelection": true,
+        "sorting": {
+            "default": {}
+        },
+        "privileges": [
+            {
+                "name": "LocalStorage",
+                "essential": true,
+                "parameters": []
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Values": {
+                            "min": 0,
+                            "max": 13
+                        },
+                        "DeltaOne": {
+                            "min": 0,
+                            "max": 2
+                        },
+                        "colCategory": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "DeltaTwo": {
+                            "min": 0,
+                            "max": 2
+                        },
+                        "DeltaThree": {
+                            "min": 0,
+                            "max": 2
+                        }
+                    }
+                ],
+                "matrix": {
+                    "rows": {
+                        "for": {
+                            "in": "rowCategory"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 100000
+                            }
+                        }
+                    },
+                    "columns": {
+                        "for": {
+                            "in": "colCategory"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 100000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Values"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ValuesFrom"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "DeltaOne"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "DeltaTwo"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "DeltaThree"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "displayNameKey": "formattingGeneral",
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    }
+                }
+            },
+            "chartType": {
+                "displayName": "Chart Type",
+                "properties": {
+                    "layoutOrientationMode": {
+                        "displayName": "Layout Orientation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Time",
+                                    "value": "time"
+                                },
+                                {
+                                    "displayName": "Structure",
+                                    "value": "structure"
+                                }
+                            ]
+                        },
+                        "description": "Time or Structure"
+                    },
+                    "stackColumnMode": {
+                        "displayName": "Stack / Column",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Stack",
+                                    "value": "stack"
+                                },
+                                {
+                                    "displayName": "Columns by Dimension",
+                                    "value": "columnsByDimension"
+                                },
+                                {
+                                    "displayName": "Columns by Measures",
+                                    "value": "columnsByMeasures"
+                                },
+                                {
+                                    "displayName": "Columns by Both",
+                                    "value": "columnByBoth"
+                                }
+                            ]
+                        },
+                        "description": "Stacked Bars oder Side by Side Columns"
+                    },
+                    "mainChartStyle": {
+                        "displayName": "Main Chart Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Waterfall",
+                                    "value": "waterfall"
+                                },
+                                {
+                                    "displayName": "Stacked Bar",
+                                    "value": "stackedbar"
+                                },
+                                {
+                                    "displayName": "Bar",
+                                    "value": "bar"
+                                }
+                            ]
+                        }
+                    },
+                    "waterfallStyle": {
+                        "displayName": "Waterfall Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Running Totals",
+                                    "value": "running_totals"
+                                },
+                                {
+                                    "displayName": "Running Subsums",
+                                    "value": "running_subsums"
+                                },
+                                {
+                                    "displayName": "Deltas",
+                                    "value": "deltas"
+                                }
+                            ]
+                        }
+                    },
+                    "intermediateSums": {
+                        "displayName": "Intermediate Sums",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Totals",
+                                    "value": "totals"
+                                },
+                                {
+                                    "displayName": "Sub Sums",
+                                    "value": "subsums"
+                                }
+                            ]
+                        }
+                    },
+                    "delta1ChartType": {
+                        "displayName": "Delta 1 Chart Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Absolute",
+                                    "value": "absolute"
+                                },
+                                {
+                                    "displayName": "Percentage",
+                                    "value": "percentage"
+                                },
+                                {
+                                    "displayName": "Waterfall",
+                                    "value": "waterfall"
+                                }
+                            ]
+                        }
+                    },
+                    "delta2ChartType": {
+                        "displayName": "Delta 2 Chart Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Absolute",
+                                    "value": "absolute"
+                                },
+                                {
+                                    "displayName": "Percentage",
+                                    "value": "percentage"
+                                },
+                                {
+                                    "displayName": "Waterfall",
+                                    "value": "waterfall"
+                                }
+                            ]
+                        }
+                    },
+                    "delta3ChartType": {
+                        "displayName": "Delta 3 Chart Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Absolute",
+                                    "value": "absolute"
+                                },
+                                {
+                                    "displayName": "Percentage",
+                                    "value": "percentage"
+                                },
+                                {
+                                    "displayName": "Waterfall",
+                                    "value": "waterfall"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "behavior": {
+                "displayName": "Behavior",
+                "properties": {
+                    "selectionType": {
+                        "displayName": "Selection Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "By Node",
+                                    "value": "byNode"
+                                },
+                                {
+                                    "displayName": "By Member",
+                                    "value": "byMember"
+                                }
+                            ]
+                        },
+                        "description": "How the review objects are selected"
+                    },
+                    "showPreviewCharts": {
+                        "displayName": "Show Preview Charts",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "previewStyle": {
+                        "displayName": "Preview Chart Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Relative Sigma",
+                                    "value": "relative_sigma"
+                                },
+                                {
+                                    "displayName": "Absolute Sigma",
+                                    "value": "absolute_sigma"
+                                }
+                            ]
+                        },
+                        "description": "How to calculate and display preview charts"
+                    },
+                    "showReviewCharts": {
+                        "displayName": "Show History",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "reviewLevelCount": {
+                        "displayName": "History Level Count",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "reviewLevelSpace": {
+                        "displayName": "History Level Space in %",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "reviewLevelDisplay": {
+                        "displayName": "History Levels Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Last As Chart",
+                                    "value": "lastAsChart"
+                                },
+                                {
+                                    "displayName": "As Chart",
+                                    "value": "asChart"
+                                },
+                                {
+                                    "displayName": "Text only",
+                                    "value": "textOnly"
+                                }
+                            ]
+                        }
+                    },
+                    "animationSpeed": {
+                        "displayName": "Animations",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Fast",
+                                    "value": "fast"
+                                },
+                                {
+                                    "displayName": "Slow",
+                                    "value": "slow"
+                                },
+                                {
+                                    "displayName": "Off",
+                                    "value": "off"
+                                }
+                            ]
+                        }
+                    },
+                    "filterOtherVisuals": {
+                        "displayName": "Filter Other Visuals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "drillDownEnabled": {
+                        "displayName": "Drill down enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showExpandSymbols": {
+                        "displayName": "Show Expand Symbols",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomEnabled": {
+                        "displayName": "Zoom Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomLower": {
+                        "displayName": "Zoom Lower (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "zoomHigher": {
+                        "displayName": "Zoom Higher (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "formatting": {
+                "displayName": "Formatting",
+                "properties": {
+                    "fontColor": {
+                        "displayName": "Text Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontSizeTitle": {
+                        "displayName": "Title Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "redGreenInWaterfall": {
+                        "displayName": "Red/Green Deviations in Waterfall",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "invertAllRedGreen": {
+                        "description": "Inverts All Red/Green in Deviations. (Overrides all specific inversions.)",
+                        "displayName": "Invert All Red/Green",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideOverlappingLabels": {
+                        "displayName": "Hide Overlapping Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendEnabled": {
+                        "displayName": "Legend Enabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selectedTheme": {
+                        "displayName": "Selected Theme",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "IBCS Colors",
+                                    "value": "IBCS Colors"
+                                },
+                                {
+                                    "displayName": "Power BI",
+                                    "value": "Power BI"
+                                }
+                            ]
+                        },
+                        "description": "The selected color styling theme"
+                    },
+                    "expandedSumsAsText": {
+                        "displayName": "Expanded Sums As Text",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Only Bar Charts",
+                                    "value": "ONLY_BAR_CHART"
+                                },
+                                {
+                                    "displayName": "Only Deltas",
+                                    "value": "ONLY_DELTAS"
+                                },
+                                {
+                                    "displayName": "Never",
+                                    "value": "NEVER"
+                                },
+                                {
+                                    "displayName": "Always",
+                                    "value": "ALWAYS"
+                                }
+                            ]
+                        },
+                        "description": "The selected color styling theme"
+                    }
+                }
+            },
+            "numberFormatting": {
+                "displayName": "Number Formatting",
+                "properties": {
+                    "decimals": {
+                        "displayName": "Decimals",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "0",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "1",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "displayName": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "displayName": "all",
+                                    "value": "all"
+                                }
+                            ]
+                        },
+                        "description": "The number of decimals to display"
+                    },
+                    "decimalsPercent": {
+                        "displayName": "Decimals Percentage",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "0",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "1",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "displayName": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "displayName": "all",
+                                    "value": "all"
+                                }
+                            ]
+                        },
+                        "description": "The number of decimals to display for percent numbers"
+                    },
+                    "numberScale": {
+                        "displayName": "Scale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Trillions",
+                                    "value": "t"
+                                },
+                                {
+                                    "displayName": "Billions",
+                                    "value": "b"
+                                },
+                                {
+                                    "displayName": "Millions",
+                                    "value": "m"
+                                },
+                                {
+                                    "displayName": "Thousands",
+                                    "value": "k"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                }
+                            ]
+                        },
+                        "description": "Which magnitude to scale the numbers to"
+                    },
+                    "negativeFormat": {
+                        "displayName": "Negative Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "-1230",
+                                    "value": "minusSign"
+                                },
+                                {
+                                    "displayName": "(1230)",
+                                    "value": "parenthesis"
+                                }
+                            ]
+                        },
+                        "description": "How to display negative numbers"
+                    },
+                    "delimiters": {
+                        "displayName": "Delimiters",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "1,123.00",
+                                    "value": "english"
+                                },
+                                {
+                                    "displayName": "1.123,00",
+                                    "value": "german"
+                                }
+                            ]
+                        },
+                        "description": "How to display interpunctuation"
+                    },
+                    "thousandsSeparator": {
+                        "displayName": "Apply Thousands Separator",
+                        "type": {
+                            "bool": true
+                        },
+                        "description": "Apply Thousands Separator"
+                    },
+                    "disableFormatting": {
+                        "displayName": "Disable Formatting",
+                        "type": {
+                            "bool": true
+                        },
+                        "description": "Disable Formatting"
+                    },
+                    "hideScaleAbbreviation": {
+                        "displayName": "Hide Scale Abbreviation",
+                        "type": {
+                            "bool": true
+                        },
+                        "description": "Hide abbreviations; for example, if you want to display them in the title"
+                    },
+                    "scaleAbbreviationThousands": {
+                        "displayName": "Abbreviation for Thousands",
+                        "type": {
+                            "text": true
+                        },
+                        "description": "Abbreviation for Thousands"
+                    },
+                    "scaleAbbreviationMillions": {
+                        "displayName": "Abbreviation for Millions",
+                        "type": {
+                            "text": true
+                        },
+                        "description": "Abbreviation for Millions"
+                    },
+                    "scaleAbbreviationBillions": {
+                        "displayName": "Abbreviation for Billions",
+                        "type": {
+                            "text": true
+                        },
+                        "description": "Abbreviation for Billions"
+                    },
+                    "scaleAbbreviationTrillions": {
+                        "displayName": "Abbreviation for Trillions",
+                        "type": {
+                            "text": true
+                        },
+                        "description": "Abbreviation for Trillions"
+                    }
+                }
+            },
+            "navigationState": {
+                "displayName": "Navigation State",
+                "properties": {
+                    "bookmarkState": {
+                        "displayName": "Bookmarks State",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    },
+                    "selectionState": {
+                        "displayName": "Deprecated Selection State",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    },
+                    "expansionState": {
+                        "displayName": "Expansion State",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    },
+                    "selectedTreeNodes": {
+                        "displayName": "Selected Nodes",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    },
+                    "drilledDownTreeNodes": {
+                        "displayName": "Drilled Down Nodes",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    }
+                }
+            },
+            "licensing": {
+                "displayName": "License",
+                "properties": {
+                    "trialLicenseKey": {
+                        "displayName": "Trial License",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "highlighting": {
+                "displayName": "Highlighting",
+                "properties": {
+                    "highlightingEnabled": {
+                        "displayName": "Enabled",
+                        "type": {
+                            "bool": true
+                        },
+                        "filterState": true
+                    },
+                    "selectedHighlights": {
+                        "displayName": "Selected Highlights",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    }
+                }
+            },
+            "colorsAndSpaces": {
+                "displayName": "Colors and Spaces",
+                "properties": {
+                    "colors": {
+                        "displayName": "Colors",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "spaces": {
+                        "displayName": "Spaces",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "controlSettings": {
+                "displayName": "Control Settings",
+                "properties": {
+                    "allowedControls": {
+                        "displayName": "Allowed Controls",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "memberConfiguration": {
+                "displayName": "Member Configurations",
+                "properties": {
+                    "deviationMembers": {
+                        "displayName": "Deviation Members",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    },
+                    "increaseIsBadMembers": {
+                        "displayName": "Increase Is Bad Members",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "invertedMembers": {
+                        "displayName": "Inverted Members",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "skippedMembers": {
+                        "displayName": "Skipped Members",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customColumns": {
+                        "displayName": "Custom Columns",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "reviewChartMeasures": {
+                        "displayName": "Review Chart Measures",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "conditionalFormatting": {
+                        "displayName": "Conditional Formatting Settings",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "sizeSettings": {
+                "displayName": "Sizes and Spaces",
+                "properties": {
+                    "maxCategoryWidth": {
+                        "displayName": "Max Category Width px",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "barWidthRatio": {
+                        "displayName": "Bar Width Ratio %",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxCategoryLabelWidth": {
+                        "displayName": "Max Category Label Width %",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "limitCategoryWidth": {
+                        "displayName": "Limit Category Width?",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "levelTextInsetPercent": {
+                        "displayName": "Level Text Inset (% of Font Height)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "sortSettings": {
+                "displayName": "Sorting + TopN",
+                "properties": {
+                    "sortingMeasure": {
+                        "displayName": "Sort by Measure",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    },
+                    "sortingMember": {
+                        "displayName": "Sort by Member",
+                        "type": {
+                            "text": true
+                        },
+                        "filterState": true
+                    },
+                    "topBottomCount": {
+                        "displayName": "Top / Bottom Count",
+                        "type": {
+                            "numeric": true
+                        },
+                        "filterState": true
+                    },
+                    "restLabel": {
+                        "displayName": "Rest Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "sortMode": {
+                        "displayName": "Sorting Mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Down / Descending",
+                                    "value": "down"
+                                },
+                                {
+                                    "displayName": "Up / Ascending",
+                                    "value": "up"
+                                }
+                            ]
+                        },
+                        "filterState": true
+                    },
+                    "topBottomMode": {
+                        "displayName": "Top / Bottom",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Auto Top",
+                                    "value": "autoTop"
+                                },
+                                {
+                                    "displayName": "Auto Bottom",
+                                    "value": "autoBottom"
+                                },
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom"
+                                }
+                            ]
+                        },
+                        "filterState": true
+                    }
+                }
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

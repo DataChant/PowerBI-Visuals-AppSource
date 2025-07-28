@@ -1,0 +1,337 @@
+{
+    "visual": {
+        "name": "hi-chart",
+        "displayName": "hi-chart Reporting Studio",
+        "guid": "hichart8FC5F06844ED44BDB87EC043F90F3A3D",
+        "visualClassName": "Visual",
+        "version": "1.0.24.0",
+        "description": "PowerBI custom visual to display hi-chart Reporting Studio within PowerBI",
+        "supportUrl": "https://hi-chart.com/hi-chart-software/hi-chart-powerbi-support",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "CP Corporate Planning GmbH",
+        "email": "support@corporate-planning.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "de-DE": {
+            "X_AXIS": "Spalten",
+            "Y_AXIS": "Zeilen",
+            "CHART_MULTIPLIER": "Diagramm-Multiplizierer",
+            "MEASURES": "Werte (Kennzahlen)",
+            "props.debugging_desc": "Settings f\u00fcr den Debug-Modus",
+            "props.debugging_name": "Debug",
+            "props.debuggingCode_desc": "Geben Sie einen Code ein, den Sie vom Support bekommen haben.",
+            "props.debuggingCode_name": "Support-Code",
+            "props.loggerOverlay_desc": "Aktiviert die Log-Ausgabe",
+            "props.loggerOverlay_name": "Aktiv",
+            "props.groupAxis_desc": "Definiert, ob mehrere Spalten in einer Achse zu einer Hierarchie gruppiert werden",
+            "props.groupAxis_name": "Achse hierarchisch",
+            "props.groupAxis.rows_desc": "In den Zeilen werden mehrere Datenspalten hierarchisch gruppiert",
+            "props.groupAxis.rows_name": "Zeilen",
+            "props.groupAxis.columns_desc": "In den Spalten werden mehrere Datenspalten hierarchisch gruppiert",
+            "props.groupAxis.columns_name": "Spalten"
+        },
+        "en-US": {
+            "X_AXIS": "Columns",
+            "Y_AXIS": "Rows",
+            "CHART_MULTIPLIER": "Chart multiplier",
+            "MEASURES": "Values (measures)",
+            "props.debugging_desc": "Settings for debug mode",
+            "props.debugging_name": "Debug",
+            "props.debuggingCode_desc": "Enter a code that you have received from our support department.",
+            "props.debuggingCode_name": "Support-Code",
+            "props.loggerOverlay_desc": "Activates log output",
+            "props.loggerOverlay_name": "Active",
+            "props.groupAxis_desc": "Defines whether several columns in an axis are grouped into a hierarchy",
+            "props.groupAxis_name": "Axes hierarchical",
+            "props.groupAxis.rows_desc": "Several data columns are grouped hierarchically in rows",
+            "props.groupAxis.rows_name": "Rows",
+            "props.groupAxis.columns_desc": "Several data columns are grouped hierarchically in columns",
+            "props.groupAxis.columns_name": "Columns"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "xaxis",
+                "kind": "Grouping",
+                "displayName": "Columns",
+                "displayNameKey": "X_AXIS",
+                "description": "Defines the dimensions in the x-axis",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "yaxis",
+                "kind": "Grouping",
+                "displayName": "Rows",
+                "displayNameKey": "Y_AXIS",
+                "description": "Defines the dimensions in the y-axis",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "multiplier",
+                "kind": "Grouping",
+                "displayName": "Chart multiplier",
+                "displayNameKey": "CHART_MULTIPLIER",
+                "description": "Defines a dimension for multiplying the chart for each member.",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "measure",
+                "kind": "Measure",
+                "displayName": "Values (measures)",
+                "displayNameKey": "MEASURES",
+                "description": "Sets the measures",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ],
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "multiplier": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "matrix": {
+                    "rows": {
+                        "for": {
+                            "in": "yaxis"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 50000
+                            }
+                        }
+                    },
+                    "columns": {
+                        "for": {
+                            "in": "xaxis"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 50000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "measure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "multiplier"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "axisGroup": {
+                "properties": {
+                    "columns": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rows": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "debugging": {
+                "properties": {
+                    "code": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "overlay": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "internal": {
+                "properties": {
+                    "license": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "licenseSync": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "page_config": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "stylesheets": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "stylesheetsSync": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "version": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "subtotals": {
+            "matrix": {
+                "rowSubtotals": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "rowSubtotals"
+                    },
+                    "defaultValue": true
+                },
+                "rowSubtotalsPerLevel": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "perRowLevel"
+                    },
+                    "defaultValue": false
+                },
+                "columnSubtotals": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "columnSubtotals"
+                    },
+                    "defaultValue": true
+                },
+                "columnSubtotalsPerLevel": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "perColumnLevel"
+                    },
+                    "defaultValue": false
+                },
+                "levelSubtotalEnabled": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "levelSubtotalEnabled"
+                    },
+                    "defaultValue": true
+                }
+            }
+        },
+        "privileges": [
+            {
+                "name": "LocalStorage",
+                "essential": false
+            },
+            {
+                "name": "ExportContent",
+                "essential": false
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "supportsEmptyDataView": true,
+        "supportsHighlight": false,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": false,
+        "suppressDefaultTitle": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

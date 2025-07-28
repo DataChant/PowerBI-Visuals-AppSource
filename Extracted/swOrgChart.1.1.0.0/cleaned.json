@@ -1,0 +1,680 @@
+{
+    "visual": {
+        "name": "swOrgChart",
+        "displayName": "swOrgChart",
+        "guid": "swOrgChart2A3BCE7191B5491FBB82F771A169702D",
+        "visualClassName": "Visual",
+        "version": "1.1.0",
+        "description": "Display the hierarchy and power, roles and responsibilities, functions and relationships in an organization.",
+        "supportUrl": "http://www.sharewinfo.com/support.html",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "1.10.0",
+    "author": {
+        "name": "sharewinfo",
+        "email": "info@sharewinfo.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "external/ejs1/external/jquery-3.2.1.min.js",
+        "src/init.js",
+        "external/ejs1/scripts/common/ej.core.min.js",
+        "external/ejs1/scripts/common/ej.data.min.js",
+        "external/ejs1/scripts/common/ej.draggable.min.js",
+        "external/ejs1/scripts/common/ej.scroller.min.js",
+        "external/ejs1/scripts/web/ej.menu.min.js",
+        "external/ejs1/external/jsrender.min.js",
+        "external/ejs1/scripts/common/ej.touch.min.js",
+        "external/ejs1/scripts/datavisualization/ej.diagram.min.js",
+        "external/watermark.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Id",
+                "displayNameKey": "dataRoles_idKey",
+                "name": "id",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Parent Id",
+                "displayNameKey": "dataRoles_parentIdKey",
+                "name": "parentId",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Label",
+                "displayNameKey": "dataRoles_labelKey",
+                "name": "label",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Image",
+                "displayNameKey": "dataRoles_imageKey",
+                "name": "image",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Color",
+                "displayNameKey": "dataRoles_colorKey",
+                "name": "color",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Link",
+                "displayNameKey": "dataRoles_linkKey",
+                "name": "link",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "ToolTip",
+                "displayNameKey": "dataRoles_toolTipKey",
+                "name": "toolTip",
+                "kind": "Grouping"
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "layout": {
+                "displayName": "Layout",
+                "displayNameKey": "objects_layoutKey",
+                "properties": {
+                    "type": {
+                        "displayName": "Type",
+                        "displayNameKey": "objects_layout_typeKey",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "hierarchicaltree",
+                                    "displayName": "HierarchicalTree",
+                                    "displayNameKey": "objects_layout_type_hierarchicaltreeKey"
+                                },
+                                {
+                                    "value": "organizationalchart",
+                                    "displayName": "OrganizationalChart",
+                                    "displayNameKey": "objects_layout_type_organizationalchartKey"
+                                }
+                            ]
+                        }
+                    },
+                    "orientation": {
+                        "displayName": "Orientation",
+                        "displayNameKey": "objects_layout_orientationKey",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "TopToBottom",
+                                    "displayName": "TopToBottom",
+                                    "displayNameKey": "objects_layout_orientation_TopToBottomKey"
+                                },
+                                {
+                                    "value": "BottomToTop",
+                                    "displayName": "BottomToTop",
+                                    "displayNameKey": "objects_layout_orientation_BottomToTopKey"
+                                },
+                                {
+                                    "value": "LeftToRight",
+                                    "displayName": "LeftToRight",
+                                    "displayNameKey": "objects_layout_orientation_LeftToRightKey"
+                                },
+                                {
+                                    "value": "RightToLeft",
+                                    "displayName": "RightToLeft",
+                                    "displayNameKey": "objects_layout_orientation_RightToLeftKey"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "nodes": {
+                "displayName": "Nodes",
+                "displayNameKey": "objects_nodesKey",
+                "properties": {
+                    "level": {
+                        "displayName": "Level",
+                        "displayNameKey": "objects_nodes_levelKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "height": {
+                        "displayName": "Height",
+                        "displayNameKey": "objects_nodes_heightKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "width": {
+                        "displayName": "Width",
+                        "displayNameKey": "objects_nodes_widthKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "horizontalSpacing": {
+                        "displayName": "Horizontal Spacing",
+                        "displayNameKey": "objects_nodes_horizontalSpacingKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "verticalSpacing": {
+                        "displayName": "Vertical Spacing",
+                        "displayNameKey": "objects_nodes_verticalSpacingKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fillColor": {
+                        "displayName": "Fill Color",
+                        "displayNameKey": "objects_nodes_fillColorKey",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "displayNameKey": "objects_nodes_borderColorKey",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shape": {
+                        "displayName": "Shape",
+                        "displayNameKey": "objects_nodes_shapeKey",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Rectangle",
+                                    "displayName": "Rectangle",
+                                    "displayNameKey": "objects_nodes_shape_rectangleKey"
+                                },
+                                {
+                                    "value": "Ellipse",
+                                    "displayName": "Ellipse",
+                                    "displayNameKey": "objects_nodes_shape_ellipseKey"
+                                },
+                                {
+                                    "value": "Triangle",
+                                    "displayName": "Triangle",
+                                    "displayNameKey": "objects_nodes_shape_triangleKey"
+                                },
+                                {
+                                    "value": "Star",
+                                    "displayName": "Star",
+                                    "displayNameKey": "objects_nodes_shape_starKey"
+                                },
+                                {
+                                    "value": "Pentagon",
+                                    "displayName": "Pentagon",
+                                    "displayNameKey": "objects_nodes_shape_pentagonKey"
+                                },
+                                {
+                                    "value": "Heptagon",
+                                    "displayName": "Heptagon",
+                                    "displayNameKey": "objects_nodes_shape_heptagonKey"
+                                },
+                                {
+                                    "value": "Octagon",
+                                    "displayName": "Octagon",
+                                    "displayNameKey": "objects_nodes_shape_octagonKey"
+                                },
+                                {
+                                    "value": "Trapezoid",
+                                    "displayName": "Trapezoid",
+                                    "displayNameKey": "objects_nodes_shape_trapezoidKey"
+                                },
+                                {
+                                    "value": "Decagon",
+                                    "displayName": "Decagon",
+                                    "displayNameKey": "objects_nodes_shape_decagonKey"
+                                },
+                                {
+                                    "value": "Cylinder",
+                                    "displayName": "Cylinder",
+                                    "displayNameKey": "objects_nodes_shape_cylinderKey"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "displayName": "Labels",
+                "displayNameKey": "objects_labelsKey",
+                "properties": {
+                    "leftSpacing": {
+                        "displayName": "Left Spacing",
+                        "displayNameKey": "objects_labels_leftSpacingKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "spacing": {
+                        "displayName": "Spacing",
+                        "displayNameKey": "objects_labels_spacingKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "displayNameKey": "objects_labels_fontSizeKey",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "displayNameKey": "objects_labels_fontFamilyKey",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial",
+                                    "displayNameKey": "objects_labels_fontFamily_ArialKey"
+                                },
+                                {
+                                    "value": "Arial Black",
+                                    "displayName": "Arial Black",
+                                    "displayNameKey": "objects_labels_fontFamily_ArialBlackKey"
+                                },
+                                {
+                                    "value": "Arial Unicode MS",
+                                    "displayName": "Arial Unicode MS",
+                                    "displayNameKey": "objects_labels_fontFamily_ArialUnicodeMSKey"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri",
+                                    "displayNameKey": "Calibri"
+                                },
+                                {
+                                    "value": "Cambria",
+                                    "displayName": "Cambria",
+                                    "displayNameKey": "Cambria"
+                                },
+                                {
+                                    "value": "Cambria Math",
+                                    "displayName": "Cambria Math",
+                                    "displayNameKey": "Cambria Math"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS",
+                                    "displayNameKey": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Consolas",
+                                    "displayName": "Consolas",
+                                    "displayNameKey": "Consolas"
+                                },
+                                {
+                                    "value": "Constantia",
+                                    "displayName": "Constantia",
+                                    "displayNameKey": "Constantia"
+                                },
+                                {
+                                    "value": "Corbel",
+                                    "displayName": "Corbel",
+                                    "displayNameKey": "Corbel"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New",
+                                    "displayNameKey": "Courier New"
+                                },
+                                {
+                                    "value": "DIN",
+                                    "displayName": "DIN",
+                                    "displayNameKey": "DIN"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia",
+                                    "displayNameKey": "Georgia"
+                                },
+                                {
+                                    "value": "Lucida Sans Unicode",
+                                    "displayName": "Lucida Sans Unicode",
+                                    "displayNameKey": "Lucida Sans Unicode"
+                                },
+                                {
+                                    "value": "Segoe (Bold)",
+                                    "displayName": "Segoe (Bold)",
+                                    "displayNameKey": "Segoe (Bold)"
+                                },
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI",
+                                    "displayNameKey": "Segoe UI"
+                                },
+                                {
+                                    "value": "Segoe UI Light",
+                                    "displayName": "Segoe UI Light",
+                                    "displayNameKey": "Segoe UI Light"
+                                },
+                                {
+                                    "value": "Symbol",
+                                    "displayName": "Symbol",
+                                    "displayNameKey": "Symbol"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "TahomaDIN",
+                                    "displayNameKey": "Tahoma"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman",
+                                    "displayNameKey": "Times New Roman"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS",
+                                    "displayNameKey": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana",
+                                    "displayNameKey": "Verdana"
+                                },
+                                {
+                                    "value": "Wingdings",
+                                    "displayName": "Wingdings",
+                                    "displayNameKey": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "displayNameKey": "objects_labels_fontColorKey",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "scale": {
+                        "displayName": "Scale Ratio",
+                        "displayNameKey": "objects_labels_ScaleKey",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None",
+                                    "displayNameKey": "objects_labels_scale_noneKey"
+                                },
+                                {
+                                    "value": "meet",
+                                    "displayName": "Meet",
+                                    "displayNameKey": "objects_labels_scale_meetKey"
+                                },
+                                {
+                                    "value": "slice",
+                                    "displayName": "Slice",
+                                    "displayNameKey": "objects_labels_scale_sliceKey"
+                                },
+                                {
+                                    "value": "stretch",
+                                    "displayName": "Stretch",
+                                    "displayNameKey": "objects_labels_scale_stretchKey"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "connectors": {
+                "displayName": "Connectors",
+                "displayNameKey": "objects_connectorsKey",
+                "properties": {
+                    "color": {
+                        "displayName": "Color",
+                        "displayNameKey": "objects_connectors_colorKey",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shape": {
+                        "displayName": "Target Shape",
+                        "displayNameKey": "objects_connectors_shapeKey",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None",
+                                    "displayNameKey": "objects_connectors_shape_noneKey"
+                                },
+                                {
+                                    "value": "arrow",
+                                    "displayName": "Arrow",
+                                    "displayNameKey": "objects_connectors_shape_arrowKey"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle",
+                                    "displayNameKey": "objects_connectors_shape_circleKey"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond",
+                                    "displayNameKey": "objects_connectors_shape_diamondKey"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "displayName": "CornerRadius",
+                        "displayNameKey": "objects_connectors_cornerRadiusKey",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "id": {
+                            "max": 1
+                        },
+                        "parentId": {
+                            "max": 1
+                        },
+                        "image": {
+                            "max": 1
+                        },
+                        "color": {
+                            "max": 1
+                        },
+                        "link": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "id"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "parentId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "label"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "image"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "color"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "link"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "toolTip"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "stringResources": {
+        "zh-CN": {
+            "dataRoles_idKey": "Id",
+            "dataRoles_parentIdKey": "\u7236Id",
+            "dataRoles_labelKey": "\u6807\u7b7e",
+            "dataRoles_imageKey": "\u56fe\u7247",
+            "dataRoles_colorKey": "\u989c\u8272",
+            "dataRoles_linkKey": "\u94fe\u63a5",
+            "dataRoles_toolTipKey": "\u63d0\u793a",
+            "objects_layoutKey": "\u5e03\u5c40",
+            "objects_layout_typeKey": "\u5e03\u5c40\u7c7b\u578b",
+            "objects_layout_type_hierarchicaltreeKey": "\u5206\u5c42",
+            "objects_layout_type_organizationalchartKey": "\u7ec4\u7ec7\u7ed3\u6784",
+            "objects_layout_orientationKey": "\u5e03\u5c40\u65b9\u5411",
+            "objects_layout_orientation_TopToBottomKey": "\u4ece\u4e0a\u81f3\u4e0b",
+            "objects_layout_orientation_BottomToTopKey": "\u4ece\u4e0b\u81f3\u4e0a",
+            "objects_layout_orientation_LeftToRightKey": "\u4ece\u5de6\u81f3\u53f3",
+            "objects_layout_orientation_RightToLeftKey": "\u4ece\u53f3\u81f3\u5de6",
+            "objects_nodesKey": "\u8282\u70b9",
+            "objects_nodes_levelKey": "\u663e\u793a\u591a\u5c11\u7ea7",
+            "objects_nodes_heightKey": "\u9ad8\u5ea6",
+            "objects_nodes_widthKey": "\u5bbd\u5ea6",
+            "objects_nodes_horizontalSpacingKey": "\u6c34\u5e73\u95f4\u8ddd",
+            "objects_nodes_verticalSpacingKey": "\u5782\u76f4\u95f4\u8ddd",
+            "objects_nodes_fillColorKey": "\u586b\u5145\u989c\u8272",
+            "objects_nodes_borderColorKey": "\u8fb9\u6846\u989c\u8272",
+            "objects_nodes_shapeKey": "\u5f62\u72b6",
+            "objects_nodes_shape_rectangleKey": "\u77e9\u5f62",
+            "objects_nodes_shape_ellipseKey": "\u692d\u5706",
+            "objects_nodes_shape_triangleKey": "\u4e09\u89d2\u5f62",
+            "objects_nodes_shape_starKey": "\u661f\u5f62",
+            "objects_nodes_shape_pentagonKey": "\u4e94\u89d2\u5f62",
+            "objects_nodes_shape_heptagonKey": "\u4e03\u8fb9\u5f62",
+            "objects_nodes_shape_octagonKey": "\u516b\u89d2\u5f62",
+            "objects_nodes_shape_trapezoidKey": "\u68af\u5f62",
+            "objects_nodes_shape_decagonKey": "\u5341\u8fb9\u5f62",
+            "objects_nodes_shape_cylinderKey": "\u5706\u7b52",
+            "objects_labelsKey": "\u6807\u7b7e",
+            "objects_labels_leftSpacingKey": "\u5de6\u95f4\u8ddd",
+            "objects_labels_spacingKey": "\u6807\u7b7e\u95f4\u8ddd",
+            "objects_labels_fontSizeKey": "\u5b57\u4f53\u5927\u5c0f",
+            "objects_labels_fontFamilyKey": "\u5b57\u4f53\u7cfb\u5217",
+            "objects_labels_fontColorKey": "\u5b57\u4f53\u989c\u8272",
+            "objects_labels_ScaleKey": "\u7f29\u653e\u6bd4\u4f8b",
+            "objects_labels_scale_noneKey": "\u65e0",
+            "objects_labels_scale_meetKey": "\u8fb9\u754c",
+            "objects_labels_scale_sliceKey": "\u6700\u5927",
+            "objects_labels_scale_stretchKey": "\u62c9\u4f38",
+            "objects_connectorsKey": "\u8fde\u63a5\u5668",
+            "objects_connectors_colorKey": "\u989c\u8272",
+            "objects_connectors_shapeKey": "\u76ee\u6807\u5f62\u72b6",
+            "objects_connectors_shape_noneKey": "\u65e0",
+            "objects_connectors_shape_arrowKey": "\u7bad\u5934",
+            "objects_connectors_shape_circleKey": "\u5706\u5f62",
+            "objects_connectors_shape_diamondKey": "\u94bb\u77f3",
+            "objects_connectors_cornerRadiusKey": "\u5706\u89d2\u534a\u5f84"
+        },
+        "en-US": {
+            "dataRoles_idKey": "Id",
+            "dataRoles_parentIdKey": "Parent Id",
+            "dataRoles_labelKey": "Label",
+            "dataRoles_imageKey": "Image",
+            "dataRoles_colorKey": "Color",
+            "dataRoles_linkKey": "Link",
+            "dataRoles_toolTipKey": "ToolTip",
+            "objects_layoutKey": "Layout",
+            "objects_layout_typeKey": "Type",
+            "objects_layout_type_hierarchicaltreeKey": "HierarchicalTree",
+            "objects_layout_type_organizationalchartKey": "OrganizationalChart",
+            "objects_layout_orientationKey": "Orientation",
+            "objects_layout_orientation_TopToBottomKey": "TopToBottom",
+            "objects_layout_orientation_BottomToTopKey": "BottomToTop",
+            "objects_layout_orientation_LeftToRightKey": "LeftToRight",
+            "objects_layout_orientation_RightToLeftKey": "RightToLeft",
+            "objects_nodesKey": "Nodes",
+            "objects_nodes_levelKey": "Level",
+            "objects_nodes_heightKey": "Height",
+            "objects_nodes_widthKey": "Width",
+            "objects_nodes_horizontalSpacingKey": "Horizontal Spacing",
+            "objects_nodes_verticalSpacingKey": "Vertical Spacing",
+            "objects_nodes_fillColorKey": "Fill Color",
+            "objects_nodes_borderColorKey": "Border Color",
+            "objects_nodes_shapeKey": "Shape",
+            "objects_nodes_shape_rectangleKey": "Rectangle",
+            "objects_nodes_shape_ellipseKey": "Ellipse",
+            "objects_nodes_shape_triangleKey": "Triangle",
+            "objects_nodes_shape_starKey": "Star",
+            "objects_nodes_shape_pentagonKey": "Pentagon",
+            "objects_nodes_shape_heptagonKey": "Heptagon",
+            "objects_nodes_shape_octagonKey": "Octagon",
+            "objects_nodes_shape_trapezoidKey": "Trapezoid",
+            "objects_nodes_shape_decagonKey": "Decagon",
+            "objects_nodes_shape_cylinderKey": "Cylinder",
+            "objects_labelsKey": "Labels",
+            "objects_labels_leftSpacingKey": "Left Spacing",
+            "objects_labels_spacingKey": "Spacing",
+            "objects_labels_fontSizeKey": "Font Size",
+            "objects_labels_fontFamilyKey": "Font Family",
+            "objects_labels_fontColorKey": "Font Color",
+            "objects_labels_ScaleKey": "Scale Ratio",
+            "objects_labels_scale_noneKey": "None",
+            "objects_labels_scale_meetKey": "Meet",
+            "objects_labels_scale_sliceKey": "Slice",
+            "objects_labels_scale_stretchKey": "Stretch",
+            "objects_connectorsKey": "Connectors",
+            "objects_connectors_colorKey": "Color",
+            "objects_connectors_shapeKey": "Target Shape",
+            "objects_connectors_shape_noneKey": "None",
+            "objects_connectors_shape_arrowKey": "Arrow",
+            "objects_connectors_shape_circleKey": "Circle",
+            "objects_connectors_shape_diamondKey": "Diamond",
+            "objects_connectors_cornerRadiusKey": "CornerRadius"
+        }
+    }
+}

@@ -1,0 +1,1259 @@
+{
+    "visual": {
+        "name": "InfoCard",
+        "displayName": "InfoCard",
+        "guid": "InfoCard20C2BF75F48447AC938F5C499D100557",
+        "visualClassName": "InfoCard",
+        "version": "1.0.4.1",
+        "description": "Custom visual card with KPI and advanced formatting options.",
+        "supportUrl": "https://www.inservit.com/pbiviz-infocard/",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "2.5.0",
+    "author": {
+        "name": "Inservit LLC",
+        "email": "support@inservit.com"
+    },
+    "assets": {
+        "icon": "assets/infocard.png"
+    },
+    "externalJS": [
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.cultures.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-colorutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Value",
+                "displayNameKey": "Visual_Values",
+                "name": "measure",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Min value - Conditional Formatting",
+                "displayNameKey": "Visual_CFMin",
+                "name": "cfMinVal",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Mid value - Conditional Formatting",
+                "displayNameKey": "Visual_CFMid",
+                "name": "cfMidVal",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Max value - Conditional Formatting",
+                "displayNameKey": "Visual_CFMax",
+                "name": "cfMaxVal",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltip",
+                "name": "tooltip",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "cfMinVal"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "cfMidVal"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "cfMaxVal"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltip"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "conditions": [
+                    {
+                        "measure": {
+                            "max": 1
+                        },
+                        "cfMinVal": {
+                            "max": 1
+                        },
+                        "cfMidVal": {
+                            "max": 1
+                        },
+                        "cfMaxVal": {
+                            "max": 1
+                        }
+                    }
+                ]
+            }
+        ],
+        "objects": {
+            "dataCardFill": {
+                "displayName": "Fill",
+                "displayNameKey": "Visual_InfoCard_Fill",
+                "description": "Card custom background/fill formatting.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fillColor": {
+                        "displayName": "Fill Color",
+                        "displayNameKey": "Visual_InfoCard_FillColor",
+                        "description": "Background/fill Color.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fillType": {
+                        "displayName": "Fill Type",
+                        "displayNameKey": "Visual_InfoCard_FillType",
+                        "description": "Fill type.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "Solid"
+                                },
+                                {
+                                    "displayName": "Blur",
+                                    "value": "Blur"
+                                }
+                            ]
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "displayNameKey": "V_IC_FillTransparency",
+                        "description": "Fill Color - transparency.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fillXPos": {
+                        "displayName": "X Position",
+                        "displayNameKey": "Visual_InfoCard_FillXPos",
+                        "description": "Fill position from left.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fillYPos": {
+                        "displayName": "Y Position",
+                        "displayNameKey": "Visual_InfoCard_FillYPos",
+                        "description": "Fill position from top.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fillWidth": {
+                        "displayName": "Fill Width",
+                        "displayNameKey": "Visual_InfoCard_FillWidth",
+                        "description": "Fill width (%).",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fillHeight": {
+                        "displayName": "Fill Height",
+                        "displayNameKey": "Visual_InfoCard_FillHeighjt",
+                        "description": "Fill height (%).",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fillCF": {
+                        "displayName": "Conditional Formatting",
+                        "displayNameKey": "Visual_InfoCard_FillCF",
+                        "description": "Conditional formatting - Fill.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fillCFUseMeasure": {
+                        "displayName": "Use measure values",
+                        "displayNameKey": "Visual_ICFILL_UseM",
+                        "description": "Conditional formatting - use min,mid,max measures for condition values.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fillMin": {
+                        "displayName": "Min",
+                        "displayNameKey": "Visual_InfoCard_CFMinRange",
+                        "description": "Fill condition - minimum range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fillMinColor": {
+                        "displayName": "Min Color",
+                        "displayNameKey": "Visual_InfoCard_CFMinColor",
+                        "description": "Fill condition - color for minimum range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fillCenter": {
+                        "displayName": "Mid",
+                        "displayNameKey": "Visual_InfoCard_CFMidRange",
+                        "description": "Fill condition - mid range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fillCenterColor": {
+                        "displayName": "Mid Color",
+                        "displayNameKey": "Visual_InfoCard_CFMidColor",
+                        "description": "Fill condition - color for mid range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fillMax": {
+                        "displayName": "Max",
+                        "displayNameKey": "Visual_InfoCard_CFMaxRange",
+                        "description": "Fill condition - max range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fillMaxColor": {
+                        "displayName": "Max Color",
+                        "displayNameKey": "Visual_InfoCard_CFMaxColor",
+                        "description": "Fill condition - color for max range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fillCFOpacity": {
+                        "displayName": "Auto Transprancy (Conditional Formatting)",
+                        "displayNameKey": "VD_FILL_CFOPACITY",
+                        "description": "Conditional formatting - fill auto transparency.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "borderFormat": {
+                "displayName": "Custom Border",
+                "displayNameKey": "Visual_Border_Format",
+                "description": "Custom border formatting.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderThickness": {
+                        "displayName": "Border Size",
+                        "displayNameKey": "Visual_Border_Thickness",
+                        "description": "Border thickness.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "angle": {
+                        "displayName": "Edge (Radius)",
+                        "displayNameKey": "Visual_Border_Radius",
+                        "description": "Border edge/radius.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Color",
+                        "displayNameKey": "Visual_Border_Color",
+                        "description": "Border default color.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderCF": {
+                        "displayName": "Conditional Formatting",
+                        "displayNameKey": "Visual_Border_CF",
+                        "description": "Border - conditional formatting.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderCFUseMeasure": {
+                        "displayName": "Use measure values",
+                        "displayNameKey": "Visual_Border_UseM",
+                        "description": "Conditional formatting - use min,mid,max measures for condition values.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderCFMin": {
+                        "displayName": "Min",
+                        "displayNameKey": "Visual_Border_CF_MINV",
+                        "description": "Minimum range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderCFMinColor": {
+                        "displayName": "Min Color",
+                        "displayNameKey": "Visual_Border_CFMinColor",
+                        "description": "Border color - min range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderCFMid": {
+                        "displayName": "Mid",
+                        "displayNameKey": "Visual_Border_CF_MIDRANGE",
+                        "description": "Mid range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderCFMidColor": {
+                        "displayName": "Mid Color",
+                        "displayNameKey": "Visual_Border_CFMidColor",
+                        "description": "Border color - mid range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderCFMax": {
+                        "displayName": "Max",
+                        "displayNameKey": "Visual_Border_CF_MAXRANGE",
+                        "description": "Max range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderCFMaxColor": {
+                        "displayName": "Max Color",
+                        "displayNameKey": "Visual_Border_CFMaxColor",
+                        "description": "Border color - max range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "dataLabelFormat": {
+                "displayName": "Data Label",
+                "displayNameKey": "Visual_DataLabel_Format",
+                "description": "Data label formatting.",
+                "properties": {
+                    "dataLabelFontFamily": {
+                        "displayName": "Font Family",
+                        "displayNameKey": "Visual_DataLabel_FontFamily",
+                        "description": "Data label font family.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "description": "Default font - helvetica, arial, sans-serif",
+                                    "value": "helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Arial Black",
+                                    "value": "Arial Black"
+                                },
+                                {
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "Arial Unicode MS"
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayName": "Cambria Math",
+                                    "value": "Cambria Math"
+                                },
+                                {
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "Comic Sans MS"
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "Courier New"
+                                },
+                                {
+                                    "displayName": "DIN",
+                                    "value": "wf_standard-font, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "Lucida Sans Unicode"
+                                },
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "Segoe UI"
+                                },
+                                {
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "Times New Roman"
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "Trebuchet MS"
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Font Size",
+                        "displayNameKey": "Visual_DataLabel_FontSize",
+                        "description": "Data label font size (8-40).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "EnlargeFont": {
+                        "displayName": "Enlarge Font?",
+                        "displayNameKey": "Visual_DataLabel_FlagEnFont",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "imageHeight": {
+                        "displayName": "Enlarge Font Size",
+                        "displayNameKey": "Visual_DataLabel_EnFont",
+                        "description": "Data label enlarge font (24-150).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataLabelFontColor": {
+                        "displayName": "Font Color",
+                        "displayNameKey": "Visual_DataLabel_FontColor",
+                        "description": "Data label font color.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dataLabelFontBold": {
+                        "displayName": "Font Weight",
+                        "displayNameKey": "Visual_DataLabel_FontBold",
+                        "description": "Data label font weight - normal or bold.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    },
+                    "dataLabelBlankDisplay": {
+                        "displayName": "Display Blank As",
+                        "displayNameKey": "Visual_DataLabel_BlankDisplay",
+                        "description": "Static text to display incase of null/blank data.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "dataLabelDisplayUnits": {
+                        "displayName": "Display Units",
+                        "displayNameKey": "Visual_DataLabel_DisplayUnits",
+                        "description": "Data label display units.",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "strokeWidth": {
+                        "displayName": "Decimal Places",
+                        "displayNameKey": "Visual_DataLabel_DecimalPlaces",
+                        "description": "Data label decimal places.",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataLabelAlignment": {
+                        "displayName": "Alignment",
+                        "displayNameKey": "Visual_DataLabel_DataAlignment",
+                        "description": "Align data label.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top Left",
+                                    "value": "topleft"
+                                },
+                                {
+                                    "displayName": "Top Center",
+                                    "value": "topmiddle"
+                                },
+                                {
+                                    "displayName": "Top Right",
+                                    "value": "topright"
+                                },
+                                {
+                                    "displayName": "Mid Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Mid Center",
+                                    "value": "middle"
+                                },
+                                {
+                                    "displayName": "Mid Right",
+                                    "value": "right"
+                                },
+                                {
+                                    "displayName": "Bottom Left",
+                                    "value": "bottomleft"
+                                },
+                                {
+                                    "displayName": "Bottom Center",
+                                    "value": "bottommiddle"
+                                },
+                                {
+                                    "displayName": "Bottom Right",
+                                    "value": "bottomright"
+                                }
+                            ]
+                        }
+                    },
+                    "dataLabelPosition": {
+                        "displayName": "Position",
+                        "displayNameKey": "Visual_DataLabel_Position",
+                        "description": "Data label position.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataLabelXPos": {
+                        "displayName": "X Position",
+                        "displayNameKey": "Visual_DataLabel_XPos",
+                        "description": "Data label position from left.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "dataLabelYPos": {
+                        "displayName": "Y Position",
+                        "displayNameKey": "Visual_DataLabel_YPos",
+                        "description": "Data label position from top.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "dataLabelCF": {
+                        "displayName": "Conditional Formatting",
+                        "displayNameKey": "Visual_DataLabel_CF",
+                        "description": "Data label - conditional formatting.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelCFUseMeasure": {
+                        "displayName": "Use measure values",
+                        "displayNameKey": "Visual_DL_UseM",
+                        "description": "Conditional formatting - use min,mid,max measures for condition values.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataLabelCFMin": {
+                        "displayName": "Min",
+                        "displayNameKey": "Visual_DataLabel_CFMinRange",
+                        "description": "Data label fill condition - minimum range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataLabelCFMinColor": {
+                        "displayName": "Min Color",
+                        "displayNameKey": "Visual_DataLabel_CFMinColor",
+                        "description": "Data label fill condition - color for minimum range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dataLabelCFCenter": {
+                        "displayName": "Mid",
+                        "displayNameKey": "Visual_DataLabel_CFCenterRange",
+                        "description": "Data label fill condition - mid range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataLabelCFCenterColor": {
+                        "displayName": "Mid Color",
+                        "displayNameKey": "Visual_DataLabel_CFMidColor",
+                        "description": "Data label fill condition - color for mid range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dataLabelCFMax": {
+                        "displayName": "Max",
+                        "displayNameKey": "Visual_DataLabel_CFMaxRange",
+                        "description": "Data label fill condition - max range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataLabelCFMaxColor": {
+                        "displayName": "Max Color",
+                        "displayNameKey": "Visual_DataLabel_CFMaxColor",
+                        "description": "Data label fill condition - color for max range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "dataCategoryFormat": {
+                "displayName": "Category Label",
+                "displayNameKey": "Visual_Data_CategoryFormat",
+                "description": "Category label formatting.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataCategoryName": {
+                        "displayName": "Category Name",
+                        "displayNameKey": "Visual_Data_CategoryName",
+                        "description": "Category label display name.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "dataCategoryFontFamily": {
+                        "displayName": "Font Family",
+                        "displayNameKey": "Visual_Data_Category_Font_Family",
+                        "description": "Category label - font family.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "description": "Default font - helvetica, arial, sans-serif",
+                                    "value": "helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Arial Black",
+                                    "value": "Arial Black"
+                                },
+                                {
+                                    "displayName": "Arial Unicode MS",
+                                    "value": "Arial Unicode MS"
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Cambria",
+                                    "value": "Cambria"
+                                },
+                                {
+                                    "displayName": "Cambria Math",
+                                    "value": "Cambria Math"
+                                },
+                                {
+                                    "displayName": "Candara",
+                                    "value": "Candara"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "Comic Sans MS"
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                },
+                                {
+                                    "displayName": "Constantia",
+                                    "value": "Constantia"
+                                },
+                                {
+                                    "displayName": "Corbel",
+                                    "value": "Corbel"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "Courier New"
+                                },
+                                {
+                                    "displayName": "DIN",
+                                    "value": "wf_standard-font, helvetica, arial, sans-serif"
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Lucida Sans Unicode",
+                                    "value": "Lucida Sans Unicode"
+                                },
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "Segoe UI"
+                                },
+                                {
+                                    "displayName": "Symbol",
+                                    "value": "Symbol"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "Times New Roman"
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "Trebuchet MS"
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Wingdings",
+                                    "value": "Wingdings"
+                                }
+                            ]
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Font Size",
+                        "displayNameKey": "Visual_Data_Category_FontSize",
+                        "description": "Category label font size (8-40px).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "EnlargeFont": {
+                        "displayName": "Enlarge Font?",
+                        "displayNameKey": "Visual_Data_Category_FlagEnFont",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "preferredCategoryWidth": {
+                        "displayName": "Enlarge Font Size",
+                        "displayNameKey": "Visual_Data_Category_EnFontSize",
+                        "description": "Category label enlarged font size (20-180px).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataCategoryFontColor": {
+                        "displayName": "Font Color",
+                        "displayNameKey": "Visual_Data_Category_FontColor",
+                        "description": "Category label font color.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dataCategoryFontBold": {
+                        "displayName": "Font Weight",
+                        "displayNameKey": "Visual_Data_Category_FontBold",
+                        "description": "Set category label font weight to normal or bold.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    },
+                    "dataCategoryAlignment": {
+                        "displayName": "Alignment",
+                        "displayNameKey": "Visual_Data_CategoryAlignment",
+                        "description": "Align - Category label.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top Left",
+                                    "value": "topleft"
+                                },
+                                {
+                                    "displayName": "Top Center",
+                                    "value": "topmiddle"
+                                },
+                                {
+                                    "displayName": "Top Right",
+                                    "value": "topright"
+                                },
+                                {
+                                    "displayName": "Mid Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Mid Center",
+                                    "value": "middle"
+                                },
+                                {
+                                    "displayName": "Mid Right",
+                                    "value": "right"
+                                },
+                                {
+                                    "displayName": "Bottom Left",
+                                    "value": "bottomleft"
+                                },
+                                {
+                                    "displayName": "Bottom Center",
+                                    "value": "bottommiddle"
+                                },
+                                {
+                                    "displayName": "Bottom Right",
+                                    "value": "bottomright"
+                                }
+                            ]
+                        }
+                    },
+                    "dataCategoryPosition": {
+                        "displayName": "Position",
+                        "displayNameKey": "Visual_Data_Category_Position",
+                        "description": "Category label position.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataCategoryXPos": {
+                        "displayName": "X Position",
+                        "displayNameKey": "Visual_Data_CategoryXPos",
+                        "description": "Category label position from left.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "dataCategoryYPos": {
+                        "displayName": "Y Position",
+                        "displayNameKey": "Visual_Data_CategoryYPos",
+                        "description": "Category label position from top.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "rotate": {
+                        "displayName": "Rotate",
+                        "displayNameKey": "Visual_Data_CategoryRoate",
+                        "description": "Vertically rotate category label.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rotateAngle": {
+                        "displayName": "Angle",
+                        "displayNameKey": "Visual_InfoCard_RotateAngle",
+                        "description": "Angle to vertically rotate category label.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "90",
+                                    "value": "90"
+                                },
+                                {
+                                    "displayName": "-90",
+                                    "value": "-90"
+                                }
+                            ]
+                        }
+                    },
+                    "dataCategoryCF": {
+                        "displayName": "Conditional Formatting",
+                        "displayNameKey": "Visual_Data_CategoryCF",
+                        "description": "Category label - conditional formatting.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "categoryUseMeasure": {
+                        "displayName": "Use measure values",
+                        "displayNameKey": "Visual_DC_UseM",
+                        "description": "Conditional formatting - use min, mid, max measures for condition values.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataCategoryCFMin": {
+                        "displayName": "Min",
+                        "displayNameKey": "Visual_Data_Category_CF_MINRANGE",
+                        "description": "Category label fill condition - minimum range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataCategoryCFMinColor": {
+                        "displayName": "Min Color",
+                        "displayNameKey": "Visual_Data_Category_CF_MINCOLOR",
+                        "description": "Category label - color for minimum range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dataCategoryCFCenter": {
+                        "displayName": "Mid",
+                        "displayNameKey": "Visual_Data_Category_CF_MIDRANGE",
+                        "description": "Category label fill condition - mid range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataCategoryCFCenterColor": {
+                        "displayName": "Mid Color",
+                        "displayNameKey": "Visual_Data_Category_CF_MIDCOLOR",
+                        "description": "Category label - color for mid range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dataCategoryCFMax": {
+                        "displayName": "Max",
+                        "displayNameKey": "Visual_Data_Category_CF_MAXRANGE",
+                        "description": "Category label fill condition - max range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataCategoryCFMaxColor": {
+                        "displayName": "Max Color",
+                        "displayNameKey": "Visual_Data_Category_CF_MAXCOLOR",
+                        "description": "Category label - color for max range.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "imgFormat": {
+                "displayName": "Image",
+                "displayNameKey": "Visual_Data_ImageFormat",
+                "description": "Flag to display image.",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "imageURL": {
+                        "displayName": "Image URL",
+                        "displayNameKey": "Visual_Data_ImageURL",
+                        "description": "Default image URL.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageWidth": {
+                        "displayName": "Width",
+                        "displayNameKey": "Visual_Image_WIDTH",
+                        "description": "Image width.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "imageHgt": {
+                        "displayName": "Height",
+                        "displayNameKey": "Visual_Image_Height",
+                        "description": "Image height.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "imageXPos": {
+                        "displayName": "X Position",
+                        "displayNameKey": "Visual_Image_XPos",
+                        "description": "Image position from left.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "imageYPos": {
+                        "displayName": "Y Position",
+                        "displayNameKey": "Visual_Image_YPos",
+                        "description": "Image position from top.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "imageCF": {
+                        "displayName": "Conditional Formatting",
+                        "displayNameKey": "Visual_Image_CF",
+                        "description": "Flag for image conditional formatting.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "imgCFUseMeasure": {
+                        "displayName": "Use measure values",
+                        "displayNameKey": "Visual_IMG_UseM",
+                        "description": "Conditional formatting - use min,mid,max measures for condition values.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "imageCFMin": {
+                        "displayName": "Minimum",
+                        "displayNameKey": "Visual_Image_CF_MINRANGE",
+                        "description": "Minimum range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "imageCFMinUrl": {
+                        "displayName": "URL - Min range",
+                        "displayNameKey": "Visual_ImageUrl_CF_MINRANGE",
+                        "description": "Image URL - minimum range.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageCFMid": {
+                        "displayName": "Mid",
+                        "displayNameKey": "Visual_Image_CF_MIDRANGE",
+                        "description": "Mid range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "imageCFMidUrl": {
+                        "displayName": "URL - Mid range",
+                        "displayNameKey": "Visual_ImageUrl_CF_MIDRANGE",
+                        "description": "Image URL for mid range.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageCFMax": {
+                        "displayName": "Max",
+                        "displayNameKey": "Visual_Image_CF_MAXRANGE",
+                        "description": "Max range.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "imageCFMaxUrl": {
+                        "displayName": "URL - Max range",
+                        "displayNameKey": "Visual_ImageUrl_CF_MAXRANGE",
+                        "description": "Image URL for max range.",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "units": {
+                "displayName": "Tooltip (Data Format)",
+                "properties": {
+                    "show": {
+                        "displayName": "Units",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltipUnits": {
+                        "displayName": "Display Units",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimals",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "displayNameKey": "V_IC_ToolTipColor",
+                        "description": "Color - tooltip measure indicator.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltip"
+            ]
+        },
+        "suppressDefaultTitle": true
+    },
+    "stringResources": {}
+}

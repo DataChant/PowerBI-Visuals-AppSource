@@ -1,0 +1,445 @@
+{
+    "visual": {
+        "name": "kpigauge",
+        "displayName": "KPI Gauge",
+        "guid": "kpigaugeE1C1F2D818584821B802A6B2EE9891B6",
+        "visualClassName": "Visual",
+        "version": "2.2.2.0",
+        "description": "Multi purpose KPI Gauge containing both devation from target as well as trend marker.",
+        "supportUrl": "https://github.com/LSchipperGroningen/powerbi_kpi_visual_support/issues",
+        "gitHubUrl": "https://github.com/LSchipperGroningen/powerbi_kpi_visual_support"
+    },
+    "author": {
+        "name": "Lars Schipper",
+        "email": "lschipper@ilionx.com"
+    },
+    "apiVersion": "5.3.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": true,
+                "parameters": [
+                    "http://www.w3.org"
+                ]
+            }
+        ],
+        "dataRoles": [
+            {
+                "displayName": "KPI value",
+                "description": "The value (measure) which has to be measured",
+                "name": "kpivalue",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "KPI target",
+                "description": "The value (measure) on which the the measure has to be targeted against",
+                "name": "kpitarget",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "KPI trend",
+                "description": "A measure that is based on the difference between the measure and the target, which results in a 1,0 or -1. This value determines the icon to be shown corresponding to the trend",
+                "name": "kpitrend",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Period",
+                "description": "A measure returning a label informing the user which period the KPI is reporting about (shown on the bottom of the visual)",
+                "name": "timespantext",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Higher is better",
+                "description": "A configuration value (integer) which determines whether a higher value is either good or bad (1 as in higher is better and 0 as in lower is better)",
+                "name": "higherisbetter",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Iconcode",
+                "description": "The icon (SVG) to be displayed in the topleft of the visual. The SVG should be described in XML/HTML format.",
+                "name": "icon",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "KPI",
+                "description": "The Key Performance Indicator it regards (When using a configuration table, don't forget to filter the correct KPI so the correct configuration values will be used!)",
+                "name": "label",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Margin",
+                "description": "A configuration value (decimal) which determines the margin between the green and red color (which results in the neutral color orange) For example a Margin of 0.03 means the neutral color will have a range from -3 % until 3 %",
+                "name": "margin",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Scale is absolute",
+                "description": "A configuration value (integer) which determines whether the used scale is absolute (value: 1) or continous (value: 0)",
+                "name": "scaleisabsolute",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Maximum scale",
+                "description": "A configuration value (decimal) which determines the maximum scale to be shown on the visual",
+                "name": "scalemax",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Minimum scale",
+                "description": "A configuration value (decimal) which determines the minimum scale to be shown on the visual",
+                "name": "scalemin",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Target label",
+                "description": "A configuration field which has a descriptive value of the target label shown right before the target value on the visual",
+                "name": "targetlabel",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Tooltip",
+                "description": "A configuration field which has a descriptive value of the tooltip shown when hovering over the visual",
+                "name": "tooltip",
+                "kind": "Grouping"
+            }
+        ],
+        "objects": {
+            "kpi": {
+                "displayName": "KPI",
+                "properties": {
+                    "kpiLabel": {
+                        "displayName": "KPI label",
+                        "description": "A configuration field which has a descriptive value of the KPI label shown above the KPI value on the visual",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "toolTip": {
+                        "displayName": "Tooltip",
+                        "description": "A configuration field which has a descriptive value of the tooltip shown when hovering over the visual",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "targetLabel": {
+                        "displayName": "Target label",
+                        "description": "A configuration field which has a descriptive value of the target label shown right before the target value on the visual",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "scaleMin": {
+                        "displayName": "Minimum scale",
+                        "description": "A configuration value (decimal) which determines the minimum scale to be shown on the visual",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "margin": {
+                        "displayName": "Margin",
+                        "description": "A configuration value (decimal) which determines the margin between the green and red color (which results in the neutral color orange) For example a Margin of 0.03 means the neutral color will have a range from -3 % until 3 %",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "scaleMax": {
+                        "displayName": "Maximum scale",
+                        "description": "A configuration value (decimal) which determines the maximum scale to be shown on the visual",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "iconName": {
+                        "displayName": "Icon",
+                        "description": "The icon (SVG) to be displayed in the topleft of the visual. The SVG should be described in XML/HTML format.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Geen",
+                                    "value": ""
+                                },
+                                {
+                                    "displayName": "Financial result",
+                                    "value": "financieel"
+                                },
+                                {
+                                    "displayName": "Formation",
+                                    "value": "formatie"
+                                },
+                                {
+                                    "displayName": "Productivity",
+                                    "value": "productiviteit"
+                                },
+                                {
+                                    "displayName": "Incident",
+                                    "value": "incident"
+                                },
+                                {
+                                    "displayName": "Thermometer",
+                                    "value": "thermometer"
+                                },
+                                {
+                                    "displayName": "Healthcare",
+                                    "value": "zorg"
+                                }
+                            ]
+                        }
+                    },
+                    "higherKpiIsBetter": {
+                        "displayName": "Higher is better",
+                        "description": "A configuration value (integer) which determines whether a higher value is either good or bad (1 as in higher is better and 0 as in lower is better)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scaleIsAbsolute": {
+                        "displayName": "Scale is absolute",
+                        "description": "A configuration value (integer) which determines whether the used scale is absolute (value: 1) or continous (value: 0)",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "style": {
+                "displayName": "General style",
+                "properties": {
+                    "displayUnit": {
+                        "displayName": "Display-units",
+                        "description": "Scientific formatting (K, M..)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "description": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    }
+                }
+            },
+            "labelStyle": {
+                "displayName": "Label style",
+                "properties": {
+                    "kpiLabelFontFamily": {
+                        "displayName": "Font family",
+                        "description": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "kpiLabelFontColor": {
+                        "displayName": "Font color",
+                        "description": "Font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "kpiLabelFontSize": {
+                        "displayName": "Font size",
+                        "description": "Font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelFontWeight": {
+                        "displayName": "Font weight",
+                        "description": "Font weight",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "periodeStyle": {
+                "displayName": "Periode style",
+                "properties": {
+                    "periodeFontFamily": {
+                        "displayName": "Font family",
+                        "description": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "periodeFontColor": {
+                        "displayName": "Font color",
+                        "description": "Font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "periodeFontWeight": {
+                        "displayName": "Font weight",
+                        "description": "Font weight",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "value": "bold"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "kpiValueStyle": {
+                "displayName": "KPI value style",
+                "properties": {
+                    "kpiValueDecimalPlaces": {
+                        "displayName": "Amount of decimals",
+                        "description": "Amount of decimals",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "kpiValueLabelFontSize": {
+                        "displayName": "KPI value font size",
+                        "description": "Font size of the KPI value",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "kpivalue": {
+                            "max": 1
+                        },
+                        "kpitarget": {
+                            "max": 1
+                        },
+                        "kpitrend": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "kpivalue"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "kpitarget"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "kpitrend"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "timespantext"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "higherisbetter"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "icon"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "label"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "margin"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "scaleisabsolute"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "scalemax"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "scalemin"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "targetlabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltip"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

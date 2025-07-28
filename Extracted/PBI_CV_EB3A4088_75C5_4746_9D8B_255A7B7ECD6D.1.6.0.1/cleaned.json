@@ -1,0 +1,1675 @@
+{
+    "visual": {
+        "name": "mapboxGLMap",
+        "displayName": "Mapbox Visual",
+        "guid": "PBI_CV_EB3A4088_75C5_4746_9D8B_255A7B7ECD6D",
+        "visualClassName": "MapboxMap",
+        "version": "1.6.0.1",
+        "description": "Visualize massive location data with custom map styles, using circle, heatmap, choropleth, and cluster layers.",
+        "supportUrl": "www.mapbox.com/help",
+        "gitHubUrl": "https://github.com/mapbox/mapboxgl-powerbi"
+    },
+    "author": {
+        "name": "Mapbox",
+        "email": "ryan.baumann@mapbox.com"
+    },
+    "apiVersion": "4.0.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "location",
+                "kind": "Grouping",
+                "displayName": "Location",
+                "description": "Geographic location identifier for Choropleth layer",
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "stateorprovince": true
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "latitude",
+                "kind": "Grouping",
+                "displayName": "Latitude",
+                "description": "Latitude geographic point dimension",
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "latitude": true
+                        }
+                    }
+                ],
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    },
+                    {
+                        "geography": {
+                            "latitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "longitude",
+                "kind": "Grouping",
+                "displayName": "Longitude",
+                "description": "Longitude geographic point dimension",
+                "preferredTypes": [
+                    {
+                        "geography": {
+                            "longitude": true
+                        }
+                    }
+                ],
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    },
+                    {
+                        "geography": {
+                            "longitude": true
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "color",
+                "kind": "Measure",
+                "displayName": "Color",
+                "description": "Measure or Dimension to color circles and heatmaps.  Can be numeric or text data type."
+            },
+            {
+                "name": "size",
+                "kind": "Measure",
+                "displayName": "Size",
+                "description": "Measure to control circle radius size. Must be numeric data type.",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "cluster",
+                "kind": "Measure",
+                "displayName": "Cluster",
+                "description": "Measure to aggregate points for clustering.  Must be numeric data type.",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "tooltips",
+                "kind": "Measure",
+                "displayName": "Tooltips",
+                "description": "Values to display in tooltips"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "location": {
+                            "max": 1
+                        },
+                        "latitude": {
+                            "max": 1
+                        },
+                        "longitude": {
+                            "max": 1
+                        },
+                        "color": {
+                            "max": 2
+                        },
+                        "size": {
+                            "max": 1
+                        },
+                        "cluster": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "dataReductionAlgorithm": {
+                            "sample": {
+                                "count": 30000
+                            }
+                        },
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "location"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "latitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "longitude"
+                                }
+                            }
+                        ]
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "color"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "size"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "cluster"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "drilldown": {
+            "roles": [
+                "location"
+            ]
+        },
+        "objects": {
+            "api": {
+                "displayName": "Viz Settings",
+                "displayNameKey": "mapbox_api",
+                "description": "Mapbox GL Visualization Settings",
+                "properties": {
+                    "accessToken": {
+                        "displayName": "Access Token",
+                        "displayNameKey": "access_token",
+                        "description": "Public Access Token from your Mapbox account - get yours at https://www.mapbox.com/account",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "style": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://styles/mapbox/light-v10?optimize=true",
+                                    "displayName": "Light",
+                                    "displayNameKey": "light_v10"
+                                },
+                                {
+                                    "value": "mapbox://styles/mapbox/dark-v10?optimize=true",
+                                    "displayName": "Dark",
+                                    "displayNameKey": "dark_v10"
+                                },
+                                {
+                                    "value": "mapbox://styles/mapbox/streets-v11?optimize=true",
+                                    "displayName": "Streets",
+                                    "displayNameKey": "streets_v11"
+                                },
+                                {
+                                    "value": "mapbox://styles/mapbox/outdoors-v11?optimize=true",
+                                    "displayName": "Outdoors",
+                                    "displayNameKey": "outdoors_v11"
+                                },
+                                {
+                                    "value": "mapbox://styles/mapbox/satellite-streets-v11?optimize=true",
+                                    "displayName": "Satellite Streets",
+                                    "displayNameKey": "satellite_streets_v11"
+                                },
+                                {
+                                    "value": "mapbox://styles/mapbox/satellite-v9?optimize=true",
+                                    "displayName": "Satellite",
+                                    "displayNameKey": "satellite_v9"
+                                },
+                                {
+                                    "value": "mapbox://styles/mapbox/navigation-preview-day-v4?optimize=true",
+                                    "displayName": "Traffic Light",
+                                    "displayNameKey": "navigation_preview_day_v4"
+                                },
+                                {
+                                    "value": "mapbox://styles/mapbox/navigation-preview-night-v4?optimize=true",
+                                    "displayName": "Traffic Dark",
+                                    "displayNameKey": "navigation_preview_night_v4"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom...",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Map Style",
+                        "displayNameKey": "map_style"
+                    },
+                    "labelPosition": {
+                        "displayName": "Label position",
+                        "displayNameKey": "labelPosition",
+                        "description": "Position of the labels compared to data points.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "above",
+                                    "displayName": "Above data",
+                                    "displayNameKey": "above_data"
+                                },
+                                {
+                                    "value": "below",
+                                    "displayName": "Below data",
+                                    "displayNameKey": "below_data"
+                                }
+                            ]
+                        }
+                    },
+                    "styleUrl": {
+                        "displayName": "Style URL",
+                        "displayNameKey": "styleUrl",
+                        "description": "Mapbox URL to a custom style you created on your Mapbox account.  See https://www.mapbox.com/help/studio-manual/ for a guide on creating map styles in Mapbox Studio",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "zoom": {
+                        "displayName": "Zoom",
+                        "displayNameKey": "zoom",
+                        "description": "Starting zoom level for map",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startLong": {
+                        "displayName": "Longitude",
+                        "displayNameKey": "startLong",
+                        "description": "Starting longitude level for map",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startLat": {
+                        "displayName": "Latitude",
+                        "displayNameKey": "startLat",
+                        "description": "Starting latitude level for map",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "autozoom": {
+                        "displayName": "Auto Zoom",
+                        "displayNameKey": "autozoom",
+                        "description": "Toggle autozoom on/off",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mapboxControls": {
+                        "displayName": "Mapbox Controls",
+                        "displayNameKey": "mapboxControls",
+                        "description": "Toggle Mapbox control elements on/off",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "apiUrl": {
+                        "displayName": "Mapbox API URL",
+                        "displayNameKey": "apiUrl",
+                        "description": "Default URL for map api requests.  Set this to your Mapbox Atlas server hostname.",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "geocoder": {
+                "displayName": "Geocoder",
+                "displayNameKey": "geocoder",
+                "description": "Geocoder settings",
+                "properties": {
+                    "show": {
+                        "displayName": "Geocoder",
+                        "description": "Toggle geocoder on/off",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dropPin": {
+                        "displayName": "Drop pin",
+                        "description": "Should a pin be added to the map after search",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom": {
+                        "displayName": "Zoom",
+                        "description": "Zoom level to set after search",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "circle": {
+                "displayName": "Circle",
+                "displayNameKey": "circle",
+                "description": "Circle display settings",
+                "properties": {
+                    "show": {
+                        "displayName": "Circle",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "diverging": {
+                        "displayName": "Diverging",
+                        "description": "Diverge colors by value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "radius": {
+                        "displayName": "Radius",
+                        "displayNameKey": "radius",
+                        "description": "Optional number greater than or equal to 0. Units in pixels. ",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "scaleFactor": {
+                        "displayName": "Zoom scale factor",
+                        "displayNameKey": "scaleFactor",
+                        "description": "The scale factor to use when sizing circles relative to zoom level.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "blur": {
+                        "displayName": "Blur",
+                        "displayNameKey": "blur",
+                        "description": "Amount to blur the circle (0-100).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "displayNameKey": "opacity",
+                        "description": "The global opacity in percentage at which the layer will be drawn.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "strokeWidth": {
+                        "displayName": "Stroke Width",
+                        "displayNameKey": "strokeWidth",
+                        "description": "The width of the circle's stroke. Strokes are placed outside of the Circle Radius.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "strokeOpacity": {
+                        "displayName": "Stroke Opacity",
+                        "displayNameKey": "strokeOpacity",
+                        "description": "The opacity of the circle's stroke.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "strokeColor": {
+                        "displayName": "Stroke Color",
+                        "displayNameKey": "strokeColor",
+                        "description": "The stroke color of the circle.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minColor": {
+                        "displayName": "Minimum",
+                        "displayNameKey": "minColor",
+                        "description": "Defines the color for the minimum value of the color field.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "midColor": {
+                        "displayName": "Center",
+                        "displayNameKey": "midColor",
+                        "description": "Defines the color for the center value of the color field.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "displayName": "Maximum",
+                        "displayNameKey": "maxColor",
+                        "description": "Defines the color for the maximum value of the color field.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minValue": {
+                        "displayName": "Minimum",
+                        "displayNameKey": "minValue",
+                        "description": "Minimum value to consider for colors",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "midValue": {
+                        "displayName": "Center",
+                        "displayNameKey": "midValue",
+                        "description": "Center value to consider for colors",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxValue": {
+                        "displayName": "Maximum",
+                        "displayNameKey": "maxValue",
+                        "description": "Maximum value to consider for colors",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "highlightColor": {
+                        "displayName": "Highlight Color",
+                        "displayNameKey": "highlightColor",
+                        "description": "Defines the color a polyon will take when highlighted.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Min Zoom",
+                        "displayNameKey": "minZoom",
+                        "description": "Minimum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Max Zoom",
+                        "displayNameKey": "maxZoom",
+                        "description": "Maximum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend": {
+                        "displayName": "Legend",
+                        "displayNameKey": "legend",
+                        "description": "Enable legend",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "heatmap": {
+                "displayName": "Heatmap",
+                "displayNameKey": "heatmap",
+                "description": "Heatmap display settings",
+                "properties": {
+                    "show": {
+                        "displayName": "Heatmap",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "radius": {
+                        "displayName": "Radius",
+                        "displayNameKey": "radius",
+                        "description": "Radius of influence of one heatmap point in pixels. Increasing the value makes the heatmap smoother, but less detailed.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "intensity": {
+                        "displayName": "Intensity",
+                        "displayNameKey": "intensity",
+                        "description": "Controls the intensity of the heatmap globally.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "displayNameKey": "opacity",
+                        "description": "The global opacity in percentage at which the heatmap layer will be drawn.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minColor": {
+                        "displayName": "Minimum",
+                        "displayNameKey": "minColor",
+                        "description": "Minimum color for heatmap color ramp.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "midColor": {
+                        "displayName": "Center",
+                        "displayNameKey": "midColor",
+                        "description": "Center color for heatmap color ramp.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "displayName": "Maximum",
+                        "displayNameKey": "maxColor",
+                        "description": "Maximum color for heatmap color ramp. ",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Min Zoom",
+                        "displayNameKey": "minZoom",
+                        "description": "Minimum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Max Zoom",
+                        "displayNameKey": "maxZoom",
+                        "description": "Maximum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "cluster": {
+                "displayName": "Cluster",
+                "displayNameKey": "cluster",
+                "description": "Cluster display settings",
+                "properties": {
+                    "show": {
+                        "displayName": "Cluster",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "aggregation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Count",
+                                    "displayName": "Count",
+                                    "displayNameKey": "Count"
+                                },
+                                {
+                                    "value": "Sum",
+                                    "displayName": "Sum",
+                                    "displayNameKey": "Sum"
+                                },
+                                {
+                                    "value": "Average",
+                                    "displayName": "Average",
+                                    "displayNameKey": "Average"
+                                },
+                                {
+                                    "value": "Minimum",
+                                    "displayName": "Minimum",
+                                    "displayNameKey": "Minimum"
+                                },
+                                {
+                                    "value": "Maximum",
+                                    "displayName": "Maximum",
+                                    "displayNameKey": "Maximum"
+                                }
+                            ]
+                        },
+                        "displayName": "Aggregation function",
+                        "displayNameKey": "aggregation"
+                    },
+                    "radius": {
+                        "displayName": "Radius",
+                        "displayNameKey": "radius",
+                        "description": "Radius of the smallest cluster circles.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "blur": {
+                        "displayName": "Blur",
+                        "displayNameKey": "blur",
+                        "description": "Amount to blur the circle (0-100).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "clusterRadius": {
+                        "displayName": "Cluster Radius",
+                        "displayNameKey": "clusterRadius",
+                        "description": "Density of clusters in pixels.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "clusterMaxZoom": {
+                        "displayName": "Cluster Max Zoom",
+                        "displayNameKey": "clusterMaxZoom",
+                        "description": "Maximum zoom level to cluster points.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minColor": {
+                        "displayName": "Minimum",
+                        "displayNameKey": "minColor",
+                        "description": "Defines the color for the minimum value of the color field.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "displayName": "Maximum",
+                        "displayNameKey": "maxColor",
+                        "description": "Defines the color for the maximum value of the color field.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "strokeWidth": {
+                        "displayName": "Stroke Width",
+                        "displayNameKey": "strokeWidth",
+                        "description": "The width of the circle's stroke. Strokes are placed outside of the Circle Radius.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "strokeOpacity": {
+                        "displayName": "Stroke Opacity",
+                        "displayNameKey": "strokeOpacity",
+                        "description": "The opacity of the circle's stroke.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "strokeColor": {
+                        "displayName": "Stroke Color",
+                        "displayNameKey": "strokeColor",
+                        "description": "The stroke color of the circle.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Min Zoom",
+                        "displayNameKey": "minZoom",
+                        "description": "Minimum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Max Zoom",
+                        "displayNameKey": "maxZoom",
+                        "description": "Maximum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legend": {
+                        "displayName": "Legend",
+                        "displayNameKey": "legend",
+                        "description": "Enable legend",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "choropleth": {
+                "displayName": "Choropleth",
+                "displayNameKey": "choropleth",
+                "description": "Choropleth display settings",
+                "properties": {
+                    "show": {
+                        "displayName": "Choropleth",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "aggregation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Count",
+                                    "displayName": "Count",
+                                    "displayNameKey": "Count"
+                                },
+                                {
+                                    "value": "Sum",
+                                    "displayName": "Sum",
+                                    "displayNameKey": "Sum"
+                                },
+                                {
+                                    "value": "Average",
+                                    "displayName": "Average",
+                                    "displayNameKey": "Average"
+                                },
+                                {
+                                    "value": "Minimum",
+                                    "displayName": "Minimum",
+                                    "displayNameKey": "Minimum"
+                                },
+                                {
+                                    "value": "Maximum",
+                                    "displayName": "Maximum",
+                                    "displayNameKey": "Maximum"
+                                }
+                            ]
+                        },
+                        "displayName": "Aggregation function",
+                        "displayNameKey": "aggregation"
+                    },
+                    "diverging": {
+                        "displayName": "Diverging",
+                        "description": "Diverge colors by value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minColor": {
+                        "displayName": "Minimum",
+                        "displayNameKey": "minColor",
+                        "description": "Defines the color for the minimum value of the color field.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "midColor": {
+                        "displayName": "Center",
+                        "displayNameKey": "midColor",
+                        "description": "Center color for choropleth color ramp. ",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "displayName": "Maximum",
+                        "displayNameKey": "maxColor",
+                        "description": "Defines the color for the maximum value of the color field.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minValue": {
+                        "displayName": "Minimum",
+                        "displayNameKey": "minValue",
+                        "description": "Minimum value to consider for colors",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "midValue": {
+                        "displayName": "Center",
+                        "displayNameKey": "midValue",
+                        "description": "Center value to consider for colors",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxValue": {
+                        "displayName": "Maximum",
+                        "displayNameKey": "maxValue",
+                        "description": "Maximum value to consider for colors",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "highlightColor": {
+                        "displayName": "Highlight Color",
+                        "displayNameKey": "highlightColor",
+                        "description": "Defines the color a polyon will take when highlighted.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "height": {
+                        "displayName": "Extrusion Height",
+                        "displayNameKey": "height",
+                        "description": "Defines height for 3d extrusion multiplied by 1000",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "extrusionPitch": {
+                        "displayName": "Extrusion Pitch",
+                        "displayNameKey": "extrusionPitch",
+                        "description": "Defines pitch for 3d extrusion",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Min Zoom",
+                        "displayNameKey": "minZoom",
+                        "description": "Minimum zoom level layer is visibile at.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Max Zoom",
+                        "displayNameKey": "maxZoom",
+                        "description": "Maximum zoom level layer is visibile at.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "maxLevel": {
+                        "displayName": "Number of levels",
+                        "displayNameKey": "nlevels",
+                        "description": "Number of different levels used for drilldown",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "selectedLevel": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "1",
+                                    "displayName": "Level 1",
+                                    "displayNameKey": "level1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Level 2",
+                                    "displayNameKey": "level2"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "Level 3",
+                                    "displayNameKey": "level3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "Level 4",
+                                    "displayNameKey": "level4"
+                                },
+                                {
+                                    "value": "5",
+                                    "displayName": "Level 5",
+                                    "displayNameKey": "level5"
+                                },
+                                {
+                                    "value": "6",
+                                    "displayName": "Level 6",
+                                    "displayNameKey": "level6"
+                                },
+                                {
+                                    "value": "7",
+                                    "displayName": "Level 7",
+                                    "displayNameKey": "level7"
+                                },
+                                {
+                                    "value": "8",
+                                    "displayName": "Level 8",
+                                    "displayNameKey": "level8"
+                                },
+                                {
+                                    "value": "9",
+                                    "displayName": "Level 9",
+                                    "displayNameKey": "level9"
+                                },
+                                {
+                                    "value": "10",
+                                    "displayName": "Level 10",
+                                    "displayNameKey": "level10"
+                                }
+                            ]
+                        },
+                        "displayName": "Level",
+                        "displayNameKey": "selectedLevel",
+                        "description": "Select a level to join."
+                    },
+                    "data1": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 1",
+                        "displayNameKey": "choroplethData1",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl1": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 1",
+                        "displayNameKey": "vectorTileUrl1",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer1": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 1",
+                        "displayNameKey": "sourceLayer1",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty1": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 1",
+                        "displayNameKey": "vectorProperty1",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data2": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 2",
+                        "displayNameKey": "choroplethData2",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl2": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 2",
+                        "displayNameKey": "vectorTileUrl2",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer2": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 2",
+                        "displayNameKey": "sourceLayer2",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty2": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 2",
+                        "displayNameKey": "vectorProperty2",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data3": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 3",
+                        "displayNameKey": "choroplethData3",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl3": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 3",
+                        "displayNameKey": "vectorTileUrl3",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer3": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 3",
+                        "displayNameKey": "sourceLayer3",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty3": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 3",
+                        "displayNameKey": "vectorProperty3",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data4": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 4",
+                        "displayNameKey": "choroplethData4",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl4": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 4",
+                        "displayNameKey": "vectorTileUrl4",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer4": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 4",
+                        "displayNameKey": "sourceLayer4",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty4": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 4",
+                        "displayNameKey": "vectorProperty4",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data5": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 5",
+                        "displayNameKey": "choroplethData5",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl5": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 5",
+                        "displayNameKey": "vectorTileUrl5",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer5": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 5",
+                        "displayNameKey": "sourceLayer5",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty5": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 5",
+                        "displayNameKey": "vectorProperty5",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data6": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 6",
+                        "displayNameKey": "choroplethData6",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl6": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 6",
+                        "displayNameKey": "vectorTileUrl6",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer6": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 6",
+                        "displayNameKey": "sourceLayer6",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty6": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 6",
+                        "displayNameKey": "vectorProperty6",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data7": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 7",
+                        "displayNameKey": "choroplethData7",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl7": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 7",
+                        "displayNameKey": "vectorTileUrl7",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer7": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 7",
+                        "displayNameKey": "sourceLayer7",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty7": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 7",
+                        "displayNameKey": "vectorProperty7",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data8": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 8",
+                        "displayNameKey": "choroplethData8",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl8": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 8",
+                        "displayNameKey": "vectorTileUrl8",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer8": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 8",
+                        "displayNameKey": "sourceLayer8",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty8": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 8",
+                        "displayNameKey": "vectorProperty8",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data9": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 9",
+                        "displayNameKey": "choroplethData9",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl9": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 9",
+                        "displayNameKey": "vectorTileUrl9",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer9": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 9",
+                        "displayNameKey": "sourceLayer9",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty9": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 9",
+                        "displayNameKey": "vectorProperty9",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "data10": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "mapbox://mapbox.pbi-countries-v1",
+                                    "displayName": "Global Countries",
+                                    "displayNameKey": "globalCountries"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-states-v1",
+                                    "displayName": "US States",
+                                    "displayNameKey": "usaStates"
+                                },
+                                {
+                                    "value": "mapbox://mapbox.pbi-us-postcodes-v1",
+                                    "displayName": "US Postcodes ZCTA",
+                                    "displayNameKey": "usaPostcodes5digit"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom Tileset",
+                                    "displayNameKey": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Data Level 10",
+                        "displayNameKey": "choroplethData10",
+                        "description": "Select a boundary tileset.  Select from Global Countries, USA States, and USA Postcodes; or create your own boundaries by uploading shapes to your Mapbox account.  See https://www.mapbox.com/help/studio-manual-uploads/ for a tutorial on how to upload your own boundaries.  Email help@mapbox.com to ask about access to global administrative and postal boundaries."
+                    },
+                    "vectorTileUrl10": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Tile Url Level 10",
+                        "displayNameKey": "vectorTileUrl10",
+                        "description": "The URL of the vector tileset. Example for US states: mapbox://mapbox.us_census_states_2015"
+                    },
+                    "sourceLayer10": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Source Layer Name Level 10",
+                        "displayNameKey": "sourceLayer10",
+                        "description": "The id of the vector layer to use for data join"
+                    },
+                    "vectorProperty10": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Vector Property Level 10",
+                        "displayNameKey": "vectorProperty10",
+                        "description": "The property name in the vector layer to use for data join"
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "displayNameKey": "opacity",
+                        "description": "The global opacity in percentage at which the layer will be drawn.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "outlineColor": {
+                        "displayName": "Outline Color",
+                        "displayNameKey": "outlineColor",
+                        "description": "The outline color of the filled areas.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "outlineWidth": {
+                        "displayName": "Outline Width",
+                        "displayNameKey": "outlineWidth",
+                        "description": "The width of the outline of the filled areas.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "outlineOpacity": {
+                        "displayName": "Outline Opacity",
+                        "displayNameKey": "outlineOpacity",
+                        "description": "The global opacity in percentage at which the outline will be drawn.",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "legend": {
+                        "displayName": "Legend",
+                        "displayNameKey": "legend",
+                        "description": "Enable legend",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "raster": {
+                "displayName": "Raster",
+                "displayNameKey": "raster",
+                "description": "Raster Tile layer settings from a WMS or ZXY tile url.",
+                "properties": {
+                    "show": {
+                        "displayName": "WMS",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "url": {
+                        "displayName": "URL",
+                        "displayNameKey": "url",
+                        "description": "The URL to load the raster tiles source from in WMS or ZXY format.  You must hide then show this layer for your raster source to see the changes from this field while developing  For an example WMS url compatible here, see https://docs.mapbox.com/mapbox-gl-js/example/wms/ - note that the `?bbox={bbox-epsg-3857}` URL parameter is required in a WMS URL.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rasterTileSize": {
+                        "displayName": "Raster Tile Size",
+                        "displayNameKey": "rasterTileSize",
+                        "description": "The tile size in pixels of your rasters (256 or 512).  You must hide then show this layer to show the changes from this field while developing.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "displayNameKey": "opacity",
+                        "description": "The global opacity in percentage at which the layer will be drawn.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minZoom": {
+                        "displayName": "Min Zoom",
+                        "displayNameKey": "minZoom",
+                        "description": "Minimum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxZoom": {
+                        "displayName": "Max Zoom",
+                        "displayNameKey": "maxZoom",
+                        "description": "Maximum zoom level layer is visibile at.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "colorSelector": {
+                "displayName": "Data Colors",
+                "properties": {
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

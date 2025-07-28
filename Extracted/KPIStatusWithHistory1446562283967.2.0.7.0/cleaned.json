@@ -1,0 +1,382 @@
+{
+    "visual": {
+        "name": "kPIIndicator",
+        "displayName": "KPI Indicator",
+        "guid": "KPIStatusWithHistory1446562283967",
+        "visualClassName": "Visual",
+        "version": "2.0.7",
+        "description": "This visualization is all about visualizing Key Performance Indicators. The status is presented as a color indication, comparing the actual and target values. Deviation is presented as distance in percent of actual from target. The history (trend) is presented as a line or a bar chart. It is up to the user to decide the granularity of the data displayed. Any dimension attributes can be used, but it\u2019s recommended to stick to the ones in your date dimension.",
+        "supportUrl": "http://www.fredrikhedenstrom.com",
+        "gitHubUrl": "https://github.com/fredrikheden/kpiindicator"
+    },
+    "apiVersion": "1.12.0",
+    "author": {
+        "name": "Fredrik Hedenstr\u00f6m",
+        "email": "fredrik.hedenstrom@outlook.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/jquery/dist/jquery.min.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/lodash/lodash.min.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "external/hashtable.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Actual value",
+                "name": "Values",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Target value",
+                "name": "Targets",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Trend axis",
+                "name": "Category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Trend actual value (if other than actual)",
+                "name": "ValuesTrendActual",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Trend target value (if other than target)",
+                "name": "ValuesTrendTarget",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Values": {
+                            "max": 1
+                        },
+                        "Category": {
+                            "max": 1
+                        },
+                        "Targets": {
+                            "max": 1
+                        },
+                        "ValuesTrendActual": {
+                            "max": 1
+                        },
+                        "ValuesTrendTarget": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "Category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {}
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "Series",
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "Values"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "Targets"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "ValuesTrendActual"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "ValuesTrendTarget"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {}
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "kpi": {
+                "displayName": "KPI General",
+                "properties": {
+                    "pKPIName": {
+                        "displayName": "KPI name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "pBandingPercentage": {
+                        "displayName": "Banding percentage",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pBandingType": {
+                        "displayName": "Banding type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "IIB",
+                                    "displayName": "Increasing is better"
+                                },
+                                {
+                                    "value": "DIB",
+                                    "displayName": "Decreasing is better"
+                                },
+                                {
+                                    "value": "CIB",
+                                    "displayName": "Closer is better"
+                                }
+                            ]
+                        }
+                    },
+                    "pBandingCompareType": {
+                        "displayName": "Banding comparison",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ABS",
+                                    "displayName": "Absolute"
+                                },
+                                {
+                                    "value": "REL",
+                                    "displayName": "Relative"
+                                }
+                            ]
+                        }
+                    },
+                    "pIndicateDifferenceAsPercent": {
+                        "displayName": "Deviation as %",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pChartType": {
+                        "displayName": "Chart type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "LINE",
+                                    "displayName": "Line"
+                                },
+                                {
+                                    "value": "LINENOMARKER",
+                                    "displayName": "Line no marker"
+                                },
+                                {
+                                    "value": "BAR",
+                                    "displayName": "Bar"
+                                }
+                            ]
+                        }
+                    },
+                    "pForceThousandSeparator": {
+                        "displayName": "Thousands separator",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pFixedTarget": {
+                        "displayName": "Static target",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pDisplayDeviation": {
+                        "displayName": "Display deviation",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pConstantActual": {
+                        "displayName": "Actual heading tooltip",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "pConstantTarget": {
+                        "displayName": "Target heading tooltip",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "pCustomFormat": {
+                        "displayName": "Custom format (e.g. >0.00 %;-0.00 %< or >#,##0;-#,##0<)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "pAggregationType": {
+                        "displayName": "Aggregation type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "LAST",
+                                    "displayName": "Last value"
+                                },
+                                {
+                                    "value": "AVERAGE",
+                                    "displayName": "Average"
+                                },
+                                {
+                                    "value": "SUM",
+                                    "displayName": "Sum"
+                                }
+                            ]
+                        }
+                    },
+                    "pMinimumDataPointsForTrendToBeShown": {
+                        "displayName": "Minimum data points for trend to be shown",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "kpiFonts": {
+                "displayName": "KPI Font Size",
+                "properties": {
+                    "show": {
+                        "displayName": "KPI Custom Font Size",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pKPIFontSizeHeading": {
+                        "displayName": "Heading",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pKPIFontSizeActual": {
+                        "displayName": "Actual",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pKPIFontSizeDeviation": {
+                        "displayName": "Deviation",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "kpiColors": {
+                "displayName": "KPI Colors",
+                "properties": {
+                    "pKPIColorGood": {
+                        "displayName": "Good",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pKPIColorNeutral": {
+                        "displayName": "Neutral",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pKPIColorBad": {
+                        "displayName": "Bad",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pKPIColorNone": {
+                        "displayName": "None",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pKPIColorText": {
+                        "displayName": "Text",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pKPIColorTrend": {
+                        "displayName": "Trend",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "stringResources": {}
+}

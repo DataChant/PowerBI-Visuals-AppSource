@@ -1,0 +1,254 @@
+{
+    "visual": {
+        "name": "FunnelWithSourceByMAQSoftware",
+        "displayName": "Funnel with Source by MAQ Software",
+        "guid": "funnelwithsource1823AB39DB234AB522063E728AD51",
+        "visualClassName": "Visual",
+        "version": "4.0.0",
+        "description": "Displays stage-wise metrics and the source (entry point) of any data point",
+        "supportUrl": "https://bit.ly/maqsoftware-support",
+        "gitHubUrl": "https://github.com/MAQ-Software-Solutions/FunnelWithSource"
+    },
+    "author": {
+        "name": "MAQ Software",
+        "email": "support@maqsoftware.com"
+    },
+    "apiVersion": "3.5.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "category",
+                "kind": "Grouping",
+                "displayName": "Category",
+                "description": "Data field value to plot bowtie (Source) portion"
+            },
+            {
+                "name": "subCategory",
+                "kind": "Grouping",
+                "displayName": "Sub category",
+                "description": "Data field value to plot funnel portion"
+            },
+            {
+                "name": "primaryMeasure",
+                "kind": "Measure",
+                "displayName": "Primary measure",
+                "description": "Primary measure value of funnel stage",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "secondaryMeasure",
+                "kind": "Measure",
+                "displayName": "Secondary measure",
+                "description": "Secondary measure value of funnel stage",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "subCategory": {
+                            "max": 1
+                        },
+                        "primaryMeasure": {
+                            "max": 1
+                        },
+                        "secondaryMeasure": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "subCategory",
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "primaryMeasure"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "secondaryMeasure"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 30000
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "suppressDefaultTitle": true,
+        "objects": {
+            "dataPoint": {
+                "displayName": "Data colors",
+                "description": "Display data color options",
+                "properties": {
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "displayName": "Primary data labels",
+                "description": "Option to update primary label settings",
+                "properties": {
+                    "fontColor": {
+                        "displayName": "Font color",
+                        "description": "Option to update font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display units",
+                        "description": "Select the units (millions, billions, etc).",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "secondaryLabels": {
+                "displayName": "Secondary data labels",
+                "description": "Option to update secondary label settings",
+                "properties": {
+                    "fontColor": {
+                        "displayName": "Font color",
+                        "description": "Option to update font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelDisplayUnits": {
+                        "displayName": "Display units",
+                        "description": "Select the units (millions, billions, etc).",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "labelPrecision": {
+                        "displayName": "Decimal places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "gradientColors": {
+                "displayName": "Gradient colors",
+                "description": "Option to select minimum and maximum gradient colors",
+                "properties": {
+                    "minColor": {
+                        "displayName": "Minimum",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "displayName": "Maximum",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "connector": {
+                "displayName": "Connector settings",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Connector color",
+                        "description": "Option to update connector color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

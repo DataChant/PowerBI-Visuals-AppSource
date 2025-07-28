@@ -1,0 +1,265 @@
+{
+    "visual": {
+        "name": "hexbinScatterplot",
+        "displayName": "Hexbin Scatterplot",
+        "guid": "hexbinScatter70A7F14565444FAA99F786FAD6EA5AE1",
+        "visualClassName": "Visual",
+        "version": "1.1.0.1",
+        "description": "Scatterplot with hexbins",
+        "supportUrl": "https://deldersveld.github.io/powerbi/support/hexbin-scatterplot",
+        "gitHubUrl": "https://github.com/deldersveld/pbiHexbinScatterplot/"
+    },
+    "apiVersion": "1.7.0",
+    "author": {
+        "name": "David Eldersveld",
+        "email": "david@dataveld.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
+        "node_modules/globalize/lib/globalize.js",
+        "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
+        "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
+        "node_modules/powerbi-visuals-utils-chartutils/lib/index.js",
+        "node_modules/d3/d3.min.js",
+        "node_modules/d3-hexbin/build/d3-hexbin.min.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Details",
+                "name": "category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "X Axis",
+                "name": "xAxis",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Y Axis",
+                "name": "yAxis",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Point Saturation",
+                "name": "measure",
+                "kind": "Measure"
+            }
+        ],
+        "objects": {
+            "dataPoint": {
+                "displayName": "Hexbin scatterplot options",
+                "properties": {
+                    "binColor": {
+                        "displayName": "Bin color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "binRadius": {
+                        "displayName": "Bin radius",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "10",
+                                    "displayName": "50"
+                                },
+                                {
+                                    "value": "20",
+                                    "displayName": "40"
+                                },
+                                {
+                                    "value": "30",
+                                    "displayName": "30"
+                                },
+                                {
+                                    "value": "40",
+                                    "displayName": "20"
+                                },
+                                {
+                                    "value": "50",
+                                    "displayName": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "showHexbins": {
+                        "displayName": "Show bins",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showHexbinLabels": {
+                        "displayName": "Show bin stats on hover",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "binOutline": {
+                        "displayName": "Bin outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dotColor": {
+                        "displayName": "Point color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dotSize": {
+                        "displayName": "Point size",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "2",
+                                    "displayName": "2"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "4"
+                                },
+                                {
+                                    "value": "5",
+                                    "displayName": "5"
+                                }
+                            ]
+                        }
+                    },
+                    "showDots": {
+                        "displayName": "Show points",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fillRule": {
+                        "displayName": "Color saturation",
+                        "type": {
+                            "fill": {}
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "axes": {
+                "displayName": "Axes options",
+                "properties": {
+                    "showXAxis": {
+                        "displayName": "Show X axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showXTitle": {
+                        "displayName": "X title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showYAxis": {
+                        "displayName": "Show Y axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showYTitle": {
+                        "displayName": "Y title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "originZeroZero": {
+                        "displayName": "Origin at (0,0)",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "xAxis": {
+                            "max": 1
+                        },
+                        "yAxis": {
+                            "max": 1
+                        },
+                        "measure": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "xAxis"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "yAxis"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "stringResources": {}
+}

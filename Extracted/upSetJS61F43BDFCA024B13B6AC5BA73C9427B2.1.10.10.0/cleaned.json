@@ -1,0 +1,591 @@
+{
+    "visual": {
+        "name": "@upsetjs/powerbi_visuals",
+        "displayName": "Ultimate UpSet Plot",
+        "guid": "upSetJS61F43BDFCA024B13B6AC5BA73C9427B2",
+        "visualClassName": "Visual",
+        "version": "1.10.10",
+        "description": "UpSet plots are a scalable alternative to venn diagrams for showing set intersections for more than three sets",
+        "supportUrl": "https://www.sgratzl.com",
+        "gitHubUrl": "https://github.com/upsetjs/upsetjs_powerbi_visuals"
+    },
+    "author": {
+        "name": "Samuel Gratzl",
+        "email": "sam@sgratzl.com"
+    },
+    "apiVersion": "4.0.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "elements",
+                "displayName": "Elements",
+                "description": "exactly one grouping representing the list of elements that are synced",
+                "kind": "Grouping",
+                "preferredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "sets",
+                "displayName": "Sets",
+                "description": "one or more grouping or measures where each is interpreted as a set, a trueish value in row i is interpreted that the corresponding element i is part of this set",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "bool": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "attributes",
+                "displayName": "Attributes",
+                "description": "zero or more numerical/text measures which are used to render boxplots or mosaic plots",
+                "kind": "Measure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    },
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "name": "counts",
+                "displayName": "Cardinality Expression Measure",
+                "description": "numerical measure defining the number of elements in the set, see also expression input",
+                "kind": "Measure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "elements": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "counts": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "elements"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 10000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "sets"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "attributes"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "counts"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "suppressDefaultTitle": true,
+        "objects": {
+            "license": {
+                "displayName": "License",
+                "objectCategory": 1,
+                "properties": {
+                    "code": {
+                        "displayName": "Code",
+                        "description": "license Code",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "info": {
+                        "displayName": "Info",
+                        "description": "will print whether the license could be verified",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "contact": {
+                        "displayName": "Contact",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "sets": {
+                "displayName": "Sets",
+                "objectCategory": 2,
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayName": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "order": {
+                        "displayName": "Order Sets By",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit Order"
+                                },
+                                {
+                                    "value": "name",
+                                    "displayName": "Name"
+                                },
+                                {
+                                    "value": "cardinality",
+                                    "displayName": "Cardinality"
+                                },
+                                {
+                                    "value": "cardinality:desc",
+                                    "displayName": "Cardinality (decreasing)"
+                                }
+                            ]
+                        }
+                    },
+                    "limit": {
+                        "displayName": "Limit to Top N Sets",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "combinations": {
+                "displayName": "Set Combinations",
+                "objectCategory": 2,
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayName": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "mode": {
+                        "displayName": "Generation Mode",
+                        "description": "specify the set combination generation mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Set Intersections",
+                                    "value": "intersection"
+                                },
+                                {
+                                    "displayName": "Set Unions",
+                                    "value": "union"
+                                },
+                                {
+                                    "displayName": "Distinct Set Intersections",
+                                    "value": "distinctIntersection"
+                                }
+                            ]
+                        }
+                    },
+                    "min": {
+                        "displayName": "Minimum Degree",
+                        "description": "minimum number of sets in a set combination",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "max": {
+                        "displayName": "Maximum Degree",
+                        "description": "maximum number of sets in a set combination",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "empty": {
+                        "displayName": "Show Empty Combinations",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "limit": {
+                        "displayName": "Limit to Top N Combinations",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "order": {
+                        "displayName": "Order Combinations By",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "name",
+                                    "displayName": "1. Name"
+                                },
+                                {
+                                    "value": "cardinality,name",
+                                    "displayName": "1. Cardinality 2. Name"
+                                },
+                                {
+                                    "value": "cardinality,degree,name",
+                                    "displayName": "1. Cardinality 2. Degree 3. Name"
+                                },
+                                {
+                                    "value": "degree,name",
+                                    "displayName": "1. Degree 2. Name"
+                                },
+                                {
+                                    "value": "degree,cardinality,name",
+                                    "displayName": "1. Degree 2. Cardinality 3. Name"
+                                },
+                                {
+                                    "value": "group,name",
+                                    "displayName": "1. Set Group 2. Name"
+                                },
+                                {
+                                    "value": "group,cardinality,name",
+                                    "displayName": "1. Set Group 2. Cardinality 3. Name"
+                                },
+                                {
+                                    "value": "group,degree,name",
+                                    "displayName": "1. Set Group 2. Degree 3. Name"
+                                },
+                                {
+                                    "value": "group,degree,cardinality,name",
+                                    "displayName": "1. Set Group 2. Degree 3. Cardinality 4. Name"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "theme": {
+                "displayName": "Theme",
+                "objectCategory": 1,
+                "properties": {
+                    "theme": {
+                        "displayName": "Theme",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Light",
+                                    "value": "light"
+                                },
+                                {
+                                    "displayName": "Individual Colors",
+                                    "value": "powerbi"
+                                },
+                                {
+                                    "displayName": "Colored Sets",
+                                    "value": "powerbi-set"
+                                },
+                                {
+                                    "displayName": "Single Color",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Dark",
+                                    "value": "dark"
+                                },
+                                {
+                                    "displayName": "Vega",
+                                    "value": "vega"
+                                }
+                            ]
+                        }
+                    },
+                    "selectionColor": {
+                        "displayName": "Selection Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "hasSelectionColor": {
+                        "displayName": "Color when selection is present",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hasSelectionOpacity": {
+                        "displayName": "Opacity when selection is present",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hoverHintColor": {
+                        "displayName": "Hover Hint Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "notMemberColor": {
+                        "displayName": "Not Member Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "alternatingBackgroundColor": {
+                        "displayName": "Alternating Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "setColors": {
+                "displayName": "Set Colors",
+                "objectCategory": 1,
+                "properties": {
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "attributeColors": {
+                "displayName": "Attribute Colors",
+                "objectCategory": 1,
+                "description": "customize the colors of categorical attributes",
+                "properties": {
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "style": {
+                "displayName": "Style",
+                "properties": {
+                    "numericScale": {
+                        "displayName": "Scale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Linear Scale",
+                                    "value": "linear"
+                                },
+                                {
+                                    "displayName": "Log Scale",
+                                    "value": "log"
+                                }
+                            ]
+                        }
+                    },
+                    "setName": {
+                        "displayName": "Set Axis Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "setLabelAlignment": {
+                        "displayName": "Set Label Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "combinationName": {
+                        "displayName": "Combination Axis Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "setNameAxisOffset": {
+                        "displayName": "Set Axis Offset",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "combinationNameAxisOffset": {
+                        "displayName": "Combination Axis Offset",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "setMaxScale": {
+                        "displayName": "Set Scale Maximum",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "combinationScaleMax": {
+                        "displayName": "Combination Scale Maximum",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "fonts": {
+                "displayName": "Fonts",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "chartLabel": {
+                        "displayName": "Chart Label",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "setLabel": {
+                        "displayName": "Set Label",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "barLabel": {
+                        "displayName": "Bar Label",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "tooltips": {
+            "supportEnhancedTooltips": true,
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        }
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

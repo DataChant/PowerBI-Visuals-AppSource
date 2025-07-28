@@ -1,0 +1,390 @@
+{
+    "visual": {
+        "name": "ClusteringUsingOPTICSByMAQSoftware",
+        "displayName": "Clustering using OPTICS by MAQ Software",
+        "guid": "ClusteringUsingOPTICSCAD9384DAA1042E78771F55A0BD811D8",
+        "visualClassName": "ClusteringUsingOPTICS",
+        "version": "3.0.5",
+        "description": "OPTICS based clustering algorithm to analyze groups and hierarchies within a group.\u200b",
+        "supportUrl": "https://github.com/maqsoftware/PowerBI-visuals/issues",
+        "gitHubUrl": "https://github.com/maqsoftware/PowerBI-visuals/"
+    },
+    "apiVersion": "2.1.0",
+    "author": {
+        "name": "MAQ Software",
+        "email": "support@maqsoftware.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [
+        "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js"
+    ],
+    "style": "style/visual.less",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "X values",
+                "kind": "GroupingOrMeasure",
+                "name": "Value1"
+            },
+            {
+                "displayName": "Y values",
+                "kind": "GroupingOrMeasure",
+                "name": "Value2"
+            },
+            {
+                "displayName": "Tooltip",
+                "kind": "GroupingOrMeasure",
+                "name": "Tooltip"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Value1": {
+                            "max": 6
+                        },
+                        "Value2": {
+                            "max": 6
+                        },
+                        "Tooltip": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "Value1"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Value2"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Tooltip"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {
+                                        "count": 10000
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "# Copyright (c) MAQ Software.  All rights reserved.\n\n# Third Party Programs. This software enables you to obtain software applications from other sources.\n# Those applications are offered and distributed by third parties under their own license terms.\n# MAQ Software is not developing, distributing or licensing those applications to you, but instead,\n# as a convenience, enables you to use this software to obtain those applications directly from\n# the application providers.\n# By using the software, you acknowledge and agree that you are obtaining the applications directly\n# from the third party providers and under separate license terms, and that it is your responsibility to locate,\n# understand and comply with those license terms.\n# Microsoft grants you no license rights for third-party software or applications that is obtained using this software.\n\n#\n# WARNINGS:\n#\n# CREATION DATE: 06/12/2017\n#\n# LAST UPDATE: --/--/---\n#\n# VERSION: 3.0.0\n#\n# R VERSION TESTED: 3.4.2\n#\n# AUTHOR: MAQ Software\n\n############### Utility functions ###############\nlibraryRequireInstall = function(packageName, ...)\n{\n  if(!require(packageName, character.only = TRUE)) \n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\n}\n\nlibraryRequireInstall(\"XML\")\nlibraryRequireInstall(\"htmlwidgets\")\n\ninternalSaveWidget <- function(widget, fname)\n{\n  tempFname = paste(fname, \".tmp\", sep=\"\")\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\n  FlattenHTML(tempFname, fname)\n}\n\nFlattenHTML <- function(fnameIn, fnameOut)\n{\n  # Read and parse HTML file\n  # Embed all js and css files into one unified file\n  \n  if(!file.exists(fnameIn))\n    return(FALSE)\n  \n  dir = dirname(fnameIn)\n  html = htmlTreeParse(fnameIn, useInternal = TRUE)\n  top = xmlRoot(html)\n  \n  # extract all <script> tags with src value\n  srcNode=getNodeSet(top, '//script[@src]')\n  for (node in srcNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['src'])\n    alternateSrc = FindSrcReplacement(fname)\n    if (!is.null(alternateSrc))\n    {\n      s = alternateSrc\n      names(s) = 'src'\n      newNode = xmlNode(\"script\",attrs = s)\n      replaceNodes(node, newNode)\n    }else{\n      str=ReadFileForEmbedding(fname);\n      if (!is.null(str))\n      {      \n        newNode = xmlNode(\"script\", str, attrs = c(type = \"text/javascript\"))\n        replaceNodes(node, newNode)\n      }\n    }\n  }\n  \n  # extract all <link> tags with src value\n  linkNode=getNodeSet(top, '//link[@href]')\n  for (node in linkNode)\n  {\n    b = xmlAttrs(node)\n    fname = file.path(dir, b['href'])\n    str = ReadFileForEmbedding(fname, FALSE);\n    if (!is.null(str))\n    {\n      newNode = xmlNode(\"style\", str)\n      replaceNodes(node, newNode)\n    }\n  }\n  \n  saveXML(html, file = fnameOut)\n  return(TRUE)\n}\n\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\n{\n  data = ReadFullFile(fname)\n  if (is.null(data))\n    return(NULL)\n\n  str = paste(data, collapse ='\\n')\n  if (addCdata) {\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\n  }\n  return(str)\n}\n\nReadFullFile <- function(fname)\n{\n  if(!file.exists(fname))\n    return(NULL)\n  \n  con = file(fname, open = \"r\")\n  data = readLines(con)\n  close(con)\n  return(data)\n}\n\nFindSrcReplacement <- function(str)\n{\n  # finds reference to 'plotly' js and replaces with a version from CDN\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\n  str <- iconv(str, to=\"UTF-8\")\n  pattern = \"plotlyjs-(\\\\w.+)/plotly-latest.min.js\"\n  match1=regexpr(pattern, str)\n  attr(match1, 'useBytes') <- FALSE\n  strMatch=regmatches(str, match1, invert = FALSE)\n  if (length(strMatch) == 0) return(NULL)\n  \n  pattern2 = \"-(\\\\d.+)/\"\n  match2 = regexpr(pattern2, strMatch[1])\n  attr(match2, 'useBytes') <- FALSE\n  strmatch = regmatches(strMatch[1], match2)\n  if (length(strmatch) == 0) return(NULL)\n  \n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\n  # This matches the specific version used in the plotly package used.\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\n  return(str)\n}\n#################################################\n\n# graphics libraries\nlibraryRequireInstall(\"ggplot2\")\n\nlibraryRequireInstall(\"plotly\")\n\n#clustering libraries\nlibraryRequireInstall(\"dbscan\")\n\n\n############################################\n\n#optics clustering\nversion <- packageVersion(\"dbscan\")\n\n#Remove screenshot feature\ndisabledButtonsList <- list('toImage', 'sendDataToCloud')\nautoSteepnessValue <- c(0.005, 0.05, 0.1, 0.2, 0.5, 0.8, 0.9)\n\nReadFullFileReplaceString <- function(fnameIn, fnameOut, sourceString,targetString)\n{\n  if(!file.exists(fnameIn))\n    return(NULL)\n \n  tx  <- readLines(fnameIn)\n  tx2  <- gsub(pattern = sourceString, replace = targetString, x = tx)\n  writeLines(tx2, con = fnameOut)\n}\n\ngenerateError <- function (errorMsg)\n{\n  xAesthetics <- list(\n    title = sprintf(\n      \"Could not get any cluster assigned as per the values and parameters.\"\n    ),\n    zeroline = FALSE,\n    showline = FALSE,\n    showticklabels = FALSE,\n    showgrid = FALSE\n  )\n  yAesthetics <- list(\n    title = \"\",\n    zeroline = FALSE,\n    showline = FALSE,\n    showticklabels = FALSE,\n    showgrid = FALSE\n  )\n  p <- plot_ly() %>%\n    layout(title = '',\n           xaxis = xAesthetics,\n           yaxis = yAesthetics)\n  \n  p$x$config$modeBarButtonsToRemove = disabledButtonsList\n  internalSaveWidget(p, 'out.html')\n  ReadFullFileReplaceString('out.html', 'out.html', ',\"padding\":40,', ',\"padding\":0,')\n  \n  quit()\n}\n\ntryCatch({\n  ##################################################\n  xdataFrame <- data.frame(Value1)\n  ydataFrame <- data.frame(Value2)\n  ##################################################\n  nColumnsY <- NCOL(ydataFrame)\n  nColumnsX <- NCOL(xdataFrame)\n  nRowsY <- NROW(ydataFrame)\n  nRowsX <- NROW(xdataFrame)\n  \n  ynumericCheck <- sapply(ydataFrame, is.numeric)\n  xnumericCheck <- sapply(xdataFrame, is.numeric)\n\n  parameterSettings <- 'Auto'\n  if (exists(\"clusterSettings_parameterSettings\") )\n  {\n    parameterSettings <- clusterSettings_parameterSettings\n  }\n\n  epsilon <- 1\n  if (exists(\"clusterSettings_epsilon\") &&\n      clusterSettings_epsilon >= 1)\n  {\n    epsilon <- clusterSettings_epsilon\n  }\n\n  minptsClust <- 10\n  if (exists(\"clusterSettings_minptsClust\") &&\n      clusterSettings_minptsClust > 1)\n  {\n    minptsClust <- clusterSettings_minptsClust\n  }\n\n  steepThres<-0.005\n  if (exists(\"clusterSettings_steepThres\") &&\n      clusterSettings_steepThres > 0 && clusterSettings_steepThres < 1)\n  {\n    steepThres <- clusterSettings_steepThres\n  }\n  \n  steepThres <- as.numeric(steepThres)\n  ####################################################\n  plotColor <- \"#FFFFFF\"\n  if (exists(\"plotSettings_plotColor\"))\n  {\n    plotColor <- plotSettings_plotColor\n  }\n  ###############################\n  ### x axis settings######\n  \n  xTitle <- names(xdataFrame)[1]\n  if (exists(\"xaxisSettings_xTitle\") && xaxisSettings_xTitle != '')\n  {\n    xTitle <- xaxisSettings_xTitle\n  }\n  \n  if (nColumnsX > 1) {\n    xTitle <- paste(xTitle, \"(PCA 1)\", sep = \" \")\n  }\n  \n  xZeroline <- TRUE\n  if (exists(\"xaxisSettings_xZeroline\"))\n  {\n    xZeroline <- xaxisSettings_xZeroline\n  }\n  \n  xLabels <- TRUE\n  if (exists(\"xaxisSettings_xLabels\"))\n  {\n    xLabels <- xaxisSettings_xLabels\n  }\n  \n  xGrid <- TRUE\n  if (exists(\"xaxisSettings_xGrid\"))\n  {\n    xGrid <- xaxisSettings_xGrid\n  }\n  \n  xGridCol <- \"#BFC4C5\"\n  if (exists(\"xaxisSettings_xGridCol\"))\n  {\n    xGridCol <- xaxisSettings_xGridCol\n  }\n  \n  xGridWidth <- 0.1\n  if (exists(\"xaxisSettings_xGridWidth\") &&\n      xaxisSettings_xGridWidth <= 5 && xaxisSettings_xGridWidth >= 0.1)\n  {\n    xGridWidth <- xaxisSettings_xGridWidth\n  }\n  \n  xAxisBaseLine <- TRUE\n  if (exists(\"xaxisSettings_xAxisBaseLine\"))\n  {\n    xAxisBaseLine <- xaxisSettings_xAxisBaseLine\n  }\n  \n  xAxisBaseLineCol <- \"#000000\"\n  if (exists(\"xaxisSettings_xAxisBaseLineCol\"))\n  {\n    xAxisBaseLineCol <- xaxisSettings_xAxisBaseLineCol\n  }\n  \n  xAxisBaseLineWidth <- 4\n  if (exists(\"xaxisSettings_xAxisBaseLineWidth\") &&\n      xaxisSettings_xAxisBaseLineWidth <= 11 &&\n      xaxisSettings_xAxisBaseLineWidth >= 1)\n  {\n    xAxisBaseLineWidth <- xaxisSettings_xAxisBaseLineWidth\n  }\n  \n  ##############################\n  ####y axis settings ########\n  \n  yTitle <- names(ydataFrame)[1]\n  if (exists(\"yaxisSettings_yTitle\") && yaxisSettings_yTitle != '')\n  {\n    yTitle <- yaxisSettings_yTitle\n  }\n  if (nColumnsY > 1) {\n    yTitle <- paste(yTitle, \"(PCA 1)\", sep = \" \")\n  }\n  \n  yZeroline <- TRUE\n  if (exists(\"yaxisSettings_yZeroline\"))\n  {\n    yZeroline <- yaxisSettings_yZeroline\n  }\n  \n  yLabels <- TRUE\n  if (exists(\"yaxisSettings_yLabels\"))\n  {\n    yLabels <- yaxisSettings_yLabels\n  }\n  \n  yGrid <- TRUE\n  if (exists(\"yaxisSettings_yGrid\"))\n  {\n    yGrid <- yaxisSettings_yGrid\n  }\n  \n  yGridCol <- \"#BFC4C5\"\n  if (exists(\"yaxisSettings_yGridCol\"))\n  {\n    yGridCol <- yaxisSettings_yGridCol\n  }\n  \n  yGridWidth <- 0.1\n  if (exists(\"yaxisSettings_yGridWidth\") &&\n      yaxisSettings_yGridWidth <= 5 && yaxisSettings_yGridWidth >= 0.1)\n  {\n    yGridWidth <- yaxisSettings_yGridWidth\n  }\n  \n  yAxisBaseLine <- TRUE\n  if (exists(\"yaxisSettings_yAxisBaseLine\"))\n  {\n    yAxisBaseLine <- yaxisSettings_yAxisBaseLine\n  }\n  \n  yAxisBaseLineCol <- \"#000000\"\n  if (exists(\"yaxisSettings_yAxisBaseLineCol\"))\n  {\n    yAxisBaseLineCol <- yaxisSettings_yAxisBaseLineCol\n  }\n  \n  yAxisBaseLineWidth <- 4\n  if (exists(\"yaxisSettings_yAxisBaseLineWidth\") &&\n      yaxisSettings_yAxisBaseLineWidth <= 11 &&\n      yaxisSettings_yAxisBaseLineWidth >= 1)\n  {\n    yAxisBaseLineWidth <- yaxisSettings_yAxisBaseLineWidth\n  }\n  ############################################################\n  ############################################################\n  ###################plot setting lists#############\n  \n  xAesthetics <- list(\n    title = xTitle,\n    zeroline = xZeroline,\n    showticklabels = xLabels,\n    showgrid = xGrid,\n    gridcolor = toRGB(xGridCol),\n    gridwidth = xGridWidth,\n    showline = xAxisBaseLine,\n    linecolor = toRGB(xAxisBaseLineCol),\n    linewidth = xAxisBaseLineWidth\n  )\n  yAesthetics <- list(\n    title = yTitle,\n    zeroline = yZeroline,\n    showticklabels = yLabels,\n    showgrid = yGrid,\n    gridcolor = toRGB(yGridCol),\n    gridwidth = yGridWidth,\n    showline = yAxisBaseLine,\n    linecolor = toRGB(yAxisBaseLineCol),\n    linewidth = yAxisBaseLineWidth\n  )\n  \n  \n  ############################################################\n  ############################################################\n  ############################################################\n  ###################methods to handle missing values and tooltips#########\n  \n  getmode <- function(v) {\n    uniqv <- unique(v)\n    uniqv[which.max(tabulate(match(v, uniqv)))]\n  }\n  \n  getTooltips <- function() {\n    xInfo1 <- Value1[1]\n    yInfo1 <- Value2[1]\n    colnames(xInfo1) <- c(\"X\")\n    colnames(yInfo1) <- c(\"Y\")\n    xInfo1 <- data.frame(xInfo1)\n    yInfo1 <- data.frame(yInfo1)\n    if (exists(\"Tooltip\"))\n    {\n      tooltip1 <- Tooltip\n      x <- cbind(\n        x = finalXvector,\n        y = finalYvector,\n        tooltip = tooltip1,\n        xInfo = xInfo1,\n        yInfo = yInfo1\n      )\n    }\n    else{\n      x <- cbind(\n        x = finalXvector,\n        y = finalYvector,\n        xInfo = xInfo1,\n        yInfo = yInfo1\n      )\n    }\n    \n    return (x)\n  }\n  \n  dataScaling <- function (dataFrame)\n  {\n    nMin <- -3\n    nMax <- 3\n    min <- min(dataFrame)\n    max <- max(dataFrame)\n    nX = nMin + (nMax - nMin) * (dataFrame - min) / (max - min)\n    return(nX)\n  }\n  \n  ###############################################################\n  #handle missing values and generalize different formats of data\n  \n  for (iCounter in 1:nColumnsY)\n  {\n    if (ynumericCheck[iCounter] == FALSE)\n    {\n      modeValue <- getmode(ydataFrame[, iCounter])\n      for (jCounter in 1:nRowsY)\n      {\n        if (is.na(ydataFrame[jCounter, iCounter]))\n        {\n          ydataFrame[jCounter, iCounter] <- modeValue\n        }\n      }\n      uniqueLevels <- levels(ydataFrame[, iCounter])\n      levels(ydataFrame[, iCounter]) <- 1:NROW(uniqueLevels)\n      ydataFrame[, iCounter] <-\n        as.numeric(as.character(ydataFrame[, iCounter]))\n    }\n    \n    if (ynumericCheck[iCounter] == TRUE)\n    {\n      meanValue <- mean(ydataFrame[, iCounter], trim = 0 , na.rm = TRUE)\n      for (jCounter in 1:nRowsY)\n      {\n        if (is.na(ydataFrame[jCounter, iCounter]))\n        {\n          ydataFrame[jCounter, iCounter] <- meanValue\n        }\n      }\n    }\n  }\n  \n  \n  for (iCounter in 1:nColumnsX)\n  {\n    if (xnumericCheck[iCounter] == FALSE)\n    {\n      xModeValue <- getmode(xdataFrame[, iCounter])\n      for (jCounter in 1:nRowsX)\n      {\n        if (is.na(xdataFrame[jCounter, iCounter]))\n        {\n          xdataFrame[jCounter, iCounter] <- xModeValue\n        }\n      }\n      uniqueLevels <- levels(xdataFrame[, iCounter])\n      levels(xdataFrame[, iCounter]) <- 1:NROW(uniqueLevels)\n      xdataFrame[, iCounter] <-\n        as.numeric(as.character(xdataFrame[, iCounter]))\n    }\n    \n    if (xnumericCheck[iCounter] == TRUE)\n    {\n      xMeanValue <- mean(xdataFrame[, iCounter], trim = 0 , na.rm = TRUE)\n      for (jCounter in 1:nRowsX)\n      {\n        if (is.na(xdataFrame[jCounter, iCounter]))\n        {\n          xdataFrame[jCounter, iCounter] <- xMeanValue\n        }\n      }\n    }\n  }\n  \n  ############################################################\n  ############################################################\n  ############################################################\n  ###################data Scaling#############################\n  \n  maxYData <- max(ydataFrame)\n  maxXData <- max(xdataFrame)\n  maxXYData <- max(c(maxYData, maxXData))\n  \n  if (exists(\"clusterSettings_scaling\") &&\n      clusterSettings_scaling) {\n    scaledYdata <- ydataFrame\n    \n    scaledXdata <- xdataFrame\n    \n    for (iCounter in 1:nColumnsY) {\n      tempF <- dataScaling(scaledYdata[, iCounter])\n      scaledYdata[, iCounter] <- tempF\n    }\n    for (iCounter in 1:nColumnsX) {\n      tempF <- dataScaling(scaledXdata[, iCounter])\n      scaledXdata[, iCounter] <- tempF\n    }\n  } else {\n    epsilon <- epsilon * ((maxXYData * 5) / 100)\n    scaledYdata <- ydataFrame\n    scaledXdata <- xdataFrame\n  }\n  \n  scaledYdata <- data.frame(scaledYdata)\n  scaledXdata <- data.frame(scaledXdata)\n  \n  ############################################################\n  ############################################################\n  ############################################################\n  ###PCA for dimensions both axis in case dimensions are >2###\n  \n  if (NCOL(scaledYdata) > 1)\n  {\n    yVectorPCA <- prcomp(t(scaledYdata))\n    yVectorPCA <- yVectorPCA$rotation\n    yVectorPCA <- data.frame(yVectorPCA)\n    yVectorPCA <- yVectorPCA[1]\n  }\n  if (NCOL(scaledXdata) > 1)\n  {\n    xVectorPCA <- prcomp(t(scaledXdata))\n    xVectorPCA <- xVectorPCA$rotation\n    xVectorPCA <- data.frame(xVectorPCA)\n    xVectorPCA <- xVectorPCA[1]\n  }\n  \n  ############################################################\n  ############################################################\n  ############################################################\n  #################data binding###############################\n  if (NCOL(scaledYdata) > 1)\n  {\n    finalYvector <- yVectorPCA\n  }\n  if (NCOL(scaledXdata) > 1)\n  {\n    finalXvector <- xVectorPCA\n  }\n  if (NCOL(scaledYdata) == 1)\n  {\n    finalYvector <- scaledYdata\n  }\n  if (NCOL(scaledXdata) == 1)\n  {\n    finalXvector <- scaledXdata\n  }\n  \n  colnames(finalYvector) <- c(\"y\")\n  colnames(finalXvector) <- c(\"x\")\n  \n  #Data binding\n  x <- cbind(x = finalXvector,\n             y = finalYvector)\n  \n  ############################################################\n  ############################################################\n  ############################################################\n  #########clustering and plotting implementations############\n  \n  # generating color palette for clusters by using Power BI Colors\n  colPalette <-\n    c(\n      \"#DFBFDF\",\n      \"#3599B8\",\n      \"#A66999\",\n      \"#FE9666\",\n      \"#8AD4EB\",\n      \"#F2C80F\",\n      \"#FD625E\",\n      \"#01B8AA\"\n    )\n  \n  getOpticsXi_new <- function (x, epsilon) {\n    points = nrow(x)\n    while (epsilon < maxXYData) {\n      for (value in autoSteepnessValue) {\n        while (points > 1) {\n          isPassed <- TRUE\n          if (isPassed) {\n            tryCatch({\n              res <- optics(x, eps = epsilon, minPts = points)\n              print(res)\n              res <- opticsXi(res, xi = value)\n              print(res)\n              isPassed <- FALSE\n              return (res)\n            }, error = function(e) {\n              isPassed <- TRUE\n            }, warning = function(w) {\n              isPassed <- TRUE\n            })\n          }\n          points <- round(points / 2)\n        }\n      }\n      epsilon <- epsilon * 2\n      points = nrow(x)\n    }\n  }\n  \n  getExtractXi_new <- function (x, epsilon) {\n    points = nrow(x)\n    while (epsilon < maxXYData) {\n      for (value in autoSteepnessValue) {\n        while (points > 1) {\n          isPassed <- TRUE\n          if (isPassed) {\n            tryCatch({\n              res <- optics(x, eps = epsilon, minPts = points)\n              print(res)\n              res <- extractXi(res, xi = value)\n              print(res)\n              isPassed <- FALSE\n              return (res)\n            }, error = function(e) {\n              isPassed <- TRUE\n            }, warning = function(w) {\n              isPassed <- TRUE\n            })\n          }\n          points <- round(points / 2)\n        }\n      }\n      epsilon <- epsilon * 2\n      points = nrow(x)\n    }\n  }\n  \n  epsilonMultiplier <- maxXYData / 10\n  autoEpsilon <- c(epsilonMultiplier)\n  for (iCounter in 2:10) {\n    autoEpsilon <- append(autoEpsilon, epsilonMultiplier * iCounter)\n  }\n  \n  ############################################################\n  if (version < 1) {\n    # handling for older libraries (used in Power BI app sevice)\n    if (parameterSettings == 'Manual') {\n      res <- optics(x, eps = epsilon, minPts = minptsClust)\n      res <- opticsXi(res, xi = steepThres)\n    } else {\n      res <- getOpticsXi_new(x, epsilon)\n    }\n    \n    \n    ############################################################\n  }\n  else{\n    # handling for newer libraries (Power BI desktop)\n    if (parameterSettings == 'Manual') {\n      res <- optics(x, eps = epsilon, minPts = minptsClust)\n      res <- extractXi(res, xi = steepThres)\n    } else {\n      res <- getExtractXi_new(x, epsilon)\n    }\n  }\n  \n  ########## Function for hull plot ############\n  cl <- res\n  col <- colPalette\n  cex = 0.5\n  hull_lwd = 1\n  hull_lty = 1\n  solid = TRUE\n  alpha = .2\n  main = \"OPTICS\"\n  \n  ### extract clustering (keep hierarchical xICSXi structure)\n  if (is(cl, \"xics\") || \"clusters_xi\" %in% names(cl)) {\n    clusters_xi <- cl$clusters_xi\n    cl_order <- cl$order\n  } else\n    clusters_xi <- NULL\n  \n  if (is.list(cl))\n    cl <- cl$cluster\n  if (!is.numeric(cl))\n    stop(\"Could not get any cluster assigned as per the values and parameters entered.\")\n  \n  if (is.null(col))\n    col <- palette()\n  if (max(cl) + 1L > length(col))\n    warning(\"Not enough colors to display clusters. Some colors may get reused.\")\n  \n  if (is.null(hull_lwd) || is.na(hull_lwd) || hull_lwd == 0) {\n    hull_lwd <- 1\n    border <- NA\n  }\n  \n  if (is(cl, \"xics\") || \"clusters_xi\" %in% names(cl)) {\n    ## this is necessary for larger datasets: Ensure largest is plotted first\n    clusters_xi <-\n      clusters_xi[order(-(clusters_xi$end - clusters_xi$start)), ] # Order by size (descending)\n    ci_order <- clusters_xi$cluster_id\n  } else {\n    ci_order <- 1:max(cl)\n  }\n  \n  pointCol <- col[cl %% length(col) + 1L]\n  p <- ggplot()\n  \n  col_poly <- adjustcolor(col)\n  border <- col\n  \n  for (i in 1:length(ci_order)) {\n    ### use all the points for xICSXi's hierarchical structure\n    if (is.null(clusters_xi)) {\n      d <- x[cl == i, ]\n    }\n    else {\n      d <- x[cl_order[clusters_xi$start[i]:clusters_xi$end[i]], ]\n    }\n    \n    ch <- chull(d)\n    ch <- c(ch, ch[1])\n    \n    polyCol <- col_poly[ci_order[i] %% length(col_poly) + 1L]\n    borderCol <- border[ci_order[i] %% length(col_poly) + 1L]\n    \n    \n    p <-\n      p + geom_polygon(\n        data = d[ch, ],\n        aes(x = x, y = y),\n        fill = polyCol,\n        colour = borderCol,\n        alpha = 0.2\n      )\n    \n  }\n  x <- getTooltips()\n  if (exists(\"Tooltip\")) {\n    p <-\n      p + geom_point(\n        data = x,\n        aes(\n          x = x,\n          y = y,\n          xTooltip = X,\n          yTooltip = Y,\n          userTooltip = Tooltip\n        ),\n        colour = pointCol\n      )\n    p <-\n      ggplotly(p, tooltip = c('xTooltip', 'yTooltip', 'userTooltip')) %>%\n      layout(\n        title = '',\n        xaxis = xAesthetics,\n        yaxis = yAesthetics,\n        margin = list(\n          l = 50,\n          r = 0,\n          t = 50,\n          b = 50\n        ),\n        plot_bgcolor = plotColor\n      )\n  }\n  else{\n    p <-\n      p + geom_point(data = x,\n                     aes(\n                       x = x,\n                       y = y,\n                       xTooltip = X,\n                       yTooltip = Y\n                     ),\n                     colour = pointCol)\n    p <- ggplotly(p, tooltip = c('xTooltip', 'yTooltip')) %>%\n      layout(\n        title = '',\n        xaxis = xAesthetics,\n        yaxis = yAesthetics,\n        margin = list(\n          l = 50,\n          r = 0,\n          t = 50,\n          b = 50\n        ),\n        plot_bgcolor = plotColor\n      )\n  }\n  p$x$config$modeBarButtonsToRemove = disabledButtonsList\n  #printing the plot on visual device\n  internalSaveWidget(config(p, collaborate = FALSE, displaylogo = FALSE), 'out.html')\n  ReadFullFileReplaceString('out.html', 'out.html', ',\"padding\":40,', ',\"padding\":0,')\n  \n  quit()\n},\nerror = function(e)\n{\n  #catching error and displaying message\n  generateError (e)\n})"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "clusterSettings": {
+                "displayName": "Clustering settings",
+                "description": "Settings to control clusters",
+                "properties": {
+                    "parameterSettings": {
+                        "displayName": "Parameter setting",
+                        "description": "Set the parameters for the Clustering using OPTICS",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "Auto"
+                                },
+                                {
+                                    "displayName": "User defined",
+                                    "value": "Manual"
+                                }
+                            ]
+                        }
+                    },
+                    "scaling": {
+                        "displayName": "Data scaling",
+                        "description": "Enable data scaling",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "epsilon": {
+                        "displayName": "Epsilon neighbours",
+                        "description": "It is the upper limit of the size of the epsilon neighborhood. Limiting the neighborhood size improves performance and has no or very little impact on the ordering as long as it is not set too low",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minptsClust": {
+                        "displayName": "Min number of points in a cluster",
+                        "description": "Number of minimum points in the threshold region. The parameter is used to identify dense neighborhoods and the reachability distance is calculated as the distance to the minPts nearest neighbor",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "steepThres": {
+                        "displayName": "Steepness threshold",
+                        "description": "Between 0 to 1. Steepness threshold to identify clusters hierarchically using the Xi method",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "plotSettings": {
+                "displayName": "Plot settings",
+                "description": "Settings plot appereance",
+                "properties": {
+                    "title": {
+                        "displayName": "Title",
+                        "description": "Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "plotColor": {
+                        "displayName": "Plot background color",
+                        "description": "Plot background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "xaxisSettings": {
+                "displayName": "X-Axis",
+                "description": "Appereance settings for X-Axis",
+                "properties": {
+                    "xTitle": {
+                        "displayName": "Title",
+                        "description": "Title",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "xZeroline": {
+                        "displayName": "Zeroline",
+                        "description": "Zeroline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xLabels": {
+                        "displayName": "Labels",
+                        "description": "Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xGrid": {
+                        "displayName": "Gridlines",
+                        "description": "Gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xGridCol": {
+                        "displayName": "Gridlines color",
+                        "description": "Color of gridlines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xGridWidth": {
+                        "displayName": "Gridlines width",
+                        "description": "Width of gridlines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xAxisBaseLine": {
+                        "displayName": "Baseline",
+                        "description": "Baseline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xAxisBaseLineCol": {
+                        "displayName": "Baseline color",
+                        "description": "Color of baseline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xAxisBaseLineWidth": {
+                        "displayName": "Baseline width",
+                        "description": "Width of baseline",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "yaxisSettings": {
+                "displayName": "Y-Axis",
+                "description": "Appereance settings for Y-Axis",
+                "properties": {
+                    "yTitle": {
+                        "displayName": "Title",
+                        "description": "Title",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "yZeroline": {
+                        "displayName": "Zeroline",
+                        "description": "Zeroline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yLabels": {
+                        "displayName": "Labels",
+                        "description": "Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yGrid": {
+                        "displayName": "Gridlines",
+                        "description": "Gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yGridCol": {
+                        "displayName": "Gridlines color",
+                        "description": "Color of gridlines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "yGridWidth": {
+                        "displayName": "Gridlines width",
+                        "description": "Width of gridlines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "yAxisBaseLine": {
+                        "displayName": "Baseline",
+                        "description": "Baseline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisBaseLineCol": {
+                        "displayName": "Baseline color",
+                        "description": "Color of baseline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "yAxisBaseLineWidth": {
+                        "displayName": "Baseline width",
+                        "description": "Width of baseline",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "suppressDefaultTitle": true
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "XML",
+                "displayName": "XML",
+                "url": "https://cran.r-project.org/web/packages/XML/index.html"
+            },
+            {
+                "name": "forecast",
+                "displayName": "forecast",
+                "url": "https://cran.r-project.org/web/packages/forecast/index.html"
+            },
+            {
+                "name": "dbscan",
+                "displayName": "dbscan",
+                "url": "https://cran.r-project.org/web/packages/dbscan/index.html"
+            }
+        ]
+    },
+    "stringResources": {}
+}

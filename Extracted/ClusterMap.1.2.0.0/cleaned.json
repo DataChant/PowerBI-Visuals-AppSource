@@ -1,0 +1,273 @@
+{
+    "visual": {
+        "name": "ClusterMap",
+        "displayName": "Cluster Map",
+        "guid": "ClusterMap1652434605854",
+        "visualClassName": "ClusterMap",
+        "description": "This visual is currently in beta testing and is undergoing active development. Cluster Map displays labeled groups of related documents using image mosaics. Clusters can be arranged in a \u201cspiral\u201d layout around a dominant cluster or in a \u201crelational\u201d layout in which clusters are arranged by degree of relatedness.  Click a cluster to invoke highlighting in linked visuals, or invoke highlighting from a linked visual to see the proportion of documents in each cluster that match the highlight criteria. Cluster Map is designed for use with Facet Key and Strippet Browser.",
+        "supportUrl": "http://community.powerbi.com",
+        "gitHubUrl": "https://github.com/Microsoft/PowerBI-visuals-ClusterMap"
+    },
+    "author": {
+        "name": "Microsoft (experimental)",
+        "email": "msrvizsupport@microsoft.com"
+    },
+    "apiVersion": "1.11.0",
+    "assets": {
+        "icon": "assets/icon.svg",
+        "thumbnail": "assets/thumbnail.png",
+        "screenshot": "assets/screenshot.png"
+    },
+    "style": "style/visual.scss",
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "PersonaGroup",
+                "kind": 0,
+                "displayName": "Cluster ID",
+                "description": "A unique ID that identifies each cluster."
+            },
+            {
+                "name": "ReferenceName",
+                "kind": 0,
+                "displayName": "Label",
+                "description": "A label to display on top of each cluster."
+            },
+            {
+                "name": "ReferenceCount",
+                "kind": 1,
+                "displayName": "Count",
+                "description": "The number of members of this cluster."
+            },
+            {
+                "name": "ReferenceBucket",
+                "kind": 0,
+                "displayName": "Segmented By",
+                "description": "Optional values to be used to segment the members of this cluster in groups."
+            },
+            {
+                "name": "ReferenceImageUrl",
+                "kind": 0,
+                "displayName": "Image Url",
+                "description": "Up to four optional images to display as the cluster's background."
+            },
+            {
+                "name": "ReferenceLinkTo",
+                "kind": 0,
+                "displayName": "Related To",
+                "description": "Optional IDs of other clusters related to this cluster."
+            },
+            {
+                "name": "ReferenceLinkWeight",
+                "kind": 0,
+                "displayName": "Relatedness Strength",
+                "description": "Optional strength of the link between this cluster and the other clusters it is related to."
+            },
+            {
+                "name": "ParentID",
+                "kind": 0,
+                "displayName": "Parent Cluster ID",
+                "description": "Optional ID of the cluster this cluster is parented to."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "PersonaGroup": {
+                            "max": 1
+                        },
+                        "ReferenceName": {
+                            "max": 1
+                        },
+                        "ReferenceCount": {
+                            "max": 1
+                        },
+                        "ReferenceBucket": {
+                            "max": 1
+                        },
+                        "ReferenceImageUrl": {
+                            "max": 4
+                        },
+                        "ReferenceBackgroundColor": {
+                            "max": 1
+                        },
+                        "ReferenceLinkTo": {
+                            "max": 1
+                        },
+                        "ReferenceLinkWeight": {
+                            "max": 1
+                        },
+                        "ParentID": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "PersonaGroup"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 500000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "ReferenceName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ReferenceCount"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ReferenceBucket"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ReferenceImageUrl"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ReferenceBackgroundColor"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ReferenceLinkTo"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ReferenceLinkWeight"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ParentID"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 500000
+                            }
+                        }
+                    },
+                    "rowCount": {
+                        "preferred": {
+                            "min": 5000,
+                            "max": 500000
+                        },
+                        "supported": {
+                            "min": 0,
+                            "max": 500000
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "presentation": {
+                "displayName": "Presentation",
+                "properties": {
+                    "initialCount": {
+                        "displayName": "Max Cluster Count",
+                        "description": "The maximum number of clusters to display.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "imageCount": {
+                        "displayName": "Max Image Count",
+                        "description": "The maximum number of images to display in a cluster.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "layout": {
+                        "displayName": "Layout",
+                        "description": "Defines how the clusters are positioned on the screen.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "orbital",
+                                    "displayName": "Spiral"
+                                },
+                                {
+                                    "value": "cola",
+                                    "displayName": "Relational"
+                                }
+                            ]
+                        }
+                    },
+                    "normalColor": {
+                        "displayName": "Gauge Color",
+                        "description": "Defines the base color for the persona's gauges.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "selectedColor": {
+                        "displayName": "Selection Color",
+                        "description": "Defines the base color of the persona's gauges when selection is active.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showNameLabels": {
+                        "displayName": "Show Labels",
+                        "description": "Show cluster name labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataLoading": {
+                "displayName": "Data Loading",
+                "properties": {
+                    "maxDataRows": {
+                        "displayName": "Max Data Rows",
+                        "description": "The maximum number of data rows to load from the original data",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "displayBuildVersion": {
+                        "displayName": "Build Info",
+                        "description": "Displays the build version of the current visual",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "suppressDefaultTitle": true
+    },
+    "output": "dist/essex.widget.clustermap.pbiviz"
+}

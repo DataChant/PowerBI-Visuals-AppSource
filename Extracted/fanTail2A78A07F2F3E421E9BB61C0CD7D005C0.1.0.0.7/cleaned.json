@@ -1,0 +1,173 @@
+{
+    "visual": {
+        "name": "fanTail",
+        "displayName": "Fan Tail by FlashBI",
+        "guid": "fanTail2A78A07F2F3E421E9BB61C0CD7D005C0",
+        "visualClassName": "FanTailVisual",
+        "version": "1.0.0.7",
+        "description": "FanTail",
+        "supportUrl": "https://flashbi.com.au/visuals/",
+        "gitHubUrl": "Missilent"
+    },
+    "author": {
+        "name": "Missilent",
+        "email": "fiona@flashbi.com.au"
+    },
+    "apiVersion": "5.4.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Layers",
+                "kind": "Grouping",
+                "name": "Layers"
+            },
+            {
+                "displayName": "% value",
+                "kind": "Measure",
+                "name": "Values"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Layers": {
+                            "min": 1
+                        },
+                        "Values": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "Layers"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "Values"
+                                        }
+                                    }
+                                ],
+                                "dataReductionAlgorithm": {
+                                    "top": {}
+                                }
+                            }
+                        }
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "############### Utility functions ###############\r\nlibraryRequireInstall = function(packageName, ...)\r\n{\r\n  if(!require(packageName, character.only = TRUE)) \r\n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\r\n}\r\n\r\nlibraryRequireInstall(\"XML\")\r\nlibraryRequireInstall(\"htmlwidgets\")\r\n\r\ninternalSaveWidget <- function(widget, fname)\r\n{\r\n  tempFname = paste(fname, \".tmp\", sep=\"\")\r\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE,background='transparent')\r\n  FlattenHTML(tempFname, fname)\r\n}\r\n\r\nFlattenHTML <- function(fnameIn, fnameOut)\r\n{\r\n  # Read and parse HTML file\r\n  # Embed all js and css files into one unified file\r\n  \r\n  if(!file.exists(fnameIn))\r\n    return(FALSE)\r\n  \r\n  dir = dirname(fnameIn)\r\n  html = htmlTreeParse(fnameIn, useInternal = TRUE)\r\n  top = xmlRoot(html)\r\n  \r\n  # extract all <script> tags with src value\r\n  srcNode=getNodeSet(top, '//script[@src]')\r\n  for (node in srcNode)\r\n  {\r\n    b = xmlAttrs(node)\r\n    fname = file.path(dir, b['src'])\r\n    alternateSrc = FindSrcReplacement(fname)\r\n    if (!is.null(alternateSrc))\r\n    {\r\n      s = alternateSrc\r\n      names(s) = 'src'\r\n      newNode = xmlNode(\"script\",attrs = s)\r\n      replaceNodes(node, newNode)\r\n    }else{\r\n      str=ReadFileForEmbedding(fname);\r\n      if (!is.null(str))\r\n      {      \r\n        newNode = xmlNode(\"script\", str, attrs = c(type = \"text/javascript\"))\r\n        replaceNodes(node, newNode)\r\n      }\r\n    }\r\n  }\r\n  \r\n  # extract all <link> tags with src value\r\n  linkNode=getNodeSet(top, '//link[@href]')\r\n  for (node in linkNode)\r\n  {\r\n    b = xmlAttrs(node)\r\n    fname = file.path(dir, b['href'])\r\n    str = ReadFileForEmbedding(fname, FALSE);\r\n    if (!is.null(str))\r\n    {\r\n      newNode = xmlNode(\"style\", str)\r\n      replaceNodes(node, newNode)\r\n    }\r\n  }\r\n  \r\n  saveXML(html, file = fnameOut)\r\n  return(TRUE)\r\n}\r\n\r\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\r\n{\r\n  data = ReadFullFile(fname)\r\n  if (is.null(data))\r\n    return(NULL)\r\n\r\n  str = paste(data, collapse ='\\n')\r\n  if (addCdata) {\r\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\r\n  }\r\n  return(str)\r\n}\r\n\r\nReadFullFile <- function(fname)\r\n{\r\n  if(!file.exists(fname))\r\n    return(NULL)\r\n  \r\n  con = file(fname, open = \"r\")\r\n  data = readLines(con)\r\n  close(con)\r\n  return(data)\r\n}\r\n\r\nFindSrcReplacement <- function(str)\r\n{\r\n  # finds reference to 'plotly' js and replaces with a version from CDN\r\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\r\n  str <- iconv(str, to=\"UTF-8\")\r\n  pattern = \"plotlyjs-(\\\\w.+)/plotly-latest.min.js\"\r\n  match1=regexpr(pattern, str)\r\n  attr(match1, 'useBytes') <- FALSE\r\n  strMatch=regmatches(str, match1, invert = FALSE)\r\n  if (length(strMatch) == 0) return(NULL)\r\n  \r\n  pattern2 = \"-(\\\\d.+)/\"\r\n  match2 = regexpr(pattern2, strMatch[1])\r\n  attr(match2, 'useBytes') <- FALSE\r\n  strmatch = regmatches(strMatch[1], match2)\r\n  if (length(strmatch) == 0) return(NULL)\r\n  \r\n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\r\n  # This matches the specific version used in the plotly package used.\r\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\r\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\r\n  return(str)\r\n}\r\n#################################################\r\n\r\n\r\n\r\n#  Load R packages needed ####\r\nlibrary(ggplot2)\r\nlibrary(plotly)\r\nlibrary(reshape2)\r\nlibrary(htmlwidgets)\r\nlibrary(htmltools)\r\nlibrary(tidyverse)\r\nlibrary(colorspace)\r\nlibrary(dplyr)\r\nlibrary(viridis)\r\nlibrary(RColorBrewer)\r\nlibrary(data.table)\r\n\r\n\r\n###### Sunburst function - to wrangle data into the subnurst hierarchy format ####\r\nas.sunburstDF <- function(DF, valueCol = NULL){ require(data.table)\r\n  colNamesDF <- names(DF)\r\n  if(is.data.table(DF)){\r\n    DT <- copy(DF)\r\n  } else {\r\n    DT <- data.table(DF, stringsAsFactors = FALSE)\r\n  }\r\n  DT[, root := \"Total\"]\r\n  colNamesDT <- names(DT)\r\n  if(is.null(valueCol)){\r\n    setcolorder(DT, c(\"root\", colNamesDF))\r\n  } else {\r\n    setnames(DT, valueCol, \"values\", skip_absent=TRUE)\r\n    setcolorder(DT, c(\"root\", setdiff(colNamesDF, valueCol), \"values\"))\r\n  }\r\n  hierarchyCols <- setdiff(colNamesDT, \"values\")\r\n  hierarchyList <- list()  \r\n  for(i in seq_along(hierarchyCols)){\r\n    currentCols <- colNamesDT[1:i]\r\n    if(is.null(valueCol)){\r\n      currentDT <- unique(DT[, ..currentCols][, values := .N, by = currentCols], by = currentCols)\r\n    } else {\r\n      currentDT <- DT[, lapply(.SD, sum, na.rm = TRUE), by=currentCols, .SDcols = \"values\"]\r\n    }\r\n    setnames(currentDT, length(currentCols), \"labels\")\r\n    hierarchyList[[i]] <- currentDT\r\n  }\r\n  hierarchyDT <- rbindlist(hierarchyList, use.names = TRUE, fill = TRUE)\r\n  parentCols <- setdiff(names(hierarchyDT), c(\"labels\", \"values\", valueCol))\r\n  hierarchyDT[, parents := apply(.SD, 1, function(x){fifelse(all(is.na(x)),\r\n                                                             yes = NA_character_, no = paste(x[!is.na(x)],sep = \":\", collapse = \" - \"))}),.SDcols = parentCols]\r\n  hierarchyDT[, ids := apply(.SD, 1, function(x){paste(x[!is.na(x)], collapse = \" - \")}),\r\n              .SDcols = c(\"parents\", \"labels\")]\r\n  hierarchyDT[, c(parentCols) := NULL]\r\n  return(hierarchyDT)\r\n}\r\n\r\n \r\ndf <-  data.frame(cbind(Layers,  Values)) # Values\r\n \r\n#df <- df %>% select(1,2)\r\nsunburstDFpos <- as.sunburstDF(df,valueCol =  rev(names(df))[1])  # valueCol = rev(names(df))[1])  #\r\n\r\n###  get the data for the hover over values and labels ####\r\nnumcols <- as.integer(NROW(unique(sunburstDFpos$values) ))\r\nnumlabs <- as.integer(NROW(unique(sunburstDFpos$labels) ))\r\nthelabs  <-  data.frame( thelabnames = unique(sunburstDFpos$labels))\r\nthelabs  <- tibble::rowid_to_column(thelabs, \"ID\")\r\nthelabsvals   <-   sunburstDFpos %>% select(labels,values)  %>%  group_by(labels) %>%\r\n  slice(which.max(1 ))  %>% select(labels,groupvalues =  values)  \r\nthelabs$labcol <- NA\r\n\r\n###  set the color pallet ####\r\nthelabs$labcol <- viridis(nrow(thelabs)) \r\nthelabs<- thelabs %>% mutate (labcol =  ifelse(thelabnames == 'Total', \"#FFFFFF\",labcol ))    # #98fb98\r\nthelabs<- thelabs %>% mutate (labcol =  ifelse(thelabnames == 'Total', \"#FFFFFF\",labcol ))    # #98fb98\r\n\r\n\r\n####  Wrangle  the data to show the totals sections ####\r\nsunburstDFpos <- sunburstDFpos %>% mutate( valuestotzero  = ifelse(labels == 'Total' ,0 ,values )  ,\r\n                                           valuestotonly  = ifelse(labels == 'Total' ,values ,\"\"))  %>%\r\n  inner_join( thelabsvals , by = c(\"labels\" = \"labels\" ))\r\nsunburstDFpos <- sunburstDFpos %>%  mutate( thelabsvals = ifelse( ids == 'Total' ,0 ,groupvalues))  %>%\r\n  arrange(-thelabsvals)\r\nsunburstDFpos<-   inner_join( sunburstDFpos  ,  thelabs,  by = c( \"labels\" = \"thelabnames\"))\r\n#sunburstDFpos <- sunburstDFpos %>%  mutate( labels = ifelse( labels == 'Total' ,\"Total\",labels))\r\nsunburstDFpos <- sunburstDFpos %>%\r\n  group_by(parents) %>%\r\n  mutate(parentval = sum(values , na.rm= T))\r\nsunburstDFpos <- sunburstDFpos %>%  mutate( percofparent= values / parentval )\r\n\r\n\r\n##### plot the sunburst ####\r\n q <- plot_ly(data = sunburstDFpos, ids = ~ids, labels= ~labels, parents = ~parents,  text = ~valuestotzero,\r\n             branchvalues = 'remainder',customdata = ~percofparent,\r\n             hovertext = ~values, values= ~valuestotzero, type='sunburst',marker = list( colors = ~labcol )   ,\r\n             insidetextorientation='radial' ,\r\n            texttemplate=\"%{label}\",\r\n            hovertemplate=\"%{label} <br> %{value:#,.5s} <br> %{customdata:.1%}</b><extra></extra>\"\r\n            )   %>%  #percentParent percentEntry\r\n  hide_colorbar() %>%\r\n  layout (  grid = list(columns = 1, rows= 1), xaxis = list( zeroline = FALSE,  showline = FALSE,\r\n                                                            showticklabels = FALSE,  showgrid = FALSE),\r\n           yaxis = list( zeroline = FALSE,  showline = FALSE,\r\n                         showticklabels = FALSE,  showgrid = FALSE),  margin(2, 2, 2, 2)  )\r\n\r\n\r\np <- ggplotly(q)\r\ninternalSaveWidget(p, 'out.html')\r\n\r\n"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "displayNameKey": "formattingGeneral",
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    }
+                }
+            },
+            "group": {
+                "displayName": "Group",
+                "displayNameKey": "Visual_Group",
+                "properties": {
+                    "showSelected": {
+                        "displayName": "Show category label",
+                        "displayNameKey": "Visual_ShowCategoryLabel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDataLabels": {
+                        "displayName": "Show data labels",
+                        "displayNameKey": "Visual_ShowDataLabels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font size",
+                        "displayNameKey": "Visual_FontSize",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Top category color",
+                        "displayNameKey": "Visual_TopCategoryColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "displayName": "Tooltip",
+                "displayNameKey": "Visual_Tooltip",
+                "properties": {
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "displayNameKey": "Visual_DisplayUnits",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "displayNameKey": "Visual_Precision",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsLandingPage": false,
+        "privileges": [],
+        "suppressDefaultTitle": false,
+        "supportsMultiVisualSelection": true,
+        "supportsHighlight": true,
+        "supportsSynchronizingFilterState": true,
+        "sorting": {
+            "default": {}
+        }
+    },
+    "dependencies": {},
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

@@ -1,0 +1,2277 @@
+{
+    "visual": {
+        "name": "PowerKPI",
+        "displayName": "Power KPI 2.0.0",
+        "guid": "powerKPI462CE5C2666F4EC8A8BDD7E5587320A3",
+        "visualClassName": "PowerKPI",
+        "version": "2.0.0",
+        "description": "A powerful KPI Indicator with multi-line chart and labels for current date, value and variances. Rich customization options, including current status labels and symbols, trend and comparison lines, multiple variances, auto-scaling, text formatting, and density controls. Highly flexible for use in large, detailed report tiles or tiny, summary dashboard tiles.",
+        "supportUrl": "https://aka.ms/customvisualscommunity",
+        "gitHubUrl": "https://github.com/Microsoft/PowerBI-visuals-PowerKPI"
+    },
+    "author": {
+        "name": "Microsoft",
+        "email": "pbicvsupport@microsoft.com"
+    },
+    "apiVersion": "2.5.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Axis",
+                "displayName": "Axis",
+                "kind": "Grouping"
+            },
+            {
+                "name": "SeriesColumn",
+                "displayName": "Series",
+                "kind": "Grouping"
+            },
+            {
+                "name": "Values",
+                "displayName": "Values",
+                "kind": "Measure"
+            },
+            {
+                "name": "SecondaryValues",
+                "displayName": "Secondary Values",
+                "kind": "Measure"
+            },
+            {
+                "name": "KPI",
+                "displayName": "KPI Indicator Index",
+                "kind": "Measure"
+            },
+            {
+                "name": "KPIIndicatorValue",
+                "displayName": "KPI Indicator Value",
+                "kind": "Measure"
+            },
+            {
+                "name": "SecondKPIIndicatorValue",
+                "displayName": "Second KPI Indicator Value",
+                "kind": "Measure"
+            }
+        ],
+        "objects": {
+            "layout": {
+                "displayName": "Layout",
+                "properties": {
+                    "autoHideVisualComponents": {
+                        "displayName": "Auto Scale",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "auto": {
+                        "displayName": "Auto",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "layout": {
+                        "displayName": "Layout",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "Left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "Bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "Right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "title": {
+                "displayName": "Title",
+                "properties": {}
+            },
+            "subtitle": {
+                "displayName": "Subtitle",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Title Text",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "background": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "alignment": {
+                        "displayName": "Alignment",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    }
+                }
+            },
+            "kpiIndicator": {
+                "displayName": "KPI Indicator",
+                "description": "KPI Indicator options",
+                "properties": {
+                    "color_0": {
+                        "displayName": "KPI 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shape_0": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Indicator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle-full",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "rhombus",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                },
+                                {
+                                    "value": "exclamation",
+                                    "displayName": "Exclamation"
+                                },
+                                {
+                                    "value": "checkmark",
+                                    "displayName": "Checkmark"
+                                },
+                                {
+                                    "value": "arrow-up",
+                                    "displayName": "Arrow Up"
+                                },
+                                {
+                                    "value": "arrow-right-up",
+                                    "displayName": "Arrow Right Up"
+                                },
+                                {
+                                    "value": "arrow-right-down",
+                                    "displayName": "Arrow Right Down"
+                                },
+                                {
+                                    "value": "arrow-down",
+                                    "displayName": "Arrow Down"
+                                },
+                                {
+                                    "value": "caret-up",
+                                    "displayName": "Caret Up"
+                                },
+                                {
+                                    "value": "caret-down",
+                                    "displayName": "Caret Down"
+                                },
+                                {
+                                    "value": "circle-empty",
+                                    "displayName": "Circle Empty"
+                                },
+                                {
+                                    "value": "circle-x",
+                                    "displayName": "Circle X"
+                                },
+                                {
+                                    "value": "circle-exclamation",
+                                    "displayName": "Circle Exclamation"
+                                },
+                                {
+                                    "value": "circle-checkmark",
+                                    "displayName": "Circle Checkmark"
+                                },
+                                {
+                                    "value": "x",
+                                    "displayName": "X"
+                                },
+                                {
+                                    "value": "star-empty",
+                                    "displayName": "Star Empty"
+                                },
+                                {
+                                    "value": "star-full",
+                                    "displayName": "Star Full"
+                                }
+                            ]
+                        }
+                    },
+                    "kpiIndex_0": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_1": {
+                        "displayName": "KPI 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shape_1": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Indicator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle-full",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "rhombus",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                },
+                                {
+                                    "value": "exclamation",
+                                    "displayName": "Exclamation"
+                                },
+                                {
+                                    "value": "checkmark",
+                                    "displayName": "Checkmark"
+                                },
+                                {
+                                    "value": "arrow-up",
+                                    "displayName": "Arrow Up"
+                                },
+                                {
+                                    "value": "arrow-right-up",
+                                    "displayName": "Arrow Right Up"
+                                },
+                                {
+                                    "value": "arrow-right-down",
+                                    "displayName": "Arrow Right Down"
+                                },
+                                {
+                                    "value": "arrow-down",
+                                    "displayName": "Arrow Down"
+                                },
+                                {
+                                    "value": "caret-up",
+                                    "displayName": "Caret Up"
+                                },
+                                {
+                                    "value": "caret-down",
+                                    "displayName": "Caret Down"
+                                },
+                                {
+                                    "value": "circle-empty",
+                                    "displayName": "Circle Empty"
+                                },
+                                {
+                                    "value": "circle-x",
+                                    "displayName": "Circle X"
+                                },
+                                {
+                                    "value": "circle-exclamation",
+                                    "displayName": "Circle Exclamation"
+                                },
+                                {
+                                    "value": "circle-checkmark",
+                                    "displayName": "Circle Checkmark"
+                                },
+                                {
+                                    "value": "x",
+                                    "displayName": "X"
+                                },
+                                {
+                                    "value": "star-empty",
+                                    "displayName": "Star Empty"
+                                },
+                                {
+                                    "value": "star-full",
+                                    "displayName": "Star Full"
+                                }
+                            ]
+                        }
+                    },
+                    "kpiIndex_1": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_2": {
+                        "displayName": "KPI 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shape_2": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Indicator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle-full",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "rhombus",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                },
+                                {
+                                    "value": "exclamation",
+                                    "displayName": "Exclamation"
+                                },
+                                {
+                                    "value": "checkmark",
+                                    "displayName": "Checkmark"
+                                },
+                                {
+                                    "value": "arrow-up",
+                                    "displayName": "Arrow Up"
+                                },
+                                {
+                                    "value": "arrow-right-up",
+                                    "displayName": "Arrow Right Up"
+                                },
+                                {
+                                    "value": "arrow-right-down",
+                                    "displayName": "Arrow Right Down"
+                                },
+                                {
+                                    "value": "arrow-down",
+                                    "displayName": "Arrow Down"
+                                },
+                                {
+                                    "value": "caret-up",
+                                    "displayName": "Caret Up"
+                                },
+                                {
+                                    "value": "caret-down",
+                                    "displayName": "Caret Down"
+                                },
+                                {
+                                    "value": "circle-empty",
+                                    "displayName": "Circle Empty"
+                                },
+                                {
+                                    "value": "circle-x",
+                                    "displayName": "Circle X"
+                                },
+                                {
+                                    "value": "circle-exclamation",
+                                    "displayName": "Circle Exclamation"
+                                },
+                                {
+                                    "value": "circle-checkmark",
+                                    "displayName": "Circle Checkmark"
+                                },
+                                {
+                                    "value": "x",
+                                    "displayName": "X"
+                                },
+                                {
+                                    "value": "star-empty",
+                                    "displayName": "Star Empty"
+                                },
+                                {
+                                    "value": "star-full",
+                                    "displayName": "Star Full"
+                                }
+                            ]
+                        }
+                    },
+                    "kpiIndex_2": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_3": {
+                        "displayName": "KPI 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shape_3": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Indicator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle-full",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "rhombus",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                },
+                                {
+                                    "value": "exclamation",
+                                    "displayName": "Exclamation"
+                                },
+                                {
+                                    "value": "checkmark",
+                                    "displayName": "Checkmark"
+                                },
+                                {
+                                    "value": "arrow-up",
+                                    "displayName": "Arrow Up"
+                                },
+                                {
+                                    "value": "arrow-right-up",
+                                    "displayName": "Arrow Right Up"
+                                },
+                                {
+                                    "value": "arrow-right-down",
+                                    "displayName": "Arrow Right Down"
+                                },
+                                {
+                                    "value": "arrow-down",
+                                    "displayName": "Arrow Down"
+                                },
+                                {
+                                    "value": "caret-up",
+                                    "displayName": "Caret Up"
+                                },
+                                {
+                                    "value": "caret-down",
+                                    "displayName": "Caret Down"
+                                },
+                                {
+                                    "value": "circle-empty",
+                                    "displayName": "Circle Empty"
+                                },
+                                {
+                                    "value": "circle-x",
+                                    "displayName": "Circle X"
+                                },
+                                {
+                                    "value": "circle-exclamation",
+                                    "displayName": "Circle Exclamation"
+                                },
+                                {
+                                    "value": "circle-checkmark",
+                                    "displayName": "Circle Checkmark"
+                                },
+                                {
+                                    "value": "x",
+                                    "displayName": "X"
+                                },
+                                {
+                                    "value": "star-empty",
+                                    "displayName": "Star Empty"
+                                },
+                                {
+                                    "value": "star-full",
+                                    "displayName": "Star Full"
+                                }
+                            ]
+                        }
+                    },
+                    "kpiIndex_3": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color_4": {
+                        "displayName": "KPI 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shape_4": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Indicator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle-full",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "rhombus",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                },
+                                {
+                                    "value": "exclamation",
+                                    "displayName": "Exclamation"
+                                },
+                                {
+                                    "value": "checkmark",
+                                    "displayName": "Checkmark"
+                                },
+                                {
+                                    "value": "arrow-up",
+                                    "displayName": "Arrow Up"
+                                },
+                                {
+                                    "value": "arrow-right-up",
+                                    "displayName": "Arrow Right Up"
+                                },
+                                {
+                                    "value": "arrow-right-down",
+                                    "displayName": "Arrow Right Down"
+                                },
+                                {
+                                    "value": "arrow-down",
+                                    "displayName": "Arrow Down"
+                                },
+                                {
+                                    "value": "caret-up",
+                                    "displayName": "Caret Up"
+                                },
+                                {
+                                    "value": "caret-down",
+                                    "displayName": "Caret Down"
+                                },
+                                {
+                                    "value": "circle-empty",
+                                    "displayName": "Circle Empty"
+                                },
+                                {
+                                    "value": "circle-x",
+                                    "displayName": "Circle X"
+                                },
+                                {
+                                    "value": "circle-exclamation",
+                                    "displayName": "Circle Exclamation"
+                                },
+                                {
+                                    "value": "circle-checkmark",
+                                    "displayName": "Circle Checkmark"
+                                },
+                                {
+                                    "value": "x",
+                                    "displayName": "X"
+                                },
+                                {
+                                    "value": "star-empty",
+                                    "displayName": "Star Empty"
+                                },
+                                {
+                                    "value": "star-full",
+                                    "displayName": "Star Full"
+                                }
+                            ]
+                        }
+                    },
+                    "kpiIndex_4": {
+                        "displayName": "\u00a0\u00a0\u00a0\u00a0Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "Right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "shouldBackgroundColorMatchKpiColor": {
+                        "displayName": "Background Match KPI Color",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "kpiIndicatorValue": {
+                "displayName": "KPI Indicator Value",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "format": {
+                        "displayName": "Format",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "matchKPIColor": {
+                        "displayName": "Match KPI Indicator Color",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "kpiIndicatorLabel": {
+                "displayName": "KPI Indicator Label",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "secondKPIIndicatorValue": {
+                "displayName": "Second KPI Indicator Value",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "format": {
+                        "displayName": "Format",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "secondKPIIndicatorLabel": {
+                "displayName": "Second KPI Indicator Label",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "actualValueKPI": {
+                "displayName": "KPI Actual Value",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "actualLabelKPI": {
+                "displayName": "KPI Actual Label",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    }
+                }
+            },
+            "dateValueKPI": {
+                "displayName": "KPI Date Value",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "format": {
+                        "displayName": "Format",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "dateLabelKPI": {
+                "displayName": "KPI Date Label",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "displayName": "Data Labels",
+                "description": "Display data label options",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "isBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "isItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "percentile": {
+                        "displayName": "Label Density",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "line": {
+                "displayName": "Line",
+                "properties": {
+                    "fillColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shouldMatchKpiColor": {
+                        "displayName": "Match KPI Color",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataPointStartsKpiColorSegment": {
+                        "displayName": "Data Point Starts KPI Color Segment",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineType": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "line",
+                                    "displayName": "Line"
+                                },
+                                {
+                                    "value": "area",
+                                    "displayName": "Area"
+                                }
+                            ]
+                        }
+                    },
+                    "thickness": {
+                        "displayName": "Thickness",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rawOpacity": {
+                        "displayName": "Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rawAreaOpacity": {
+                        "displayName": "Area Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solidLine",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dottedLine",
+                                    "displayName": "Dotted"
+                                },
+                                {
+                                    "value": "dashedLine",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotDashedLine",
+                                    "displayName": "Dot-dashed"
+                                }
+                            ]
+                        }
+                    },
+                    "interpolation": {
+                        "displayName": "Interpolation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "step-before",
+                                    "displayName": "Step-before"
+                                },
+                                {
+                                    "value": "step-after",
+                                    "displayName": "Step-after"
+                                },
+                                {
+                                    "value": "basis",
+                                    "displayName": "Basis"
+                                },
+                                {
+                                    "value": "basis-open",
+                                    "displayName": "Basis-open"
+                                },
+                                {
+                                    "value": "basis-closed",
+                                    "displayName": "Basis-closed"
+                                },
+                                {
+                                    "value": "cardinal",
+                                    "displayName": "Cardinal"
+                                },
+                                {
+                                    "value": "cardinal-open",
+                                    "displayName": "Cardinal-open"
+                                },
+                                {
+                                    "value": "cardinal-closed",
+                                    "displayName": "Cardinal-closed"
+                                },
+                                {
+                                    "value": "monotone",
+                                    "displayName": "Monotone"
+                                }
+                            ]
+                        }
+                    },
+                    "interpolationWithColorizedLine": {
+                        "displayName": "Interpolation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "step-before",
+                                    "displayName": "Step-before"
+                                },
+                                {
+                                    "value": "step-after",
+                                    "displayName": "Step-after"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "series": {
+                "displayName": "Data Colors",
+                "properties": {
+                    "fillColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "lineStyle": {
+                "displayName": "Line Style",
+                "properties": {
+                    "lineStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solidLine",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dottedLine",
+                                    "displayName": "Dotted"
+                                },
+                                {
+                                    "value": "dashedLine",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotDashedLine",
+                                    "displayName": "Dot-dashed"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "lineThickness": {
+                "displayName": "Line Thickness",
+                "properties": {
+                    "thickness": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "description": "Display legend options",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "Bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "Left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "Right",
+                                    "displayName": "Right"
+                                },
+                                {
+                                    "value": "TopCenter",
+                                    "displayName": "Top Center"
+                                },
+                                {
+                                    "value": "BottomCenter",
+                                    "displayName": "Bottom Center"
+                                },
+                                {
+                                    "value": "LeftCenter",
+                                    "displayName": "Left Center"
+                                },
+                                {
+                                    "value": "RightCenter",
+                                    "displayName": "Right Center"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Legend Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "style": {
+                        "displayName": "Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "box",
+                                    "displayName": "Box"
+                                },
+                                {
+                                    "value": "line",
+                                    "displayName": "Line"
+                                },
+                                {
+                                    "value": "styledLine",
+                                    "displayName": "Styled Line"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "displayName": "X Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "percentile": {
+                        "displayName": "Ticks Density",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "type": {
+                        "displayName": "Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Continuous"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Categorical"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Y Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "percentile": {
+                        "displayName": "Ticks Density",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "min": {
+                        "displayName": "Min",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "max": {
+                        "displayName": "Max",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "secondaryYAxis": {
+                "displayName": "Secondary Y Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "percentile": {
+                        "displayName": "Ticks Density",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "min": {
+                        "displayName": "Min",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "max": {
+                        "displayName": "Max",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "referenceLineOfXAxis": {
+                "displayName": "X Axis Reference Lines",
+                "properties": {
+                    "show": {
+                        "displayName": "",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "thickness": {
+                        "displayName": "Thickness",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "referenceLineOfYAxis": {
+                "displayName": "Y Axis Reference Lines",
+                "properties": {
+                    "show": {
+                        "displayName": "",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "thickness": {
+                        "displayName": "Thickness",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "secondaryReferenceLineOfYAxis": {
+                "displayName": "Secondary Y Axis Reference Lines",
+                "properties": {
+                    "show": {
+                        "displayName": "",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "thickness": {
+                        "displayName": "Thickness",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "tooltipLabel": {
+                "displayName": "Tooltip Label",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "placeHolderText": "Variance",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "format": {
+                        "displayName": "Format",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "tooltipVariance": {
+                "displayName": "Tooltip KPI Indicator Value",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "placeHolderText": "Variance",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "format": {
+                        "displayName": "Format",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "secondTooltipVariance": {
+                "displayName": "Second Tooltip KPI Indicator Value",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "placeHolderText": "Variance",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "format": {
+                        "displayName": "Format",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "tooltipValues": {
+                "displayName": "Tooltip Values",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "description": "Select the units (millions, billions, etc.)",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "precision": {
+                        "displayName": "Decimal Places",
+                        "description": "Select the number of decimal places to display",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "numeric": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    },
+                    "label": {
+                        "displayName": "Label",
+                        "placeHolderText": "Variance",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Axis": {
+                            "max": 1
+                        },
+                        "SeriesColumn": {
+                            "max": 0
+                        },
+                        "Values": {
+                            "max": 0
+                        },
+                        "SecondaryValues": {
+                            "max": 0
+                        },
+                        "KPI": {
+                            "max": 0
+                        },
+                        "KPIIndicatorValue": {
+                            "max": 0
+                        },
+                        "SecondKPIIndicatorValue": {
+                            "max": 0
+                        }
+                    },
+                    {
+                        "Axis": {
+                            "max": 1
+                        },
+                        "SeriesColumn": {
+                            "max": 1
+                        },
+                        "Values": {
+                            "max": 1
+                        },
+                        "SecondaryValues": {
+                            "max": 1
+                        },
+                        "KPI": {
+                            "max": 0
+                        },
+                        "KPIIndicatorValue": {
+                            "max": 1
+                        },
+                        "SecondKPIIndicatorValue": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "Axis": {
+                            "max": 1
+                        },
+                        "SeriesColumn": {
+                            "max": 0
+                        },
+                        "Values": {
+                            "min": 1
+                        },
+                        "KPI": {
+                            "max": 0
+                        },
+                        "KPIIndicatorValue": {
+                            "max": 1
+                        },
+                        "SecondKPIIndicatorValue": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "Axis": {
+                            "max": 1
+                        },
+                        "SeriesColumn": {
+                            "max": 1
+                        },
+                        "Values": {
+                            "max": 1
+                        },
+                        "SecondaryValues": {
+                            "max": 1
+                        },
+                        "KPI": {
+                            "max": 1
+                        },
+                        "KPIIndicatorValue": {
+                            "max": 1
+                        },
+                        "SecondKPIIndicatorValue": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "Axis": {
+                            "max": 1
+                        },
+                        "SeriesColumn": {
+                            "max": 0
+                        },
+                        "Values": {
+                            "min": 1
+                        },
+                        "KPI": {
+                            "max": 1
+                        },
+                        "KPIIndicatorValue": {
+                            "max": 1
+                        },
+                        "SecondKPIIndicatorValue": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "Axis"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "SeriesColumn",
+                            "select": [
+                                {
+                                    "for": {
+                                        "in": "Values"
+                                    }
+                                },
+                                {
+                                    "for": {
+                                        "in": "SecondaryValues"
+                                    }
+                                },
+                                {
+                                    "for": {
+                                        "in": "KPI"
+                                    }
+                                },
+                                {
+                                    "for": {
+                                        "in": "KPIIndicatorValue"
+                                    }
+                                },
+                                {
+                                    "for": {
+                                        "in": "SecondKPIIndicatorValue"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "Axis",
+                        "direction": 1
+                    }
+                ]
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

@@ -1,0 +1,660 @@
+{
+    "visual": {
+        "name": "hierarchySlicer",
+        "displayName": "Hierarchy Slicer",
+        "guid": "HierarchySlicer1458836712039",
+        "visualClassName": "HierarchySlicer",
+        "version": "2.2.2",
+        "description": "With the hierarchy slicer it is possible to represent a hierarchy as a single slicer. The different levels are shown as a tree.",
+        "supportUrl": "https://azurebi-docs.jppp.org/powerbi-visuals/index.html",
+        "gitHubUrl": "https://github.com/liprec/powerbi-hierarchySlicer"
+    },
+    "author": {
+        "name": "Jan Pieter Posthuma",
+        "email": "mail@jppp.org"
+    },
+    "apiVersion": "3.2.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Fields",
+                "kind": "Grouping",
+                "displayName": "Fields"
+            },
+            {
+                "name": "Values",
+                "kind": "Measure",
+                "displayName": "Values"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Values": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "matrix": {
+                    "rows": {
+                        "for": {
+                            "in": "Fields"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Values"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    },
+                    "filterValues": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "expanded": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "selectAll": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selfFilter": {
+                        "type": {
+                            "filter": {
+                                "selfFilter": true
+                            }
+                        }
+                    },
+                    "selfFilterEnabled": {
+                        "type": {
+                            "operations": {
+                                "searchEnabled": true
+                            }
+                        }
+                    },
+                    "telemetry": {
+                        "displayName": "Telemetry",
+                        "description": "Enable telemetry logging",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "selection": {
+                "displayName": "Selection controls",
+                "properties": {
+                    "singleSelect": {
+                        "displayName": "Single Select",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ctrlSelect": {
+                        "displayName": "Multi-select with CTRL",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selectionType": {
+                        "displayName": "Selection type",
+                        "description": "- Standard: children are included in selection (if applicable)\n- Leafs only: only leafs/lowest level are selectable",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Standard",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "Leafs only",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "hideMembers": {
+                        "displayName": "Hide Members",
+                        "description": "Ragged/unbalanced hierarchies can be enabled by hidding members",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Never",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "Empty",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "Parent Name",
+                                    "value": "2"
+                                }
+                            ]
+                        }
+                    },
+                    "emptyLeafs": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "emptyString": {
+                        "displayName": "'' strings are empty",
+                        "description": "An 'blank' string is threated as an empty value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "emptyLeafLabel": {
+                        "displayName": "Empty leaf label",
+                        "description": "Replacement text for empty values",
+                        "placeHolderText": "(Blank)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "selectAll": {
+                        "displayName": "Select All",
+                        "description": "Show the 'Select All' member",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selectAllLabel": {
+                        "displayName": "Select All Label",
+                        "description": "Label for 'Select All' member",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "header": {
+                "displayName": "Slicer header",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "title": {
+                        "displayName": "Title",
+                        "placeHolderText": "Auto",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "restatement": {
+                        "displayName": "Show summary",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font color",
+                        "description": "Font color of the title",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hoverColor": {
+                        "displayName": "Hover",
+                        "description": "Title color of the cells when the mouse if hovered over",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "background": {
+                        "displayName": "Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontStyle": {
+                        "displayName": "Font style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "Italic",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "fontWeight": {
+                        "displayName": "Font weight",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Light",
+                                    "value": "200"
+                                },
+                                {
+                                    "displayName": "Normal",
+                                    "value": "400"
+                                },
+                                {
+                                    "displayName": "Semi bold",
+                                    "value": "600"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "value": "800"
+                                }
+                            ]
+                        }
+                    },
+                    "outline": {
+                        "displayName": "Outline",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Bottom only"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Top only"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "Left only"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "Right only"
+                                },
+                                {
+                                    "value": "5",
+                                    "displayName": "Top + bottom"
+                                },
+                                {
+                                    "value": "6",
+                                    "displayName": "Left + right"
+                                },
+                                {
+                                    "value": "7",
+                                    "displayName": "Frame"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "items": {
+                "displayName": "Items",
+                "properties": {
+                    "fontColor": {
+                        "displayName": "Font color",
+                        "description": "Font color of the cells",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "selectedColor": {
+                        "displayName": "Select color",
+                        "description": "Font color of the selected cells",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hoverColor": {
+                        "displayName": "Hover",
+                        "description": "Color of the cells when the mouse if hovered over",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "checkBoxColor": {
+                        "displayName": "Checkbox color",
+                        "description": "Color of the checkbox",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "scrollbarColor": {
+                        "displayName": "Scrollbar color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "background": {
+                        "displayName": "Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontStyle": {
+                        "displayName": "Font style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Normal",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "Italic",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "fontWeight": {
+                        "displayName": "Font weight",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Light",
+                                    "value": "200"
+                                },
+                                {
+                                    "displayName": "Normal",
+                                    "value": "400"
+                                },
+                                {
+                                    "displayName": "Semi bold",
+                                    "value": "600"
+                                },
+                                {
+                                    "displayName": "Bold",
+                                    "value": "800"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "search": {
+                "displayName": "Search",
+                "properties": {
+                    "addSelection": {
+                        "displayName": "Add to selection",
+                        "description": "Add search selection to \ncurrent selection (multiselect only)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font color",
+                        "description": "Font color of the search",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "iconColor": {
+                        "displayName": "Icon color",
+                        "description": "Color of the search icons",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line color",
+                        "description": "Color of the line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "background": {
+                        "displayName": "Background",
+                        "description": "Background color of the searchbox",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "mobile": {
+                "displayName": "Zoom mode",
+                "description": "Options related to the mobile friendly and focus views",
+                "properties": {
+                    "enable": {
+                        "displayName": "Enable",
+                        "description": "Toggle zoom view",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "title": {
+                        "displayName": "Header",
+                        "description": "Double tap to toggle zoom view",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "focus": {
+                        "displayName": "Focus mode",
+                        "description": "Enable zoom in Focus mode",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enLarge": {
+                        "displayName": "Enlarge",
+                        "description": "Amount of enlarging the font for zoom view",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "25",
+                                    "displayName": "Small (25%)"
+                                },
+                                {
+                                    "value": "50",
+                                    "displayName": "Normal (50%)"
+                                },
+                                {
+                                    "value": "100",
+                                    "displayName": "Large (100%)"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "tooltipSettings": {
+                "displayName": "Tooltip settings",
+                "description": "Additional options to configure the Tooltips",
+                "properties": {
+                    "icon": {
+                        "displayName": "Icon",
+                        "description": "Choose which icon should be drawn to show tooltips",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "Information",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "Triangle",
+                                    "value": "2"
+                                },
+                                {
+                                    "displayName": "Horizontal dots",
+                                    "value": "3"
+                                },
+                                {
+                                    "displayName": "Vertical dots",
+                                    "value": "4"
+                                }
+                            ]
+                        }
+                    },
+                    "color": {
+                        "displayName": "Icon color",
+                        "description": "Color of the tooltip icons",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "supportsHighlight": true,
+        "suppressDefaultTitle": true,
+        "supportsLandingPage": true,
+        "supportsKeyboardFocus": false,
+        "supportsSynchronizingFilterState": true,
+        "sorting": {
+            "default": {}
+        }
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

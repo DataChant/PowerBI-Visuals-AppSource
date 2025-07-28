@@ -1,0 +1,420 @@
+{
+    "visual": {
+        "name": "leafletReact",
+        "displayName": "React Leaflet Map",
+        "guid": "reactleafletMap_4AD8D1E1DA0943AEB18E1E59B92001A9",
+        "visualClassName": "Visual",
+        "version": "1.0.2025.14",
+        "description": "Leaflet Map using React Framework",
+        "supportUrl": "https://www.goldbergcf.com/contact",
+        "gitHubUrl": "https://github.com/jdgamsterdam/leafletReact"
+    },
+    "author": {
+        "name": "Jon Goldberg",
+        "email": "jdgamsterdam@gmail.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "indexcolumn",
+                "displayName": "Index Column-Required-Number",
+                "description": "Because of how Power BI works it is important to have a identifier for each unique LATLNG Row.  If not it may sum up those fields in an unintended Manner",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "markerlabel",
+                "displayName": "Start Marker Label",
+                "description": "The Label that will show up in the Pop-Up of the Marker. Also used for giving unique LAT-LNG",
+                "kind": "Measure"
+            },
+            {
+                "name": "relativestartmarkersize",
+                "description": "Size of the start marker based on the value in a column. This needs to be prepared (e.g. on a logrithmic scale) so values are not extremely different from one another ",
+                "displayName": "Relative Start Marker Size",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "latitude",
+                "displayName": "Latitude",
+                "description": "The Latitude of the Start Marker",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "longitude",
+                "displayName": "Longitude",
+                "description": "The Longitude of the Start Marker",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "tableicons",
+                "description": "The data column to get the URL or SVG of Icon for specific points",
+                "displayName": "Icons From Table for Start Marker",
+                "kind": "Measure"
+            },
+            {
+                "name": "endmarkerlabel",
+                "displayName": "End Marker Label",
+                "description": "The Label that will show up in the Pop-Up of the end point Marker. Also used for giving unique LAT-LNG",
+                "kind": "Measure"
+            },
+            {
+                "name": "relativeendmarkersize",
+                "description": "Size of the End marker based on the value in a column. This needs to be prepared (e.g. on a logrithmic scale) so values are not extremely different from one another ",
+                "displayName": "Relative End Marker Size",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "tolatitude",
+                "displayName": "To Latitude",
+                "description": "The Latitude of the End Marker when using Routes",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "tolongitude",
+                "displayName": "To Longitude",
+                "description": "The Longitude of the End Marker when using Routes",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "name": "relativeroutewidth",
+                "description": "Width of the Route line based on the value in a column. This needs to be prepared (e.g. on a logrithmic scale) so values are not extremely different from one another ",
+                "displayName": "Relative Route Width",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            }
+        ],
+        "objects": {
+            "leafletMapProperties": {
+                "description": "NOTE: Since objects are handled in the Settings.ts file now, the displayName of the property Group is not really needed in label or value. However the description does show on the tooltip. However the individual control description IS set from here",
+                "displayName": "Properties for the Map",
+                "properties": {
+                    "currentZoomLevel": {
+                        "description": "Zoom Level-Replaces Leaflet Control",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "centerLAT": {
+                        "description": "Map Center Latitude",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "centerLNG": {
+                        "description": "Map Center Longitude",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "leafletMarkerGeneral": {
+                "displayName": "Properties for All Markers",
+                "properties": {
+                    "horizontalMarkerOffset": {
+                        "description": "Horizontal offset of the Marker from the LATLNG",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "verticalMarkerOffset": {
+                        "description": "Vertical offset of the Marker from the LATLNG",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "leafletmarker": {
+                "displayName": "Start Marker Properties",
+                "properties": {
+                    "leafletMarkerName": {
+                        "description": "Choose a Built-in Marker",
+                        "type": {
+                            "enumeration": []
+                        }
+                    },
+                    "leafletMarkerSize": {
+                        "description": "The Size of the Marker",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "leafletMarkerFillColor": {
+                        "displayName": "Leaflet Marker Fill Color",
+                        "description": "The fill color of the Marker.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "leafletMarkerStrokeColor": {
+                        "displayName": "Leaflet Stroke Color",
+                        "description": "The stroke color of the Marker.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "leafletMarkerStrokeSize": {
+                        "displayName": "Leaflet Stroke Size",
+                        "description": "The stroke size of the Marker.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "leafletENDmarker": {
+                "displayName": "End Marker Properties",
+                "properties": {
+                    "leafletMarkerName": {
+                        "description": "Choose a Built-in Marker",
+                        "type": {
+                            "enumeration": []
+                        }
+                    },
+                    "leafletMarkerSize": {
+                        "description": "The Size of the Marker",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "leafletMarkerFillColor": {
+                        "displayName": "Leaflet Marker Fill Color",
+                        "description": "The fill color of the Marker.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "leafletMarkerStrokeColor": {
+                        "displayName": "Leaflet Stroke Color",
+                        "description": "The stroke color of the Marker.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "leafletMarkerStrokeSize": {
+                        "displayName": "Leaflet Stroke Size",
+                        "description": "The stroke size of the Marker.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "leafletlines": {
+                "displayName": "Line Properties",
+                "properties": {
+                    "leafletLineColor": {
+                        "displayName": "Leaflet Line Fill Color",
+                        "description": "Color of the Line",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "leafletLineWeight": {
+                        "displayName": "Leaflet Line Weight",
+                        "description": "How thick is the line",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "leafletLineOpacity": {
+                        "displayName": "Leaflet Line Opacity",
+                        "description": "How Transparent is the Line",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "label": {
+                "description": "NOTE: Since objects are handled in the Settings.ts file now, the displayName of the property is not really needed in label or value. However the description does show on the tooltip",
+                "displayName": "Label",
+                "properties": {
+                    "labelFontSize": {
+                        "description": "The Size of the Label Font",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "indexcolumn": {
+                            "min": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "indexcolumn"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "markerlabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "relativestartmarkersize"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "latitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "longitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tableicons"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "endmarkerlabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "relativeendmarkersize"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tolatitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tolongitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "relativeroutewidth"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": true,
+                "parameters": [
+                    "https://*.microsoft.com",
+                    "http://*.microsoft.com",
+                    "https://*.openstreetmap.org",
+                    "http://*.openstreetmap.org",
+                    "https://*.leafletjs.com",
+                    "http://*.leafletjs.com",
+                    "https://*.osm.org",
+                    "http://*.osm.org",
+                    "https://localhost",
+                    "http://localhost",
+                    "https://*.w3.org",
+                    "http://*.w3.org"
+                ]
+            }
+        ],
+        "supportsOnObjectFormatting": true,
+        "enablePointerEventsFormatMode": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
