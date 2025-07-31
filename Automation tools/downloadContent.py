@@ -11,8 +11,6 @@ import zipfile
 import json
 import base64
 from collections import defaultdict
-import datetime
-import re
 from urllib.parse import urljoin
 
 
@@ -39,31 +37,26 @@ def load_external_js_files():
     csv_path = os.path.join(workspace_path, "external_js_files.csv")
     
     if not os.path.exists(csv_path):
-        logger.info("No existing external_js_files.csv found. Starting with empty set.")
+        logger.debug("No existing external_js_files.csv found. Starting with empty set.")
         return
         
     try:
-        logger.info(f"Loading external JS files from: {csv_path}")
         with open(csv_path, 'r', encoding='utf-8') as f:
             content = f.read()
-            logger.info(f"CSV content length: {len(content)} bytes")
+            
             if not content.strip():
-                logger.info("CSV file is empty")
+                logger.debug("CSV file is empty")
                 return
                 
             f.seek(0)  # Reset file pointer to start
             reader = csv.DictReader(f)
-            headers = reader.fieldnames
-            logger.info(f"CSV headers: {headers}")
             
             for row in reader:
-                logger.info(f"Processing row: {row}")
                 if "JavaScript File" in row:
                     EXTERNAL_JS_FILES.add(row["JavaScript File"])
                 else:
                     logger.warning("Row missing 'JavaScript File' column")
                     
-        logger.info(f"Loaded {len(EXTERNAL_JS_FILES)} external JS files from existing CSV.")
     except Exception as e:
         logger.error(f"Error loading external JS files from CSV: {str(e)}")
         logger.exception("Detailed error:")
@@ -417,8 +410,6 @@ def extract_new_visual(filename: str) -> str:
     # The extracted folder will be named after the pbiviz file (without extension)
     base_name = os.path.basename(filename)[:-7]  # Remove '.pbiviz' extension
     
-    logger.info(f"Extracting visual: {base_name}")
-    
     unzip_folder = os.path.join(destination_path, base_name)
 
     # If already extracted, skip
@@ -426,6 +417,8 @@ def extract_new_visual(filename: str) -> str:
         logger.debug(f"Skipping {os.path.basename(filename)} - already extracted.")
         return unzip_folder
 
+    logger.info(f"Extracting visual: {base_name}")
+    
     # Copy .pbiviz file to .zip file
     zip_filename = os.path.splitext(filename)[0] + ".zip"
     shutil.copy2(filename, zip_filename)
@@ -459,6 +452,7 @@ def extract_new_visual(filename: str) -> str:
     if json_path:
         extract_and_save(json_path, unzip_folder)
         os.remove(json_path)  # Remove the pbiviz.json file after extraction
+        os.removedirs(resources_path)  # Remove the resources folder if empty
 
     return unzip_folder
 
@@ -526,7 +520,6 @@ def save_external_js_list():
         for js_file in sorted_files:
             writer.writerow([js_file])
             
-    logger.info(f"Saved external JS files list to {csv_path}")
 
 def extract_javascript(javascript, target_dir, filename):
     """Extract JavaScript code from the given base64 encoded or non-encoded string and save it to a file."""   
@@ -607,16 +600,12 @@ def collect_existing_external_js():
                     js_files = f.read().splitlines()
                     # Add non-empty lines to the global set
                     EXTERNAL_JS_FILES.update(line.strip() for line in js_files if line.strip())
-                    logger.info(f"Added {len(js_files)} JS files from {visual_dir}")
             except Exception as e:
                 logger.error(f"Error reading {js_file_path}: {str(e)}")
     
     # Save the collected files
     if EXTERNAL_JS_FILES:
         save_external_js_list()
-        logger.info(f"Collected {len(EXTERNAL_JS_FILES)} unique external JS files in total")
-    else:
-        logger.info("No external JS files found")
 
 if __name__ == "__main__":
     
