@@ -26,19 +26,16 @@ import os
 import subprocess
 from datetime import datetime
 
-LATEST_COMMIT_DATE = '2025-07-24'
-PREVIOUS_COMMIT_DATE = '2025-07-17'
+# Define the latest and previous commit dates
+LATEST_COMMIT_DATE = '2025-08-01'
+PREVIOUS_COMMIT_DATE = '2025-07-31'
 
-#
 import logging
 import csv
 import io
 import os
 import subprocess
 from datetime import datetime
-
-LATEST_COMMIT_DATE = '2025-07-25'
-PREVIOUS_COMMIT_DATE = '2025-07-24'
 
 # Set up logging
 logging.basicConfig(
@@ -360,7 +357,7 @@ def generate_diff_file():
                 writeDiff(file, "Other Changes", _other_changes, _latest_data)
                 
 
-        logger.info("Summary written to visual_summary_diff.txt")
+        logger.info("Summary written to visual_summary_diff.md")
     except Exception as e:
         logger.error("Failed to write summary file: %s", str(e))
 
