@@ -30,10 +30,9 @@ import logging
 import zipfile
 import json
 import base64
-from urllib.parse import urljoin
+import filecmp
 
-
-DOWNLOAD_ALL = False  # Set to True to download all visuals, False to only process existing files
+DOWNLOAD_ALL = False  # Set to True to download all visuals, False to only process changes since last run
 
 # Global set for unique external JS files
 EXTERNAL_JS_FILES = set()
@@ -50,11 +49,30 @@ file_handler = logging.FileHandler('visual_extraction.log')
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 logger.addHandler(file_handler)
 
+g_workspace_path = os.getcwd()
+g_all_visuals_path = os.path.join(g_workspace_path, "All Visuals")
+g_all_listed_path = os.path.join(g_workspace_path, "All Listed")
+g_unlisted_path = os.path.join(g_workspace_path, "Unlisted")
+g_certified_path = os.path.join(g_workspace_path, "Certified")
+g_uncertified_path = os.path.join(g_workspace_path, "Uncertified")
+
+g_extracted_path = os.path.join(g_workspace_path, "Extcracted")
+
+VERSIONS_SUBFOLDER = "PBIVIZ with versions"
+PBIVIZ_GUIDS_SUBFOLDER = "PBIVIZ with guid"
+PBIVIZ_SIMPLE_NAMES_SUBFOLDER = "PBIVIZ"
+PBIX_SUBFOLDER = "PBIX"
+IMAGES_SUBFOLDER = "Images"
+
+g_snapshot_data = []
+g_known_simple_filenames = set()
+g_known_guids = set()
+g_known_versioned_filenames = dict()
+
 def load_external_js_files():
     """Load existing external JS files from CSV if it exists."""
-    workspace_path = get_workspace_path()
-    csv_path = os.path.join(workspace_path, "external_js_files.csv")
-    
+    csv_path = os.path.join(g_workspace_path, "external_js_files.csv")
+
     if not path_exists(csv_path):
         logger.debug("No existing external_js_files.csv found. Starting with empty set.")
         return
@@ -84,22 +102,26 @@ def path_exists(file_path: str) -> bool:
     """Check if a file exists at the given path."""
     return Path(file_path).exists()
 
-def get_workspace_path() -> str:
-    """Get the workspace path, similar to ReplaceSharePointPathWithLocal in VBA."""
-    # For now, we'll use the current working directory
-    return os.getcwd()
+def ensure_directories() -> None:
+    """Create necessary directories if they don't exist."""
+    # Ensure the main directories exist
+    paths = [
+        g_all_visuals_path, g_all_listed_path, g_unlisted_path, g_certified_path, g_uncertified_path
+    ]
+    for path in paths:
+        ensure_directories_by_folder(path)
 
-def ensure_directories(base_folder: str) -> None:
+def ensure_directories_by_folder(base_folder: str) -> None:
+    
     """Create necessary directories if they don't exist."""
     subdirs = [
         "",
-        "PBIX",
-        "PBIVIZ",
-        "PBIVIZ with versions",
-        "PBIVIZ with guid",
-        "Images"
+        VERSIONS_SUBFOLDER,
+        PBIVIZ_GUIDS_SUBFOLDER,
+        PBIVIZ_SIMPLE_NAMES_SUBFOLDER,
+        PBIX_SUBFOLDER,
+        IMAGES_SUBFOLDER
     ]
-
     for subdir in subdirs:
         dir_path = os.path.join(base_folder, subdir)
         os.makedirs(dir_path, exist_ok=True)
@@ -128,174 +150,178 @@ def download_file(url: str, target_path: str) -> bool:
         logger.error(f"Failed to save file {target_path}: {str(e)}")
         return False
 
-def cleanup_files(workspace_path: str, mode: str, simple_filename: str, guid: str, is_certified: bool, versioned_filename: str) -> None:
-    """Clean up files from other directories based on certification status changes."""
-    if mode == "All Visuals":
-        # Clean up from Unlisted if file exists in All Visuals
-        unlisted_paths = [
-            os.path.join(workspace_path, "Unlisted", "PBIX", f"{simple_filename}.pbix"),
-            os.path.join(workspace_path, "Unlisted", "Images", f"{simple_filename}.png"),
-            os.path.join(workspace_path, "Unlisted", "PBIVIZ", f"{simple_filename}.pbiviz"),
-            os.path.join(workspace_path, "Unlisted", "PBIVIZ with guid", f"{guid}.pbiviz"),
-            os.path.join(workspace_path, "Unlisted", "PBIVIZ with versions", f"{versioned_filename}")      
-        ]
-        for path in unlisted_paths:
-            if path_exists(path):
-                try:
-                    os.remove(path)
-                    logging.info(f"Cleaned up unlisted file: {path}")
-                except Exception as e:
-                    logging.error(f"Failed to clean up {path}: {str(e)}")
-    
-    elif mode == "Certified" and is_certified:
-        # Clean up from Uncertified if file is now certified
-        uncert_paths = [
-            os.path.join(workspace_path, "Uncertified", "PBIX", f"{simple_filename}.pbix"),
-            os.path.join(workspace_path, "Uncertified", "Images", f"{simple_filename}.png"),
-            os.path.join(workspace_path, "Uncertified", "PBIVIZ", f"{simple_filename}.pbiviz"),
-            os.path.join(workspace_path, "Uncertified", "PBIVIZ with guid", f"{guid}.pbiviz")
-        ]
-        for path in uncert_paths:
-            if path_exists(path):
-                try:
-                    os.remove(path)
-                    logger.info(f"Cleaned up uncertified file: {path}")
-                except Exception as e:
-                    logger.error(f"Failed to clean up {path}: {str(e)}")
-    
-    elif mode == "Uncertified" and not is_certified:
-        # Clean up from Certified if file is now uncertified
-        cert_paths = [
-            os.path.join(workspace_path, "Certified", "PBIX", f"{simple_filename}.pbix"),
-            os.path.join(workspace_path, "Certified", "Images", f"{simple_filename}.png"),
-            os.path.join(workspace_path, "Certified", "PBIVIZ", f"{simple_filename}.pbiviz"),
-            os.path.join(workspace_path, "Certified", "PBIVIZ with guid", f"{guid}.pbiviz")
-        ]
-        for path in cert_paths:
-            if path_exists(path):
-                try:
-                    os.remove(path)
-                    logger.info(f"Cleaned up certified file: {path}")
-                except Exception as e:
-                    logger.error(f"Failed to clean up {path}: {str(e)}")
 
-def copy_files_from_all_visuals(workspace_path: str, mode: str, simple_filename: str, guid: str, versioned_filename: str) -> None:
-    """Copy files from All Visuals directory instead of downloading again."""
+def copy_file(src: str, dst: str, overwrite: bool = False) -> None:
+    """Copy a file from source to destination."""
+    if not path_exists(src):
+        raise FileNotFoundError(f"Source file does not exist: {src}")
+    
+    if path_exists(dst):
+        if not overwrite:
+            return
+        if filecmp.cmp(src, dst, shallow=False):
+            logger.debug(f"File {dst} already exists and is the same as {src}, skipping copy.")
+            return
+        else:
+            logger.debug(f"File {dst} exists but differs from {src}, overwriting.")
+
     try:
-        source_paths = {
-            "PBIVIZ with versions": (
-                os.path.join(workspace_path, "All Visuals", "PBIVIZ with versions", versioned_filename),
-                os.path.join(workspace_path, mode, "PBIVIZ with versions", versioned_filename)
-            ),
-            "PBIVIZ": (
-                os.path.join(workspace_path, "All Visuals", "PBIVIZ", f"{simple_filename}.pbiviz"),
-                os.path.join(workspace_path, mode, "PBIVIZ", f"{simple_filename}.pbiviz")
-            ),
-            "PBIVIZ with guid": (
-                os.path.join(workspace_path, "All Visuals", "PBIVIZ with guid", f"{guid}.pbiviz"),
-                os.path.join(workspace_path, mode, "PBIVIZ with guid", f"{guid}.pbiviz")
-            ),
-            "PBIX": (
-                os.path.join(workspace_path, "All Visuals", "PBIX", f"{simple_filename}.pbix"),
-                os.path.join(workspace_path, mode, "PBIX", f"{simple_filename}.pbix")
-            ),
-            "Images": (
-                os.path.join(workspace_path, "All Visuals", "Images", f"{simple_filename}.png"),
-                os.path.join(workspace_path, mode, "Images", f"{simple_filename}.png")
-            )
-        }
-
-        for file_type, (src, dst) in source_paths.items():
-            if path_exists(src):
-                shutil.copy2(src, dst)
-                logger.info(f"Copied {file_type} from All Visuals to {mode}")
-            else:
-                logger.warning(f"Source file not found: {src}")
-
+        # compare files using md5 and copy only if files are not the same
+        shutil.copy2(src, dst)
+        logger.info(f"Copied {src} to {dst}")
     except Exception as e:
-        logger.error(f"Failed to copy files from All Visuals: {str(e)}")
+        logger.error(f"Failed to copy {src} to {dst}: {str(e)}")
 
 
-def process_visuals(mode: str) -> None:
-    """Process visuals based on mode (All Visuals/Certified/Uncertified)."""
-    workspace_path = get_workspace_path()
-    base_folder = os.path.join(workspace_path, mode)
+def handle_visual_files(versioned_pbiviz: str, guid_filename:str, simple_filename: str, pbix_filename: str, image_filename: str, is_certified: bool) -> None:
+
+    global g_all_visuals_path, g_all_listed_path, g_certified_path, g_uncertified_path
+
+    src_pbiviz_path = os.path.join(g_all_visuals_path, VERSIONS_SUBFOLDER, versioned_pbiviz)
+    src_pbix_path = os.path.join(g_all_visuals_path, PBIX_SUBFOLDER, pbix_filename)
+    src_image_path = os.path.join(g_all_visuals_path, IMAGES_SUBFOLDER, image_filename)
+
+    certified_or_uncertified_path = g_certified_path if is_certified else g_uncertified_path
+    clean_certified_or_uncertified_path = g_certified_path if not is_certified else g_uncertified_path
+
+    overwrite = True
+    copy_paths = [
+        (overwrite, src_pbiviz_path, os.path.join(g_all_visuals_path, PBIVIZ_GUIDS_SUBFOLDER, guid_filename)),
+        (overwrite, src_pbiviz_path, os.path.join(g_all_visuals_path, PBIVIZ_SIMPLE_NAMES_SUBFOLDER, simple_filename)),
+        
+        (not overwrite, src_pbiviz_path, os.path.join(g_all_listed_path, VERSIONS_SUBFOLDER, versioned_pbiviz)),
+        (overwrite, src_pbiviz_path, os.path.join(g_all_listed_path, PBIVIZ_GUIDS_SUBFOLDER, guid_filename)),
+        (overwrite, src_pbiviz_path, os.path.join(g_all_listed_path, PBIVIZ_SIMPLE_NAMES_SUBFOLDER, simple_filename)),
+
+        (not overwrite, src_pbiviz_path, os.path.join(certified_or_uncertified_path, VERSIONS_SUBFOLDER, versioned_pbiviz)),
+        (overwrite, src_pbiviz_path, os.path.join(certified_or_uncertified_path, PBIVIZ_GUIDS_SUBFOLDER, guid_filename)),
+        (overwrite, src_pbiviz_path, os.path.join(certified_or_uncertified_path, PBIVIZ_SIMPLE_NAMES_SUBFOLDER, simple_filename)),    
+        
+        (overwrite, src_pbix_path, os.path.join(g_all_listed_path, PBIX_SUBFOLDER, pbix_filename)),
+        (overwrite, src_pbix_path, os.path.join(certified_or_uncertified_path, PBIX_SUBFOLDER, pbix_filename)),
+
+        (overwrite, src_image_path, os.path.join(g_all_listed_path, IMAGES_SUBFOLDER, image_filename)),
+        (overwrite,src_image_path, os.path.join(certified_or_uncertified_path, IMAGES_SUBFOLDER, image_filename))
+    ]   
     
-    # Ensure all required directories exist
-    ensure_directories(base_folder)
-    
+    for overwrite, src, dst in copy_paths:
+        copy_file(src, dst, overwrite)
+
+    delete_paths = [
+        os.path.join(clean_certified_or_uncertified_path, PBIVIZ_GUIDS_SUBFOLDER, guid_filename),
+        os.path.join(clean_certified_or_uncertified_path, PBIVIZ_SIMPLE_NAMES_SUBFOLDER, simple_filename),
+        os.path.join(clean_certified_or_uncertified_path, PBIX_SUBFOLDER, pbix_filename),
+        os.path.join(clean_certified_or_uncertified_path, IMAGES_SUBFOLDER, image_filename),
+    ]
+
+    # Remove files that are no longer needed
+    for file_to_delete in delete_paths:
+        try:
+            if path_exists(file_to_delete):
+                os.remove(file_to_delete)
+                logger.debug(f"Removed file: {file_to_delete}")
+        except Exception as e:
+            logger.error(f"Failed to remove {file_to_delete}: {str(e)}")
+
+
+def cleanup_unlisted(versioned_filename: str, guid: str, simple_filename: str) -> None:
+    """Clean up files from other directories based on certification status changes."""
+    # Clean up from Unlisted if file exists in All Visuals
+    unlisted_paths = [
+        os.path.join(g_unlisted_path, PBIX_SUBFOLDER, f"{simple_filename}.pbix"),
+        os.path.join(g_unlisted_path, IMAGES_SUBFOLDER, f"{simple_filename}.png"),
+        os.path.join(g_unlisted_path, PBIVIZ_SIMPLE_NAMES_SUBFOLDER, f"{simple_filename}.pbiviz"),
+        os.path.join(g_unlisted_path, PBIVIZ_GUIDS_SUBFOLDER, f"{guid}.pbiviz"),
+        os.path.join(g_unlisted_path, VERSIONS_SUBFOLDER, f"{versioned_filename}")
+    ]
+    for path in unlisted_paths:
+        if path_exists(path):
+            try:
+                os.remove(path)
+                logging.info(f"Cleaned up unlisted file: {path}")
+            except Exception as e:
+                logging.error(f"Failed to clean up {path}: {str(e)}")
+
+def initialize_snapshot_data() -> None:
     # Read the CSV file
-    csv_path = os.path.join(workspace_path, "Custom Visuals.csv")
+
+    global g_snapshot_data, g_known_simple_filenames, g_known_guids, g_known_versioned_filenames
+    csv_path = os.path.join(g_workspace_path, "Custom Visuals.csv")
     
     try:
+
         with open(csv_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            total_rows = sum(1 for row in reader)  # Count total rows
-            f.seek(0)  # Reset file pointer
-            next(reader)  # Skip header row
-            
-            for i, row in enumerate(reader, 1):
-                # Get values from the correct columns as per VBA
-                pbiviz_url = row.get('PBIVIZ', '')
-                pbix_url = row.get('PBIX', '')
-                simple_filename = row.get('Simple Filename', '')  # Short filename without version
-                is_certified = row.get('Certified', '').lower() == 'true'
-                versioned_filename = row.get('Filename', '')  # Full filename with version
-                image_url = row.get('Image', '')
-                guid = row.get('Visual GUID', '')
-
-                if not simple_filename or not versioned_filename:
-                    logger.error(f"Missing filename information, skipping row {i}")
-                    continue
-
-                # Skip rows based on certification status for specific modes
-                if (mode == "Certified" and not is_certified) or \
-                   (mode == "Uncertified" and is_certified):
-                    continue
-
-                # Check if file already exists
-                version_path = os.path.join(base_folder, 'PBIVIZ with versions', versioned_filename)
-                if path_exists(version_path) and not DOWNLOAD_ALL:
-                    logger.debug(f"Skipping existing file: {simple_filename} ({i}/{total_rows})")
-                    cleanup_files(workspace_path, mode, simple_filename, guid, is_certified, versioned_filename)
-                    continue
-
-                # Process based on mode
-                if mode != "All Visuals":
-                    logger.info(f"Copying files for {simple_filename} ({i}/{total_rows})")
-                    copy_files_from_all_visuals(workspace_path, mode, simple_filename, guid, versioned_filename)
-                else:
-                    # Download files for All Visuals mode
-                    logger.info(f"Downloading files for {simple_filename} ({i}/{total_rows})")
-                    
-                    # Download versioned PBIVIZ
-                    if pbiviz_url:
-                        download_file(pbiviz_url, version_path)
-                        
-                        # Copy to regular PBIVIZ and GUID folders
-                        pbiviz_path = os.path.join(base_folder, 'PBIVIZ', f"{simple_filename}.pbiviz")
-                        guid_path = os.path.join(base_folder, 'PBIVIZ with guid', f"{guid}.pbiviz")
-                        shutil.copy2(version_path, pbiviz_path)
-                        shutil.copy2(version_path, guid_path)
-
-                        extract_new_visual(version_path)
-
-                    # Download PBIX file
-                    if pbix_url:
-                        pbix_path = os.path.join(base_folder, 'PBIX', f"{simple_filename}.pbix")
-                        download_file(pbix_url, pbix_path)
-                    
-                    # Download Image
-                    if image_url:
-                        image_path = os.path.join(base_folder, 'Images', f"{simple_filename}.png")
-                        download_file(image_url, image_path)
-
-                # Clean up files from other directories based on certification status
-                cleanup_files(workspace_path, mode, simple_filename, guid, is_certified, versioned_filename)
-                    
+            for row in reader:
+                g_snapshot_data.append(row)
+    
     except Exception as e:
-        logger.error(f"Error processing {mode}: {str(e)}")
+        raise (f"Error processing file {csv_path}: {str(e)}")
+    
+    for row in g_snapshot_data:
+        simple_filename = row.get('Simple Filename', '').lower()  # Convert to lowercase
+        guid = row.get('Visual GUID', '').lower()  # Convert to lowercase
+        versioned_filename = row.get('Filename', '')
+        if simple_filename:
+            g_known_simple_filenames.add(simple_filename)
+        if guid:
+            g_known_guids.add(guid)
+            if versioned_filename:
+                g_known_versioned_filenames[versioned_filename] = guid
+       
 
+def process_visuals() -> None:
+    """Process visuals based on mode (All Visuals/Certified/Uncertified)."""
+    
+    i = 0
+    total_rows = len(g_snapshot_data)
+
+    for row in g_snapshot_data:
+        i += 1
+        
+        # Get values from the correct columns as per VBA
+        pbiviz_url = row.get('PBIVIZ', '')
+        pbix_url = row.get('PBIX', '')
+        simple_filename = row.get('Simple Filename', '')  # Short filename without version
+        is_certified = row.get('Certified', '').lower() == 'true'
+        versioned_filename = row.get('Filename', '')  # Full filename with version
+        image_url = row.get('Image', '')
+        guid = row.get('Visual GUID', '')
+        pbix_filename = f"{simple_filename}.pbix"
+        image_filename = f"{simple_filename}.png"
+        version_path = os.path.join(g_all_visuals_path, VERSIONS_SUBFOLDER, versioned_filename)
+        
+        if not simple_filename or not versioned_filename:
+            logger.error(f"Missing filename information, skipping row {i}")
+            continue
+
+        # Check if file already exists
+        new_download = False
+        if not path_exists(version_path) or DOWNLOAD_ALL:  
+            if pbiviz_url:
+                # Download versioned PBIVIZ
+                logger.info(f"Downloading files for {simple_filename}")
+                download_file(pbiviz_url, version_path)
+                extract_new_visual(version_path)
+                new_download = True
+            
+        # Download PBIX file
+        if pbix_url:
+            pbix_path = os.path.join(g_all_visuals_path, PBIX_SUBFOLDER, f"{pbix_filename}")
+            if new_download or (not path_exists(pbix_path)) or DOWNLOAD_ALL:
+                logger.info(f"Downloading PBIX file for {simple_filename}")
+                download_file(pbix_url, pbix_path)
+        
+        # Download Image
+        if image_url:
+            image_path = os.path.join(g_all_visuals_path, IMAGES_SUBFOLDER, f"{image_filename}")
+            if new_download or (not path_exists(image_path)) or DOWNLOAD_ALL:
+                logger.info(f"Downloading Image file for {simple_filename}")
+                download_file(image_url, image_path)    
+
+            
+        handle_visual_files(versioned_filename, guid, simple_filename, pbix_filename, image_filename, is_certified)
+        
 
 def move_file_to_unlisted(all_dir, listed_dir, unlisted_dir, folder, filename):
     # Move PBIVIZ file
@@ -324,45 +350,13 @@ def move_files(all_visuals_path, listed_path, unlisted_path, filename, subfolder
             
             move_file_to_unlisted(all_visuals_path, listed_path, unlisted_path, subfolder, filename)
             
+    
 
 def handle_unlisted_visuals() -> None:
     """Move visuals that are not in the CSV to the Unlisted folder."""
-    workspace_path = get_workspace_path()
-    all_visuals_path = os.path.join(workspace_path, "All Visuals")
-    all_listed_path = os.path.join(workspace_path, "All Listed")
-    unlisted_path = os.path.join(workspace_path, "Unlisted")
     
-    # Ensure sub directories exist
-    ensure_directories(all_visuals_path)
-    ensure_directories(all_listed_path)
-    ensure_directories(unlisted_path)
-    
-    # Read the CSV file to get the list of known visuals
-    csv_path = os.path.join(workspace_path, "Custom Visuals.csv")
-    known_simple_filenames = set()
-    known_guids = set()
-    known_versioned_filenames = dict()
-    
-    try:
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                simple_filename = row.get('Simple Filename', '').lower()  # Convert to lowercase
-                guid = row.get('Visual GUID', '').lower()  # Convert to lowercase
-                versioned_filename = row.get('Filename', '')
-                if simple_filename:
-                    known_simple_filenames.add(simple_filename)
-                if guid:
-                    known_guids.add(guid)
-                    if versioned_filename:
-                        known_versioned_filenames[versioned_filename] = guid
-
-    except Exception as e:
-        logger.error(f"Error reading CSV file: {str(e)}")
-        return
-
     # Process regular PBIVIZ files and associated files
-    pbiviz_dir = os.path.join(all_visuals_path, "PBIVIZ")
+    pbiviz_dir = os.path.join(g_all_visuals_path, PBIVIZ_SIMPLE_NAMES_SUBFOLDER)
     if not path_exists(pbiviz_dir):
         return
     
@@ -371,55 +365,53 @@ def handle_unlisted_visuals() -> None:
             continue
             
         simple_filename = filename[:-7].lower()  # Remove .pbiviz extension and convert to lowercase
-        if simple_filename in known_simple_filenames:
+        if simple_filename in g_known_simple_filenames:
             continue
 
         # Move PBIVIZ file
-        move_file_to_unlisted(all_visuals_path, all_listed_path, unlisted_path, "PBIVIZ", filename)
+        move_file_to_unlisted(g_all_visuals_path, g_all_listed_path, g_unlisted_path, "PBIVIZ", filename)
         
         # Move associated PNG and PBIX files
-        move_files(all_visuals_path, all_listed_path, unlisted_path, filename, "Images", "png")
-        move_files(all_visuals_path, all_listed_path, unlisted_path, filename, "PBIX", "pbix")
+        move_files(g_all_visuals_path, g_all_listed_path, g_unlisted_path, filename, "Images", "png")
+        move_files(g_all_visuals_path, g_all_listed_path, g_unlisted_path, filename, "PBIX", "pbix")
                
     # Process GUID-based PBIVIZ files
-    guid_dir = os.path.join(all_visuals_path, "PBIVIZ with guid")
+    guid_dir = os.path.join(g_all_visuals_path, PBIVIZ_GUIDS_SUBFOLDER)
     
     for filename in os.listdir(guid_dir):
         if not filename.lower().endswith('.pbiviz'):  # Case-insensitive check
             continue
             
         guid = filename[:-7].lower()  # Remove .pbiviz extension and convert to lowercase
-        if guid not in known_guids:
+        if guid not in g_known_guids:
             logger.info(f"Moving unlisted GUID visual: {filename}")
             
-            move_file_to_unlisted(all_visuals_path, all_listed_path, unlisted_path, "PBIVIZ with guid", filename)
+            move_file_to_unlisted(g_all_visuals_path, g_all_listed_path, g_unlisted_path, PBIVIZ_GUIDS_SUBFOLDER, filename)
             
             
     # Process versioned PBIVIZ files
-    versioned_pbiviz_dir = os.path.join(all_visuals_path, "PBIVIZ with versions")
+    versioned_pbiviz_dir = os.path.join(g_all_visuals_path, VERSIONS_SUBFOLDER)
     for filename in os.listdir(versioned_pbiviz_dir):
         if not filename.lower().endswith('.pbiviz'):  # Case-insensitive check
             continue
         
-        guid_found = known_versioned_filenames.get(filename, None)
+        guid_found = g_known_versioned_filenames.get(filename, None)
         
-        if guid_found and guid_found in known_guids:
+        if guid_found and guid_found in g_known_guids:
             # This versioned visual is known. We skip it
             continue
             
-        move_file_to_unlisted(all_visuals_path, all_listed_path, unlisted_path, "PBIVIZ with versions", filename)
+        move_file_to_unlisted(g_all_visuals_path, g_all_listed_path, g_unlisted_path, VERSIONS_SUBFOLDER, filename)
 
-    pass    
+    
 
 
 def scan_unarchived_visuals(parent_folder) -> None:
     """Scan for unarchived visuals and extract their versions."""
-    workspace_path = get_workspace_path()
-    all_visuals_path = os.path.join(workspace_path, parent_folder, "PBIVIZ with versions")
+    all_visuals_path = os.path.join(g_workspace_path, parent_folder, VERSIONS_SUBFOLDER)
     
     # Ensure the destination directory exists
-    destination_path = os.path.join(workspace_path,"Extracted")
-    os.makedirs(destination_path, exist_ok=True)
+    os.makedirs(g_extracted_path, exist_ok=True)
     
     # Scan for .pbiviz files in the All Visuals directory
     for root, _, files in os.walk(all_visuals_path):
@@ -435,8 +427,7 @@ def scan_unarchived_visuals(parent_folder) -> None:
 def extract_new_visual(filename: str) -> str:
   
     # Define the root and repo folders as in the PowerShell script
-    workspace_path = get_workspace_path()
-    destination_path = os.path.join(workspace_path, "Extracted")
+    destination_path = os.path.join(g_workspace_path, "Extracted")
 
     if not path_exists(destination_path):
         os.makedirs(destination_path)
@@ -540,10 +531,9 @@ def handle_external_javascripts(external_js_files, parent_dir):
 
 def save_external_js_list():
     """Save the list of all unique external JS files with their URLs."""
-    workspace_path = get_workspace_path()
     
     # Create the CSV file
-    csv_path = os.path.join(workspace_path, "external_js_files.csv")
+    csv_path = os.path.join(g_workspace_path, "external_js_files.csv")
     
     with open(csv_path, "w", encoding="utf-8", newline='') as f:
         writer = csv.writer(f)
@@ -587,41 +577,9 @@ def extract_css(css, target_dir, filename):
     except Exception as e:
         logger.error(f"Error saving CSS file {path}: {str(e)}")
 
-
-
-def main():
-    """Main function to orchestrate the download process."""
-    try:
-        # Load existing external JS files from root folder
-        load_external_js_files()
-
-        # Collect existing external JS files
-        collect_existing_external_js()
-        
-        # Process all categories
-        process_visuals("All Visuals")
-        process_visuals("All Listed")
-        process_visuals("Certified")
-        process_visuals("Uncertified")
-        
-        # Handle unlisted visuals
-        handle_unlisted_visuals()
-        
-        scan_unarchived_visuals("All Visuals")
-        scan_unarchived_visuals("Unlisted")
-        
-        # Save the external JS list
-        save_external_js_list()
-        
-        logger.info("Download process completed successfully")
-        
-    except Exception as e:
-        logger.error(f"Main process error: {str(e)}")
-
 def collect_existing_external_js():
     """One-time function to collect all external JS files from extracted visuals."""
-    workspace_path = get_workspace_path()
-    extracted_path = os.path.join(workspace_path, "Extracted")
+    extracted_path = os.path.join(g_workspace_path, "Extracted")
     
     if not path_exists(extracted_path):
         logger.info("No Extracted directory found.")
@@ -642,6 +600,38 @@ def collect_existing_external_js():
     # Save the collected files
     if EXTERNAL_JS_FILES:
         save_external_js_list()
+
+
+def main():
+    """Main function to orchestrate the download process."""
+    try:
+        ensure_directories()
+
+        initialize_snapshot_data()
+
+        # Load existing external JS files from root folder
+        load_external_js_files()
+
+        # Collect existing external JS files
+        collect_existing_external_js()
+        
+        # Process all categories
+        process_visuals()
+        
+        # Handle unlisted visuals
+        handle_unlisted_visuals()
+
+        scan_unarchived_visuals("All Visuals")
+        scan_unarchived_visuals("Unlisted")
+        
+        # Save the external JS list
+        save_external_js_list()
+        
+        logger.info("Download process completed successfully")
+        
+    except Exception as e:
+        logger.error(f"Main process error: {str(e)}")
+
 
 if __name__ == "__main__":
     
