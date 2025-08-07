@@ -67,7 +67,6 @@ IMAGES_SUBFOLDER = "Images"
 g_snapshot_data = []
 g_known_simple_filenames = set()
 g_known_guids = set()
-g_known_versioned_filenames = dict()
 
 def load_external_js_files():
     """Load existing external JS files from CSV if it exists."""
@@ -245,7 +244,7 @@ def cleanup_unlisted(versioned_filename: str, guid: str, simple_filename: str) -
 def initialize_snapshot_data() -> None:
     # Read the CSV file
 
-    global g_snapshot_data, g_known_simple_filenames, g_known_guids, g_known_versioned_filenames
+    global g_snapshot_data, g_known_simple_filenames, g_known_guids
     csv_path = os.path.join(g_workspace_path, "Custom Visuals.csv")
     
     try:
@@ -261,13 +260,11 @@ def initialize_snapshot_data() -> None:
     for row in g_snapshot_data:
         simple_filename = row.get('Simple Filename', '').lower()  # Convert to lowercase
         guid = row.get('Visual GUID', '').lower()  # Convert to lowercase
-        versioned_filename = row.get('Filename', '')
         if simple_filename:
             g_known_simple_filenames.add(simple_filename)
         if guid:
             g_known_guids.add(guid)
-            if versioned_filename:
-                g_known_versioned_filenames[versioned_filename] = guid
+            
        
 
 def process_visuals() -> None:
@@ -400,9 +397,16 @@ def handle_unlisted_visuals() -> None:
         if not filename.lower().endswith('.pbiviz'):  # Case-insensitive check
             continue
         
-        guid_found = g_known_versioned_filenames.get(filename, None)
-        
-        if guid_found and guid_found in g_known_guids:
+        guid_in_file = ""
+        # Extract GUID by removing the last version part and .pbiviz extension
+        # Split by dots and take all but the last 5 parts (4 version digits + "pbiviz")
+        filename_parts = filename.split('.')
+        if len(filename_parts) >= 6:  # Ensure we have enough parts to remove 5
+            guid_in_file = '.'.join(filename_parts[:-5]).lower()
+        else:
+            guid_in_file = filename[:-7].lower()  # Fallback: just remove .pbiviz
+
+        if guid_in_file in g_known_guids:
             # This versioned visual is known. We skip it
             continue
             
