@@ -27,7 +27,7 @@ Q: What are the benefits of downloading the PBIVIZ files from this repository an
 
 Q: Can I find in this repository older pbiviz files that are no longer available by Microsoft?
 
-> A: Yes. You will find all versions of the visuals since January 2024 under **PBIVIZ with versions** subfolder that is under **All Visuals**,**Certified**, and **Uncertified** folders. In addition, if the visuals are no longer on AppSource, you will find their last version under the **Unlisted** [folder](https://github.com/DataChant/PowerBI-Visuals-AppSource/tree/main/Unlisted).
+> A: Yes. You will find all versions of the visuals since January 2024 under **PBIVIZ with versions** subfolder that is under **All Listed**, **All Visuals**,**Certified**, and **Uncertified** folders. In addition, if the visuals are no longer on AppSource, you will find their last version under the **Unlisted** [folder](https://github.com/DataChant/PowerBI-Visuals-AppSource/tree/main/Unlisted).
 
 Q: What is the difference between the visual files in **PBIVIZ** and the ones in **PBIVIZ with versions** subfolder?
 > A: The same visuals exist in both subfolders. However, in PBIVIZ subfolder, we store the latest version of each visual in a user-friendly filename. In PBIVIZ with versions, each visual may have multiple files with the versions in the filename suffix.
