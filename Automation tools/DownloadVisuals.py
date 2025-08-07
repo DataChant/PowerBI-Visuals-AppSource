@@ -297,6 +297,7 @@ def process_visuals() -> None:
 
         # Check if file already exists
         new_download = False
+        downloaded = False
         if not path_exists(version_path) or DOWNLOAD_ALL:  
             if pbiviz_url:
                 # Download versioned PBIVIZ
@@ -304,6 +305,7 @@ def process_visuals() -> None:
                 download_file(pbiviz_url, version_path)
                 extract_new_visual(version_path)
                 new_download = True
+                downloaded = True
             
         # Download PBIX file
         if pbix_url:
@@ -311,16 +313,19 @@ def process_visuals() -> None:
             if new_download or (not path_exists(pbix_path)) or DOWNLOAD_ALL:
                 logger.info(f"Downloading PBIX file for {simple_filename}")
                 download_file(pbix_url, pbix_path)
+                downloaded = True
         
         # Download Image
         if image_url:
             image_path = os.path.join(g_all_visuals_path, IMAGES_SUBFOLDER, f"{image_filename}")
             if new_download or (not path_exists(image_path)) or DOWNLOAD_ALL:
                 logger.info(f"Downloading Image file for {simple_filename}")
-                download_file(image_url, image_path)    
+                download_file(image_url, image_path)
+                downloaded = True  
 
             
-        handle_visual_files(versioned_filename, guid, simple_filename, pbix_filename, image_filename, is_certified)
+        if downloaded:
+            handle_visual_files(versioned_filename, guid, simple_filename, pbix_filename, image_filename, is_certified)
         
 
 def move_file_to_unlisted(all_dir, listed_dir, unlisted_dir, folder, filename):

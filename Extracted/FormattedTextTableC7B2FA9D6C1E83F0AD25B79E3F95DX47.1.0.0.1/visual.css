@@ -1,0 +1,1147 @@
+/*
+*  Power BI Visualizations
+*
+*  Copyright (c) Microsoft Corporation
+*  All rights reserved.
+*  MIT License
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy
+*  of this software and associated documentation files (the ""Software""), to deal
+*  in the Software without restriction, including without limitation the rights
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is
+*  furnished to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+*  THE SOFTWARE.
+*/
+p {
+  font-size: 15px;
+  font-weight: 500;
+}
+.controls-container {
+  position: absolute;
+  top: var(--controls-margin, 20px);
+  left: var(--controls-margin, 20px);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--controls-gap, 8px);
+  padding: var(--controls-padding, 8px);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: var(--controls-border-radius, 8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.control-button {
+  width: var(--control-button-size, 36px);
+  height: var(--control-button-size, 36px);
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: calc(var(--control-button-size, 36px) * 0.167);
+  /* Dynamic border-radius */
+  font-size: var(--control-button-font-size, 18px);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  color: #374151;
+  user-select: none;
+}
+.control-button:hover {
+  background-color: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+.control-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: #f1f5f9;
+}
+.minimap-container {
+  pointer-events: none;
+}
+.minimap-background {
+  fill: rgba(255, 255, 255, 0.95);
+  stroke: rgba(0, 0, 0, 0.12);
+  stroke-width: 1;
+  rx: 8;
+  ry: 8;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+.minimap-viewport {
+  fill: rgba(99, 102, 241, 0.15);
+  stroke: #6366f1;
+  stroke-width: 1.5;
+  rx: 4;
+  ry: 4;
+  stroke-dasharray: 3,2;
+  opacity: 0.8;
+}
+.minimap-node {
+  stroke: #ffffff;
+  stroke-width: 0.5;
+  opacity: 0.7;
+}
+.minimap-edge {
+  opacity: 0.4;
+  stroke-width: 1;
+}
+.legend-container {
+  position: absolute;
+  top: 20px;
+  right: var(--node-legend-right-offset, 20px);
+  z-index: 9999;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  padding: var(--legend-padding, 12px);
+  font-size: var(--legend-font-size, 13px);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  max-width: var(--legend-max-width, 200px);
+  pointer-events: auto;
+  display: var(--legend-display, none);
+  /* Responsive display control */
+}
+.legend-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #000000 !important;
+  /* Force black text for maximum visibility */
+  font-size: calc(var(--legend-font-size, 13px) + 1px);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+.legend-item:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+.legend-item.selected {
+  background-color: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.5);
+}
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.legend-text {
+  color: #000000 !important;
+  /* Force black text for maximum visibility */
+  font-size: calc(var(--legend-font-size, 13px) - 1px);
+  line-height: 1.2;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Edge legend with responsive styling */
+.edge-legend-container {
+  position: absolute;
+  top: var(--edge-legend-top-offset, 20px);
+  right: var(--edge-legend-right-offset, 20px);
+  z-index: 9999;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  padding: var(--legend-padding, 12px);
+  font-size: var(--legend-font-size, 13px);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  max-width: var(--legend-max-width, 200px);
+  pointer-events: auto;
+  display: var(--legend-display, none);
+  /* Responsive display control */
+}
+/* Edge legend shares same item styling */
+.edge-legend-container .legend-title,
+.edge-legend-container .legend-item,
+.edge-legend-container .legend-swatch,
+.edge-legend-container .legend-text {
+  /* Inherit same styles as regular legend */
+}
+/* Responsive legend positioning is now handled via CSS custom properties set by TypeScript */
+/* The Modal (background) */
+.modal {
+  position: fixed;
+  /* Stay in place */
+  left: 0;
+  top: 0;
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  cursor: context-menu;
+  overflow-y: auto;
+}
+/* Modal Content/Box */
+.modal-content {
+  margin: auto;
+  background-color: rgba(243, 242, 241, 0.9);
+  max-width: 180px;
+  min-width: 155px;
+  max-height: 300px;
+  border: 2px solid #22326e;
+  border-radius: 0.2em;
+  padding: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+.modal-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  /* between paragraphs */
+}
+.visual-version {
+  font-size: 10px;
+  font-weight: normal;
+  margin-top: 0px;
+}
+.modal-text {
+  font-size: 12px;
+  font-weight: normal;
+  text-align: center;
+}
+#buy_license {
+  background-color: #22326e;
+  border: 1px solid #44546A;
+  border-radius: 0.5em;
+  color: white;
+  padding: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+  display: block;
+  margin-left: 10%;
+  margin-right: 10%;
+  cursor: pointer;
+}
+#buy_license:hover {
+  background-color: rgba(243, 242, 241, 0.9);
+  color: #22326e;
+  border: 1px solid #22326e;
+  cursor: pointer;
+}
+.svg_image {
+  margin-top: 50px;
+  float: left;
+  background-image: url(data:image/png;base64,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);
+  background-size: contain;
+}
+.copyright {
+  font-size: 10px;
+  font-weight: normal;
+  margin-top: 60px;
+  padding-left: 50px;
+}
+#close {
+  position: absolute;
+  margin: auto;
+  font-size: 24px;
+  transform: rotate(45deg);
+  top: -5px;
+  right: 0px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#close:hover {
+  color: #808080;
+}
+.modal-content-pro {
+  margin: auto;
+  position: relative;
+}
+.key-icon {
+  text-align: center;
+  font-size: 35px;
+  margin-bottom: 0px;
+  /* between paragraphs */
+}
+.pro-text {
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 2px;
+  /* between paragraphs */
+}
+#info {
+  font-size: 12px;
+  text-align: center;
+  border: 1px solid #44546A;
+  cursor: pointer;
+  padding: 3px 3px;
+  transition: 0.1s;
+  border-radius: 0.3em;
+}
+#info:hover {
+  color: #6b6b6b;
+  border: 1px solid #6b6b6b;
+}
+.lock {
+  background: #444444;
+  border-radius: 3px;
+  width: 25px;
+  height: 20px;
+  margin: auto;
+  position: relative;
+}
+.lock:before {
+  content: "";
+  display: block;
+  position: absolute;
+  border: 3px solid #444444;
+  top: -14px;
+  left: 2.3px;
+  width: 15px;
+  height: 27px;
+  border-radius: 35px 35px 0 0;
+}
+.watermark-icon {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  cursor: context-menu;
+  background-image: url(data:image/png;base64,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);
+  background-size: contain;
+}
+.watermark-text {
+  position: absolute;
+  font-size: 12px;
+  right: 32px;
+  bottom: -3px;
+  cursor: context-menu;
+}
+svg {
+  cursor: context-menu;
+}
+/* Cursor styles for zoom/pan interactions */
+.pannable {
+  cursor: grab;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+}
+.panning {
+  cursor: grabbing !important;
+  cursor: -webkit-grabbing !important;
+  cursor: -moz-grabbing !important;
+}
+.bubble_group {
+  cursor: pointer;
+}
+/* Node hover effect - blue frame */
+.node-element {
+  cursor: pointer;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+.node-element:hover {
+  stroke: #6366f1 !important;
+  stroke-width: 3px !important;
+  stroke-opacity: 1 !important;
+}
+/* Edge hover effect - blue outline */
+.edge-path {
+  cursor: pointer;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+.edge-path:hover {
+  stroke: #6366f1 !important;
+  stroke-width: 4px !important;
+  stroke-opacity: 1 !important;
+}
+/* Rich Text Tooltip Styling */
+.powerbi-tooltip .powerbi-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 12px;
+}
+.powerbi-tooltip .powerbi-table .powerbi-table-header,
+.powerbi-tooltip .powerbi-table .powerbi-table-cell {
+  padding: 6px 8px;
+  border: 1px solid #e1e5e9;
+  text-align: left;
+}
+.powerbi-tooltip .powerbi-table .powerbi-table-header {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+.powerbi-tooltip .powerbi-table .powerbi-table-cell {
+  background-color: #fff;
+  color: #212529;
+}
+.powerbi-tooltip .powerbi-code {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 3px;
+  color: #e83e8c;
+  font-family: 'Courier New', Monaco, monospace;
+  font-size: 11px;
+  padding: 2px 4px;
+}
+.powerbi-tooltip .powerbi-pre {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-family: 'Courier New', Monaco, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+.powerbi-tooltip .powerbi-blockquote {
+  border-left: 4px solid #007acc;
+  margin: 8px 0;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  font-style: italic;
+  color: #495057;
+}
+.powerbi-tooltip .powerbi-link {
+  color: #007acc;
+  text-decoration: none;
+}
+.powerbi-tooltip .powerbi-link:hover {
+  text-decoration: underline;
+}
+/* Slack-specific styling */
+.powerbi-slack-content .powerbi-slack-user-mention,
+.powerbi-slack-content .powerbi-slack-channel-mention,
+.powerbi-slack-content .powerbi-slack-usergroup-mention {
+  background-color: #e8f4fd;
+  color: #1264a3;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+  font-size: 11px;
+}
+.powerbi-slack-content .powerbi-slack-date {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #495057;
+}
+.powerbi-slack-content .s-emoji {
+  font-size: 14px;
+  margin: 0 2px;
+}
+/* Teams-specific styling */
+.powerbi-teams-content .powerbi-teams-mention {
+  background-color: #e8f3ff;
+  color: #0078d4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 11px;
+  border: 1px solid #deecf9;
+}
+.powerbi-teams-content .powerbi-teams-adaptive-card {
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 8px;
+  margin: 6px 0;
+  background-color: #f8f9fa;
+}
+.powerbi-teams-content .powerbi-teams-adaptive-card .card-title {
+  font-weight: 600;
+  color: #323130;
+  margin-bottom: 4px;
+}
+/* Confluence-specific styling */
+.powerbi-confluence-content .powerbi-confluence-panel {
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-left: 4px solid;
+}
+.powerbi-confluence-content .powerbi-confluence-panel.powerbi-confluence-info {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  color: #1565c0;
+}
+.powerbi-confluence-content .powerbi-confluence-panel.powerbi-confluence-warning {
+  background-color: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
+}
+.powerbi-confluence-content .powerbi-confluence-panel.powerbi-confluence-tip {
+  background-color: #f1f8e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+.powerbi-confluence-content .powerbi-confluence-panel.powerbi-confluence-note {
+  background-color: #fafafa;
+  border-color: #757575;
+  color: #424242;
+}
+.powerbi-confluence-content .powerbi-confluence-mention {
+  background-color: #e8f4fd;
+  color: #1264a3;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+  font-size: 11px;
+}
+/* Jira-specific styling */
+.powerbi-jira-content .powerbi-jira-issue-link {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 11px;
+  border: 1px solid #bbdefb;
+}
+.powerbi-jira-content .powerbi-jira-issue-link:hover {
+  background-color: #bbdefb;
+}
+.powerbi-jira-content .powerbi-jira-status {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.powerbi-jira-content .powerbi-jira-status.powerbi-jira-status-todo {
+  background-color: #f5f5f5;
+  color: #666;
+}
+.powerbi-jira-content .powerbi-jira-status.powerbi-jira-status-inprogress {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+.powerbi-jira-content .powerbi-jira-status.powerbi-jira-status-done {
+  background-color: #e8f5e8;
+  color: #388e3c;
+}
+.powerbi-jira-content .powerbi-jira-priority {
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.powerbi-jira-content .powerbi-jira-priority.powerbi-jira-priority-1 {
+  background-color: #e8f5e8;
+  color: #388e3c;
+}
+.powerbi-jira-content .powerbi-jira-priority.powerbi-jira-priority-2 {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+.powerbi-jira-content .powerbi-jira-priority.powerbi-jira-priority-3 {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+.powerbi-jira-content .powerbi-jira-mention {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+  font-size: 11px;
+}
+.powerbi-jira-content .powerbi-jira-label {
+  background-color: #e0e0e0;
+  color: #424242;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 500;
+  margin: 0 2px;
+}
+.powerbi-jira-content .powerbi-jira-time-tracking {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #495057;
+  font-family: monospace;
+}
+/* RTF-specific styling */
+.powerbi-rtf-content .powerbi-rtf-paragraph {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+.powerbi-rtf-content .powerbi-rtf-bold {
+  font-weight: 600;
+}
+.powerbi-rtf-content .powerbi-rtf-italic {
+  font-style: italic;
+}
+.powerbi-rtf-content .powerbi-rtf-underline {
+  text-decoration: underline;
+}
+.powerbi-rtf-content .powerbi-rtf-strikethrough {
+  text-decoration: line-through;
+}
+.powerbi-rtf-content .powerbi-rtf-table {
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 11px;
+}
+.powerbi-rtf-content .powerbi-rtf-table .powerbi-rtf-th,
+.powerbi-rtf-content .powerbi-rtf-table .powerbi-rtf-td {
+  border: 1px solid #dee2e6;
+  padding: 4px 8px;
+}
+.powerbi-rtf-content .powerbi-rtf-table .powerbi-rtf-th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+/* General rich text formatting */
+.rich-text-tooltip {
+  max-width: 300px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.rich-text-tooltip h1,
+.rich-text-tooltip h2,
+.rich-text-tooltip h3,
+.rich-text-tooltip h4,
+.rich-text-tooltip h5,
+.rich-text-tooltip h6 {
+  margin: 8px 0 4px 0;
+  font-weight: 600;
+  color: #212529;
+}
+.rich-text-tooltip h1 {
+  font-size: 16px;
+}
+.rich-text-tooltip h2 {
+  font-size: 14px;
+}
+.rich-text-tooltip h3 {
+  font-size: 13px;
+}
+.rich-text-tooltip h4,
+.rich-text-tooltip h5,
+.rich-text-tooltip h6 {
+  font-size: 12px;
+}
+.rich-text-tooltip p {
+  margin: 4px 0;
+}
+.rich-text-tooltip ul,
+.rich-text-tooltip ol {
+  margin: 4px 0;
+  padding-left: 16px;
+}
+.rich-text-tooltip ul li,
+.rich-text-tooltip ol li {
+  margin: 2px 0;
+}
+.rich-text-tooltip strong {
+  font-weight: 600;
+  color: #212529;
+}
+.rich-text-tooltip em {
+  font-style: italic;
+  color: #495057;
+}
+.rich-text-tooltip code {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 3px;
+  color: #e83e8c;
+  font-family: 'Courier New', Monaco, monospace;
+  font-size: 11px;
+  padding: 1px 3px;
+}
+/* Table Visual Styling */
+.table-visual-container {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  /* Error and status messages */
+  /* Parse error styling */
+  /* Loading state */
+}
+.table-visual-container .powerbi-table-container {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+.table-visual-container .powerbi-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.table-visual-container .powerbi-table-container::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+.table-visual-container .powerbi-table-container::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 4px;
+}
+.table-visual-container .powerbi-table-container::-webkit-scrollbar-thumb:hover {
+  background-color: #a8a8a8;
+}
+.table-visual-container .powerbi-formatted-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: none;
+  /* Responsive breakpoints */
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header {
+  background-color: #f3f2f1;
+  border-bottom: 2px solid #a19f9d;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-header-cell,
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-row-number-header {
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: bold;
+  color: #252423;
+  border-right: 1px solid #c8c6c4;
+  background-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-header-cell:hover,
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-row-number-header:hover {
+  background-color: #e6e6e6;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-header-cell:last-child,
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-row-number-header:last-child {
+  border-right: none;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-header-cell .powerbi-header-content,
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-row-number-header .powerbi-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-header-cell .powerbi-header-content .powerbi-header-title,
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-row-number-header .powerbi-header-content .powerbi-header-title {
+  font-weight: bold;
+  color: #252423;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-header-cell .powerbi-header-content .powerbi-format-indicator,
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-row-number-header .powerbi-header-content .powerbi-format-indicator {
+  font-size: 10px;
+  color: #6c757d;
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 8px;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-header-cell .powerbi-header-content .powerbi-sort-icon,
+.table-visual-container .powerbi-formatted-table .powerbi-table-header .powerbi-header-row .powerbi-row-number-header .powerbi-header-content .powerbi-sort-icon {
+  margin-left: 4px;
+  color: #6c757d;
+  font-size: 12px;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row {
+  border-bottom: 1px solid #c8c6c4;
+  transition: background-color 0.2s ease;
+  background-color: #ffffff;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row:hover {
+  background-color: #e6e6e6;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row:nth-child(even) {
+  background-color: #f3f2f1;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row:nth-child(even):hover {
+  background-color: #e6e6e6;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row.powerbi-row-selected {
+  background-color: #c7e0f4;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row.powerbi-row-selected:hover {
+  background-color: #b2d4f0;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row.powerbi-row-highlighted {
+  background-color: #fff3cd;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row.powerbi-row-highlighted:hover {
+  background-color: #ffeaa7;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row.powerbi-row-alternate {
+  background-color: #f3f2f1;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row.powerbi-row-alternate:hover {
+  background-color: #e6e6e6;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number {
+  padding: 8px 10px;
+  border-right: 1px solid #c8c6c4;
+  vertical-align: top;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell:last-child,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number:last-child {
+  border-right: none;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content {
+  line-height: 1.4;
+  color: #252423;
+  /* Rich text elements */
+  /* Tables within cells */
+  /* Slack-specific styling */
+  /* Teams-specific styling */
+  /* Jira-specific styling */
+  /* Confluence-specific styling */
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h1,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h1,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h2,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h2,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h3,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h3,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h4,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h4,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h5,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h5,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h6,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h6 {
+  margin: 0 0 8px 0;
+  color: #495057;
+  font-weight: 600;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h1,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h1 {
+  font-size: 1.25em;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h2,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h2 {
+  font-size: 1.15em;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h3,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h3 {
+  font-size: 1.1em;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h4,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h4,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h5,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h5,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content h6,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content h6 {
+  font-size: 1em;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content p,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content p {
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content ul,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content ul,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content ol,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content ol {
+  margin: 0 0 8px 16px;
+  padding-left: 16px;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content li,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content li {
+  margin-bottom: 4px;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content blockquote,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content blockquote {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-left: 4px solid #007acc;
+  background-color: #f8f9fa;
+  color: #495057;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content code,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content code {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  color: #e83e8c;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content pre,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content pre {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content a,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content a {
+  color: #007acc;
+  text-decoration: none;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content a:hover,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content a:hover {
+  text-decoration: underline;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content strong,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content strong,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content b,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content b {
+  font-weight: 600;
+  color: #343a40;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content em,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content em,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content i,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content i {
+  font-style: italic;
+  color: #6c757d;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content table,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content table {
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 0.9em;
+  width: 100%;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content table th,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content table th,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content table td,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content table td {
+  border: 1px solid #dee2e6;
+  padding: 6px 8px;
+  text-align: left;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content table th,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-slack-mention,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-slack-mention {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-slack-channel,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-slack-channel {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-teams-mention,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-teams-mention {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-issue,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-issue {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-issue:hover,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-issue:hover {
+  background-color: #bbdefb;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-status,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-status.status-todo,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-status.status-todo {
+  background-color: #f5f5f5;
+  color: #666;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-status.status-in-progress,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-status.status-in-progress {
+  background-color: #fff3cd;
+  color: #856404;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-status.status-done,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-status.status-done {
+  background-color: #d4edda;
+  color: #155724;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-priority,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-priority {
+  /* High */
+  /* Medium */
+  /* Low */
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-priority.priority-1,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-priority.priority-1 {
+  color: #dc3545;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-priority.priority-2,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-priority.priority-2 {
+  color: #fd7e14;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-jira-priority.priority-3,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-jira-priority.priority-3 {
+  color: #28a745;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-confluence-panel,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-confluence-panel {
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 4px solid;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-confluence-panel.panel-info,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-confluence-panel.panel-info {
+  background-color: #e3f2fd;
+  border-left-color: #2196f3;
+  color: #0d47a1;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-confluence-panel.panel-warning,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-confluence-panel.panel-warning {
+  background-color: #fff3e0;
+  border-left-color: #ff9800;
+  color: #e65100;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-confluence-panel.panel-tip,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-confluence-panel.panel-tip {
+  background-color: #e8f5e8;
+  border-left-color: #4caf50;
+  color: #1b5e20;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-rich-text-content .powerbi-confluence-panel.panel-note,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-rich-text-content .powerbi-confluence-panel.panel-note {
+  background-color: #f3e5f5;
+  border-left-color: #9c27b0;
+  color: #4a148c;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-data-cell .powerbi-plain-text-content,
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number .powerbi-plain-text-content {
+  line-height: 1.4;
+  color: #495057;
+}
+.table-visual-container .powerbi-formatted-table .powerbi-table-body .powerbi-data-row .powerbi-row-number {
+  background-color: transparent;
+  color: #605e5c;
+  text-align: center;
+  font-weight: normal;
+  font-size: 0.9em;
+}
+.table-visual-container .powerbi-formatted-table.powerbi-table-mobile {
+  font-size: 0.85em;
+}
+.table-visual-container .powerbi-formatted-table.powerbi-table-mobile .powerbi-header-cell,
+.table-visual-container .powerbi-formatted-table.powerbi-table-mobile .powerbi-data-cell {
+  padding: 8px 12px;
+}
+.table-visual-container .powerbi-formatted-table.powerbi-table-tablet {
+  font-size: 0.9em;
+}
+.table-visual-container .powerbi-formatted-table.powerbi-table-tablet .powerbi-header-cell,
+.table-visual-container .powerbi-formatted-table.powerbi-table-tablet .powerbi-data-cell {
+  padding: 10px 14px;
+}
+.table-visual-container .no-data-message,
+.table-visual-container .error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: "Segoe UI", Arial, sans-serif;
+  text-align: center;
+  padding: 40px 20px;
+}
+.table-visual-container .no-data-message.error-message,
+.table-visual-container .error-message.error-message {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin: 20px;
+}
+.table-visual-container .no-data-message.no-data-message,
+.table-visual-container .error-message.no-data-message {
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  margin: 20px;
+}
+.table-visual-container .powerbi-parse-error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px solid #f5c6cb;
+  cursor: help;
+}
+.table-visual-container .table-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #6c757d;
+  font-size: 14px;
+}
+.table-visual-container .table-loading::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e9ecef;
+  border-top: 2px solid #007acc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
