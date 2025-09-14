@@ -1,0 +1,179 @@
+{
+    "visual": {
+        "name": "safetyClock",
+        "displayName": "SafetyClock",
+        "guid": "safetyClockBE5FF400CB1042FA8E56B2741B43B00C",
+        "visualClassName": "Visual",
+        "version": "1.0.0.1",
+        "description": "Safety Clock",
+        "supportUrl": "https://flashbi.com.au/safetyclock-support/",
+        "gitHubUrl": "https://flashbi.com.au/safetyclock-support/"
+    },
+    "author": {
+        "name": "Fiona Foley",
+        "email": "chris@flashbi.com.au"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Incident Number",
+                "kind": "Grouping",
+                "name": "incidentno"
+            },
+            {
+                "displayName": "Incident Severity",
+                "kind": "Grouping",
+                "name": "severity"
+            },
+            {
+                "displayName": "Incident Hour",
+                "kind": "Grouping",
+                "name": "hour"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "incidentno": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "severity": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "hour": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "scriptResult": {
+                    "dataInput": {
+                        "table": {
+                            "rows": {
+                                "select": [
+                                    {
+                                        "for": {
+                                            "in": "incidentno"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "severity"
+                                        }
+                                    },
+                                    {
+                                        "for": {
+                                            "in": "hour"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "conditions": [
+                            {
+                                "min": 1,
+                                "max": 1
+                            }
+                        ]
+                    },
+                    "script": {
+                        "scriptProviderDefault": "R",
+                        "scriptOutputType": "html",
+                        "source": {
+                            "objectName": "rcv_script",
+                            "propertyName": "source"
+                        },
+                        "provider": {
+                            "objectName": "rcv_script",
+                            "propertyName": "provider"
+                        },
+                        "scriptSourceDefault": "############### Utility functions ###############\nlibraryRequireInstall = function(packageName, ...)\n{\n  if(!require(packageName, character.only = TRUE)) \n    warning(paste(\"*** The package: '\", packageName, \"' was not installed ***\", sep=\"\"))\n}\n\nlibraryRequireInstall(\"xml2\")\nlibraryRequireInstall(\"htmlwidgets\")\n\ninternalSaveWidget <- function(widget, fname)\n{\n  tempFname = paste(fname, \".tmp\", sep=\"\")\n  htmlwidgets::saveWidget(widget, file = tempFname, selfcontained = FALSE)\n  FlattenHTML(tempFname, fname)\n}\n\nFlattenHTML <- function(fnameIn, fnameOut)\n{\n  # Read and parse HTML file\n  # Embed all js and css files into one unified file\n  \n  if(!file.exists(fnameIn))\n    return(FALSE)\n  \n  dir = dirname(fnameIn)\n  html = read_html(fnameIn, useInternal = TRUE)\n  top = xml_root(html)\n  \n  # extract all <script> tags with src value\n  srcNode=xml_find_all(top, '//script[@src]')\n  for (node in srcNode)\n  {\n    b = xml_attrs(node)\n    fname = file.path(dir, b['src'])\n    alternateSrc = FindSrcReplacement(fname)\n    if (!is.null(alternateSrc))\n    {\n      s = alternateSrc\n      names(s) = 'src'\n      newNode = xml_new_root(\"script\")\n      xml_set_attrs(newNode, s)\n      xml_replace(node, newNode)\n    }else{\n      str=ReadFileForEmbedding(fname);\n      if (!is.null(str))\n      {      \n        newNode = xml_new_root(\"script\",str)\n        xml_set_attrs( newNode, c( type = \"text/javascript\") )\n        xml_replace(node, newNode)\n      }\n    }\n  }\n  \n  # extract all <link> tags with src value\n  linkNode=xml_find_all(top, '//link[@href]')\n  for (node in linkNode)\n  {\n    b = xml_attrs(node)\n    fname = file.path(dir, b['href'])\n    str = ReadFileForEmbedding(fname, FALSE);\n    if (!is.null(str))\n    {\n      newNode = xml_new_root(\"style\", str)\n      xml_replace(node, newNode)\n    }\n  }\n  \n  write_xml(html, file = fnameOut)\n  return(TRUE)\n}\n\nReadFileForEmbedding <- function(fname, addCdata = TRUE)\n{\n  data = ReadFullFile(fname)\n  if (is.null(data))\n    return(NULL)\n\n  str = paste(data, collapse ='\\n')\n  if (addCdata) {\n    str = paste(cbind('// <![CDATA[', str,'// ]]>'), collapse ='\\n')\n  }\n  return(str)\n}\n\nReadFullFile <- function(fname)\n{\n  if(!file.exists(fname))\n    return(NULL)\n  \n  con = file(fname, open = \"r\")\n  data = readLines(con)\n  close(con)\n  return(data)\n}\n\nFindSrcReplacement <- function(str)\n{\n  # finds reference to 'plotly' js and replaces with a version from CDN\n  # This allows the HTML to be smaller, since this script is not fully embedded in it\n  str <- iconv(str, to=\"UTF-8\")\n  pattern = \"plotly-(\\\\w.+)/plotly-latest.min.js\"\n  match1=regexpr(pattern, str)\n  attr(match1, 'useBytes') <- FALSE\n  strMatch=regmatches(str, match1, invert = FALSE)\n  if (length(strMatch) == 0) return(NULL)\n  \n  pattern2 = \"-(\\\\d.+)/\"\n  match2 = regexpr(pattern2, strMatch[1])\n  attr(match2, 'useBytes') <- FALSE\n  strmatch = regmatches(strMatch[1], match2)\n  if (length(strmatch) == 0) return(NULL)\n  \n  # CDN url is https://cdn.plot.ly/plotly-<Version>.js\n  # This matches the specific version used in the plotly package used.\n  verstr = substr(strmatch, 2, nchar(strmatch)-1)\n  str = paste('https://cdn.plot.ly/plotly-', verstr,'.min.js', sep='')\n  return(str)\n}\n\nReadFullFileReplaceString <- function(fnameIn, fnameOut, sourceString,targetString) {\n  # Replaces texts in file\n  # This makes it possible to replace e.g. paddings in the generated html widget code\n  if(!file.exists(fnameIn))\n    return(NULL)\n  tx  <- readLines(fnameIn,encoding = \"UTF-8\")\n  tx2  <- gsub(pattern = sourceString, replace = targetString, x = tx)\n  writeLines(tx2, con = fnameOut)\n}\n#################################################\n\n\n#https://forms.office.com/r/bvcsmr4h1K\n### Safety Clock by FlashBI \n\n\nlibrary(htmltools)\nlibrary(circlize)\nlibrary(dplyr)\nlibrary(tidyr)\nlibrary(tidyverse)\nlibrary(plotly)\nlibrary(ggiraph)\nlibrary(ggplot2)\nlibrary(grid)\nlibrary(png)\nlibrary(ggimage)\nlibrary(patchwork)\nlibrary(circlize)\nlibrary(htmlwidgets)\nlibrary(rsvg)\nlibrary(uuid)\n\n\n# https://blog.jongallant.com/2016/12/powerbi-custom-visual-svg-png/\n#https://studio.creativefabrica.com/vectorizer    png to svg\n#https://jakearchibald.github.io/svgomg/     copy markup \n\n# Example SVG data\nsvg_data <- '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"716\" height=\"680\" viewBox=\"0 0 2048 1945\"><path fill=\"#FCFCFC\" d=\"M0 0h2048v1945H0z\"/><path fill=\"#FCFCFC\" d=\"M0 0h2048v1945H0zm990 118-39 3-39 5-45 8-31 7-44 12-36 12-32 12-35 15-33 16-29 15-27 16-21 13-25 17-18 13-21 16-11 9-13 11-11 9-14 13-8 7-10 10-8 7-10 10-7 8-11 11-7 8-9 10-11 13-11 14-13 16-14 19-11 16-18 27-13 22-16 28-19 37-16 36-14 36-10 28-11 37-12 48-7 37-5 33-4 38-2 30v84l3 45 4 34 6 37 7 34 11 43 13 42 13 35 12 29 9 20 16 33 12 22 14 24 11 18 18 27 13 18 12 16 11 14 14 17 12 14 11 12 7 8 13 13 7 8 6 6h2l1 3h2v2l8 7 8 8 8 7 15 13 14 12 17 13 18 14 17 12 30 20 21 13 26 15 29 15 29 14 28 12 31 12 29 10 37 11 40 10 42 8 33 5 37 4 30 2 37 1h22l49-2 42-4 41-6 41-8 47-12 45-14 35-13 26-11 26-12 25-12 22-12 26-15 19-12 30-20 18-13 18-14 14-11 13-11 11-9 16-15 8-7 40-40 7-8 11-12 9-11 12-14 10-13 13-17 10-14 11-16 15-23 15-25 13-23 14-27 14-30 13-31 15-41 11-35 10-37 8-37 7-40 5-42 2-26 1-22v-70l-2-36-4-40-6-39-9-45-11-42-11-36-14-38-13-31-13-28-12-25-13-23-10-18-15-24-10-15-13-19-14-19-11-14-8-10-14-17-10-11-7-8-9-10-8-8-7-8-17-17-8-7-8-8-11-9-12-11-11-9-17-14-16-12-14-10-20-14-22-14-21-13-25-14-33-17-34-16-35-14-24-9-38-12-41-11-37-8-49-8-38-4-26-2z\"/><path fill=\"#CDCECE\" d=\"M1000 650h44l31 2 16 2 13 5 11 6 11 9 10 10 11 15 10 16 9 10 11 6 15 5 23 5 9-10 6-4h12l8 4 7 8 1 3v10l-8 11-2 4 15 15 12 18 8 17 6 21v25l-4 14-5 10-6 7-3 2-7-1-22-12-16-10-17-11-23-15-5-3-2 6-2 5 13 10 10 9 8 7 11 12 10 13 10 15 9 16 8 16 7 19 7 26 3 20 2 32-2 25-3 19-5 19-8 23-8 18-9 15-14 20-9 11-9 10-12 12-11 9-11 8 1 9 8 35 1 10-3 6-6 5-2 1h-7l-6-4-8-10-11-19-5-10-5 1-25 9-18 5-26 4-9 1h-23l-23-2-24-5-24-7-22-9-5-1-9 16-8 12-9 10-7 4-6-1-7-6-2-4v-12l8-27 5-15-13-12-8-7-12-12-9-11-11-15-11-18-11-22-9-24-6-26-3-19v-41l4-28 6-23 6-18 12-25 9-16 10-14 8-10 11-12 13-13 9-7-2-4-6-7-4 1-18 13-40 28-15 10-7 1-8-7-6-9-5-14-2-9v-20l3-16 6-15 10-16 11-14 7-9-2-4-8-11-2-5 1-7 4-6 5-4 6-3h10l9 4 11 11 4 1 18-8 13-8 10-8 11-14 11-16 9-11 13-13 15-11 13-6 14-4z\"/><path fill=\"#FDFDFD\" d=\"M1027 863h30l26 4 15 4 16 6 20 10 15 10 16 13 18 18 12 16 9 16 8 17 7 21 4 21 2 24v10l-3 27-5 20-7 19-8 16-9 15-9 11-9 10-7 8-13 11-16 11-18 10-17 7-17 5-20 4-8 1h-35l-19-3-25-7-15-6-19-10-14-10-10-8-12-11-9-10-13-18-10-17-7-16-6-18-5-25-1-10v-26l2-17 4-19 8-23 8-16 7-12 11-15 11-12 13-13 13-10 16-10 16-8 15-6 18-5 17-3zm-12-196h53l14 2 15 5 17 9 9 7 9 10 11 17 8 10 2 2v3l-28 6-15 5-14 7-13 11-6 8-2 5 1 5 10 7 21 12 24 13 22 12 8 5-1 5-3 6-5-1-15-7-27-10-19-5-25-4-20-2-1-1-1-26 1-1 14-1 6-5 1-2v-9l-5-8-2-1h-35l-16 1-5 4-2 10 1 5 2 5 5 2h14l2 1v27l-32 5-21 6-20 7-27 13-8 4-8-9v-2l16-10 18-12 22-14 22-15 8-7-1-6-8-10-13-9-14-7-14-4-12-2-21-1 2-4 8-10 8-13 7-11 11-13 12-9 11-5 11-3 16-2z\"/><path fill=\"#040304\" d=\"M990 118h102l47 4 37 5 34 6 36 8 40 11 29 9 38 14 29 12 34 16 22 11 22 12 17 10 21 13 27 18 14 10 11 8 16 12 17 14 14 12 8 7 14 12 11 11 8 7 17 17 7 8 9 9 7 8 9 10 9 11 11 13 10 13 15 20 12 17 14 21 12 19 11 19 14 25 12 23 13 28 13 31 10 26 8 23 10 32 12 46 9 47 6 42 3 31 2 36v70l-2 36-4 39-6 39-8 40-9 36-9 30-12 36-13 34-16 36-18 37-13 23-16 27-11 17-16 24-10 13-10 14-13 16-11 14-10 11-7 8-9 10-11 12-38 38-8 7-11 10-11 9-14 12-34 26-18 13-26 17-21 13-26 15-28 15-23 11-29 13-33 13-31 11-40 12-45 11-42 8-43 6-34 3-49 2h-22l-37-1-41-3-40-5-41-7-29-6-42-11-30-9-36-13-39-16-30-14-30-15-24-14-16-9-25-16-19-13-14-10-21-16-14-11-13-11-11-9-14-13-8-7-8-8-2-1v-2l-3-1v-2l-4-2-10-10-7-8-13-13-7-8-9-10-9-11-11-13-26-34-12-17-10-15-11-17-8-13-12-21-10-18-13-25-10-22-7-15-14-35-13-36-11-37-13-52-8-45-4-28-3-30-2-34v-84l3-42 5-40 7-41 6-28 12-46 13-41 15-39 11-26 14-30 16-31 14-24 13-22 20-30 12-17 13-17 11-14 9-11 11-13 7-8 10-11 7-8 11-11 7-8 10-10 8-7 10-10 8-7 10-9 11-9 14-12 17-13 20-15 20-14 23-15 25-15 21-12 29-15 31-15 36-15 41-15 36-11 34-9 37-8 49-8 37-4zm45 1-54 2-43 4-34 5-34 6-39 9-36 10-37 12-39 15-30 13-33 16-25 13-24 14-23 14-15 10-19 13-19 14-18 14-22 18-11 10-8 7-10 9-8 8-8 7-18 18-7 8-7 7-7 8-9 10-9 11-11 13-13 17-12 16-12 17-16 24-13 21-14 24-14 26-14 28-14 32-14 36-8 22-13 43-11 44-8 43-5 35-3 29-2 27-1 21v55l2 36 4 42 6 40 7 36 7 30 12 42 11 33 14 36 9 21 11 24 15 30 13 23 14 24 14 22 13 19 13 18 13 17 13 16 8 10 13 15 9 10 14 15 38 38 8 7 12 11 11 9 13 11 34 26 17 12 12 8 23 15 22 13 25 14 23 12 28 13 25 11 31 12 26 9 32 10 38 10 33 7 41 7 42 5 44 3h71l36-2 46-5 43-7 29-6 36-9 40-12 29-10 28-11 30-13 28-13 19-10 22-12 28-17 16-10 25-17 19-14 17-13 16-13 13-11 14-12 16-15 41-41 7-8 11-12 9-11 14-17 10-13 12-16 12-17 14-21 14-22 16-28 14-26 17-35 14-33 11-29 12-36 9-30 8-32 8-40 6-38 4-38 2-28v-92l-3-40-4-33-7-43-8-37-11-41-11-35-10-28-15-37-17-36-12-24-13-23-18-30-18-27-14-20-16-21-11-14-11-13-9-11-14-15-7-8-44-44-8-7-11-10-11-9-13-11-17-13-13-10-17-12-33-22-28-17-29-16-42-21-30-13-34-13-22-8-47-14-41-10-42-8-35-5-30-3-29-2z\"/><path fill=\"#FDFDFD\" d=\"M1022 825h13l19 2 8 2-1 2-38 4-24 4-23 6-23 8-19 9-14 10-15 13-19 19-11 14-10 15-11 19-7 17-5 15-5 22-3 29v46l-2-3-4-18-2-16v-42l3-21 5-21 8-20 11-21 9-12 9-11 20-20 19-14 21-13 19-9 27-9 20-4z\"/><path fill=\"#040304\" d=\"M405 543h8l9 3 5 4 5 8 3 10 1 8v20l-3 15-5 9-7 6-5 2h-14l-9-5-6-8-4-14-1-10v-12l2-14 5-12 7-7zm1043 1051h14l7 3 5 4 6 12 2 9v27l-3 13-6 10-7 5-4 1h-14l-8-4-6-8-4-11-1-6v-26l3-13 6-10 7-5zM304 928h7l10 3 7 6 3 6v12l-6 9-4 3h-2v3l5 2 7 6 3 5 1 10-3 9-4 5-9 5-4 1h-15l-10-4-7-7-3-10 1-9 6-8 7-5h2l-7-8-4-5-1-3v-11l3-6 7-6 4-2zm1391 376h12l8 3 5 4 4 7v12l-3 6-8 7v2l10 7 4 7 1 4v7l-3 8-9 8-10 3h-11l-10-3-7-6-4-8v-13l4-6 7-6 4-3-8-7-4-8v-10l4-8 9-6z\"/><path fill=\"#CDCECE\" d=\"M1006 924h5l5 10 22 66 9 26 10 9 2 4-1 9-8 9-4 25-5 28-3 5-8-1-4-2 2-16 5-33 1-10-4-2-2-6v-7l1-3 2-1v-7l-30-90-1-10z\"/><path fill=\"#040304\" d=\"m1805 920 11 1 8 4 6 8 2 7-1 1h-10l-4-8-4-3h-10l-6 5-4 8-3 15 9-6 3-1h13l8 4 7 8 3 8v12l-4 11-5 6-10 5h-14l-8-4-5-5-4-7-3-9-1-7v-17l3-16 5-10 8-7z\"/><path fill=\"#FDFDFD\" d=\"M1239 1054h1v19l-2 20-5 24-8 24-13 25-14 19-12 13-12 11-17 12-14 8-19 9-18 6-22 5-15 2h-24v-2l36-8 27-9 22-10 17-10 14-10 12-11 10-11 13-17 13-21 14-30 8-24z\"/><path fill=\"#040304\" d=\"M323 732h10l9 4 5 4 5 8 3 12v25l-3 14-5 9-7 6-8 3h-11l-8-3-6-5-4-9v-3l10-1 4 8 3 3 9 1 6-3 4-5 3-8 2-12-7 4-8 3h-7l-10-4-7-8-3-7v-16l4-9 5-6 7-4zm1247 739h10l8 3 8 7 5 10 2 9v22l-3 15-5 10-7 6-8 3h-12l-9-4-6-7-2-5 1-5h8l6 10 5 2 9-1 6-5 4-11 1-11-10 6-10 1-9-3-6-4-5-8-2-7v-10l4-11 7-8zM397 1304h13l10 5 5 7 2 5v3l-10 1-5-9-7-3-9 2-5 5-4 12-2 10 11-7 4-1h8l9 4 6 5 4 7 1 4v14l-4 10-7 7-6 3-4 1h-10l-8-3-7-6-5-10-2-9v-27l3-12 5-9 8-7z\"/><path fill=\"#FDFDFD\" d=\"M1149 742h22l17 3 16 6 19 10v1h-11l-8-1h-35l-17 4-15 6-15 9-7 6-6-2-22-12v-4l10-9 15-8 20-6z\"/><path fill=\"#CDCECE\" d=\"m785 973 1 4-4 17v15l1 31 2 23 5 31 7 28 9 24 13 27 10 16 12 19 7 9 3 4v2l-3-1-7-8-14-15-7-8-10-14-11-18-12-25-9-27-5-25-2-14v-41l3-22 5-16z\"/><path fill=\"#040304\" d=\"M1083 161h7l1 1v53l11 1v9h-11v19l-5 1-6-1v-19h-34l-1-1v-9l22-32 14-20z\"/><path fill=\"#FDFDFD\" d=\"m840 772 1 3-9 15-7 15-4 14-1 6v21l4 17 3 7-1 4-13 10-6 5h-3l-6-16-4-16v-16l4-17 8-17 9-12 12-13z\"/><path fill=\"#040304\" d=\"M1713 535h3v55h11v9l-10 1-1 19h-10l-1-19-34-1-1-1v-7l4-7 16-23 8-12 9-13zM687 1586h8l1 53 6 1 5 1v7l-1 1-9 1-1 5-1 14h-10l-1-19-34-1v-10l12-17 22-32z\"/><path fill=\"#CDCECE\" d=\"M1299 973h2l6 15 6 19 3 16 1 11v30l-3 19-7 24-8 19-10 19-12 19-14 17-11 12-8 9-2 3h-2v2l-4 1 6-7 8-11 12-19 9-15 8-15 11-26 8-25 6-29 2-23v-29l-2-18z\"/><path fill=\"#040304\" d=\"M505 1464h43l1 1v9l-35 1-2 21 10-4h9l9 3 7 6 5 10v16l-4 9-6 7-8 4-3 1h-13l-9-3-7-7-3-6-1-6 1-1h9l6 11 7 3h7l6-3 5-6 2-8-1-9-3-6-6-4-10-1-8 3-4 3h-8l2-33 1-10zm1256-739 44 1v9l-35 1-1 21 5-3 5-1h8l8 3 6 4 6 9 1 3v16l-4 9-6 7-8 4-4 1h-12l-9-3-7-7-3-6-1-6 1-1h9l6 11 7 3h7l6-3 5-6 2-8-1-9-4-7-5-3-10-1-7 3-5 3h-8l1-19 2-24z\"/><path fill=\"#F9FAFA\" d=\"m407 551 9 2 5 5 3 9 1 7v24l-2 10-4 8-6 4h-8l-6-4-4-8-2-10v-24l2-10 4-8 5-4z\"/><path fill=\"#FAFAFA\" d=\"M1451 1602h9l6 4 4 9 1 5v32l-3 10-4 6-4 2h-9l-5-3-5-10-1-4v-34l4-11z\"/><path fill=\"#040304\" d=\"M1073 1698h9l10 3 8 7 3 7v14l-4 8-9 10-10 9-8 7-7 7-1 2h40v9l-1 1h-54l1-8 4-8 13-13 11-9 7-6 6-10v-13l-3-5-4-2-8-1-6 2-5 4-3 9h-11l1-7 5-9 5-4 6-3zM341 543h9l10 3 7 6 4 10v9l-4 11-8 9-8 7-14 12-4 5-1 2h39v10h-54l1-9 6-10 7-7 11-9 12-11 4-6 1-3v-11l-4-6-3-2-7-1-8 2-5 6-2 7h-11l1-8 5-8 6-5zm464-361 13 1 8 4 5 6 3 7v11l-4 10-9 10-11 9-14 13-1 2 39 1v10h-54l1-9 6-10 14-13 10-8 7-7 4-9v-10l-4-6-8-3-8 1-7 6-2 8h-11l1-8 5-8 6-5 5-2zm-131 85h13l10 4 7 8 2 6v9l-3 9-4 6-10 10-11 9-11 11-1 2h40v10h-44l-11-1 3-11 6-8 10-10 10-8 8-7 5-8 1-4v-9l-4-6-6-3h-7l-8 4-4 9-1 2-10-1 1-8 6-9 6-4zm737 0h13l8 3 7 6 4 9v10l-3 8-6 8-9 9-11 9-10 10-1 2h40v9l-1 1h-47l-7-1 3-11 7-9 7-7 11-9 10-9 5-10v-10l-3-6-7-3h-8l-7 4-3 6-2 5-10-1 1-7 6-10 9-5zm-801 0h13l8 3 7 6 4 9v10l-3 8-6 8-7 7-8 7-10 9-6 7h40v9l-1 1h-30l-24-1 3-11 7-9 9-9 10-8 9-8 4-7 1-4v-9l-3-6-7-3h-8l-6 3-4 7-2 5h-10v-6l5-10 8-6zm390-106h15l8 3 7 7 3 7v12l-4 10-15 15-11 9-9 9v1h39l1 2-1 9h-32l-22-1 1-8 6-10 7-7 11-9 13-12 4-8v-12l-4-6-6-2h-7l-6 3-3 1-3 11h-9l-2-1 2-9 4-6 7-6zM463 385h14l10 5 6 7 2 5v12l-4 9-7 8-7 7-11 9-10 10 3 1 36 1v9h-55l3-11 6-8 9-9 11-9 8-7 5-8 1-3v-10l-4-7-5-2h-9l-7 4-4 9-1 2-10-1 1-7 4-8 8-6zm403-203h8l9 2 7 5 5 10v9l-4 8-4 3h-2l3 3 8 7 3 7v11l-4 10-8 7-8 3h-14l-10-4-8-9-2-6v-4h11l3 9 6 4 3 1h8l6-3 4-5 1-2v-12l-4-6-7-3-9-1-1-1v-7l5-1 9-3 3-6v-9l-3-5-3-2h-12l-5 5-3 7-11-1 3-9 4-6 6-4zm-1 1488h11l9 3 6 5 4 9v8l-3 7-6 6 10 9 3 7v11l-3 8-5 6-9 5-4 1h-12l-11-4-7-8-3-7v-4h11l3 8 4 4 5 2h7l8-4 4-6v-12l-4-6-6-3-11-2v-7l1-1 11-2 4-4 1-3v-9l-2-6-8-2-8 1-5 4-3 8-11-1 3-10 5-6 7-4zm703-1285h14l9 4 6 7 2 5v10l-3 6-5 5h-2v2l6 2 6 7 2 5v12l-3 8-8 8-7 3-5 1h-8l-10-3-7-5-5-9-1-6h11l4 9 6 4 8 1 8-3 4-5 1-2v-13l-4-6-8-3-8-1-1-7 1-1 10-2 5-4 1-2v-11l-3-5-4-2h-9l-6 3-4 9h-11l3-9 4-6 8-5z\"/><path fill=\"#CDCECE\" d=\"m781 784 2 1-13 25-5 15-4 25-3 45-4-4-6-16-5-19v-17l3-16 4-10 9-13 9-8z\"/><path fill=\"#040304\" d=\"M1755 1126h53v7l-6 17-14 35-9 22-1 1h-12l10-24 15-35 5-12-41-1zm-1452 0h52v9l-14 36-12 30-3 7h-12l3-9 13-30 13-31 1-2h-42v-9z\"/><path fill=\"#FDFDFD\" d=\"M903 748h14l19 3 14 5 17 9 11 8v4l-12 9-5-3-10-9-14-8-13-5-20-4-28-2 2-2 16-4z\"/><path fill=\"#040304\" d=\"M247 928h7l1 1v83h-11v-64l-8 3-11 1-1-1v-7l13-4 6-4zm1032 742h7l1 1v82l-1 1h-10v-64l-10 3-9 1-1-1v-7l6-2 11-4 4-6z\"/><path fill=\"#FDFDFD\" d=\"m1257 786 5 5 8 14 7 16 3 11 1 7v11l-3 16-6 16-5-1-10-6-1-3 6-15 3-12 1-7v-17l-3-16-6-16z\"/><path fill=\"#040304\" d=\"M1215 1670h7l1 1v82l-1 1h-10v-64l-10 3-9 1-1-1v-7l6-2 11-4 5-8zm-198 28h7l1 1v82l-1 1h-10v-64l-9 3-10 1-1-8 7-2 10-4 4-6zM268 732h8v84h-11v-64l-16 4h-3l-1-8 7-2 10-4 5-8zm1128 861 7 1v83h-11v-64l-7 3-12 1-1-2v-6l12-3 5-3h2l2-6zM268 1125h8v83h-11v-63l-11 3h-8l-1-7 15-5 5-5zm73 179h7l1 2v41l-1 40-1 1h-9v-64l-10 3-9 1-1-1v-8l13-3 5-3z\"/><path fill=\"#CDCECE\" d=\"m1293 773 4 2 10 9 8 10 10 19 4 16 1 7v11l-3 15-8 21h-3l1-13v-35l-4-17-6-16-5-11-6-12-3-4z\"/><path fill=\"#040304\" d=\"M811 1670h8v84h-10v-64l-16 4h-4v-9l13-3 7-6zm430-1480h7v84h-10l-1-63-14 3h-5v-8l13-4 6-5 3-6zM465 1463h7v84h-10v-64l-9 3-10 1-1-1v-8l11-2 7-4zm160 122 2 1v83h-10l-1-63-14 3h-5v-8l14-4 5-4 3-7zM536 385h8v83h-10l-1-63-12 3h-7v-8l12-3 6-4z\"/><path fill=\"#F9F9F9\" d=\"M1802 959h9l6 4 4 6 1 3v12l-4 8-5 4-2 1h-9l-7-6-4-8-1-5v-11l6-5zm-229 520 8 1 6 5 4 8 1 5v11l-7 6-8 3-9-2-6-7-2-5v-11l4-8 6-5z\"/><path fill=\"#F9FAFA\" d=\"M396 1343h11l6 4 4 8v13l-4 8-5 4-7 1-6-2-5-5-4-9-1-13 4-5zm-70-603 9 2 6 7 3 9v12l-5 5-6 3h-11l-7-6-3-8v-8l3-8 4-5z\"/><path fill=\"#CDCECE\" d=\"M749 1079h2l3 22 5 20 7 18 10 19 8 15 5 7-1 2-8-8-7-8-8-10-10-17-6-15-3-12-1-7v-8z\"/><path fill=\"#F9F9F9\" d=\"m305 974 7 1 8 6 3 4 1 8-4 8-8 4h-10l-7-4-4-7v-7l4-6 5-4z\"/><path fill=\"#F8F8F8\" d=\"m1699 1349 7 2 8 6 3 6v7l-4 6-3 3-7 2-9-1-5-3-4-5-1-8 3-6 7-6z\"/><path fill=\"#CDCECE\" d=\"M1333 1103h1l1 22-3 17-5 13-9 14-9 10-5 5-9 8-10 7-2-1 18-22 11-15 7-12 7-19 5-20z\"/><path fill=\"#F8F8F8\" d=\"m1697 1312 10 1 5 4 2 5-1 8-6 7-5 3-5-1-7-6-3-7 1-7 5-5z\"/><path fill=\"#F9F9F9\" d=\"M302 937h11l6 4 2 8-2 7-9 8-6-1-8-7-2-5 1-8 5-5z\"/><path fill=\"#FDFDFD\" d=\"m902 1242 5 2 6 5-1 5-11 25-5 11-4-1-1-2v-13l6-20z\"/><path fill=\"#CDCECE\" d=\"M1188 1031h11l6 3 4 5-1 7-5 4-6 2h-9l-6-3-3-4v-7l4-5zm-303 6h8l7 3 5 6-1 6-5 4-8 3-9-1-7-6v-8l5-5zm151-159 7 1 5 6 1 3v10l-3 6-5 4h-6l-5-6-2-5v-10l3-6zM747 777l2 1-8 9-10 15-4 11-3 25-3-1-2-9v-23l4-11 6-8 8-6zm295 405 7 1 5 5 2 6-1 10-4 6-3 2h-6l-5-5-3-9 1-9 3-5z\"/><path fill=\"#FDFDFD\" d=\"m1170 1248 3 1 7 25 2 8v11l-3 3-4-2-14-36 2-4z\"/><path fill=\"#F4F5F5\" d=\"M1705 553h1v36l-1 1h-25l7-11 17-25z\"/><path fill=\"#F6F6F6\" d=\"M684 1604h1v36h-25l4-7 19-28z\"/><path fill=\"#F7F7F7\" d=\"m1079 179 2 2-1 34-24 1 1-4z\"/><path fill=\"#CDCECE\" d=\"M1129 1286h2l-3 9-6 8-8 6-7 2h-12l-14-5-2-2 21-3 15-5 11-7zm213-475 4 2 6 10 4 10 1 5v12l-5 15-5 9h-2l2-19v-21l-3-16z\"/><path fill=\"#040304\" d=\"m1466 1393 5 3 47 47 1 4-5-1-49-49zM564 491l5 3 48 48-1 3-4-1-48-48-1-4zm176 998 2 1-2 6-14 24-15 26-5 8-4-1 6-12 14-24 9-16 7-11zm455 60 4 2 9 32 9 35v3h-4l-18-67zm-310 0 2 1-2 11-16 59-4 1 1-8 15-57 2-6zm330-1232 2 1-2 11-13 49-3 10-4 1 1-8 17-63zm-176 1253 4 1v73h-4zM866 317l3 1 18 67v4l-4-1-7-24-11-42zM367 967h72l1 4h-74zm22-174 11 2 55 15 6 3-1 3-35-9-36-10zm650-498h4v73h-4zm651 498 3 1-1 3-32 9-38 10-1-4 16-5zM458 1123h3l-1 4-24 7-41 11h-6v-3l24-7zm1163 0 10 2 59 16 3 1v3l-9-1-57-15-6-2zm-245-738 4 1-6 11-15 27-15 25-3 1-1-3 14-25 10-17zm185 883 7 3 28 16 27 16 2 1v4l-6-2-24-14-28-16-6-4zM703 385l4 1 9 16 14 24 11 19 1 4-2 1-4-4-16-28-15-26-2-3zm638 1104 4 2 13 23 21 36v4l-4-1-10-18-14-24-10-18-1-3zM457 631l6 2 28 16 24 14 6 4v3l-5-1-23-13-27-16-9-5zm1199 336h59l1 2-1 2h-73v-3zm-141-475h4l-2 5-13 12-15 16-8 7-11 11-1 2-4-1 2-4zm108 139 3 1-5 5-26 15-24 14-7 4h-3l1-4 24-14 28-16zM613 1394h4l-2 4-20 20-7 8-13 12-9 9-3-1 2-4zm-95-125h3l-1 4-20 11-41 24h-2l-1-3 9-6 23-13 24-14z\"/><path fill=\"#FDFDFD\" d=\"M1245 733h6l5 4 3 6-1 6-3 3h-8l-4-4-1-3v-9zm-426 6h5l4 5-1 9-4 5h-8l-4-4v-7l6-7z\"/><path fill=\"#040304\" d=\"M958 1587h4l-6 46-1 5h-4l1-13 5-37zm163-1 3 1 2 9 5 39v3h-4l-3-17-4-34zm586-707h3v4l-10 2-37 5h-5v-4zm-580-578h4l-3 27-3 21-1 3h-4l3-26zm531 748h8l43 6 1 4-15-1-36-5zM951 301h4l7 49v2l-5-1-6-46zm-535 748h8l-2 4-42 6h-8l1-4zm-43-170 45 6 6 2-1 3-19-2-31-4-1-4zm428 665 3 1-1 5-14 34-4 9-4-1 6-16 13-31zm496-1198h3l-1 7-13 31-5 10-3 1 1-7 17-40zm152 88 4 1-4 7-9 11-9 12-9 11-3-1 2-5 12-15 9-12zm-818-1 5 5 12 15 12 16 3 5v2l-4-1-12-15-15-20-3-5zm790 1029 5 5 12 16 13 17 2 5-5-1-9-12-10-13-10-14zm-761 1h3l-1 4-10 13-13 17-6 8-4-1 4-7 12-15 12-16zm875-116 7 4 26 20 8 6v4l-5-2-18-14-12-9-7-6zM783 345l3 2 13 32 5 12v3h-4l-16-39-2-5zm878 365h3v4l-32 13-15 6-1-4 13-6zm-1243 0 5 1 41 17 2 1v4l-9-3-39-16-1-3zm860 834 4 2 5 11 13 32v4h-3l-12-28-7-18zm-814-338h2l-1 4-18 8-27 11-3-1 1-3 38-16zm1152 0 10 3 38 16v4l-10-3-31-13-7-3zM506 558l5 2 12 9 14 11 10 8v3l-4-1-20-15-15-12-3-3zm38 790h3l-1 4-17 13-18 14-5 2-1-3 11-9 12-9zm1030-790h2v4l-19 14-14 11-6 4-3-1 5-6 11-8 10-8z\"/><path fill=\"#FDFDFD\" d=\"m1052 1034 4 4 1 6-4 8-4 3-1-3 3-9zm300-195h1v16l-2 8h-2l1-15z\"/><path fill=\"#040304\" d=\"m1638 1247 5 1 9 5v2l-5-1-9-5zm-455 365 2 1 3 12v3l-3-1-3-14zM923 305h2l3 13v2h-3l-2-9zm657 1042 5 1 9 7-2 2-10-7zm-1125-74h2l-1 3-10 5-4-1 10-6zm-48-535 6 1 9 4-1 2-10-3-4-2zm137-225 5 3 1 3 4 2 1 4-3-1v-2l-4-2-4-4zm350-202 3 1 2 9v5h-2l-3-11zm372 1277 3 3 4 12h-3l-4-10zm220-133 5 3 6 7v2l-4-2-7-8zm-891 0v3l-2 3h-2l-2 4-4 2 2-5zm950-62 5 1 8 8-1 2-10-8zM442 1247h2l-1 3-10 5h-3l1-3zm-65-396 14 2 1 3-9-1-6-2zm1304-85 4 1-6 3-10 2 1-3zm-356-408 2 2-6 12-2 1 1-6zm-570 0 3 1 5 10-1 4-4-6zm60 1230h1l-1 8-3 7h-2l1-6zm504-22 4 4 4 8v2h-3l-5-11zm-584-12h2l-1 5-5 9h-2l1-5zm-326-387 4 1-9 4-6 1-1-2zm-22-84h5v2l-15 3v-3zm1285-345h3v2l-12 5h-3l1-3zm-23-54h3l-1 3-11 5h-2l2-4zM443 657l14 7v1l-7-1-8-5zm983-240 3 1-7 10-3 2 1-4zm-616-81h2l5 14h-3l-4-10zm376-25h2l-2 11-1 4h-3l3-14zm-89 1315h3l1 15h-3zm58-8 2 1 2 14h-3l-2-14zm372-204 4 2 8 8-3 1-9-8zm-1044-91 3 1-8 6-3 2h-3v-2zm1142-50 5 1 9 5v2l-5-1-8-5zm35-79 9 2 6 3-2 2-13-5zm24-83 8 1 7 2v2l-8-1-7-2zM369 910h13l3 1v2l-16-1zm14-88 14 3v3l-14-3zm47-139 14 7v2l-6-2-8-4zm58-101 4 1 9 7v2l-5-2-7-5zm36-47 7 4 6 7-4-1-9-8zm83-83 4 2 7 9-2 2-7-8zm795-52 2 2-6 10-3 2 1-5zm-724 0 3 1 6 10-1 3-4-5-4-7zm673-29h2l-3 9-3 5h-2l1-5zm-81-35h2l-2 9-3 6-2-2zm-432-10h2l4 15-3-1-4-13zm319-21h2l-2 15h-3l2-14zm-59-7h3l-1 15h-3zm-87 1330h2v15h-3zm334-75 3 3 5 10v2h-2l-6-12zm-659-28 2 1-6 10-4 2 5-10zm709-1 3 3 6 10h-3l-6-9zm-733-15 1 3-7 10h-2l1-4zm756 0 4 2 6 9v2l-3-1-7-11zm46-35 4 2 7 9-1 2-10-11zm-965-127 3 1-9 7-4 2v-3zm1097-24 5 1 9 7-3 1-10-7zM394 1111h4v2l-11 3h-4v-2zm1308-260h3l-1 3-14 2v-2zm-4-29 1 3-14 3v-3zM398 766l7 1 7 3v2l-12-3-2-1zm74-159 5 1 8 6v2l-5-2-8-6zm1085-72v3l-9 8h-2l2-4zm-20-22 2 2-11 10-1-3zm-42-41h2l-2 4-6 7-3 1 1-4zm-910 0 4 2 7 8-1 2-7-6-3-4zm69-56 5 5 4 6-1 3-7-9zm108 1150 1 3-6 12-2-2 6-12zm-146-92h2l-2 4-7 8h-2l2-4zm-197-280h3v2l-10 4h-5l1-2zm1250-27 7 1 8 3v2l-9-2-6-3zm21-84 10 1 5 1v2l-12-1-3-1zm7-57h10l6 1v2h-8l-7-1zm-1322 0h10l-1 2-7 1h-8v-2zm-8-87h15l1 2-4 1-12-1zm1343-30h2v3l-15 1v-2zm-72-252v3l-9 5-4-1 5-3zm-47-75 3 1-7 6-4 3h-2l2-4zm-117-130 1 2-9 11h-2l2-4 7-8zm-231-126h1l-1 8-3 7h-2l3-11zm-233-30h3v15h-2zm-28 1330h2v15h-3zm-85-13h2l-1 9-2 6h-2l2-11zm-56-15h2l-1 8-2 6h-3l3-10zm397 0 3 1 4 13h-3zm-684-184 1 2-2 3h-2v2l-5 4-3-1 7-7zM729 371h2l6 11-1 3-5-8zm196 1248 3 1-3 13h-2l1-9zm-391-226h2l-2 4-8 6-2-1 7-7z\"/><path fill=\"#0A090A\" d=\"m1607 607 3 1-10 7-4 1 5-5z\"/><path fill=\"#040304\" d=\"m981 298 3 1v14h-2z\"/></svg>'\n\n# Save the SVG data to a file\nwriteLines(svg_data, 'image.svg')\n\n# Render the SVG into a PNG file\nrsvg::rsvg_png('image.svg', 'image.png', width = 800) \n\n\n#https://community.fabric.microsoft.com/t5/Custom-Visuals-Development/Set-a-user-defined-title-to-a-custom-R-HTML-visual/m-p/2013183\n\n# Function to generate a UUID   example 27d04328-4376-43de-85a4-b0414128c244\ngenerate_uuid <- function() {\n  UUIDgenerate()\n}\n# Function to validate a UUID\nvalidate_uuid <- function(uuid) {\n  grepl(\"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[2]{1}$\", uuid, ignore.case = TRUE)\n}\n# Example usage\n#uuid <- generate_uuid()\n#cat(\"Generated UUID:\", uuid, \"\\n\")\n#cat(\"Is Valid:\", validate_uuid(uuid), \"\\n\")            1a45a8fa8-2bf7-487b-aad7-f572fc43df58\n                                               # sample d658d3b5-0ede-444f-9e1a-bf9bd5c1f527432\n\n             \nMyLicence <- \"\" \nif (exists(\"directEdit_licensecode\" )    && validate_uuid(directEdit_licensecode) )\n    {MyLicence <-  \" \"  }  # valid licence code from flashbi\n\n\n\n\n \n if (exists(\"directEdit_licensecode\")  && (directEdit_licensecode ==  'd658d3b5-0ede-444f-9e1a-bf9bd5c1f527-2'))\n    { MyLicence <- \"To Licence go to www.FlashBI.com.au or the Microsoft MarketPlace\" }  # Heading on the sample in the marketplace  \n\nIncidents   <-  data.frame(cbind( incidentno, severity, hour)) \n#Incidents   <- Incidents %>% select(Incident_Number, Incident_severity, Incident_hour)\n#Incidents <-  #data.frame(values)   # Values VCA_Incidents #\n#data.frame(cbind(values,Incident = 1 ,stringsAsFactors = FALSE))\n\ncolnames(Incidents) <- c(\"Incident_no\", \"Incident_severity\", \"Incident_hour\")\n\nthelegend <- unlist(unique(Incidents$Incident_severity))\n\nHrs24 <- data.frame (Incident_hour  = 1:24)  %>% \n  mutate(Incident_hour = as.numeric(Incident_hour))\nHrsa  <- data.frame (Incident_hour = c(0:23)) # nolint\n\n\n\nTheHoursall <- left_join( Hrsa , Incidents ) %>%  \n  select ( Incident_hour, Incident_severity, Incident_no)   %>% \n  group_by(Incident_hour, Incident_severity) %>%\n  summarise(Number_of_Incidents =   sum(n()))\n\n#TheHoursall$Incident_severity <- ifelse(is.na(TheHoursall$Incident_severity),0,TheHoursall$Incident_severity)\n\n#TheHoursall$Incident_no <- ifelse(is.na(TheHoursall$Incident_no),0,TheHoursall$Incident_no)\n\nTheHoursmax <- left_join( Hrs24 , Incidents ) %>%  \n  select ( Incident_hour, Incident_severity, Incident_no)   %>% \n  group_by(Incident_hour) %>%\n  summarise(Number_of_Incidents =  n())\n\nmaxy <- max(TheHoursall$Number_of_Incidents)\n\ncurrent.time = as.POSIXlt(Sys.time())\nsec = ceiling(current.time$sec)\nmin = current.time$min\nhour = current.time$hour\n\nsec.degree =  (90 - sec/60 * 360)\nmin.degree = (90 - min/60 * 360)\nhour.degree =  (90 - hour/24 * 360 - min/60 * 360/24)\n\nnumcols <- length(unique(TheHoursall$Incident_severity))\ncol_fun <-  colorRamp2(c(0, 0.5, 1), c(\"green\", \"yellow\", \"red\"))\ncol_direction = col_fun(seq(0, 1, length = numcols ))\nx <- seq(0, 1, length = numcols )\n\n# create clock hands image\ncurrent.time <- as.POSIXlt(Sys.time()) # nolint\nhour <- current.time$hour\nmin <- current.time$min\nhour.degree <-  (90 - (hour / 24 * 360) - ((min / 60 ) * 360 / 24)) # nolint\n\npng(\"my_plot.png\", bg = \"transparent\")\ncircos.clear()\ncircos.par(track.margin=c(0,0), gap.degree = 0, cell.padding = c(0, 0, 0, 0), start.degree = 90)   # nolint\ncircos.initialize(\"A\",   xlim = c(0, 24))\ncircos.track(ylim = c(0, 1),   bg.border = NA ) \ncircos.axis(major.at = 0:24, labels = NULL, direction = \"inside\",  major.tick.length = mm_y(2)) # nolint  , minor.ticks = 0\ncircos.text(1:24, rep(1, 24) - mm_y(5), 1:24, facing = \"downward\",  cex = 2)\n#arrows(0, 0, cos(hour.degree/180*pi)*0.6, sin(hour.degree/180*pi)*0.6, lwd = 4 )  # nolint\ndev.off()\n\n# Load clock image\nimg <- readPNG(\"image.png\")\nimg_grob <- rasterGrob(img, interpolate = TRUE)\n\n# Load clock numbers\nimgnos <- readPNG(\"my_plot.png\")\nimg_grobnos <- rasterGrob(imgnos, interpolate = TRUE)\n\nthelegend <- unlist(unique(Incidents$Incident_severity))\n\nnumcols <- dplyr::n_distinct(Incidents$Incident_severity)\n\ncolor_palette <- colorRampPalette(c( \"#FF0000\", \"#FFA500\", \"#FFFF00\", \"#00FF00\"))(numcols )     # red \"#ce2029\", \"#fffb03\",\"#30a840\"\n#https://r-graph-gallery.com/package/ggiraph.html\n\n\np <- ggplot(Incidents,aes(  x= Incident_hour,    fill =  forcats::fct_rev(Incident_severity ), \n            data_id = Incident_no , tooltip = Incident_severity))   + \n    geom_bar_interactive(  aes(tooltip = sprintf('<span style=\"color: black; font-family: Arial; font-size: 16px;\">%s</span>',\n        paste0(\"Hour \",  x , \", Severity \", fill,\", No of Incidents \", after_stat(count)))),  size = 8) +  #, position = position_nudge(x = -0.5)   \n   # ggtitle(MyLicence  )  +\n    scale_fill_manual( values = color_palette,  aesthetics = \"fill\",  breaks = waiver(),  na.value = \"white\" ) +\n    scale_x_continuous(expand = c(0, 0)) +\n    #labs(title = \"Hover with ggiraph\", x = \"Weight\", y = \"Miles per Gallon\") +\n    labs(fill = \"Severity\",  title = MyLicence) +\n    theme_minimal() +   labs(x=NULL, y=NULL) +\n      theme(legend.position = \"right\",   \n    #  plot.background = element_rect(fill = \"red\", color = NA),\n       # legend.box=\"vertical\", \n       legend.margin=margin(t = 0, r = 0, b = 0, l = 0),\n         legend.title = element_text(size = 20, ,  family=\"Arial\"),  # Title size\n           legend.text = element_text(size = 15, ,  family=\"Arial\"),   # Text size\n         #   legend.key.size = unit(0.2, \"cm\"),  # Shrink legend key size\n          plot.title = element_text(hjust = 0.5, size = 16, face = \"bold\", color = \"red\",  family=\"Arial\" ),\n            plot.subtitle = element_blank(),\n            axis.text = element_blank(),\n            axis.text.y=element_blank(),\n            axis.title = element_blank(),\n            panel.grid = element_blank() # ,\n           # plot.margin=unit(c(0,0,0,0), \"mm\"),\n           # legend.margin=unit(0, \"mm\")\n           ) + \n  coord_radial(start = 0 * pi, end = 2 * pi, inner.radius = 0.43) \n\n #p2 <- ggplotly(p, tooltip = \"text\")\n #ggplotly( p1 )\n \n #https://r-graph-gallery.com/package/ggiraph.html\np1 <- p   +   \n inset_element(img_grob,  0.30, 0.30, 0.70, 0.70,on_top = FALSE, align_to = \"plot\", clip = TRUE )  \n\n\ninteractive_plot <- girafe(ggobj = p1,\n  width_svg = 10,\n  height_svg = 8,\n  options = list(\n    opts_hover(css = \"fill:#6f1d1b;\"),\n    opts_hover_inv(css = \"opacity:0.3;\"),\n    opts_selection(type = \"multiple\", css = \"fill:#FF851B;stroke:black;\"),\n    opts_toolbar(saveaspng = FALSE, position = \"topright\", delay_mouseout = 10000),\n    opts_tooltip(\n      css = \"background-color:black;color:white;padding:30px;border-radius:10px;box-shadow:10px 10px 10px rgba(0,0,0,0.3);font-family:Arial;font-size:20px;\",\n      opacity = 0.9,\n      use_fill = TRUE\n    ),\n    opts_sizing(rescale = TRUE),\n    opts_zoom(max = 2)\n  )\n)\n\n\n\ninternalSaveWidget(interactive_plot, 'out.html')\nReadFullFileReplaceString('out.html', 'out.html', ',\"padding\":[0-9]*,', ',\"padding\":0,')\n\n\n\n\n\n\n\n"
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "rcv_script": {
+                "properties": {
+                    "provider": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "source": {
+                        "type": {
+                            "scripting": {
+                                "source": true
+                            }
+                        }
+                    }
+                }
+            },
+            "directEdit": {
+                "properties": {
+                    "licensecode": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "settings": {
+                "displayName": "Settings",
+                "properties": {
+                    "userInput": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "User Input"
+                    }
+                }
+            }
+        },
+        "supportsMultiVisualSelection": true,
+        "suppressDefaultTitle": true,
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "parameters": [
+                    "https://cdn.plot.ly/"
+                ]
+            }
+        ]
+    },
+    "dependencies": {
+        "cranPackages": [
+            {
+                "name": "ggplot2",
+                "displayName": "GG Plot 2",
+                "url": "https://cran.r-project.org/web/packages/ggplot2/index.html"
+            },
+            {
+                "name": "plotly",
+                "displayName": "Plotly",
+                "url": "https://cran.r-project.org/web/packages/plotly/index.html"
+            },
+            {
+                "name": "htmlwidgets",
+                "displayName": "HTML Widgets",
+                "url": "https://cran.r-project.org/web/packages/htmlwidgets/index.html"
+            },
+            {
+                "name": "xml2",
+                "displayName": "xml2",
+                "url": "https://cran.r-project.org/web/packages/xml2/index.html"
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

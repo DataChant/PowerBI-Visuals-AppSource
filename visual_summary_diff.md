@@ -1,47 +1,199 @@
-[2025-08-28] 1 new visual, 11 new versions
+[2025-09-04] 4 new visuals, 7 new versions, 6 certified
 
-Here are the latest updates to the Power BI Visuals on Microsoft AppSource between 2025-08-24 and 2025-08-28:
+Here are the latest updates to the Power BI Visuals on Microsoft AppSource between 2025-08-28 and 2025-09-04:
 
 > **Note**: Links marked with 🔗 are external. Ctrl+click or right-click → 'Open in new tab' to open them in a new tab.
-## 1 New Custom Visual: ##
+## 4 New Custom Visuals: ##
 
 <table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/dunboxedsolutionsprivatelimited1746505351094.johari_id_1"><img src="https://store-images.s-microsoft.com/image/apps.5278.2622ddae-1ca9-4776-8ff9-99817322abf8.1d2d832e-8a3e-44f2-b2d4-86073f1c3476.c9fc4f0d-9048-4826-a844-f5e197a57dea" width="100" alt="Johari Window By Dunboxed" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/flashbi1688505129702.safetyclock"><img src="https://store-images.s-microsoft.com/image/apps.47843.c60340b5-d6cf-4065-92e3-d555edfed4bb.5fc574bf-876c-42a5-a4d7-d95b764762d2.cd3e89a4-31e0-4bea-ac4d-bf483073104b" width="100" alt="SafetyClock" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Johari Window By Dunboxed</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>SafetyClock</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://dunboxed.com/contact-us/">Dunboxed</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">A customizable grid chart for self, team, and strategy insights in Power BI.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/johari2C2E53C6B313466BBB205028EB08C28B.pbiviz">johari2C2E53C6B313466BBB205028EB08C28B.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.1</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://flashbi.com.au/safety-clock-support/">FlashBI</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Introducing the Safety Clock - Your 24-Hour Safety Sentinel, turn time into insight.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/safetyClockBE5FF400CB1042FA8E56B2741B43B00C.pbiviz">safetyClockBE5FF400CB1042FA8E56B2741B43B00C.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/flashbi1688505129702.the-wedge"><img src="https://store-images.s-microsoft.com/image/apps.29866.ae860963-10af-4f03-a155-dbc00939a8be.11ad1012-2623-467f-98aa-47ef8891607e.0bc435f9-92f3-42c3-bfff-494f5f1a0c5c" width="100" alt="The Wedge" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>The Wedge</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://flashbi.com.au/wedge-support/">FlashBI</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">The Wedge brings hierarchical data to life with dynamic, interactive circular layout with drilldown</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/wedgeFBB15A43DE6445D1809AB1B3861EF165.pbiviz">wedgeFBB15A43DE6445D1809AB1B3861EF165.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/yavdaanalyticspvtltd1628223732998.heatmapchartstd"><img src="https://store-images.s-microsoft.com/image/apps.31921.a42565cc-4b8b-4b0c-9cff-4e378c090c20.7627a9b4-170e-46a3-a0dc-d29c9c06cfac.d2cb223b-9ab4-475f-96fb-d28800629a7c" width="100" alt="Heatmap Chart (Standard)" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Heatmap Chart (Standard)</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://pbivizedit.com/contact">PBIVizEdit.com</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Highlight metrics, outliers, and insights in large tables with customizable heatmap-style formatting</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/heatmap453A07F28F01EE72753E360387DD1430.pbiviz">heatmap453A07F28F01EE72753E360387DD1430.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/bratlie_coding.bratliecoding_anomaly_detection"><img src="https://store-images.s-microsoft.com/image/apps.21577.54340a39-bbe1-43fc-8e40-d74395d11adb.17fe6f7a-2450-4985-8527-c4ab9ebb4a91.da93b05d-55ac-4054-af5c-54cf4e286f67" width="100" alt="bcanomalydetection" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>bcanomalydetection</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://bratliecoding.no/projects/anomaly-detection">BRATLIE CODING</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">This visual calculates and identifies anomalies in events on a timeline.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/BCanomalyDetection7DDA799B80864DB2A83E755F46BF39D3.pbiviz">BCanomalyDetection7DDA799B80864DB2A83E755F46BF39D3.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.2</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 </table>
 
 
-## 11 New Versions: ##
+## 6 Newly-Certified Visuals: ##
 
 <table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/pbi-ai-agent.pbi-ai-agent"><img src="https://store-images.s-microsoft.com/image/apps.34423.9a413b72-8ce0-45d0-8182-a7101b7d78c8.c0cdd987-b865-4fac-b319-d5cc9deca380.5a826a57-e4c3-4d2e-b24f-0962a7cc0f2b" width="100" alt="PBI AI Agent" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/umbusolutions.project-org-chart"><img src="https://store-images.s-microsoft.com/image/apps.41290.0627d6af-751c-41d3-82ce-4dc1f1c46d7b.60a255c3-ced1-414d-9c03-b878e1922490.c3249a83-a09f-4eec-9a6c-6ce6d848bcf0" width="100" alt="Project Org Chart by Umbu Solutions" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>PBI AI Agent</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Project Org Chart by Umbu Solutions</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://pbi-ai-agent.com/">PBI AI Agent</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">AI-powered data analysis assistant using AI to help analyze and understand your Power BI data</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/pbi_ai_agent.pbiviz">pbi_ai_agent.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 2.2.0.0 ➔ 2.3.0.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.umbusolutions.com/visuals/project-org-chart">UMBU SOLUTIONS, LLC</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Dynamic, scalable org chart visual for Power BI that auto-syncs and fits complex teams on one page.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/projectOrgChart86663AD305F9427F96E241D2B3F03857.pbiviz">projectOrgChart86663AD305F9427F96E241D2B3F03857.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.8</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/managility.acteryscopy"><img src="https://store-images.s-microsoft.com/image/apps.61283.46da5bf5-2123-4df6-9879-84286fac1bff.07639b7d-d491-4400-8bef-717ed56caafe.426fc1ed-d8f7-4d94-ae5d-7a7f66bebb22" width="100" alt="Acterys Copy" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/jtathedatascientists1592432854663.stackedbarchartwithline"><img src="https://store-images.s-microsoft.com/image/apps.50729.99792253-16e7-480d-8128-7ccef271c596.cb3ad415-31d3-4c67-9944-1e4419a03c1c.eab129ac-025d-450c-945b-2c09cc25523c" width="100" alt="Stacked Bar Chart with Line by JTA" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Acterys Copy</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Stacked Bar Chart with Line by JTA</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://knowledge.acterys.com/">Managility</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Copy data between different scenarios to simulate, create forecasts and new plans in Power BI</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/aPCopy350A7886680D49DAB40114D4A01EFD3C.pbiviz">aPCopy350A7886680D49DAB40114D4A01EFD3C.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.1.6.6 ➔ 1.1.7.3</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.thedatascientists.com/contact-us/">JTA The Data Scientists</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Clustered bar chart with stacked detail and trend line overlay</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/StackedBarLineC23CD878BA764C3B84E5261BC83BC537.pbiviz">StackedBarLineC23CD878BA764C3B84E5261BC83BC537.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 3.2.0.10</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/visio-chart.sunburst_visiochart"><img src="https://store-images.s-microsoft.com/image/apps.33642.59301456-52ce-4a27-b124-d8f7b92c6e17.ead40246-65d5-4d81-9908-bd121435b125.6210d703-5b35-4191-a6cc-586f75e4c84a" width="100" alt="Sunburst Chart" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Sunburst Chart</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://support.visiochart.com/">VisioChart</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Showcase hierarchical data with clarity—radial, readable, and ready for Power BI storytelling</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/sunburst_visual_7866DD911E374F88B8C085F91F12F0D7.pbiviz">sunburst_visual_7866DD911E374F88B8C085F91F12F0D7.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.4</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/truvizinc1674781244292.sankey-chart-by-powerviz"><img src="https://store-images.s-microsoft.com/image/apps.54194.c34ddd95-a930-43e7-b345-806eef1ad252.e4c0692b-99a5-4eb5-9aed-a65edc3b7b71.5ea37c54-b6ef-4cd3-b087-5acb7acfcd86" width="100" alt="Sankey Chart by Powerviz" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Sankey Chart by Powerviz</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://powerviz.ai/contact-us">TRUVIZ INC</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Unravel Complex Flows with Clarity using the Sankey Chart by Powerviz</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/SankeyChart72F9467FDC1043888E57A6FA275C4DCE.pbiviz">SankeyChart72F9467FDC1043888E57A6FA275C4DCE.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.2</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/stratada.powergraph-sankey"><img src="https://store-images.s-microsoft.com/image/apps.37479.1c29b1fa-2534-4322-ae5b-66190ce6b63d.de5677bc-7128-4b61-aa27-5d6870d22a47.04ba0eb2-f9be-43fb-99cb-d7c61eaab363" width="100" alt="PowerGraph Sankey Diagram" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>PowerGraph Sankey Diagram</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://powergraph.com/products/powergraph-sankey-visual-for-power-bi/powergraph-sankey-for-power-bi-user-guide/">PowerGraph</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PowerGraph Sankey is an advanced visual for dynamic, interactive flow diagram with enhanced features</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/PowerGraphSankey02300D1BE6F5427989F3DE31CCA9E0F320MS.pbiviz">PowerGraphSankey02300D1BE6F5427989F3DE31CCA9E0F320MS.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 3.1.3.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/umbusolutions.indented-tree"><img src="https://store-images.s-microsoft.com/image/apps.44908.45a9d2ac-eee0-4b47-bdc2-052ac793020b.68c94a53-8859-4589-8d9c-662ea0b1bb68.43ef9208-b147-44eb-9f31-26ddfaca5619" width="100" alt="Indented Tree Chart by Umbu Solutions" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Indented Tree Chart by Umbu Solutions</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.umbusolutions.com/visuals/indented-tree-chart">UMBU SOLUTIONS, LLC</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Interactive Power BI visual for exploring hierarchical data with columns and expandable nodes.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/treeF3F5EB7A19B14879BDE6ACED936CCA62.pbiviz">treeF3F5EB7A19B14879BDE6ACED936CCA62.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.3</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+</table>
+
+
+## 7 New Versions: ##
+
+<table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/umbusolutions.project-org-chart"><img src="https://store-images.s-microsoft.com/image/apps.41290.0627d6af-751c-41d3-82ce-4dc1f1c46d7b.60a255c3-ced1-414d-9c03-b878e1922490.c3249a83-a09f-4eec-9a6c-6ce6d848bcf0" width="100" alt="Project Org Chart by Umbu Solutions" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Project Org Chart by Umbu Solutions</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.umbusolutions.com/visuals/project-org-chart">UMBU SOLUTIONS, LLC</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Dynamic, scalable org chart visual for Power BI that auto-syncs and fits complex teams on one page.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/projectOrgChart86663AD305F9427F96E241D2B3F03857.pbiviz">projectOrgChart86663AD305F9427F96E241D2B3F03857.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.0.7 ➔ 1.0.0.8</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mylocsinc1648311649136.tmap"><img src="https://store-images.s-microsoft.com/image/apps.53792.1410884d-bd0f-411c-8276-2288b7d3d9d8.aef81213-ee67-46c8-96b5-13d0f77a52ac.b6f8b829-5e67-4aee-8d68-c6e9e551ba22" width="100" alt="TMap" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>TMap</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.mylocs.ca/contact.html">Mylocs Inc</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">TMap is a drilldownable thematic map visual for Power BI.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/tMap8E0FD0EA52A241AAB7312149B2333625.pbiviz">tMap8E0FD0EA52A241AAB7312149B2333625.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 3.0.1.2 ➔ 3.0.5.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/workforcevision.org-chart-drag-and-drop"><img src="https://store-images.s-microsoft.com/image/apps.61590.f11728f1-3776-46e7-8887-66d1faaf4435.08c5b5a1-be88-4c6c-b427-9662e6a2f205.3c315d5d-7036-49d1-8ec1-9d32df2545cd" width="100" alt="Org Chart Drag and Drop" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Org Chart Drag and Drop</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://workforcevision.powerappsportals.com/Support-and-Help/">WorkforceVision LTD</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Visualise your organization structure through a customisable drag and drop Organization Chart</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/orgChart021B261450284A21B688B59A7342AC52.pbiviz">orgChart021B261450284A21B688B59A7342AC52.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.2.5.9 ➔ 1.2.6.2</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/datavizboutiquegmbh1631474046585.ultimate_waterfall_api"><img src="https://store-images.s-microsoft.com/image/apps.31187.0ce06711-60ba-4db0-9ca0-b3f4a8676499.ed3ad621-ab30-4b89-90a9-19f9f2aca9d4.44c5404e-5e44-4ac0-a153-4167f1d54409" width="100" alt="Ultimate Waterfall (API)" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Ultimate Waterfall (API)</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://dataviz.boutique/2017/02/22/kontakt/">dataviz.boutique GmbH</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Start Value, Chart Orientation, Small Multiples, Sub Totals, Deviation, IBCS (R) Table</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/Waterfall2023Pbi552BC2DB21894DA5B40D0FE0FE33D590.pbiviz">Waterfall2023Pbi552BC2DB21894DA5B40D0FE0FE33D590.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.1.1.6 ➔ 1.1.1.8</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/symilarityltd1676913830957.orcaviz-pro"><img src="https://store-images.s-microsoft.com/image/apps.55120.9d61dd51-6cc4-403b-b310-2a002ffe3f1f.7bccb4df-0c3d-4228-8fc5-3ce3b69da998.cdb66629-0350-4bcb-a35e-9b7d85b45f1a" width="100" alt="orcaviz-pro" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>orcaviz-pro</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://orcaviz.com/support/">OrcaViz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Bring location intelligence to Power BI with Orcaviz.com custom visuals</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/OrcaViz_PowerBI_Licenced_Visualisation_Pro_v2_1_0_0.pbiviz">OrcaViz_PowerBI_Licenced_Visualisation_Pro_v2_1_0_0.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 4.0.2.0 ➔ 4.0.3.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104381083"><img src="https://store-images.s-microsoft.com/image/apps.27347.a4348d07-292b-40e6-8cc8-a5d5e5e6e250.d5b29ba2-3156-475f-a9cb-300f6f9a79cb.9f7c9a68-63cd-465e-858c-86a9916327ff" width="100" alt="Power KPI" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Power KPI</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://aka.ms/customvisualscommunity">Microsoft Corporation</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">A powerful KPI Indicator with multi-line chart and labels for current date, value and variances.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/powerKPI462CE5C2666F4EC8A8BDD7E5587320A3.pbiviz">powerKPI462CE5C2666F4EC8A8BDD7E5587320A3.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 2.0.0.0 ➔ 3.0.3.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/ilfatgaliev1696579877540.charticulator_visual_community_editor"><img src="https://store-images.s-microsoft.com/image/apps.49165.39db0d0d-da11-4a12-97f2-1b1bef3a80f3.de719d54-0fed-4209-b496-81ae1d35ed83.77dea177-e858-494d-9de2-b3a0806025bc" width="100" alt="Charticulator Visual Community (Editor)" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Charticulator Visual Community (Editor)</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://github.com/zBritva/charticulator-visual-community/issues">Ilfat Galiev</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Create custom and reusable charts right within Power BI in the new visual</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/charticulatorVisualCommunity_EDITOR.pbiviz">charticulatorVisualCommunity_EDITOR.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.6.8.0 ➔ 1.6.9.0</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+</table>
+
+
+## 4 Changes in Listings or Terms: ##
+
+<table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
 <tr>
   <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/polyvista1585910805469.sankey_diagram_for_power_bi_by_chartexpo"><img src="https://store-images.s-microsoft.com/image/apps.35715.8b7f3354-6b95-41ef-9047-05ccddb0a260.610b2edc-2bae-49fa-a19c-5bdb4b915bcb.0d636ba9-5046-4750-80af-14c221c89e3f" width="100" alt="Sankey Diagram for Power BI by ChartExpo" style="max-width: 100%; height: auto;"/>
 </a></td>
@@ -50,103 +202,7 @@ Here are the latest updates to the Power BI Visuals on Microsoft AppSource betwe
 <tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.chartexpo.com/Home/Contact">polyvista.com</a></td></tr>
 <tr><td style="border: none !important; padding: 4px;">Find out why 450,000+ users love ChartExpo. Experience the ChartExpo Sankey Diagram Difference.</td></tr>
 <tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/chartexposankeydiagramD70B8BC1836C4420A7BFCE36F48EE4BE.pbiviz">chartexposankeydiagramD70B8BC1836C4420A7BFCE36F48EE4BE.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.1.3 ➔ 1.0.2.0</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/datellersprivatelimited1651219582015.datellersnestedtotalbarchart"><img src="https://store-images.s-microsoft.com/image/apps.21798.34ae63a9-e51d-45b9-a553-89aebfccf73e.4b59f6ce-a820-414a-a6bb-3cfcfdaf2fe6.8959595c-d3dd-49cf-aa04-5aad56e0a558" width="100" alt="Datellers Nested Total Bar Chart" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Datellers Nested Total Bar Chart</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://datellers.com/">DATELLERS PRIVATE LIMITED</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">An alternative to Stacked Bar Charts, showing Segment-To-Totals for Comparison.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/nestedTotalBarChartC2D32E67DFF64FDD9564CF2CFCD20141.pbiviz">nestedTotalBarChartC2D32E67DFF64FDD9564CF2CFCD20141.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.1.2.0 ➔ 1.2.0.0</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380774"><img src="https://store-images.s-microsoft.com/image/apps.8163.d4070d8f-9bde-426c-ac82-6507c3d8b867.4e3743a7-6276-46ee-a466-4088d10cd693.a39caf54-026e-45e0-a4d0-31fb8267cf5f" width="100" alt="Dual KPI" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Dual KPI</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://aka.ms/customvisualscommunity">Microsoft Corporation</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Efficiently visualizes two measures over time, showing their trend on a joint timeline</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/PBI_CV_3C80B1F2_09AF_4123_8E99_C3CBC46B23E0.pbiviz">PBI_CV_3C80B1F2_09AF_4123_8E99_C3CBC46B23E0.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 2.0.5.0 ➔ 2.1.2.0</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/flashbi1688505129702.fantail_flashbi"><img src="https://store-images.s-microsoft.com/image/apps.5754.1180c1a5-a79d-46a1-ba7d-55d8d0cbdbe4.9d34130b-6498-43a1-a40d-b34703ff674c.371bc881-a910-47b7-8a60-1e8fc8e89c9c" width="100" alt="fantail_flashbi" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>fantail_flashbi</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://flashbi.com.au/fantail-support/">FlashBI</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">The FanTail brings hierarchical data to life with dynamic, interactive radial layout with drilldown.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/fanTailLicC277B9B6C5624BB5966D4ADBB33EB249.pbiviz">fanTailLicC277B9B6C5624BB5966D4ADBB33EB249.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.0.1 ➔ 1.0.0.2</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/cedrobigmbh1711545044523.cbifocus_planner"><img src="https://store-images.s-microsoft.com/image/apps.52498.7e5f9b11-3e7c-4970-b65b-012591320864.6987560a-4853-4431-b05b-ad545c2191be.eaa2e5f5-3a5e-4cc6-8fe6-8b753a3eb06c" width="100" alt="cBI Focus Planner" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>cBI Focus Planner</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://cbi-focus.com/resources/">cedroBI GmbH</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Plan, budget, and write back directly in Power BI with this enterprise-ready visual.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/cbiFocusPlanner1FAB44DD56754A93A0B6690165CAA439.pbiviz">cbiFocusPlanner1FAB44DD56754A93A0B6690165CAA439.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.13.0 ➔ 1.1.0.0</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/it-devgmbh.itdevgmbh-pbivisual-pictobar"><img src="https://store-images.s-microsoft.com/image/apps.37549.8fc37687-536e-4fa6-9cd9-912762333a41.12d7e4be-7643-42bc-a96d-e61cb0b5e84a.c42c99f3-8fc6-4f7e-8888-037d776a2b52" width="100" alt="PictoBar" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>PictoBar</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://de.it-dev.eu/kontakt/">IT-DEV GmbH</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Change images, pick your layout, scale big numbers with ease!</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/pictoBarVisual5F436B8EAA8C4FF18C2B4A1A27D04EB6.pbiviz">pictoBarVisual5F436B8EAA8C4FF18C2B4A1A27D04EB6.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.0.2 ➔ 1.0.0.6</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/flinkergmbh1644589155747.ifc-viewer"><img src="https://store-images.s-microsoft.com/image/apps.12309.140eab14-5327-44a0-b9ff-66fb1c47991e.f8d441fc-ad72-4aad-9215-f5ffc89f6ab8.c72c39db-6149-456b-8dbb-568523dc5194" width="100" alt="IFC Viewer" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>IFC Viewer</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://outlook.office365.com/book/SupportConsultingonlinemeeting@flinker.app/">Flinker GmbH</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">3D IFC Viewer in Power BI for seamless BIM collaboration</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/ifcviewer.pbiviz">ifcviewer.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 3.1.0.0 ➔ 3.2.0.0</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/codexenterprisesllc1687402101378.bichamp-autocompfilter"><img src="https://store-images.s-microsoft.com/image/apps.40753.e8fdf94b-1848-4cd3-94f5-e1d6e4d3b9cf.6d60a9e2-5c4a-455f-aae8-203c4713451e.bb0c30b2-2d6f-4d55-a0c1-fa3cdf9585b9" width="100" alt="Autocomplete Filter (BI-Champ Suite)" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Autocomplete Filter (BI-Champ Suite)</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://bizintelligencechampions.com/help/autocomp">CodeX Enterprises LLC</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">A rich text filter that allows search, autocompletion, copy-and-paste list support, and much more.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/valuefilter067F5282FE684A43B734273E444AE8EB.pbiviz">valuefilter067F5282FE684A43B734273E444AE8EB.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 3.3.0.0 ➔ 3.4.0.0</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/softclouds.softclouds_editgrid"><img src="https://store-images.s-microsoft.com/image/apps.3236.a44e548f-83ef-476f-b237-ea352592f130.baf893e3-7ad1-4b49-928c-c008560700e5.3c6d5946-1b22-4e11-b766-49af47fe6880" width="100" alt="Edit Grid" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Edit Grid</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.softclouds.com/privacy-policy.html">SoftClouds LLC</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Excel like table that allow users to view and change the data, and save it to a SQL Server table.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/editgridAgGridA8E9B44F8F9D6C689D09A39B46.pbiviz">editgridAgGridA8E9B44F8F9D6C689D09A39B46.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.1.9 ➔ 1.0.1.10</td></tr>
-<tr><td style="border: none !important; padding: 4px;"></td></tr>
-</table>
-
-
-## 2 Changes in Listings or Terms: ##
-
-<table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
-<tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/solveddoo1696267674162.wewrite_table"><img src="https://store-images.s-microsoft.com/image/apps.63690.a1afd4a7-9a52-444c-b34f-e1b03916c8a5.cec79dce-b212-469c-9973-a09d66b855ae.b4448654-c314-464e-832c-b17447628973" width="100" alt="WeWrite Table" style="max-width: 100%; height: auto;"/>
-</a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>WeWrite Table</b></td>
-</tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://wewritevisuals.com/contact/">SOLVED</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">A custom table visual with write-back capabilities</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/weWriteTableB9D21BABB05F45D6B3CD2DD68EF0DCBC.pbiviz">weWriteTableB9D21BABB05F45D6B3CD2DD68EF0DCBC.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Release Date: 6/27/2025 ➔ 8/27/2025</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Release Date: 8/28/2025 ➔ 9/2/2025</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
   <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/tekantislimited1706613112857.iconmap_pro"><img src="https://store-images.s-microsoft.com/image/apps.30126.0347caa9-a37a-4089-b319-491abd252258.da478442-e653-448e-9756-8a657f692479.92639a87-802e-4fc3-ade2-db0ea34cfef4" width="100" alt="Icon Map Pro" style="max-width: 100%; height: auto;"/>
@@ -156,7 +212,27 @@ Here are the latest updates to the Power BI Visuals on Microsoft AppSource betwe
 <tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://iconmappro.com/docs/support">Tekantis</a></td></tr>
 <tr><td style="border: none !important; padding: 4px;">Advanced geospatial analytics made simple with Icon Map Pro for Microsoft Power BI</td></tr>
 <tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/iconMapProE938B1CED4834168A55864E1F8E7242E.pbiviz">iconMapProE938B1CED4834168A55864E1F8E7242E.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Release Date: 8/15/2025 ➔ 8/28/2025</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Release Date: 8/28/2025 ➔ 9/3/2025</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/popfinger.jobnet_visual"><img src="https://store-images.s-microsoft.com/image/apps.11404.de7c40c8-6177-411b-874c-b89f0a4a549b.5be7b398-bafc-4f5a-83a2-ff07ab75242f.353abdef-6d45-4e45-82c5-e25cf0257aea" width="100" alt="JobNet Visual" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>JobNet Visual</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://bi.popfinger.com/documentation/">POPFINGER IT Consulting</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Visualize your parallel processes in a Gantt chart fashion to identify performance bottlenecks.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/jobnet7DD37433644745C993F066FF4654FFDB.pbiviz">jobnet7DD37433644745C993F066FF4654FFDB.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Release Date: 7/11/2025 ➔ 9/1/2025</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/blogic.vcad"><img src="https://store-images.s-microsoft.com/image/apps.20257.72519539-d973-434a-8e93-d09df4f7d651.340c5a08-b4cc-454e-b477-15b365a4059f.8171aad6-3b4a-4362-86a1-c92038400a64" width="100" alt="Vcad" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Vcad</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.bimservices.it/contact/">BLOGIC SRL</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Vcad is a powerful custom visual for Power BI that enables seamless integration of 2D/3D BIM models</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/vcadpbiviewer8F4E28F3DE2F4242B26119AEE011E1F5.pbiviz">vcadpbiviewer8F4E28F3DE2F4242B26119AEE011E1F5.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Release Date: 8/4/2025 ➔ 8/29/2025</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 </table>
 
