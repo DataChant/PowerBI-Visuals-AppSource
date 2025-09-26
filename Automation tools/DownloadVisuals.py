@@ -291,7 +291,7 @@ def process_visuals() -> None:
         if not simple_filename or not versioned_filename:
             logger.error(f"Missing filename information, skipping row {i}")
             continue
-
+        
         # Check if file already exists
         new_download = False
         downloaded = False
@@ -320,10 +320,8 @@ def process_visuals() -> None:
                 download_file(image_url, image_path)
                 downloaded = True  
 
-            
         if downloaded:
-            handle_visual_files(versioned_filename, guid, simple_filename, pbix_filename, image_filename, is_certified)
-        
+            handle_visual_files(versioned_filename, f"{guid}.pbiviz", f"{simple_filename}.pbiviz", pbix_filename, image_filename, is_certified)
 
 def move_file_to_unlisted(all_dir, listed_dir, unlisted_dir, folder, filename):
     # Move PBIVIZ file

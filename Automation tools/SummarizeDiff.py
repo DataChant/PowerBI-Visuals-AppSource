@@ -27,8 +27,8 @@ import subprocess
 from datetime import datetime
 
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2025-09-18'
-PREVIOUS_COMMIT_DATE = '2025-09-14'
+LATEST_COMMIT_DATE = '2025-09-26'
+PREVIOUS_COMMIT_DATE = '2025-09-18'
 
 import logging
 import csv
@@ -194,10 +194,10 @@ def create_github_link(url: str, text: str, class_name: str = "") -> str:
 
 def create_github_image_link(url: str, img_src: str, alt_text: str, width: int = 100) -> str:
     """Create a GitHub Discussions-compatible image link."""
-    if not url or not img_src:
-        return f'<img src="{img_src}" width="{width}" alt="{alt_text}" style="max-width: 100%; height: auto;"/>' if img_src else "No thumbnail"
     
     img_tag = f'<img src="{img_src}" width="{width}" alt="{alt_text}" style="max-width: 100%; height: auto;"/>'
+    if not url:
+        return img_tag
     
     # Simple link that GitHub allows
     return f'<a href="{url}">{img_tag}\n</a>'
@@ -230,15 +230,29 @@ def writeDiff(file, title, set_of_changes, data_dict):
         visual = data_dict.get(guid, {})
 
         version = visual.get("Version", "")
-        thumbnail_url = _latest_all_data.get(guid, {}).get("Image", "")
-        
+        # Get AppSource URL from the data dictionary
+        app_source_url = visual.get("AppSource Link", "")
+
         visual_name = visual.get("Custom Visual", "")
+        
+        #thumbnail_url = _latest_all_data.get(guid, {}).get("Image", "")
+        #thumbnail_url = f"https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/Images/{visual_name}.png"
+        thumbnail_url = f"../blob/main/All%20Visuals/Images/{visual_name}.png?raw=true"
+ 
+        if title == "Removed Custom Visuals":
+            app_source_url = None
+        
         publisher = visual.get("Publisher", "")
         publisher_link = visual.get("SupportLink", "")
 
         publisher_line  = f"Publisher: {create_github_link(publisher_link, publisher)}"     
         description = visual.get("Description", "")
-        guid_line = f"Direct Download: {create_github_link(f'https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/{guid}.pbiviz', f'{guid}.pbiviz')}"
+        github_link = create_github_link(
+            f'https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/{guid}.pbiviz',
+            f'{guid}.pbiviz'
+        )
+        guid_line = f"Direct Download: {github_link}"
+
         change_lines = []
 
         if title == "New Versions":
@@ -262,8 +276,7 @@ def writeDiff(file, title, set_of_changes, data_dict):
         else:    
             version_line = f"Version: {version}"
 
-        # Get AppSource URL from the data dictionary
-        app_source_url = visual.get("AppSource Link", "")
+        
         file.write('<tr>\n')
         
         # First column (image) - spans all 5 rows
@@ -271,7 +284,7 @@ def writeDiff(file, title, set_of_changes, data_dict):
         rowspan = 5
         if change_lines:
             rowspan = len(change_lines) + 4
-        if thumbnail_url and app_source_url:
+        if thumbnail_url:
             image_link = create_github_image_link(app_source_url, thumbnail_url, visual_name, 100)
             file.write(f'  <td rowspan="{rowspan}" style="width: 120px; border: none !important; vertical-align: top; text-align: center;">{image_link}</td>\n')
         else:
