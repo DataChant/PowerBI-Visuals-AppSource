@@ -1,0 +1,810 @@
+{
+    "visual": {
+        "name": "@upsetjs/powerbi_visuals",
+        "displayName": "UpSet Plot",
+        "guid": "upSetJS61F43BDFCA024B13B6AC5BA73C9427B2",
+        "visualClassName": "UpSetPlot",
+        "version": "2.0.0.0",
+        "description": "UpSet plots are a scalable alternative to venn diagrams for showing set intersections for more than three sets",
+        "supportUrl": "https://www.sgratzl.com",
+        "gitHubUrl": "https://github.com/upsetjs/upsetjs_powerbi_visuals"
+    },
+    "author": {
+        "name": "Samuel Gratzl",
+        "email": "sam@sgratzl.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Addon_Attribute": "Attribute",
+            "Addon_Minimum": "Minimum",
+            "Addon_25q": "25% Quantile",
+            "Addon_Median": "Median",
+            "Addon_75q": "75% Quantile",
+            "Addon_Maximum": "Maximum",
+            "Tooltip_Size": "Size",
+            "Role_Elements": "Elements",
+            "Role_Elements_Desc": "exactly one grouping representing the list of elements that are synced",
+            "Role_Sets": "Sets",
+            "Role_Sets_Desc": "one or more grouping or measures where each is interpreted as a set, a trueish value in row i is interpreted that the corresponding element i is part of this set",
+            "Role_Attributes": "Attributes",
+            "Role_Attributes_Desc": "zero or more numerical/text measures which are used to render boxplots or mosaic plots",
+            "Role_Counts": "Cardinality Expression Measure",
+            "Role_Counts_Desc": "numerical measure defining the number of elements in the set, see also expression input",
+            "Sets_DisplayName": "Sets",
+            "Sets_Order_DisplayName": "Order Sets By",
+            "Sets_Order_Inherit": "Inherit Order",
+            "Sets_Order_Name": "Name",
+            "Sets_Order_Cardinality": "Cardinality",
+            "Sets_Order_Cardinality_Desc": "Cardinality (decreasing)",
+            "Sets_Limit": "Limit to Top N Sets",
+            "Combinations_DisplayName": "Set Combinations",
+            "Combinations_Mode_DisplayName": "Generation Mode",
+            "Combinations_Mode_Intersection": "Set Intersections",
+            "Combinations_Mode_Union": "Set Unions",
+            "Combinations_Mode_DistinctIntersection": "Distinct Set Intersections",
+            "Combinations_Min": "Minimum Degree",
+            "Combinations_Max": "Maximum Degree",
+            "Combinations_Empty": "Show Empty Combinations",
+            "Combinations_Limit": "Limit to Top N Combinations",
+            "Combinations_Order": "Order Combinations By",
+            "Combinations_Order_Name": "1. Name",
+            "Combinations_Order_Cardinality_Name": "1. Cardinality 2. Name",
+            "Combinations_Order_Cardinality_Degree_Name": "1. Cardinality 2. Degree 3. Name",
+            "Combinations_Order_Degree_Name": "1. Degree 2. Name",
+            "Combinations_Order_Degree_Cardinality_Name": "1. Degree 2. Cardinality 3. Name",
+            "Combinations_Order_Group_Name": "1. Set Group 2. Name",
+            "Combinations_Order_Group_Cardinality_Name": "1. Set Group 2. Cardinality 3. Name",
+            "Combinations_Order_Group_Degree_Name": "1. Set Group 2. Degree 3. Name",
+            "Combinations_Order_Group_Degree_Cardinality_Name": "1. Set Group 2. Degree 3. Cardinality 4. Name",
+            "Theme_DisplayName": "Theme",
+            "Theme_Theme_DisplayName": "Theme",
+            "Theme_Theme_Light_DisplayName": "Light",
+            "Theme_Theme_IndividualColors_DisplayName": "Individual Colors",
+            "Theme_Theme_ColoredSets_DisplayName": "Colored Sets",
+            "Theme_Theme_SingleColor_DisplayName": "Single Color",
+            "Theme_Theme_Dark_DisplayName": "Dark",
+            "Theme_Theme_Vega_DisplayName": "Vega",
+            "Theme_SelectionColor_DisplayName": "Selection Color",
+            "Theme_Color_DisplayName": "Color",
+            "Theme_Opacity_DisplayName": "Opacity",
+            "Theme_HasSelectionColor_DisplayName": "Color when selection is present",
+            "Theme_HasSelectionOpacity_DisplayName": "Opacity when selection is present",
+            "Theme_TextColor_DisplayName": "Text Color",
+            "Theme_Hover_Hint_Color_DisplayName": "Hover Hint Color",
+            "Theme_Not_Member_Color_DisplayName": "Not Member Color",
+            "Theme_Alternating_Background_Color_DisplayName": "Alternating Background Color",
+            "Fonts_DisplayName": "Fonts",
+            "Fonts_FontFamily_DisplayName": "Font Family",
+            "Fonts_SetLabel_DisplayName": "Set Label",
+            "Fonts_ValueLabel_DisplayName": "Value Label",
+            "Fonts_ChartLabel_DisplayName": "Chart Label",
+            "Fonts_BarLabel_DisplayName": "Bar Label",
+            "Style_DisplayName": "Style",
+            "Style_NumericScale_DisplayName": "Scale",
+            "Style_NumericScale_Linear": "Linear Scale",
+            "Style_NumericScale_Log": "Log Scale",
+            "Style_SetName_DisplayName": "Set Axis Name",
+            "Style_SetLabelAlignment_DisplayName": "Set Label Alignment",
+            "Style_CombinationName_DisplayName": "Combination Axis Name",
+            "Style_SetNameAxisOffset_DisplayName": "Set Axis Offset",
+            "Style_CombinationNameAxisOffset_DisplayName": "Combination Axis Offset",
+            "Style_SetMaxScale_DisplayName": "Set Scale Maximum",
+            "Style_CombinationScaleMax_DisplayName": "Combination Scale Maximum"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "elements",
+                "displayName": "Elements",
+                "displayNameKey": "Role_Elements",
+                "descriptionKey": "Role_Elements_Desc",
+                "kind": "Grouping",
+                "preferredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "sets",
+                "displayName": "Set",
+                "displayNameKey": "Role_Sets",
+                "descriptionKey": "Role_Sets_Desc",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "bool": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "attributes",
+                "displayName": "Attributes",
+                "displayNameKey": "Role_Attributes",
+                "descriptionKey": "Role_Attributes_Desc",
+                "kind": "Measure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    },
+                    {
+                        "text": true
+                    }
+                ]
+            },
+            {
+                "name": "counts",
+                "displayName": "Cardinality Expression Measure",
+                "displayNameKey": "Role_Counts",
+                "descriptionKey": "Role_Counts_Desc",
+                "kind": "Measure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "elements": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "counts": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "elements"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "sets"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "attributes"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "counts"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "suppressDefaultTitle": true,
+        "supportsMultiVisualSelection": true,
+        "privileges": [],
+        "objects": {
+            "sets": {
+                "displayNameKey": "Sets_DisplayName",
+                "objectCategory": 1,
+                "properties": {
+                    "order": {
+                        "displayNameKey": "Sets_Order_DisplayName",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Sets_Order_Inherit",
+                                    "value": "inherit"
+                                },
+                                {
+                                    "displayNameKey": "Sets_Order_Name",
+                                    "value": "name"
+                                },
+                                {
+                                    "displayNameKey": "Sets_Order_Cardinality",
+                                    "value": "cardinality"
+                                },
+                                {
+                                    "displayNameKey": "Sets_Order_Cardinality_Desc",
+                                    "value": "cardinality:desc"
+                                }
+                            ]
+                        }
+                    },
+                    "limit": {
+                        "displayNameKey": "Sets_Limit",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "combinations": {
+                "displayNameKey": "Combinations_DisplayName",
+                "objectCategory": 1,
+                "properties": {
+                    "mode": {
+                        "displayNameKey": "Combinations_Mode_DisplayName",
+                        "description": "specify the set combination generation mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Combinations_Mode_Intersection",
+                                    "value": "intersection"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Mode_Union",
+                                    "value": "union"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Mode_DistinctIntersection",
+                                    "value": "distinctIntersection"
+                                }
+                            ]
+                        }
+                    },
+                    "min": {
+                        "displayNameKey": "Combinations_Min",
+                        "description": "minimum number of sets in a set combination",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "max": {
+                        "displayNameKey": "Combinations_Max",
+                        "description": "maximum number of sets in a set combination",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "empty": {
+                        "displayNameKey": "Combinations_Empty",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "limit": {
+                        "displayNameKey": "Combinations_Limit",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "order": {
+                        "displayNameKey": "Combinations_Order",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Combinations_Order_Name",
+                                    "value": "name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Cardinality_Name",
+                                    "value": "cardinality,name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Cardinality_Degree_Name",
+                                    "value": "cardinality,degree,name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Degree_Name",
+                                    "value": "degree,name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Degree_Cardinality_Name",
+                                    "value": "degree,cardinality,name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Group_Name",
+                                    "value": "group,name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Group_Cardinality_Name",
+                                    "value": "group,cardinality,name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Group_Degree_Name",
+                                    "value": "group,degree,name"
+                                },
+                                {
+                                    "displayNameKey": "Combinations_Order_Group_Degree_Cardinality_Name",
+                                    "value": "group,degree,cardinality,name"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "theme": {
+                "displayNameKey": "Theme_DisplayName",
+                "objectCategory": 1,
+                "properties": {
+                    "theme": {
+                        "displayNameKey": "Theme_Theme_DisplayName",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Theme_Theme_Light_DisplayName",
+                                    "value": "light"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_IndividualColors_DisplayName",
+                                    "value": "powerbi"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_ColoredSets_DisplayName",
+                                    "value": "powerbi-set"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_SingleColor_DisplayName",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_Dark_DisplayName",
+                                    "value": "dark"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_Vega_DisplayName",
+                                    "value": "vega"
+                                }
+                            ]
+                        }
+                    },
+                    "selectionColor": {
+                        "displayNameKey": "Theme_SelectionColor_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color": {
+                        "displayNameKey": "Theme_Color_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opacity": {
+                        "displayNameKey": "Theme_Opacity_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "hasSelectionColor": {
+                        "displayNameKey": "Theme_HasSelectionColor_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hasSelectionOpacity": {
+                        "displayNameKey": "Theme_HasSelectionOpacity_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textColor": {
+                        "displayNameKey": "Theme_TextColor_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hoverHintColor": {
+                        "displayNameKey": "Theme_Hover_Hint_Color_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "notMemberColor": {
+                        "displayNameKey": "Theme_Not_Member_Color_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "alternatingBackgroundColor": {
+                        "displayNameKey": "Theme_Alternating_Background_Color_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "setColors": {
+                "displayName": "Set Colors",
+                "objectCategory": 1,
+                "properties": {
+                    "setColor1": {
+                        "displayName": "Set Color 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor2": {
+                        "displayName": "Set Color 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor3": {
+                        "displayName": "Set Color 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor4": {
+                        "displayName": "Set Color 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor5": {
+                        "displayName": "Set Color 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor6": {
+                        "displayName": "Set Color 6",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor7": {
+                        "displayName": "Set Color 7",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor8": {
+                        "displayName": "Set Color 8",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor9": {
+                        "displayName": "Set Color 9",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor10": {
+                        "displayName": "Set Color 10",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "attributeColors": {
+                "displayName": "Attribute Colors",
+                "objectCategory": 1,
+                "description": "customize the colors of categorical attributes",
+                "properties": {
+                    "attributeColor1": {
+                        "displayName": "Attribute Color 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor2": {
+                        "displayName": "Attribute Color 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor3": {
+                        "displayName": "Attribute Color 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor4": {
+                        "displayName": "Attribute Color 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor5": {
+                        "displayName": "Attribute Color 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor6": {
+                        "displayName": "Attribute Color 6",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor7": {
+                        "displayName": "Attribute Color 7",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor8": {
+                        "displayName": "Attribute Color 8",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor9": {
+                        "displayName": "Attribute Color 9",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "attributeColor10": {
+                        "displayName": "Attribute Color 10",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "style": {
+                "displayNameKey": "Style_DisplayName",
+                "properties": {
+                    "numericScale": {
+                        "displayNameKey": "Style_NumericScale_DisplayName",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Style_NumericScale_Linear",
+                                    "value": "linear"
+                                },
+                                {
+                                    "displayNameKey": "Style_NumericScale_Log",
+                                    "value": "log"
+                                }
+                            ]
+                        }
+                    },
+                    "setName": {
+                        "displayNameKey": "Style_SetName_DisplayName",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "setLabelAlignment": {
+                        "displayNameKey": "Style_SetLabelAlignment_DisplayName",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "combinationName": {
+                        "displayNameKey": "Style_CombinationName_DisplayName",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "setNameAxisOffset": {
+                        "displayNameKey": "Style_SetNameAxisOffset_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "combinationNameAxisOffset": {
+                        "displayNameKey": "Style_CombinationNameAxisOffset_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "setMaxScale": {
+                        "displayNameKey": "Style_SetMaxScale_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "combinationScaleMax": {
+                        "displayNameKey": "Style_CombinationScaleMax_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "fonts": {
+                "displayNameKey": "Fonts_DisplayName",
+                "properties": {
+                    "fontFamily": {
+                        "displayNameKey": "Fonts_FontFamily_DisplayName",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "chartLabel": {
+                        "displayNameKey": "Fonts_ChartLabel_DisplayName",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "setLabel": {
+                        "displayNameKey": "Fonts_SetLabel_DisplayName",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "barLabel": {
+                        "displayNameKey": "Fonts_BarLabel_DisplayName",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsSynchronizingFilterState": true,
+        "supportsKeyboardFocus": true,
+        "tooltips": {
+            "supportEnhancedTooltips": true,
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

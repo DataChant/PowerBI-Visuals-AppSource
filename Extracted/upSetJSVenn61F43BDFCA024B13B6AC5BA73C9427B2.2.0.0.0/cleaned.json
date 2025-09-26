@@ -1,0 +1,420 @@
+{
+    "visual": {
+        "name": "@upsetjs/powerbi_visuals",
+        "displayName": "Venn Diagram",
+        "guid": "upSetJSVenn61F43BDFCA024B13B6AC5BA73C9427B2",
+        "visualClassName": "VennDiagram",
+        "version": "2.0.0.0",
+        "description": "Venn diagrams allow one to show set intersections up to three sets",
+        "supportUrl": "https://www.sgratzl.com",
+        "gitHubUrl": "https://github.com/upsetjs/upsetjs_powerbi_venn_visuals"
+    },
+    "author": {
+        "name": "Samuel Gratzl",
+        "email": "sam@sgratzl.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Addon_Attribute": "Attribute",
+            "Addon_Minimum": "Minimum",
+            "Addon_25q": "25% Quantile",
+            "Addon_Median": "Median",
+            "Addon_75q": "75% Quantile",
+            "Addon_Maximum": "Maximum",
+            "Tooltip_Size": "Size",
+            "Role_Elements": "Elements",
+            "Role_Elements_Desc": "exactly one grouping representing the list of elements that are synced",
+            "Role_Sets": "Sets",
+            "Role_Sets_Desc": "one or more grouping or measures where each is interpreted as a set, a trueish value in row i is interpreted that the corresponding element i is part of this set",
+            "Role_Counts": "Cardinality Expression Measure",
+            "Role_Counts_Desc": "numerical measure defining the number of elements in the set, see also expression input",
+            "Theme_DisplayName": "Theme",
+            "Theme_Theme_DisplayName": "Theme",
+            "Theme_Theme_Light_DisplayName": "Light",
+            "Theme_Theme_IndividualColors_DisplayName": "Individual Colors",
+            "Theme_Theme_ColoredSets_DisplayName": "Colored Sets",
+            "Theme_Theme_SingleColor_DisplayName": "Single Color",
+            "Theme_Theme_Dark_DisplayName": "Dark",
+            "Theme_Theme_Vega_DisplayName": "Vega",
+            "Theme_SelectionColor_DisplayName": "Selection Color",
+            "Theme_Color_DisplayName": "Color",
+            "Theme_Opacity_DisplayName": "Opacity",
+            "Theme_HasSelectionColor_DisplayName": "Color when selection is present",
+            "Theme_HasSelectionOpacity_DisplayName": "Opacity when selection is present",
+            "Theme_TextColor_DisplayName": "Text Color",
+            "Style_DisplayName": "Style",
+            "Style_Mode_DisplayName": "Layout Mode",
+            "Style_Mode_Venn_DisplayName": "Venn Diagram",
+            "Style_Mode_Euler_DisplayName": "Euler Diagram",
+            "Fonts_DisplayName": "Fonts",
+            "Fonts_FontFamily_DisplayName": "Font Family",
+            "Fonts_SetLabel_DisplayName": "Set Label",
+            "Fonts_ValueLabel_DisplayName": "Value Label"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "elements",
+                "displayName": "Elements",
+                "displayNameKey": "Role_Elements",
+                "description": "exactly one grouping representing the list of elements that are synced",
+                "descriptionKey": "Role_Elements_Desc",
+                "kind": "Grouping",
+                "preferredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "sets",
+                "displayName": "Sets",
+                "displayNameKey": "Role_Sets",
+                "description": "one or more grouping or measures where each is interpreted as a set, a trueish value in row i is interpreted that the corresponding element i is part of this set",
+                "descriptionKey": "Role_Sets_Desc",
+                "kind": "GroupingOrMeasure",
+                "preferredTypes": [
+                    {
+                        "bool": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "name": "counts",
+                "displayName": "Cardinality Expression Measure",
+                "displayNameKey": "Role_Counts",
+                "description": "numerical measure defining the number of elements in the set, see also expression input",
+                "descriptionKey": "Role_Counts_Desc",
+                "kind": "Measure",
+                "preferredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "elements": {
+                            "max": 1
+                        }
+                    },
+                    {
+                        "counts": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "elements"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "sets"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "counts"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "suppressDefaultTitle": true,
+        "supportsMultiVisualSelection": true,
+        "privileges": [],
+        "objects": {
+            "theme": {
+                "displayNameKey": "Theme_DisplayName",
+                "objectCategory": 1,
+                "properties": {
+                    "theme": {
+                        "displayNameKey": "Theme_Theme_DisplayName",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Theme_Theme_Light_DisplayName",
+                                    "value": "light"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_IndividualColors_DisplayName",
+                                    "value": "powerbi"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_ColoredSets_DisplayName",
+                                    "value": "powerbi-set"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_SingleColor_DisplayName",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_Dark_DisplayName",
+                                    "value": "dark"
+                                },
+                                {
+                                    "displayNameKey": "Theme_Theme_Vega_DisplayName",
+                                    "value": "vega"
+                                }
+                            ]
+                        }
+                    },
+                    "selectionColor": {
+                        "displayNameKey": "Theme_SelectionColor_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color": {
+                        "displayNameKey": "Theme_Color_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opacity": {
+                        "displayNameKey": "Theme_Opacity_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "hasSelectionColor": {
+                        "displayNameKey": "Theme_HasSelectionColor_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hasSelectionOpacity": {
+                        "displayNameKey": "Theme_HasSelectionOpacity_DisplayName",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textColor": {
+                        "displayNameKey": "Theme_TextColor_DisplayName",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "setColors": {
+                "displayName": "Set Colors",
+                "objectCategory": 1,
+                "properties": {
+                    "setColor1": {
+                        "displayName": "Set Color 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor2": {
+                        "displayName": "Set Color 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor3": {
+                        "displayName": "Set Color 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor4": {
+                        "displayName": "Set Color 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor5": {
+                        "displayName": "Set Color 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor6": {
+                        "displayName": "Set Color 6",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor7": {
+                        "displayName": "Set Color 7",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor8": {
+                        "displayName": "Set Color 8",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor9": {
+                        "displayName": "Set Color 9",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "setColor10": {
+                        "displayName": "Set Color 10",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "style": {
+                "displayNameKey": "Style_DisplayName",
+                "properties": {
+                    "mode": {
+                        "displayNameKey": "Style_Mode_DisplayName",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayNameKey": "Style_Mode_Venn_DisplayName",
+                                    "value": "venn"
+                                },
+                                {
+                                    "displayNameKey": "Style_Mode_Euler_DisplayName",
+                                    "value": "euler"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "fonts": {
+                "displayNameKey": "Fonts_DisplayName",
+                "properties": {
+                    "fontFamily": {
+                        "displayNameKey": "Fonts_FontFamily_DisplayName",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "setLabel": {
+                        "displayNameKey": "Fonts_SetLabel_DisplayName",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "valueLabel": {
+                        "displayNameKey": "Fonts_ValueLabel_DisplayName",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsSynchronizingFilterState": true,
+        "supportsKeyboardFocus": true,
+        "tooltips": {
+            "supportEnhancedTooltips": true,
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
