@@ -37,17 +37,42 @@ DOWNLOAD_ALL = False  # Set to True to download all visuals, False to only proce
 # Global set for unique external JS files
 EXTERNAL_JS_FILES = set()
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Set up logging with UTF-8 encoding to handle Unicode characters
+import sys
 
-# Add file handler to also write logs to a file
+# Configure console handler with UTF-8 encoding
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+# Ensure UTF-8 encoding for console output on Windows
+if sys.platform.startswith('win'):
+    # For Windows, we need to handle Unicode properly
+    import codecs
+    if hasattr(sys.stdout, 'reconfigure'):
+        # Python 3.7+
+        sys.stdout.reconfigure(encoding='utf-8')
+    else:
+        # Fallback for older Python versions
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+
+# Set up file handler with UTF-8 encoding
 logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler('visual_extraction.log')
+logger.setLevel(logging.INFO)
+
+# Remove default handlers to avoid duplicate messages
+logger.handlers.clear()
+
+# Add our custom console handler
+logger.addHandler(console_handler)
+
+# Add file handler with UTF-8 encoding
+file_handler = logging.FileHandler('visual_extraction.log', encoding='utf-8')
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 logger.addHandler(file_handler)
+
+# Prevent propagation to root logger to avoid duplicate messages
+logger.propagate = False
 
 g_workspace_path = os.getcwd()
 g_all_visuals_path = os.path.join(g_workspace_path, "All Visuals")
