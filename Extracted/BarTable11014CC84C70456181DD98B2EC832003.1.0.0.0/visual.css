@@ -1,0 +1,580 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 12px;
+}
+body {
+  background: white;
+  min-height: 100vh;
+  padding: 20px;
+  color: #333;
+  position: relative;
+  overflow-x: hidden;
+}
+/* 水印样式 - 类似参考代码的静态斜铺水印 */
+.watermark {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
+  font-size: 12px;
+}
+.watermark-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-size: 12px;
+}
+.watermark-text {
+  position: absolute;
+  font-size: 20px;
+  color: #999;
+  white-space: nowrap;
+  transform: rotate(-45deg);
+  font-weight: 300;
+}
+/* 创建网格状分布的水印文本 */
+.watermark-text:nth-child(1) {
+  top: 10%;
+  left: 5%;
+}
+.watermark-text:nth-child(2) {
+  top: 25%;
+  left: 15%;
+}
+.watermark-text:nth-child(3) {
+  top: 40%;
+  left: 25%;
+}
+.watermark-text:nth-child(4) {
+  top: 55%;
+  left: 35%;
+}
+.watermark-text:nth-child(5) {
+  top: 70%;
+  left: 45%;
+}
+.watermark-text:nth-child(6) {
+  top: 85%;
+  left: 55%;
+}
+.watermark-text:nth-child(7) {
+  top: 15%;
+  left: 65%;
+}
+.watermark-text:nth-child(8) {
+  top: 30%;
+  left: 75%;
+}
+.watermark-text:nth-child(9) {
+  top: 45%;
+  left: 85%;
+}
+.watermark-text:nth-child(10) {
+  top: 60%;
+  left: 95%;
+}
+.watermark-text:nth-child(11) {
+  top: 5%;
+  left: 20%;
+}
+.watermark-text:nth-child(12) {
+  top: 20%;
+  left: 30%;
+}
+.watermark-text:nth-child(13) {
+  top: 35%;
+  left: 40%;
+}
+.watermark-text:nth-child(14) {
+  top: 50%;
+  left: 50%;
+}
+.watermark-text:nth-child(15) {
+  top: 65%;
+  left: 60%;
+}
+.watermark-text:nth-child(16) {
+  top: 80%;
+  left: 70%;
+}
+.watermark-text:nth-child(17) {
+  top: 95%;
+  left: 80%;
+}
+.watermark-text:nth-child(18) {
+  top: 10%;
+  left: 90%;
+}
+.watermark-text:nth-child(19) {
+  top: 25%;
+  left: 100%;
+}
+.watermark-text:nth-child(20) {
+  top: 40%;
+  left: 110%;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+/* 其余样式保持不变... */
+/* 内容包装器 - 包含图表和表格 */
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* 主布局容器 - 使用flex布局 */
+.main-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+/* 固定左侧区域 - 包含Y轴和表格行标签 */
+.fixed-left-panel {
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: white;
+  z-index: 30;
+  border-right: 1px solid #eaeaea;
+}
+/* 可滚动右侧区域 - 包含图表内容和表格数据 */
+.scrollable-right-panel {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* 自定义滚动条样式 */
+  /* Firefox 滚动条样式 */
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+.scrollable-right-panel::-webkit-scrollbar {
+  height: 8px;
+}
+.scrollable-right-panel::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.scrollable-right-panel::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+.scrollable-right-panel::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+/* 其余所有原有样式保持不变... */
+/* Y轴标签区域 - 关键修复：确保Y轴0位置与X轴对齐 */
+.y-axis-container {
+  height: 200px;
+  /* 固定高度，与柱状图高度一致 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 10px;
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  border-bottom: 1px solid #666;
+  background: white;
+  position: relative;
+  flex-shrink: 0;
+  /* 精确对齐设置 */
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.y-axis-label {
+  position: relative;
+  line-height: 1.2;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 20%;
+  /* 每个标签占据20%高度 */
+  margin: 0;
+  padding: 0;
+}
+/* 关键修复：使用精确的像素定位确保Y轴0标签与X轴对齐 */
+.y-axis-label:nth-child(1) {
+  align-items: flex-end;
+  position: absolute;
+  bottom: -1px;
+  /* 微调，确保与X轴对齐 */
+  width: 100%;
+}
+.y-axis-label:nth-child(2) {
+  position: absolute;
+  bottom: 25%;
+  width: 100%;
+}
+.y-axis-label:nth-child(3) {
+  position: absolute;
+  bottom: 50%;
+  width: 100%;
+}
+.y-axis-label:nth-child(4) {
+  position: absolute;
+  bottom: 75%;
+  width: 100%;
+}
+.y-axis-label:nth-child(5) {
+  position: absolute;
+  bottom: 100%;
+  width: 100%;
+  align-items: flex-start;
+}
+/* 图表区域 - 精确对齐 */
+.chart-area {
+  display: flex;
+  margin-bottom: 0;
+  /* 移除底部边距 */
+  margin-top: 20px;
+  min-width: min-content;
+  height: 200px;
+  /* 固定高度 */
+  flex-shrink: 0;
+  align-items: flex-end;
+  position: relative;
+}
+.chart-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: min-content;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+.bars-container {
+  display: flex;
+  height: 200px;
+  /* 固定高度 */
+  align-items: flex-end;
+  position: relative;
+  border-bottom: 1px solid #666;
+  margin-bottom: 0;
+  /* 移除底部边距 */
+  min-width: min-content;
+  padding-left: 0;
+  flex-shrink: 0;
+  /* 确保与Y轴基线对齐 */
+  padding-bottom: 0;
+  box-sizing: border-box;
+  /* 关键修复：确保柱子容器宽度与表格容器一致 */
+  width: 100%;
+}
+.y-axis-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  /* 使用100%高度，确保从顶部到底部 */
+  background-color: #666;
+  z-index: 1;
+}
+.x-axis-line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #666;
+  z-index: 1;
+}
+.bar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  /* 继承父容器高度 */
+  justify-content: flex-end;
+  /* 柱子从底部开始 */
+  flex-shrink: 0;
+  margin: 0 0px;
+  position: relative;
+  /* 关键修复：宽度将通过JavaScript动态设置 */
+}
+.bar {
+  background: linear-gradient(to top, #4b6cb7, #182848);
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 2px;
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  /* 关键修复：设置最小和最大宽度 - 更新为25px和40px */
+  min-width: 25px;
+  /* 修改：从8px改为25px */
+  max-width: 40px;
+  /* 修改：从60px改为40px */
+  /* 确保柱子底部与X轴对齐 */
+  margin-bottom: 0;
+  bottom: 0;
+  /* 关键：确保柱子底部对齐 */
+}
+.bar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(75, 108, 183, 0.4);
+}
+.bar.highlight {
+  background: linear-gradient(to top, #ff6b6b, #ee5a52);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+/* 数值标签样式 */
+.value-label.no-border {
+  background: transparent !important;
+  color: #333;
+  padding: 2px 4px;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 12px;
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 5;
+  pointer-events: none;
+}
+/* X轴标签 */
+.x-axis-labels {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0;
+  /* 移除底部边距 */
+  min-width: min-content;
+  flex-shrink: 0;
+  /* 确保X轴与柱状图底部对齐 */
+  margin-top: 0;
+  padding-top: 0px;
+  /* 减少上边距 */
+  position: relative;
+  height: 20px;
+  /* 减少X轴标签高度 */
+  /* 关键修复：确保X轴标签容器宽度与柱子容器一致 */
+  width: 100%;
+}
+.x-label {
+  text-align: center;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 2px;
+  flex-shrink: 0;
+  margin: 0 0px;
+  height: 100%;
+  /* 确保X轴标签高度一致 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 关键修复：宽度将通过JavaScript动态设置 */
+}
+/* 关键修复：Y轴0点下方的空白区域 */
+.y-axis-spacer {
+  height: 22px;
+  /* 与X轴标签高度相同 */
+  width: 100%;
+  background: white;
+  flex-shrink: 0;
+  border-right: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
+}
+/* 表格区域 - 修复对齐问题 */
+.table-container {
+  border: 1px solid #eaeaea;
+  border-radius: 0px;
+  overflow: hidden;
+  min-width: min-content;
+  display: flex;
+  flex-shrink: 0;
+  /* 移除顶部边距，现在由Y轴空白区域提供 */
+  margin-top: 0;
+  /* 关键修复：确保表格容器宽度与图表容器一致 */
+  width: 100%;
+}
+/* 表格行标签容器 - 关键修复：移除顶部间距，现在由Y轴空白区域提供 */
+.table-labels-container {
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  flex-shrink: 0;
+  /* 移除顶部边距，现在由Y轴空白区域提供 */
+  margin-top: 0;
+}
+/* 表格行标签 - 关键修改：支持动态高度和换行 */
+.table-row-label {
+  width: 100%;
+  padding: 12px 10px;
+  text-align: right;
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  /* 修改：改为顶部对齐 */
+  justify-content: flex-end;
+  background-color: white;
+  border-right: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  min-height: 44px;
+  height: auto !important;
+  /* 新增：允许高度自动调整 */
+  flex-shrink: 0;
+  line-height: 1.4;
+  /* 新增：更好的行高 */
+  padding-top: 8px;
+  /* 调整内边距 */
+  padding-bottom: 8px;
+}
+.table-row-label:last-child {
+  border-bottom: none;
+}
+/* 表格数据容器 - 关键修复：移除顶部间距 */
+.table-data-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: min-content;
+  /* 移除顶部边距，现在由Y轴空白区域提供 */
+  margin-top: 0;
+  /* 关键修复：确保表格数据容器宽度与图表容器一致 */
+  width: 100%;
+  height: auto !important;
+  /* 新增：允许高度自动调整 */
+}
+.table-data-row {
+  display: flex;
+  border-bottom: 1px solid #eaeaea;
+  min-width: min-content;
+  /* 关键修复：确保表格行宽度与图表容器一致 */
+  width: 100%;
+  height: auto !important;
+  /* 新增：允许高度自动调整 */
+}
+.table-data-row:last-child {
+  border-bottom: none;
+}
+.data-cell {
+  padding: 12px 2px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-width: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  display: flex;
+  align-items: flex-start;
+  /* 修改：改为顶部对齐 */
+  justify-content: center;
+  border-right: 1px solid #f0f0f0;
+  min-height: 44px;
+  height: auto !important;
+  /* 新增：允许高度自动调整 */
+  line-height: 1.4;
+  flex-shrink: 0;
+  /* 关键修改：宽度将通过JavaScript动态设置 */
+  /* 关键修复：使用固定flex basis确保与bar-column宽度同步 */
+  flex: 0 0 auto;
+  /* 不使用flex-grow，使用固定宽度 */
+  padding-top: 8px;
+  /* 调整内边距 */
+  padding-bottom: 8px;
+}
+.data-cell:last-child {
+  border-right: none;
+}
+.data-cell:hover {
+  background-color: #e6f7ff;
+}
+.data-cell.highlight {
+  background-color: #e6f7ff !important;
+  font-weight: 600;
+  color: #1890ff;
+}
+/* 状态指示器样式 */
+.status-excellent {
+  color: #52c41a;
+  font-weight: 600;
+}
+.status-good {
+  color: #1890ff;
+  font-weight: 600;
+}
+.status-normal {
+  color: #faad14;
+  font-weight: 600;
+}
+.status-poor {
+  color: #f5222d;
+  font-weight: 600;
+}
+/* 增长指示器样式 */
+.positive-growth {
+  color: #f5222d;
+  font-weight: 600;
+}
+.negative-growth {
+  color: #52c41a;
+  font-weight: 600;
+}
+/* PowerBI风格的工具提示 */
+.tooltip {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 200px;
+}
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+}
+.tooltip-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.tooltip-value {
+  display: flex;
+  justify-content: space-between;
+}
+
