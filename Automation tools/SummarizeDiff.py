@@ -27,8 +27,8 @@ import subprocess
 from datetime import datetime
 
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2025-10-10'
-PREVIOUS_COMMIT_DATE = '2025-10-03'
+LATEST_COMMIT_DATE = '2025-10-17'
+PREVIOUS_COMMIT_DATE = '2025-10-10'
 
 import logging
 import csv
@@ -349,8 +349,6 @@ def generate_diff_file():
 
             if _new_visuals or _removed_visuals or _other_changes:
                 file.write(f"Here are the latest updates to the Power BI Visuals on Microsoft AppSource between {PREVIOUS_COMMIT_DATE} and {LATEST_COMMIT_DATE}:")
-                file.write("\n\n> **Note**: Links marked with 🔗 are external. Ctrl+click or right-click → 'Open in new tab' to open them in a new tab.")
-
             if _new_visuals:
                 writeDiff(file, "New Custom Visuals", _new_visuals, _latest_data)
 
