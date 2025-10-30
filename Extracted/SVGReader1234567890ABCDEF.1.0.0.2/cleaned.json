@@ -1,0 +1,1040 @@
+{
+    "visual": {
+        "name": "SVGReader",
+        "displayName": "SVG Reader",
+        "guid": "SVGReader1234567890ABCDEF",
+        "visualClassName": "Visual",
+        "version": "1.0.0.2",
+        "description": "Professional SVG Reader for displaying interactive diagrams with dynamic data binding, advanced color management, and seamless integration. Perfect for floor plans, factory layouts, network diagrams, and control panels.",
+        "supportUrl": "https://sites.google.com/view/svg-reader-visual/support",
+        "gitHubUrl": "https://github.com/yourusername/svg-reader-powerbi"
+    },
+    "author": {
+        "name": "Abdalla Dabes",
+        "email": "AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [],
+        "dataRoles": [
+            {
+                "displayName": "ID",
+                "name": "id",
+                "kind": "Grouping",
+                "description": "Element IDs that match SVG area names/IDs for data binding",
+                "displayNameKey": "Role_DisplayName_Id"
+            },
+            {
+                "displayName": "Value",
+                "name": "value",
+                "kind": "Measure",
+                "description": "Numeric values to display for each element",
+                "displayNameKey": "Role_DisplayName_Value"
+            },
+            {
+                "displayName": "Category",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "Categories for legend and color assignment",
+                "displayNameKey": "Role_DisplayName_Category"
+            },
+            {
+                "displayName": "Display Text",
+                "name": "displayText",
+                "kind": "Measure",
+                "description": "Text to display on elements (overrides Value)",
+                "displayNameKey": "Role_DisplayName_DisplayText"
+            },
+            {
+                "displayName": "Tooltip Fields",
+                "name": "tooltips",
+                "kind": "GroupingOrMeasure",
+                "description": "Additional fields for tooltips",
+                "displayNameKey": "Role_DisplayName_Tooltip",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "bool": true
+                    }
+                ]
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "id": {
+                            "max": 1
+                        },
+                        "value": {
+                            "max": 1
+                        },
+                        "category": {
+                            "max": 1
+                        },
+                        "displayText": {
+                            "max": 1
+                        },
+                        "tooltips": {
+                            "max": 10
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "id"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "value"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "displayText"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "svg": {
+                "displayName": "SVG Settings",
+                "displayNameKey": "Visual_Svg",
+                "description": "Control SVG file loading and display options",
+                "properties": {
+                    "showLoadButton": {
+                        "displayName": "Show Load Button",
+                        "description": "Display the button to load SVG files",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fitToViewport": {
+                        "displayName": "Fit to Viewport",
+                        "description": "Automatically fit SVG to visual viewport",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "maintainAspectRatio": {
+                        "displayName": "Maintain Aspect Ratio",
+                        "description": "Keep original SVG proportions when scaling",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for the SVG container",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "persistSvg": {
+                        "displayName": "Persist SVG",
+                        "description": "Keep SVG loaded when navigating between pages",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoLoad": {
+                        "displayName": "Auto Load SVG",
+                        "description": "Automatically load SVG from URL",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "svgUrl": {
+                        "displayName": "SVG URL",
+                        "description": "URL of SVG file to auto-load",
+                        "type": {
+                            "text": true
+                        },
+                        "suppressFormatPainterCopy": true
+                    }
+                }
+            },
+            "defaultColors": {
+                "displayName": "Default Colors",
+                "displayNameKey": "Visual_DefaultColors",
+                "description": "Default color palette for elements",
+                "properties": {
+                    "defaultColor1": {
+                        "displayName": "Default Color (Unmatched/Filtered)",
+                        "description": "Color for elements without data or filtered out",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor2": {
+                        "displayName": "Category Color 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor3": {
+                        "displayName": "Category Color 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor4": {
+                        "displayName": "Category Color 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor5": {
+                        "displayName": "Category Color 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor6": {
+                        "displayName": "Category Color 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor7": {
+                        "displayName": "Category Color 6",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor8": {
+                        "displayName": "Category Color 7",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor9": {
+                        "displayName": "Category Color 8",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "defaultColor10": {
+                        "displayName": "Category Color 9",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorSelectionMode": {
+                        "displayName": "Color Selection Mode",
+                        "description": "How to assign colors to elements",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Sequential",
+                                    "value": "sequential"
+                                },
+                                {
+                                    "displayName": "Random",
+                                    "value": "random"
+                                },
+                                {
+                                    "displayName": "Gradient",
+                                    "value": "gradient"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryColors": {
+                "displayName": "Category Colors",
+                "displayNameKey": "Visual_CategoryColors",
+                "description": "Colors for specific categories",
+                "properties": {
+                    "enableCategoryColors": {
+                        "displayName": "Enable Category Colors",
+                        "description": "Use category field for coloring",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "unmatchedColor": {
+                        "displayName": "Unmatched Color",
+                        "description": "Color for elements without matching category",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "unmatchedOpacity": {
+                        "displayName": "Unmatched Opacity",
+                        "description": "Opacity for unmatched elements (0-1)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "outline": {
+                "displayName": "Area Outline",
+                "displayNameKey": "Visual_Outline",
+                "description": "Configure element outlines",
+                "properties": {
+                    "showOutline": {
+                        "displayName": "Show Outline",
+                        "description": "Display outlines on elements",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "outlineColor": {
+                        "displayName": "Outline Color",
+                        "description": "Color of element outlines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "outlineWidth": {
+                        "displayName": "Outline Width",
+                        "description": "Width of outlines in pixels",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "outlineStyle": {
+                        "displayName": "Outline Style",
+                        "description": "Style of outline",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "outlineOnHover": {
+                        "displayName": "Outline on Hover",
+                        "description": "Show outline when hovering",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hoverOutlineColor": {
+                        "displayName": "Hover Outline Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "hoverOutlineWidth": {
+                        "displayName": "Hover Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "selectedOutlineColor": {
+                        "displayName": "Selected Outline Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "selectedOutlineWidth": {
+                        "displayName": "Selected Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "valueText": {
+                "displayName": "Value Text",
+                "displayNameKey": "Visual_ValueText",
+                "description": "Configure text display on elements",
+                "properties": {
+                    "showText": {
+                        "displayName": "Show Text",
+                        "description": "Display text on elements",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "description": "Text font size in pixels",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "description": "Text font family",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "Segoe UI"
+                                },
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "Times New Roman"
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Consolas",
+                                    "value": "Consolas"
+                                }
+                            ]
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textPosition": {
+                        "displayName": "Text Position",
+                        "description": "Position of text relative to element",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "description": "Make text bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "displayName": "Italic",
+                        "description": "Make text italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "textBackground": {
+                        "displayName": "Show Background",
+                        "description": "Show background behind text",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "textBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "numberFormat": {
+                        "displayName": "Number Format",
+                        "description": "How to format numbers",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Decimal",
+                                    "value": "decimal"
+                                },
+                                {
+                                    "displayName": "Percentage",
+                                    "value": "percentage"
+                                },
+                                {
+                                    "displayName": "Currency",
+                                    "value": "currency"
+                                }
+                            ]
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "prefix": {
+                        "displayName": "Prefix",
+                        "description": "Text to add before value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "suffix": {
+                        "displayName": "Suffix",
+                        "description": "Text to add after value",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "signature": {
+                "displayName": "Signature",
+                "displayNameKey": "Visual_Signature",
+                "description": "Developer signature display",
+                "properties": {
+                    "showSignature": {
+                        "displayName": "Show Signature",
+                        "description": "Display developer signature",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "description": "Signature font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    }
+                }
+            },
+            "interaction": {
+                "displayName": "Interaction",
+                "displayNameKey": "Visual_Interaction",
+                "description": "Configure user interaction behaviors",
+                "properties": {
+                    "enableSelection": {
+                        "displayName": "Enable Selection",
+                        "description": "Allow element selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "multiSelect": {
+                        "displayName": "Multi-Select",
+                        "description": "Allow multiple element selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableHover": {
+                        "displayName": "Enable Hover",
+                        "description": "Show hover effects",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableZoom": {
+                        "displayName": "Enable Zoom",
+                        "description": "Allow zooming in/out",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enablePan": {
+                        "displayName": "Enable Pan",
+                        "description": "Allow panning/dragging",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableDrill": {
+                        "displayName": "Enable Drill",
+                        "description": "Allow drill-through actions",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showZoomControls": {
+                        "displayName": "Show Zoom Controls",
+                        "description": "Display zoom control buttons",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "doubleClickReset": {
+                        "displayName": "Double-Click Reset",
+                        "description": "Reset view on double-click",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "tooltips": {
+                "displayName": "Tooltips",
+                "displayNameKey": "Visual_Tooltips",
+                "description": "Configure tooltip display and content",
+                "properties": {
+                    "enabled": {
+                        "displayName": "Show Tooltips",
+                        "description": "Enable or disable tooltips",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showId": {
+                        "displayName": "Show ID",
+                        "description": "Display element ID in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showValue": {
+                        "displayName": "Show Value",
+                        "description": "Display data value in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCategory": {
+                        "displayName": "Show Category",
+                        "description": "Display category in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "description": "Tooltip text font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Tooltip background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Text Color",
+                        "description": "Tooltip text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "animation": {
+                "displayName": "Animation",
+                "displayNameKey": "Visual_Animation",
+                "description": "Control animation effects",
+                "properties": {
+                    "enabled": {
+                        "displayName": "Enable Animations",
+                        "description": "Turn animations on or off",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "easing": {
+                        "displayName": "Easing",
+                        "description": "Animation timing function",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Ease",
+                                    "value": "ease"
+                                },
+                                {
+                                    "displayName": "Ease In",
+                                    "value": "ease-in"
+                                },
+                                {
+                                    "displayName": "Ease Out",
+                                    "value": "ease-out"
+                                },
+                                {
+                                    "displayName": "Ease In-Out",
+                                    "value": "ease-in-out"
+                                },
+                                {
+                                    "displayName": "Linear",
+                                    "value": "linear"
+                                }
+                            ]
+                        }
+                    },
+                    "animateOnLoad": {
+                        "displayName": "Animate on Load",
+                        "description": "Animate when SVG loads",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "animateOnUpdate": {
+                        "displayName": "Animate on Update",
+                        "description": "Animate when data changes",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pulseOnUpdate": {
+                        "displayName": "Pulse on Update",
+                        "description": "Pulse effect when data updates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hoverAnimation": {
+                        "displayName": "Hover Animation",
+                        "description": "Animation type on hover",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Scale",
+                                    "value": "scale"
+                                },
+                                {
+                                    "displayName": "Glow",
+                                    "value": "glow"
+                                },
+                                {
+                                    "displayName": "Shake",
+                                    "value": "shake"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "description": "Configure the legend appearance",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "Top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "Bottom"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "Left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "title": {
+                        "displayName": "Show Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width": {
+                        "displayName": "Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "performance": {
+                "displayName": "Performance",
+                "displayNameKey": "Visual_Performance",
+                "description": "Optimize visual performance",
+                "properties": {
+                    "hardwareAcceleration": {
+                        "displayName": "Hardware Acceleration",
+                        "description": "Use GPU acceleration",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "throttleUpdates": {
+                        "displayName": "Throttle Updates",
+                        "description": "Limit update frequency",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "renderQuality": {
+                        "displayName": "Render Quality",
+                        "description": "Rendering quality level",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "High",
+                                    "value": "high"
+                                },
+                                {
+                                    "displayName": "Medium",
+                                    "value": "medium"
+                                },
+                                {
+                                    "displayName": "Low",
+                                    "value": "low"
+                                }
+                            ]
+                        }
+                    },
+                    "cacheData": {
+                        "displayName": "Cache Data",
+                        "description": "Cache processed data",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "accessibility": {
+                "displayName": "Accessibility",
+                "displayNameKey": "Visual_Accessibility",
+                "description": "Accessibility options",
+                "properties": {
+                    "enableAccessibility": {
+                        "displayName": "Enable Accessibility",
+                        "description": "Enable accessibility features",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "highContrast": {
+                        "displayName": "High Contrast",
+                        "description": "Use high contrast colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "keyboardNavigation": {
+                        "displayName": "Keyboard Navigation",
+                        "description": "Enable keyboard navigation",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsLandingPage": false,
+        "supportsMultiVisualSelection": true,
+        "supportsSynchronizingFilterState": true,
+        "supportsKeyboardFocus": true,
+        "advancedEditModeSupport": 1,
+        "sorting": {
+            "default": {}
+        },
+        "drilldown": {
+            "roles": [
+                "id",
+                "category"
+            ]
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
