@@ -27,8 +27,8 @@ import subprocess
 from datetime import datetime
 
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2025-10-24'
-PREVIOUS_COMMIT_DATE = '2025-10-17'
+LATEST_COMMIT_DATE = '2025-10-30'
+PREVIOUS_COMMIT_DATE = '2025-10-24'
 
 import logging
 import csv
@@ -235,9 +235,9 @@ def writeDiff(file, title, set_of_changes, data_dict):
 
         visual_name = visual.get("Custom Visual", "")
         
-        #thumbnail_url = _latest_all_data.get(guid, {}).get("Image", "")
+        thumbnail_url = _latest_all_data.get(guid, {}).get("Image", "")
         #thumbnail_url = f"https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/Images/{visual_name}.png"
-        thumbnail_url = f"../blob/main/All%20Visuals/Images/{visual_name}.png?raw=true"
+        #thumbnail_url = f"../blob/main/All%20Visuals/Images/{visual_name}.png?raw=true"
  
         if title == "Removed Custom Visuals":
             app_source_url = None

@@ -1,0 +1,488 @@
+/*
+*  Power BI Visualizations
+*
+*  Copyright (c) Microsoft Corporation
+*  All rights reserved.
+*  MIT License
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy
+*  of this software and associated documentation files (the ""Software""), to deal
+*  in the Software without restriction, including without limitation the rights
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is
+*  furnished to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+*  THE SOFTWARE.
+*/
+p {
+  font-size: 15px;
+  font-weight: 500;
+}
+.controls-container {
+  position: absolute;
+  top: var(--controls-margin, 20px);
+  left: var(--controls-margin, 20px);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--controls-gap, 8px);
+  padding: var(--controls-padding, 8px);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: var(--controls-border-radius, 8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.control-button {
+  width: var(--control-button-size, 36px);
+  height: var(--control-button-size, 36px);
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: calc(var(--control-button-size, 36px) * 0.167);
+  /* Dynamic border-radius */
+  font-size: var(--control-button-font-size, 18px);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  color: #374151;
+  user-select: none;
+}
+.control-button:hover {
+  background-color: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+.control-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: #f1f5f9;
+}
+.minimap-container {
+  pointer-events: none;
+}
+.minimap-background {
+  fill: rgba(255, 255, 255, 0.95);
+  stroke: rgba(0, 0, 0, 0.12);
+  stroke-width: 1;
+  rx: 8;
+  ry: 8;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+.minimap-viewport {
+  fill: rgba(99, 102, 241, 0.15);
+  stroke: #6366f1;
+  stroke-width: 1.5;
+  rx: 4;
+  ry: 4;
+  stroke-dasharray: 3,2;
+  opacity: 0.8;
+}
+.minimap-node {
+  stroke: #ffffff;
+  stroke-width: 0.5;
+  opacity: 0.7;
+}
+.minimap-edge {
+  opacity: 0.4;
+  stroke-width: 1;
+}
+/* Issue #137: PowerBI Standard Legend Styles */
+.legend-container {
+  font-family: "Segoe UI", wf_segoe-ui_normal, helvetica, arial, sans-serif;
+  pointer-events: auto;
+  /* Issue #137: Fix z-index stacking - legend must be above gantt SVG (z-index: 1) */
+  position: absolute;
+  z-index: 10;
+  /* Let PowerBI's legend handle all positioning - don't interfere */
+  /* License blur support */
+}
+.legend-container.blurred {
+  filter: blur(3px);
+}
+/* The Modal (background) */
+.modal {
+  position: fixed;
+  /* Stay in place */
+  left: 0;
+  top: 0;
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  cursor: context-menu;
+  overflow-y: auto;
+}
+/* Modal Content/Box */
+.modal-content {
+  margin: auto;
+  background-color: rgba(243, 242, 241, 0.9);
+  max-width: 180px;
+  min-width: 155px;
+  max-height: 300px;
+  border: 2px solid #22326e;
+  border-radius: 0.2em;
+  padding: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+.modal-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  /* between paragraphs */
+}
+.visual-version {
+  font-size: 10px;
+  font-weight: normal;
+  margin-top: 0px;
+}
+.modal-text {
+  font-size: 12px;
+  font-weight: normal;
+  text-align: center;
+}
+#buy_license {
+  background-color: #22326e;
+  border: 1px solid #44546A;
+  border-radius: 0.5em;
+  color: white;
+  padding: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+  display: block;
+  margin-left: 10%;
+  margin-right: 10%;
+  cursor: pointer;
+}
+#buy_license:hover {
+  background-color: rgba(243, 242, 241, 0.9);
+  color: #22326e;
+  border: 1px solid #22326e;
+  cursor: pointer;
+}
+.svg_image {
+  margin-top: 50px;
+  float: left;
+  background-image: url(data:image/png;base64,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);
+  background-size: contain;
+}
+.copyright {
+  font-size: 10px;
+  font-weight: normal;
+  margin-top: 60px;
+  padding-left: 50px;
+}
+#close {
+  position: absolute;
+  margin: auto;
+  font-size: 24px;
+  transform: rotate(45deg);
+  top: -5px;
+  right: 0px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#close:hover {
+  color: #808080;
+}
+.modal-content-pro {
+  margin: auto;
+  position: relative;
+}
+.key-icon {
+  text-align: center;
+  font-size: 35px;
+  margin-bottom: 0px;
+  /* between paragraphs */
+}
+.pro-text {
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 2px;
+  /* between paragraphs */
+}
+#info {
+  font-size: 12px;
+  text-align: center;
+  border: 1px solid #44546A;
+  cursor: pointer;
+  padding: 3px 3px;
+  transition: 0.1s;
+  border-radius: 0.3em;
+}
+#info:hover {
+  color: #6b6b6b;
+  border: 1px solid #6b6b6b;
+}
+.lock {
+  background: #444444;
+  border-radius: 3px;
+  width: 25px;
+  height: 20px;
+  margin: auto;
+  position: relative;
+}
+.lock:before {
+  content: "";
+  display: block;
+  position: absolute;
+  border: 3px solid #444444;
+  top: -14px;
+  left: 2.3px;
+  width: 15px;
+  height: 27px;
+  border-radius: 35px 35px 0 0;
+}
+.watermark-icon {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  cursor: context-menu;
+  background-image: url(data:image/png;base64,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);
+  background-size: contain;
+}
+.watermark-text {
+  position: absolute;
+  font-size: 12px;
+  right: 32px;
+  bottom: -3px;
+  cursor: context-menu;
+}
+svg {
+  cursor: context-menu;
+}
+/* Cursor styles for zoom/pan interactions */
+.pannable {
+  cursor: grab;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+}
+.panning {
+  cursor: grabbing !important;
+  cursor: -webkit-grabbing !important;
+  cursor: -moz-grabbing !important;
+}
+.bubble_group {
+  cursor: pointer;
+}
+/* Node hover effect - blue frame */
+.node-element {
+  cursor: pointer;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+.node-element:hover {
+  stroke: #6366f1 !important;
+  stroke-width: 3px !important;
+  stroke-opacity: 1 !important;
+}
+/* Edge hover effect - blue outline */
+.edge-path {
+  cursor: pointer;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+.edge-path:hover {
+  stroke: #6366f1 !important;
+  stroke-width: 4px !important;
+  stroke-opacity: 1 !important;
+}
+/* PBI-3: Dependency Arrow Styles */
+.dependency-arrow {
+  cursor: pointer;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease;
+}
+.dependency-arrow:hover {
+  stroke: #6366f1 !important;
+  stroke-width: 4px !important;
+  opacity: 1 !important;
+}
+/* Arrowhead markers - add transition for smooth scaling */
+marker[id^="arrowhead-"] {
+  transition: transform 0.2s ease;
+}
+/* Arrowhead scaling class for JavaScript control */
+.arrowhead-enlarged {
+  transform: scale(1.3) !important;
+}
+/* Dependency type-specific styles */
+.dependency-type-FS {
+  stroke-dasharray: none;
+}
+.dependency-type-SS {
+  stroke-dasharray: 5,3;
+}
+.dependency-type-FF {
+  stroke-dasharray: 8,2;
+}
+.dependency-type-SF {
+  stroke-dasharray: 3,3,8,3;
+}
+/* Critical path styling */
+.dependency-arrow.critical-path {
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 3px rgba(220, 53, 69, 0.4));
+}
+.dependency-arrow.critical-path:hover {
+  stroke-width: 5px !important;
+  filter: drop-shadow(0 0 5px rgba(220, 53, 69, 0.6));
+}
+/* Animation for dependency arrows */
+@keyframes dependencyFadeIn {
+  from {
+    opacity: 0;
+    stroke-width: 0;
+  }
+  to {
+    opacity: 0.8;
+    stroke-width: 2px;
+  }
+}
+.dependency-arrow {
+  /* animation: dependencyFadeIn 0.3s ease-out; */
+  /* Disabled to prevent animation during scroll operations */
+}
+/* Highlight states for cross-filtering */
+.dependency-arrow.highlighted {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.5));
+}
+.dependency-arrow.dimmed {
+  opacity: 0.3 !important;
+}
+/* PBI-3 Task 3-6: Critical Path Task Styles */
+.critical-path-task {
+  stroke: #dc3545 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 4px rgba(220, 53, 69, 0.5));
+}
+.critical-path-task:hover {
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 6px rgba(220, 53, 69, 0.7));
+}
+/* Task bar base styles */
+.task-bar {
+  transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
+}
+.task-bar:hover {
+  stroke: #6366f1 !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.5));
+}
+/* Override hover for critical path tasks */
+.task-bar.critical-path-task:hover {
+  stroke: #dc3545 !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 6px rgba(220, 53, 69, 0.7));
+}
+/* PBI-3 Task 3-7: Validation Error Styles */
+.dependency-arrow.validation-error {
+  stroke: #ff6b6b !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 5,2 !important;
+  opacity: 0.9 !important;
+  filter: drop-shadow(0 0 4px rgba(255, 107, 107, 0.6));
+}
+.dependency-arrow.validation-error:hover {
+  stroke: #ff0000 !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.8));
+}
+/* Animation for validation errors */
+@keyframes validationError {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+.dependency-arrow.validation-error {
+  animation: validationError 2s infinite;
+}
+/* PBI-3 Task 3-8: Interaction and Selection Styles */
+.dependency-arrow.selected {
+  stroke: #6366f1 !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.8));
+}
+.dependency-arrow:hover {
+  stroke: #6366f1 !important;
+  stroke-width: 4px !important;
+  opacity: 1 !important;
+  transition: all 0.2s ease;
+}
+/* Enhanced hover for critical path arrows */
+.dependency-arrow.critical-path:hover {
+  stroke: #dc3545 !important;
+  stroke-width: 5px !important;
+  filter: drop-shadow(0 0 6px rgba(220, 53, 69, 0.8));
+}
+/* Enhanced hover for validation error arrows */
+.dependency-arrow.validation-error:hover {
+  stroke: #ff0000 !important;
+  stroke-width: 5px !important;
+  filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.8));
+}
+/* Task highlighting during dependency hover */
+.task-bar.dependency-related {
+  stroke: #6366f1 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6));
+}
+/* PBI-10 Task 10-8: Keyboard Navigation - Hierarchy Button Accessibility Styles */
+.expand-collapse-button {
+  outline: none;
+  /* Remove default outline, we use JavaScript focus handlers for SVG */
+}
+/* Note: Focus styling is handled via JavaScript event handlers in visual.ts
+ * because CSS :focus selectors are unreliable for SVG <g> elements across browsers */
+/* Enhanced hover state for accessibility */
+.expand-collapse-button:hover rect {
+  stroke: #4472C4 !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 2px rgba(68, 114, 196, 0.3)) !important;
+}
+.expand-collapse-button:hover text {
+  fill: #4472C4 !important;
+}
+/* Active state for button press feedback */
+.expand-collapse-button:active rect {
+  stroke: #2E5C9A !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 1px rgba(46, 92, 154, 0.8)) !important;
+}
+.expand-collapse-button:active text {
+  fill: #2E5C9A !important;
+}
+/* High contrast mode support - handled via JavaScript focus handlers
+ * because CSS :focus selectors don't work reliably for SVG <g> elements */
+/* Reduced motion preference support */
+@media (prefers-reduced-motion: reduce) {
+  .expand-collapse-button,
+  .expand-collapse-button rect,
+  .expand-collapse-button text {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
