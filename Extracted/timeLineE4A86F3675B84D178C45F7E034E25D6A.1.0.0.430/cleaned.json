@@ -1,0 +1,1072 @@
+{
+    "visual": {
+        "name": "timeLine",
+        "displayName": "Line Graph",
+        "guid": "timeLineE4A86F3675B84D178C45F7E034E25D6A",
+        "visualClassName": "Visual",
+        "version": "1.0.0.430",
+        "description": "Visualize times series with lines",
+        "supportUrl": "https://r42.ca/visuals/powerbi",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "r42 communication",
+        "email": "pbi-viz@r42.ca"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Date",
+                "name": "date",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Category",
+                "name": "key",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Value",
+                "name": "metric",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Split by",
+                "name": "cardDimension",
+                "kind": "Grouping"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "date": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "key": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "metric": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "cardDimension": {
+                            "min": 0,
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "date"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "key"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "cardDimension"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "metric"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "dimensionSeries": {
+                "displayName": "Series",
+                "properties": {
+                    "maxSeries": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "reverseOrder": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "aggregateOther": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "aggregateOtherLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorOther": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "otherPattern": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "seriesLabels": {
+                "displayName": "Series labels",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "useKeyColor": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showConnectorLines": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "truncationStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "Show full label"
+                                },
+                                {
+                                    "value": "character",
+                                    "displayName": "Truncate"
+                                },
+                                {
+                                    "value": "word",
+                                    "displayName": "Preserve words"
+                                }
+                            ]
+                        }
+                    },
+                    "maxLabelLength": {
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "dimensionColors": {
+                "displayName": "Colors",
+                "properties": {
+                    "colorType": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "colorSelector": {
+                "properties": {
+                    "useIndividualColors": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "globalFill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": false
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "metricColorSelector": {
+                "properties": {
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": {
+                                        "nullable": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "line": {
+                "displayName": "Line settings",
+                "properties": {
+                    "mainSeries": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "interpolation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "monotone-x",
+                                    "displayName": "Curved"
+                                },
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "step-before",
+                                    "displayName": "Step before"
+                                },
+                                {
+                                    "value": "step",
+                                    "displayName": "Step"
+                                },
+                                {
+                                    "value": "step-after",
+                                    "displayName": "Step after"
+                                },
+                                {
+                                    "value": "bump-x",
+                                    "displayName": "Soft curved"
+                                },
+                                {
+                                    "value": "natural",
+                                    "displayName": "Natural"
+                                }
+                            ]
+                        }
+                    },
+                    "strokeWidth": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "strokeOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fillStrategy": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "null",
+                                    "displayName": "Line breaks"
+                                },
+                                {
+                                    "value": "skip",
+                                    "displayName": "Line interpolation"
+                                },
+                                {
+                                    "value": "zero",
+                                    "displayName": "Line to Zero"
+                                }
+                            ]
+                        }
+                    },
+                    "marker": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "No marker"
+                                },
+                                {
+                                    "value": "dot",
+                                    "displayName": "Filled circle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle with stroke"
+                                },
+                                {
+                                    "value": "circle-stroke",
+                                    "displayName": "Hollow circle"
+                                },
+                                {
+                                    "value": "tick",
+                                    "displayName": "Perpendicular line"
+                                },
+                                {
+                                    "value": "tick-x",
+                                    "displayName": "Horizontal line"
+                                },
+                                {
+                                    "value": "tick-y",
+                                    "displayName": "Vertical line"
+                                },
+                                {
+                                    "value": "arrow",
+                                    "displayName": "Arrow"
+                                }
+                            ]
+                        }
+                    },
+                    "markerColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "lineOther": {
+                "displayName": "Muted line settings",
+                "properties": {
+                    "strokeWidth": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "strokeOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data labels",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "overlap": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontWeight": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColorEqualsLineColor": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "background": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showBorder": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "axisMetric": {
+                "displayName": "Metric Axis",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTitle": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridLines": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "grid",
+                                    "displayName": "Grid"
+                                },
+                                {
+                                    "value": "ticks",
+                                    "displayName": "Ticks"
+                                }
+                            ]
+                        }
+                    },
+                    "showZeroLine": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "domainMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "local",
+                                    "displayName": "Per chart"
+                                },
+                                {
+                                    "value": "global",
+                                    "displayName": "Same across charts"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom range"
+                                }
+                            ]
+                        }
+                    },
+                    "includeZero": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisMin": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisMax": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "axisDate": {
+                "displayName": "Date Axis",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTitle": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridLines": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "grid",
+                                    "displayName": "Grid"
+                                },
+                                {
+                                    "value": "ticks",
+                                    "displayName": "Ticks"
+                                }
+                            ]
+                        }
+                    },
+                    "lineColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "numberFormat": {
+                "displayName": "Number & Date format",
+                "properties": {
+                    "compact": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimalPrecisionNumbers": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "decimalPrecisionPercentages": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "dateFormatOption": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "full",
+                                    "displayName": "Full"
+                                },
+                                {
+                                    "value": "long",
+                                    "displayName": "Long"
+                                },
+                                {
+                                    "value": "medium",
+                                    "displayName": "Medium"
+                                },
+                                {
+                                    "value": "short",
+                                    "displayName": "Short"
+                                }
+                            ]
+                        }
+                    },
+                    "durationMaxUnits": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "durationStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "long",
+                                    "displayName": "Long"
+                                },
+                                {
+                                    "value": "short",
+                                    "displayName": "Short"
+                                },
+                                {
+                                    "value": "narrow",
+                                    "displayName": "Narrow"
+                                },
+                                {
+                                    "value": "digital",
+                                    "displayName": "Digital"
+                                }
+                            ]
+                        }
+                    },
+                    "locales": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "interactionStyles": {
+                "displayName": "Interaction settings",
+                "properties": {
+                    "enableFilter": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "selectedHover": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "brighten",
+                                    "displayName": "Brighten"
+                                },
+                                {
+                                    "value": "darken",
+                                    "displayName": "Darken"
+                                }
+                            ]
+                        }
+                    },
+                    "mutedHover": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "brighten",
+                                    "displayName": "Brighten"
+                                },
+                                {
+                                    "value": "darken",
+                                    "displayName": "Darken"
+                                }
+                            ]
+                        }
+                    },
+                    "hoverIntensity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "muteOnHover": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "filterColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "displayName": "Tooltip",
+                "properties": {
+                    "enabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltipType": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "key",
+                                    "displayName": "Lines"
+                                },
+                                {
+                                    "value": "datum",
+                                    "displayName": "Data points"
+                                }
+                            ]
+                        }
+                    },
+                    "offset": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "arrow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltipFontFamily": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "tooltipFontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "tooltipBackgroundColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "border": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "padding": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "cardStyle": {
+                "displayName": "Card style",
+                "properties": {
+                    "left": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "right": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "top": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bottom": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "elevation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "xxs",
+                                    "displayName": "XXS"
+                                },
+                                {
+                                    "value": "xs",
+                                    "displayName": "XS"
+                                },
+                                {
+                                    "value": "s",
+                                    "displayName": "S"
+                                },
+                                {
+                                    "value": "m",
+                                    "displayName": "M"
+                                },
+                                {
+                                    "value": "l",
+                                    "displayName": "L"
+                                },
+                                {
+                                    "value": "xl",
+                                    "displayName": "XL"
+                                },
+                                {
+                                    "value": "xxl",
+                                    "displayName": "XXL"
+                                },
+                                {
+                                    "value": "xxxl",
+                                    "displayName": "XXXL"
+                                }
+                            ]
+                        }
+                    },
+                    "backgroundBlur": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0px",
+                                    "displayName": "No blur"
+                                },
+                                {
+                                    "value": "2px",
+                                    "displayName": "Soft"
+                                },
+                                {
+                                    "value": "6px",
+                                    "displayName": "Medium"
+                                },
+                                {
+                                    "value": "12px",
+                                    "displayName": "Strong"
+                                }
+                            ]
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWeight": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "borderStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "double",
+                                    "displayName": "Double"
+                                }
+                            ]
+                        }
+                    },
+                    "borderRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "cardTitle": {
+                "displayName": "Card title",
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "invert": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "cardLayout": {
+                "displayName": "Card layout",
+                "properties": {
+                    "maxItems": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "maxColumns": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "maxRows": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "horizontalGap": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "verticalGap": {
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        },
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "privileges": [
+            {
+                "name": "ExportContent",
+                "essential": true
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
