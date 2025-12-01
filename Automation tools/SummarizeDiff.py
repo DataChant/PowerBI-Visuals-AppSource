@@ -27,8 +27,8 @@ import subprocess
 from datetime import datetime
 
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2025-11-21'
-PREVIOUS_COMMIT_DATE = '2025-11-14'
+LATEST_COMMIT_DATE = '2025-12-01'
+PREVIOUS_COMMIT_DATE = '2025-11-12'
 
 import logging
 import csv
@@ -263,12 +263,11 @@ def writeDiff(file, title, set_of_changes, data_dict):
         change_lines = []
         release_dates = ""
 
+        previous_version_vizual = _previous_data.get(guid, {})
         current_release_date =  getReleaseDateString(visual)
         previous_release_date = getReleaseDateString(previous_version_vizual)
             
         if title == "New Versions":
-
-            previous_version_vizual = _previous_data.get(guid, {})
             # For version changes, we need to show the old version
             old_version = _previous_data.get(guid, {}).get("Version", "")
             version_line = f"Version Change: {old_version} ➔ {version}"
@@ -288,9 +287,10 @@ def writeDiff(file, title, set_of_changes, data_dict):
         else:    
             version_line = f"Version: {version}"
             
-        release_dates = f"<br>Release Date: {current_release_date}"
-
-
+        if previous_release_date:
+            release_dates = f"<br>Release Date: {current_release_date}<br>Previous Release Date: {previous_release_date}"
+        else:
+            release_dates = f"<br>Release Date: {current_release_date}"
         
         file.write('<tr>\n')
         
