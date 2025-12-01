@@ -27,8 +27,8 @@ import subprocess
 from datetime import datetime
 
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2025-11-07'
-PREVIOUS_COMMIT_DATE = '2025-10-30'
+LATEST_COMMIT_DATE = '2025-11-21'
+PREVIOUS_COMMIT_DATE = '2025-11-14'
 
 import logging
 import csv
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 REPO_NAME = 'PowerBI-Visuals-AppSource'
 
-FILENAME_TO_ANALYZE = "Visuals Summary.csv"  # Summary file
+FILENAME_TO_ANALYZE = "Custom Visuals.csv"  # Summary file
 LATEST_DATA_FILE = "Custom Visuals.csv" # Detailed snapshot of all visuals on AppSource including more fields
 
 
@@ -61,7 +61,6 @@ _new_certs = set()
 _removed_certs = set()
 _new_visuals = set()
 _removed_visuals = set()
-_latest_all_data = dict()
 
 
 def get_all_commit_shas():
@@ -103,17 +102,6 @@ def get_file_from_git(file_path, commit_sha):
 # Main execution
 def compare_csv(old_csv_content, new_csv_content):
     
-    # Load Custom Visuals.csv into latest_all_data
-    latest_data_file_path = os.path.join(os.getcwd(), LATEST_DATA_FILE)
-    if os.path.exists(latest_data_file_path):
-        with open(latest_data_file_path, encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                guid = row.get("Visual GUID")
-                if guid:
-                    _latest_all_data[guid] = row
-    else:
-        logger.warning(f"{latest_data_file_path} not found in workspace.")
 
     old_csv_dict_reader = csv.DictReader(io.StringIO(old_csv_content))
     for i, row in enumerate(old_csv_dict_reader, 1):
@@ -203,6 +191,20 @@ def create_github_image_link(url: str, img_src: str, alt_text: str, width: int =
     return f'<a href="{url}">{img_tag}\n</a>'
 
 
+
+def getReleaseDateString(visual):
+    release_date = visual.get("Release Date", "")
+    release_date = release_date.split(" ")[0] if release_date else ""
+
+    if release_date:
+        try:
+            curr_dt = datetime.strptime(release_date, "%m/%d/%Y")
+            return curr_dt.strftime("%Y-%m-%d")
+        except ValueError:
+            pass
+    
+    return ""
+
 def writeDiff(file, title, set_of_changes, data_dict):
     
     if not set_of_changes:
@@ -228,17 +230,22 @@ def writeDiff(file, title, set_of_changes, data_dict):
     items = set_of_changes.keys() if isinstance(set_of_changes, dict) else set_of_changes
     for guid in items:
         visual = data_dict.get(guid, {})
-
+        if not visual:
+            raise Exception(f"Visual with GUID {guid} not found in data dictionary.")
+        
         version = visual.get("Version", "")
         # Get AppSource URL from the data dictionary
-        app_source_url = visual.get("AppSource Link", "")
+        app_source_url = visual.get("Link", "")
 
-        visual_name = visual.get("Custom Visual", "")
+        visual_name = visual.get("Name", "")
         
-        thumbnail_url = _latest_all_data.get(guid, {}).get("Image", "")
-        #thumbnail_url = f"https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/Images/{visual_name}.png"
-        #thumbnail_url = f"../blob/main/All%20Visuals/Images/{visual_name}.png?raw=true"
- 
+        thumbnail_filename = visual.get("Simple Filename", "")
+        if not thumbnail_filename or thumbnail_filename.strip() == "":
+            pass
+        
+        thumbnail_url = f"../blob/main/All%20Visuals/Images/{thumbnail_filename}.png?raw=true"
+        #thumbnail_url = f"https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/Images/{thumbnail_filename}.png"
+        
         if title == "Removed Custom Visuals":
             app_source_url = None
         
@@ -254,27 +261,35 @@ def writeDiff(file, title, set_of_changes, data_dict):
         guid_line = f"Direct Download: {github_link}"
 
         change_lines = []
+        release_dates = ""
 
+        current_release_date =  getReleaseDateString(visual)
+        previous_release_date = getReleaseDateString(previous_version_vizual)
+            
         if title == "New Versions":
+
+            previous_version_vizual = _previous_data.get(guid, {})
             # For version changes, we need to show the old version
             old_version = _previous_data.get(guid, {}).get("Version", "")
             version_line = f"Version Change: {old_version} ➔ {version}"
+
         elif title == "Other Changes":
             # For other changes, we need to show the old version
             changes = _other_changes.get(guid, {})
             for key, value in changes.items():
-                if key == "PrivacyPolicyUrl":
-                    key = "Privacy Policy"
-                elif key == "SupportLink":
-                    key = "Support Link"
-                elif key == "LegalTerms":
-                    key = "Legal Terms"
-                elif key == "Custom Visual":
-                    key = "Name"
+                if key == "Description Full":
+                    change_lines.append(f"Listing's description changed")  
+                    continue
+                elif key in ("Release Date", "Simple Filename", "Favorite New", "CSAT", "NPS", "Popularity"):
+                    continue  # Ignore release date changes
+
                 if isinstance(value, dict):
                     change_lines.append(f"{key}: {value['Old Value']} ➔ {value['New Value']}")  
         else:    
             version_line = f"Version: {version}"
+            
+        release_dates = f"<br>Release Date: {current_release_date}"
+
 
         
         file.write('<tr>\n')
@@ -299,8 +314,8 @@ def writeDiff(file, title, set_of_changes, data_dict):
         file.write(f'<tr><td style="border: none !important; padding: 4px;">{description}</td></tr>\n')
         file.write(f'<tr><td style="border: none !important; padding: 4px;">{guid_line}</td></tr>\n')
         if version_line:
-            file.write(f'<tr><td style="border: none !important; padding: 4px;">{version_line}</td></tr>\n')
-        
+            file.write(f'<tr><td style="border: none !important; padding: 4px;">{version_line}{release_dates}</td></tr>\n')
+            
         elif change_lines:
             for change_line in change_lines:
                 file.write(f'<tr><td style="border: none !important; padding: 4px;">{change_line}</td></tr>\n')
