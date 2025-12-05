@@ -1,0 +1,1949 @@
+{
+    "visual": {
+        "name": "Gantt - LeapLytics",
+        "displayName": "Gantt - LeapLytics",
+        "guid": "GanttC7B2FA9D6C1E83D1GI85194P4X78OR24",
+        "visualClassName": "Visual",
+        "version": "1.0.1.7",
+        "description": "Advanced Power BI Gantt Chart",
+        "supportUrl": "https://www.leaplytics.de/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "LeapLytics GmbH",
+        "email": "info@leaplytics.de"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": false
+            },
+            {
+                "name": "ExportContent",
+                "essential": false
+            }
+        ],
+        "dataRoles": [
+            {
+                "displayName": "Task ID",
+                "name": "taskId",
+                "kind": "Grouping",
+                "description": "Unique identifier for each task"
+            },
+            {
+                "displayName": "Task Name",
+                "name": "taskName",
+                "kind": "Grouping",
+                "description": "Display name for the task"
+            },
+            {
+                "displayName": "Planned Start Date",
+                "name": "startDate",
+                "kind": "Measure",
+                "description": "Planned Task start date and time (alternative to duration)"
+            },
+            {
+                "displayName": "Planned End Date",
+                "name": "endDate",
+                "kind": "Measure",
+                "description": "Planned Task end date and time (alternative to duration)"
+            },
+            {
+                "displayName": "Actual Start Date",
+                "name": "actualStartDate",
+                "kind": "Measure",
+                "description": "Actual Task start date and time (alternative to duration)"
+            },
+            {
+                "displayName": "Actual End Date",
+                "name": "actualEndDate",
+                "kind": "Measure",
+                "description": "Actual Task end date and time (alternative to duration)"
+            },
+            {
+                "displayName": "Estimated Start Date",
+                "name": "estimatedStartDate",
+                "kind": "Measure",
+                "description": "Estimated Task start date and time (Issue #97)"
+            },
+            {
+                "displayName": "Estimated End Date",
+                "name": "estimatedEndDate",
+                "kind": "Measure",
+                "description": "Estimated Task end date and time (Issue #97)"
+            },
+            {
+                "displayName": "Planned Duration (optional)",
+                "name": "duration",
+                "kind": "Grouping",
+                "description": "Planned Task duration in days (takes precedence over End Date)"
+            },
+            {
+                "displayName": "Actual Duration (optional)",
+                "name": "actualDuration",
+                "kind": "Grouping",
+                "description": "Actual Task duration in days (takes precedence over End Date)"
+            },
+            {
+                "displayName": "Estimated Duration (optional)",
+                "name": "estimatedDuration",
+                "kind": "Grouping",
+                "description": "Estimated Task duration in days (takes precedence over Estimated End Date, Issue #97)"
+            },
+            {
+                "displayName": "Progress (optional)",
+                "name": "progress",
+                "kind": "Measure",
+                "description": "Task completion percentage (0-100)"
+            },
+            {
+                "displayName": "Parent Task ID (optional)",
+                "name": "parentTaskId",
+                "kind": "Grouping",
+                "description": "ID of parent task for hierarchy relationships"
+            },
+            {
+                "displayName": "Predecessor Task IDs (optional)",
+                "name": "predecessors",
+                "kind": "Grouping",
+                "description": "Comma-separated list of predecessor task IDs"
+            },
+            {
+                "displayName": "Resource (optional)",
+                "name": "resource",
+                "kind": "Grouping",
+                "description": "Resource assignments (comma-separated for multiple resources)"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "taskId": {
+                            "max": 1
+                        },
+                        "taskName": {
+                            "max": 1
+                        },
+                        "duration": {
+                            "max": 1
+                        },
+                        "actualDuration": {
+                            "max": 1
+                        },
+                        "estimatedDuration": {
+                            "max": 1
+                        },
+                        "parentTaskId": {
+                            "max": 1
+                        },
+                        "predecessors": {
+                            "max": 1
+                        },
+                        "resource": {
+                            "max": 1
+                        },
+                        "startDate": {
+                            "max": 1
+                        },
+                        "endDate": {
+                            "max": 1
+                        },
+                        "actualStartDate": {
+                            "max": 1
+                        },
+                        "actualEndDate": {
+                            "max": 1
+                        },
+                        "estimatedStartDate": {
+                            "max": 1
+                        },
+                        "estimatedEndDate": {
+                            "max": 1
+                        },
+                        "progress": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "taskId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "taskName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "duration"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "actualDuration"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "estimatedDuration"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "parentTaskId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "predecessors"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "resource"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 50000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "startDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "endDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "actualStartDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "actualEndDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "estimatedStartDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "estimatedEndDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "progress"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "license": {
+                "properties": {
+                    "license": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "dateTimeFormatting": {
+                "displayName": "Date & Time Formatting",
+                "properties": {
+                    "dateStructure": {
+                        "displayName": "Date Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "MM/DD/YYYY (US)",
+                                    "value": "mdy"
+                                },
+                                {
+                                    "displayName": "DD/MM/YYYY (European)",
+                                    "value": "dmy"
+                                },
+                                {
+                                    "displayName": "YYYY-MM-DD (ISO)",
+                                    "value": "ymd"
+                                },
+                                {
+                                    "displayName": "DD.MM.YYYY (German)",
+                                    "value": "dmy-dot"
+                                },
+                                {
+                                    "displayName": "DD-MMM-YYYY",
+                                    "value": "dmy-abbr"
+                                },
+                                {
+                                    "displayName": "Month DD, YYYY",
+                                    "value": "mdy-long"
+                                },
+                                {
+                                    "displayName": "DD Month YYYY",
+                                    "value": "dmy-long"
+                                }
+                            ]
+                        }
+                    },
+                    "timeFormat": {
+                        "displayName": "Time Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "12 Hour (AM/PM)",
+                                    "value": "12h"
+                                },
+                                {
+                                    "displayName": "24 Hour",
+                                    "value": "24h"
+                                },
+                                {
+                                    "displayName": "Hide Time",
+                                    "value": "none"
+                                }
+                            ]
+                        }
+                    },
+                    "locale": {
+                        "displayName": "Locale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto (Browser Default)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "US English (en-US)",
+                                    "value": "en-US"
+                                },
+                                {
+                                    "displayName": "UK English (en-GB)",
+                                    "value": "en-GB"
+                                },
+                                {
+                                    "displayName": "German (de-DE)",
+                                    "value": "de-DE"
+                                },
+                                {
+                                    "displayName": "French (fr-FR)",
+                                    "value": "fr-FR"
+                                },
+                                {
+                                    "displayName": "Spanish (es-ES)",
+                                    "value": "es-ES"
+                                }
+                            ]
+                        }
+                    },
+                    "showDayOfWeek": {
+                        "displayName": "Show Day of Week",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltipDateStyle": {
+                        "displayName": "Tooltip Date Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Same as Chart",
+                                    "value": "same"
+                                },
+                                {
+                                    "displayName": "More Detailed",
+                                    "value": "detailed"
+                                }
+                            ]
+                        }
+                    },
+                    "showDayNameInTooltip": {
+                        "displayName": "Show Day Name in Tooltips",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "includeTimezoneInTooltip": {
+                        "displayName": "Include Timezone in Tooltips",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataConfiguration": {
+                "properties": {
+                    "dateFormat": {
+                        "displayName": "Date Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "MM/DD/YYYY",
+                                    "value": "mdy"
+                                },
+                                {
+                                    "displayName": "DD/MM/YYYY",
+                                    "value": "dmy"
+                                },
+                                {
+                                    "displayName": "YYYY-MM-DD",
+                                    "value": "ymd"
+                                }
+                            ]
+                        }
+                    },
+                    "timeFormat": {
+                        "displayName": "Time Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "12 Hour",
+                                    "value": "12h"
+                                },
+                                {
+                                    "displayName": "24 Hour",
+                                    "value": "24h"
+                                }
+                            ]
+                        }
+                    },
+                    "timezone": {
+                        "displayName": "Timezone",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "UTC",
+                                    "value": "utc"
+                                },
+                                {
+                                    "displayName": "Local",
+                                    "value": "local"
+                                }
+                            ]
+                        }
+                    },
+                    "workingDays": {
+                        "displayName": "Working Days",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Monday to Friday",
+                                    "value": "weekdays"
+                                },
+                                {
+                                    "displayName": "All Days",
+                                    "value": "all"
+                                }
+                            ]
+                        }
+                    },
+                    "validateDates": {
+                        "displayName": "Validate Dates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "allowOverlaps": {
+                        "displayName": "Allow Task Overlaps",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoAdjustDates": {
+                        "displayName": "Auto-adjust Invalid Dates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "missingDataHandling": {
+                        "displayName": "Missing Data Handling",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Hide",
+                                    "value": "hide"
+                                },
+                                {
+                                    "displayName": "Show as Empty",
+                                    "value": "empty"
+                                },
+                                {
+                                    "displayName": "Show as Zero",
+                                    "value": "zero"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "timelineStyling": {
+                "displayName": "Timeline Styling",
+                "properties": {
+                    "showDeviationBars": {
+                        "displayName": "Show Deviation Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "deviationBarDelayColor": {
+                        "displayName": "Delay Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "deviationBarAheadColor": {
+                        "displayName": "Ahead Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "deviationBarOpacity": {
+                        "displayName": "Deviation Bar Opacity (%)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showPlannedBars": {
+                        "displayName": "Show Planned Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "plannedBarOpacity": {
+                        "displayName": "Planned Bar Opacity (%)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showVarianceIndicators": {
+                        "displayName": "Show Variance Indicators",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showActualBars": {
+                        "displayName": "Show Actual Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "actualBarOpacity": {
+                        "displayName": "Actual Bar Opacity (%)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showEstimated": {
+                        "displayName": "Show Estimated Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "estimatedColor": {
+                        "displayName": "Estimated Bar Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "estimatedOpacity": {
+                        "displayName": "Estimated Bar Opacity (%)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "estimatedBorderColor": {
+                        "displayName": "Estimated Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "estimatedBorderWidth": {
+                        "displayName": "Estimated Border Width",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showDeviationLabels": {
+                        "displayName": "Show Deviation Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "deviationLabelFontSize": {
+                        "displayName": "Deviation Label Font Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "enableProgressOnResourceColors": {
+                        "displayName": "Enable on Resource Colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "resourceProgressMode": {
+                        "displayName": "Display Mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Dual-Tone",
+                                    "value": "dual-tone"
+                                },
+                                {
+                                    "displayName": "Overlay",
+                                    "value": "overlay"
+                                },
+                                {
+                                    "displayName": "Standard",
+                                    "value": "standard"
+                                }
+                            ]
+                        }
+                    },
+                    "progressOverlayOpacity": {
+                        "displayName": "Overlay Opacity (%)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "progressColorStrategy": {
+                        "displayName": "Color Strategy",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Resource Shade",
+                                    "value": "resource-shade"
+                                },
+                                {
+                                    "displayName": "Status Colors",
+                                    "value": "status"
+                                },
+                                {
+                                    "displayName": "High Contrast",
+                                    "value": "contrast"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "timeline": {
+                "properties": {
+                    "timeScale": {
+                        "displayName": "Time Scale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Days",
+                                    "value": "days"
+                                },
+                                {
+                                    "displayName": "Weeks",
+                                    "value": "weeks"
+                                },
+                                {
+                                    "displayName": "Months",
+                                    "value": "months"
+                                },
+                                {
+                                    "displayName": "Years",
+                                    "value": "years"
+                                }
+                            ]
+                        }
+                    },
+                    "autoRange": {
+                        "displayName": "Auto Time Range",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "startDate": {
+                        "displayName": "Start Date Override",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "endDate": {
+                        "displayName": "End Date Override",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showWeekends": {
+                        "displayName": "Show Weekends",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showNonWorkingDays": {
+                        "displayName": "Show Non-Working Days",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridLines": {
+                        "displayName": "Show Grid Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "todayLine": {
+                        "displayName": "Show Today Line",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "taskStyling": {
+                "properties": {
+                    "taskHeight": {
+                        "displayName": "Task Bar Height",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "taskBorderRadius": {
+                        "displayName": "Task Border Radius",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "taskBorderWidth": {
+                        "displayName": "Task Border Width",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "taskBorderColor": {
+                        "displayName": "Task Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "taskShadow": {
+                        "displayName": "Task Shadow",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "taskOpacity": {
+                        "displayName": "Task Opacity",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "colorBy": {
+                        "displayName": "Color By",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Status",
+                                    "value": "status"
+                                },
+                                {
+                                    "displayName": "Resource",
+                                    "value": "resource"
+                                },
+                                {
+                                    "displayName": "Category",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "Priority",
+                                    "value": "priority"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultTaskColor": {
+                        "displayName": "Default Task Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "useGradients": {
+                        "displayName": "Use Gradients",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoColors": {
+                        "displayName": "Auto-assign Colors",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dependencies": {
+                "properties": {
+                    "showDependencies": {
+                        "displayName": "Show Dependencies",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "arrowSize": {
+                        "displayName": "Arrow Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "lineOpacity": {
+                        "displayName": "Line Opacity",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "curvedLines": {
+                        "displayName": "Curved Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCriticalPath": {
+                        "displayName": "Highlight Critical Path",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "criticalPathColor": {
+                        "displayName": "Critical Path Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "criticalPathWidth": {
+                        "displayName": "Critical Path Width",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showValidationErrors": {
+                        "displayName": "Show Validation Errors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "validationErrorColor": {
+                        "displayName": "Validation Error Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "enableCollisionDetection": {
+                        "displayName": "Smart Routing",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTypeIndicators": {
+                        "displayName": "Show Type Indicators",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "finishToStartColor": {
+                        "displayName": "Finish-to-Start Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "startToStartColor": {
+                        "displayName": "Start-to-Start Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "finishToFinishColor": {
+                        "displayName": "Finish-to-Finish Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "startToFinishColor": {
+                        "displayName": "Start-to-Finish Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "progressTracking": {
+                "properties": {
+                    "showProgress": {
+                        "displayName": "Show Progress Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "progressStyle": {
+                        "displayName": "Progress Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "Flat",
+                                    "value": "flat"
+                                },
+                                {
+                                    "displayName": "High Contrast",
+                                    "value": "high-contrast"
+                                }
+                            ]
+                        }
+                    },
+                    "colorScheme": {
+                        "displayName": "Color Scheme",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "High Contrast",
+                                    "value": "high-contrast"
+                                },
+                                {
+                                    "displayName": "Colorblind Friendly",
+                                    "value": "colorblind-friendly"
+                                },
+                                {
+                                    "displayName": "Dark Theme",
+                                    "value": "dark"
+                                }
+                            ]
+                        }
+                    },
+                    "showEmbeddedMetrics": {
+                        "displayName": "Show Embedded Metrics",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableAnimations": {
+                        "displayName": "Enable Progress Animations",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableValidation": {
+                        "displayName": "Enable Data Validation",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "statusBasedColors": {
+                        "displayName": "Status-Based Colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "notStartedColor": {
+                        "displayName": "Not Started Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "inProgressColor": {
+                        "displayName": "In Progress Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "completedColor": {
+                        "displayName": "Completed Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "overdueColor": {
+                        "displayName": "Overdue Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "onHoldColor": {
+                        "displayName": "On Hold Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cancelledColor": {
+                        "displayName": "Cancelled Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "hierarchicalProgress": {
+                "properties": {
+                    "enableRollup": {
+                        "displayName": "Enable Progress Rollup",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rollupMethod": {
+                        "displayName": "Rollup Method",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Weighted by Duration",
+                                    "value": "weighted_duration"
+                                },
+                                {
+                                    "displayName": "Weighted by Work",
+                                    "value": "weighted_work"
+                                },
+                                {
+                                    "displayName": "Simple Average",
+                                    "value": "simple_average"
+                                },
+                                {
+                                    "displayName": "Completed Count",
+                                    "value": "completed_count"
+                                }
+                            ]
+                        }
+                    },
+                    "statusRollupMethod": {
+                        "displayName": "Status Rollup Method",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "All Completed",
+                                    "value": "all_completed"
+                                },
+                                {
+                                    "displayName": "Majority Rule",
+                                    "value": "majority_rule"
+                                },
+                                {
+                                    "displayName": "Worst Case",
+                                    "value": "worst_case"
+                                },
+                                {
+                                    "displayName": "Progress Based",
+                                    "value": "progress_based"
+                                }
+                            ]
+                        }
+                    },
+                    "showChildSegments": {
+                        "displayName": "Show Child Progress Segments",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showRollupIndicators": {
+                        "displayName": "Show Rollup Indicators",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "progressMilestones": {
+                "properties": {
+                    "showMilestones": {
+                        "displayName": "Show Milestones",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "displayName": "Milestone Shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Diamond",
+                                    "value": "diamond"
+                                },
+                                {
+                                    "displayName": "Circle",
+                                    "value": "circle"
+                                },
+                                {
+                                    "displayName": "Square",
+                                    "value": "square"
+                                },
+                                {
+                                    "displayName": "Triangle",
+                                    "value": "triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "milestoneSize": {
+                        "displayName": "Milestone Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "milestoneColor": {
+                        "displayName": "Milestone Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showMilestoneProgress": {
+                        "displayName": "Show Milestone Progress",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneProgressRings": {
+                        "displayName": "Show Progress Rings",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "resourcesCategories": {
+                "properties": {
+                    "showResources": {
+                        "displayName": "Show Resources",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "resourcePosition": {
+                        "displayName": "Resource Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "groupByResource": {
+                        "displayName": "Group By Resource",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCategories": {
+                        "displayName": "Show Categories",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "categoryIndicator": {
+                        "displayName": "Category Indicator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Color Bar",
+                                    "value": "colorbar"
+                                },
+                                {
+                                    "displayName": "Border",
+                                    "value": "border"
+                                },
+                                {
+                                    "displayName": "Icon",
+                                    "value": "icon"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                }
+                            ]
+                        }
+                    },
+                    "showStatus": {
+                        "displayName": "Show Status",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "hierarchyGrouping": {
+                "properties": {
+                    "showHierarchy": {
+                        "displayName": "Show Hierarchy",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "indentationSize": {
+                        "displayName": "Indentation Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showExpandCollapse": {
+                        "displayName": "Show Expand/Collapse",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hierarchyLines": {
+                        "displayName": "Hierarchy Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "parentTaskStyle": {
+                        "displayName": "Parent Task Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Summary Bar",
+                                    "value": "summary"
+                                },
+                                {
+                                    "displayName": "Bracket",
+                                    "value": "bracket"
+                                },
+                                {
+                                    "displayName": "Outline",
+                                    "value": "outline"
+                                },
+                                {
+                                    "displayName": "Same as Child",
+                                    "value": "child"
+                                }
+                            ]
+                        }
+                    },
+                    "rollupProgress": {
+                        "displayName": "Rollup Progress",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableGrouping": {
+                        "displayName": "Enable Grouping",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "groupBy": {
+                        "displayName": "Group By",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Resource",
+                                    "value": "resource"
+                                },
+                                {
+                                    "displayName": "Category",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "Status",
+                                    "value": "status"
+                                }
+                            ]
+                        }
+                    },
+                    "enableParentTaskVisuals": {
+                        "displayName": "Special Parent Task Display",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "parentTaskColorDarkening": {
+                        "displayName": "Parent Task Darkening (%)",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "interactivityNavigation": {
+                "properties": {
+                    "enableZoom": {
+                        "displayName": "Enable Zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enablePan": {
+                        "displayName": "Enable Pan",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoomControls": {
+                        "displayName": "Zoom Controls",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minimap": {
+                        "displayName": "Show Minimap",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minimapPosition": {
+                        "displayName": "Minimap Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top Right",
+                                    "value": "topRight"
+                                },
+                                {
+                                    "displayName": "Top Left",
+                                    "value": "topLeft"
+                                },
+                                {
+                                    "displayName": "Bottom Right",
+                                    "value": "bottomRight"
+                                },
+                                {
+                                    "displayName": "Bottom Left",
+                                    "value": "bottomLeft"
+                                }
+                            ]
+                        }
+                    },
+                    "enableSelection": {
+                        "displayName": "Enable Selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "multiSelect": {
+                        "displayName": "Multi-select",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hoverEffects": {
+                        "displayName": "Hover Effects",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "crossFiltering": {
+                        "displayName": "Cross-filtering",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "performanceDisplay": {
+                "properties": {
+                    "enableVirtualization": {
+                        "displayName": "Enable Virtualization",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "renderingMode": {
+                        "displayName": "Rendering Mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Canvas",
+                                    "value": "canvas"
+                                },
+                                {
+                                    "displayName": "SVG",
+                                    "value": "svg"
+                                },
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                }
+                            ]
+                        }
+                    },
+                    "maxTasks": {
+                        "displayName": "Maximum Tasks",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "enableAnimations": {
+                        "displayName": "Enable Animations",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "internationalAccessibility": {
+                "properties": {
+                    "language": {
+                        "displayName": "Display Language",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "English",
+                                    "value": "en"
+                                },
+                                {
+                                    "displayName": "German",
+                                    "value": "de"
+                                },
+                                {
+                                    "displayName": "French",
+                                    "value": "fr"
+                                },
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                }
+                            ]
+                        }
+                    },
+                    "dateLocale": {
+                        "displayName": "Date Locale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "System Default",
+                                    "value": "system"
+                                },
+                                {
+                                    "displayName": "US (en-US)",
+                                    "value": "en-US"
+                                },
+                                {
+                                    "displayName": "UK (en-GB)",
+                                    "value": "en-GB"
+                                }
+                            ]
+                        }
+                    },
+                    "currencySymbol": {
+                        "displayName": "Currency Symbol",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "weekStartsOn": {
+                        "displayName": "Week Starts On",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Sunday",
+                                    "value": "sunday"
+                                },
+                                {
+                                    "displayName": "Monday",
+                                    "value": "monday"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "advancedFeatures": {
+                "properties": {
+                    "enableTooltips": {
+                        "displayName": "Enable Tooltips",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltipContent": {
+                        "displayName": "Tooltip Content",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "Custom",
+                                    "value": "custom"
+                                },
+                                {
+                                    "displayName": "Detailed",
+                                    "value": "detailed"
+                                }
+                            ]
+                        }
+                    },
+                    "enableExport": {
+                        "displayName": "Enable Export",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "exportFormats": {
+                        "displayName": "Export Formats",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "PNG",
+                                    "value": "png"
+                                },
+                                {
+                                    "displayName": "SVG",
+                                    "value": "svg"
+                                },
+                                {
+                                    "displayName": "PDF",
+                                    "value": "pdf"
+                                }
+                            ]
+                        }
+                    },
+                    "enableEditing": {
+                        "displayName": "Enable Interactive Editing",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableFiltering": {
+                        "displayName": "Advanced Filtering",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "criticalPath": {
+                        "displayName": "Critical Path",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "layout": {
+                "displayName": "Layout",
+                "properties": {
+                    "enableYAxisLabels": {
+                        "displayName": "Show Task Names on Y-Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelWidth": {
+                        "displayName": "Label Width (px)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "enableAlternatingRows": {
+                        "displayName": "Enable Alternating Row Backgrounds",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "alternateRowColor": {
+                        "displayName": "Alternate Row Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackgroundOpacity": {
+                        "displayName": "Background Opacity (%)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "navigationMode": {
+                        "displayName": "Navigation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Scroll (Default)",
+                                    "value": "scroll"
+                                },
+                                {
+                                    "displayName": "Zoom & Pan",
+                                    "value": "zoom_pan"
+                                }
+                            ]
+                        }
+                    },
+                    "tasksPerView": {
+                        "displayName": "Tasks Per View (Scroll Mode)",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showTaskNamesOnRight": {
+                        "displayName": "Task Names on Right",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "leftAlignLabels": {
+                        "displayName": "Left Align Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "visibleDataColumns": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "columnWidths": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "columnOrder": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "automaticLayerSelection": {
+                        "displayName": "Automatic Layer Selection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showYears": {
+                        "displayName": "Show Years",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showQuarters": {
+                        "displayName": "Show Quarters",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMonths": {
+                        "displayName": "Show Months",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showWeeks": {
+                        "displayName": "Show Weeks",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDays": {
+                        "displayName": "Show Days",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hierarchyState": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "filterState": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "sortState": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "resources": {
+                "displayName": "Resources",
+                "properties": {
+                    "enableGrouping": {
+                        "displayName": "Group by Resource",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showResourceHeaders": {
+                        "displayName": "Show Resource Headers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showUtilization": {
+                        "displayName": "Show Utilization",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "groupSpacing": {
+                        "displayName": "Group Spacing",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "enableConflictDetection": {
+                        "displayName": "Enable Conflict Detection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "conflictSensitivity": {
+                        "displayName": "Conflict Sensitivity",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Strict",
+                                    "value": "strict"
+                                },
+                                {
+                                    "displayName": "Normal",
+                                    "value": "normal"
+                                },
+                                {
+                                    "displayName": "Relaxed",
+                                    "value": "relaxed"
+                                }
+                            ]
+                        }
+                    },
+                    "minimumOverlapDays": {
+                        "displayName": "Minimum Overlap (Days)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "conflictHighlightColor": {
+                        "displayName": "Conflict Highlight Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showConflictTooltips": {
+                        "displayName": "Show Conflict Tooltips",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showResourceColors": {
+                        "displayName": "Show Resource Colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Resource Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsMultiVisualSelection": true,
+        "sorting": {
+            "default": {}
+        },
+        "suppressDefaultTitle": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [],
+            "supportEnhancedTooltips": true
+        },
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
