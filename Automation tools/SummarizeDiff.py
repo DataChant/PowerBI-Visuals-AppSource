@@ -27,8 +27,8 @@ import subprocess
 from datetime import datetime
 
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2025-12-01'
-PREVIOUS_COMMIT_DATE = '2025-11-12'
+LATEST_COMMIT_DATE = '2025-12-05'
+PREVIOUS_COMMIT_DATE = '2025-12-01'
 
 import logging
 import csv
