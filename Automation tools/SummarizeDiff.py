@@ -19,16 +19,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import logging
-import csv
-import io
-import os
-import subprocess
-from datetime import datetime
-
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2025-12-05'
-PREVIOUS_COMMIT_DATE = '2025-12-01'
+LATEST_COMMIT_DATE = '2025-12-12'
+PREVIOUS_COMMIT_DATE = '2025-12-05'
 
 import logging
 import csv
