@@ -1,0 +1,576 @@
+:root {
+  --tsg-table-min-width: 150px;
+  --tsg-table-measure-min-width: 30px;
+  --tsg-chart-min-width: 100px;
+  --tsg-nesting-indent: 20px;
+  --tsg-background-color: white;
+  --tsg-tasks-background-color: white;
+  --tsg-measure-background-color: white;
+  --tsg-chart-background-color: white;
+  --tsg-foreground-color: black;
+  --tsg-separator-color: #f9fbfc;
+  --tsg-separator-color-hover: #d8dadb;
+  --tsg-separator-measure-color: #f9fbfc;
+  --tsg-separator-measure-color-hover: #d8dadb;
+  --tsg-header-color: #f9fbfc;
+  --tsg-task-header-color: #f9fbfc;
+  --tsg-measure-header-color: #f9fbfc;
+  --tsg-chart-header-color: #f9fbfc;
+  --tsg-border-color: lavender;
+  --tsg-border-color2: #c4c4fd;
+  --tsg-border-color3: #d3d3d4;
+  --tsg-symbol-color: dimgray;
+  --tsg-selection-color: whitesmoke;
+  --tsg-hrz-border-color: lavender;
+  --tsg-vrt-tasks-border-color: lavender;
+  --tsg-vrt-measure-border-color: lavender;
+  --tsg-vrt-chart-border-color: lavender;
+  --tsg-scrollbar-color: #d8dadb;
+  --tsg-scrollbar-color-hover: #b8b9b9;
+  --tsg-not-started-fg-color: dimgray;
+  --tsg-in-progress-fg-color: black;
+  --tsg-overdue-fg-color: darkred;
+  --tsg-completed-fg-color: #2e8b57;
+  --tsg-completed-late-fg-color: sienna;
+  --tsg-today-line-color: #faecb5;
+  --tsg-chart-bar-color: #b9c8e9;
+  --tsg-chart-bar-sum-color: #6b8bcf;
+  --tsg-chart-bar-bs-color: #b1ecd2;
+  --tsg-chart-bar-bs-sum-color: #a6f5d1;
+  --tsg-chart-bar-cmpl-color: #98afc7;
+  --tsg-chart-bar-cmpl-sum-color: #98afc7;
+  --tsg-chart-bar-bs-cmpl-color: #97e6a5;
+  --tsg-chart-bar-bs-cmpl-sum-color: #89dad2;
+  --tsg-chart-bar-bordercolor: #4973cf;
+  --tsg-chart-bs-bar-bordercolor: #63f3b2;
+  /* Advanced milestone colors and borders */
+  --tsg-chart-milestone-fill: #b9c8e9;
+  --tsg-chart-milestone-bs-fill: #b1ecd2;
+  --tsg-chart-milestone-stroke: #4973cf;
+  --tsg-chart-milestone-bs-stroke: #63f3b2;
+  /* Use same UI font as Power BI to get similar rendering */
+  --tsg-font-family: 'Segoe UI', 'wf_segoe-ui_normal', system-ui, -apple-system, sans-serif;
+  /* was Calibri */
+  --tsg-font-family2: 'Arial', sans-serif;
+  --tsg-font-family3: 'Segoe UI', 'wf_segoe-ui_normal', system-ui, -apple-system, sans-serif;
+  /* was Calibri */
+  --tsg-font-size: 12px;
+  --tsg-font-size2: 10px;
+  --tsg-font-size3: 10px;
+  --tsg-line-height: 14px;
+  --tsg-max-cell-text-lines: 1;
+  --tsg-cursor: default;
+}
+/* Improve SVG text rendering and smoothing */
+svg {
+  text-rendering: geometricPrecision;
+  /* hints for precise glyph placement */
+  shape-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+svg text,
+.tsg-chart-header-text,
+.tsg-chart-header-text2,
+.tsg-chart-header-text3 {
+  text-rendering: geometricPrecision;
+}
+/* Global rule for table text: prefer browser-native subpixel rendering and
+   provide vendor hints. This replaces per-element inline assignments. */
+.tsg-table .tsg-table-body-cell-text,
+.tsg-table .tsg-table-body-cell-text * {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: var(--tsg-header-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--tsg-scrollbar-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tsg-scrollbar-color-hover);
+}
+.tsg-no-text-selection {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.tsg-wrapper {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  background-color: var(--tsg-background-color);
+}
+.tsg-gantt-wrapper {
+  height: 100%;
+  width: 100%;
+}
+.tsg-wrapper * {
+  box-sizing: border-box;
+}
+.tsg-separator {
+  display: flex;
+  flex: 0 0 auto;
+  width: var(--tsg-separator-width);
+  height: 100%;
+  padding: 0;
+  border-right: 1px solid var(--tsg-border-color);
+  cursor: ew-resize;
+  background-color: var(--tsg-separator-color);
+}
+.tsg-separator-measure {
+  display: flex;
+  flex: 0 0 auto;
+  width: var(--tsg-separator-measure-width);
+  height: 100%;
+  padding: 0;
+  border-right: 1px solid var(--tsg-border-color);
+  cursor: ew-resize;
+  background-color: var(--tsg-separator-measure-color);
+}
+.tsg-separator:hover {
+  filter: brightness(85%);
+  /* background-color: var(--tsg-separator-color-hover); */
+}
+.tsg-separator-measure:hover {
+  filter: brightness(85%);
+  /* background-color: var(--tsg-separator-measure-color-hover); */
+}
+.tsg-table-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 5px);
+  height: 100%;
+  min-width: var(--tsg-table-min-width);
+  overflow-y: hidden;
+  overflow-x: scroll;
+  background-color: var(--tsg-tasks-background-color);
+}
+.tsg-table-measure-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 5px);
+  height: 100%;
+  min-width: var(--tsg-table-measure-min-width);
+  overflow-y: hidden;
+  overflow-x: scroll;
+  background-color: var(--tsg-measure-background-color);
+}
+.tsg-table {
+  width: max-content;
+  border-spacing: 0;
+  font-family: var(--tsg-font-family);
+  color: var(--tsg-foreground-color);
+  table-layout: fixed;
+}
+.tsg-table-header {
+  position: sticky;
+  top: 0;
+  padding: 5px;
+  height: var(--tsg-header-height) !important;
+  font-size: var(--tsg-font-size);
+  border-width: 0 var(--tsg-gridlines-width) var(--tsg-gridlines-width) 0;
+  border-bottom-color: var(--tsg-hrz-border-color);
+  border-right-color: var(--tsg-vrt-tasks-border-color);
+  border-style: solid;
+  background-color: var(--tsg-task-header-color);
+  overflow: hidden;
+  z-index: 5;
+}
+.tsg-measures-header {
+  position: sticky;
+  top: 0;
+  padding: 5px;
+  height: var(--tsg-header-height) !important;
+  font-size: var(--tsg-font-size);
+  border-width: 0 var(--tsg-gridlines-width) var(--tsg-gridlines-width) 0;
+  border-bottom-color: var(--tsg-hrz-border-color);
+  border-right-color: var(--tsg-vrt-tasks-border-color);
+  border-style: solid;
+  background-color: var(--tsg-measure-header-color);
+  overflow: hidden;
+  z-index: 5;
+}
+.tsg-table-col-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 100%;
+  cursor: col-resize;
+}
+.tsg-table-col-sort-area {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+}
+.tsg-table-lvl-selector-area {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 90%;
+  height: 25%;
+}
+.tsg-table-lvl-selector-button {
+  position: absolute;
+  border: none;
+  border-radius: 3px;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  padding: 0px;
+  font-size: 8px;
+  text-align: center;
+}
+.tsg-table-col-sorter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  text-align: right;
+}
+.tsg-table-body-row {
+  height: var(--tsg-row-height) !important;
+}
+.tsg-table-body-row.selected {
+  background-color: var(--tsg-selection-color);
+}
+.summarytask .tsg-table-body-cell {
+  font-weight: bold;
+}
+.selected .tsg-table-body-cell {
+  font-weight: bold;
+}
+.not-started .tsg-table-body-cell {
+  color: var(--tsg-not-started-fg-color);
+}
+.in-progress .tsg-table-body-cell {
+  color: var(--tsg-in-progress-fg-color);
+}
+.overdue .tsg-table-body-cell {
+  color: var(--tsg-overdue-fg-color);
+}
+.completed .tsg-table-body-cell {
+  color: var(--tsg-completed-fg-color) !important;
+}
+.completed-late .tsg-table-body-cell {
+  color: var(--tsg-completed-late-fg-color);
+}
+.tsg-table-body-cell {
+  padding: 0;
+  cursor: default;
+  border-width: 0 var(--tsg-gridlines-width) var(--tsg-gridlines-width) 0;
+  border-bottom-color: var(--tsg-hrz-border-color);
+  border-right-color: var(--tsg-vrt-tasks-border-color);
+  border-style: solid;
+}
+.tsg-table-body-cell-text-wrapper {
+  display: flex;
+  align-items: center;
+  height: calc(var(--tsg-row-height) - 2px);
+  padding: 2px;
+}
+.tsg-table-body-cell-text-wrapper.left {
+  justify-content: flex-start;
+}
+.tsg-table-body-cell-text-wrapper.center {
+  justify-content: center;
+}
+.tsg-table-body-cell-text-wrapper.right {
+  justify-content: flex-end;
+}
+.tsg-table-body-cell-text-expander {
+  width: var(--tsg-nesting-indent) !important;
+  min-width: var(--tsg-nesting-indent) !important;
+  color: var(--tsg-symbol-color);
+  text-align: center;
+  cursor: pointer;
+}
+.tsg-table-body-cell-text-expander.nesting-1 {
+  padding-left: var(--tsg-nesting-indent) !important;
+  width: calc(var(--tsg-nesting-indent) * 2) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 2) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-2 {
+  padding-left: calc(var(--tsg-nesting-indent) * 2) !important;
+  width: calc(var(--tsg-nesting-indent) * 3) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 3) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-3 {
+  padding-left: calc(var(--tsg-nesting-indent) * 3) !important;
+  width: calc(var(--tsg-nesting-indent) * 4) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 4) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-4 {
+  padding-left: calc(var(--tsg-nesting-indent) * 4) !important;
+  width: calc(var(--tsg-nesting-indent) * 5) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 5) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-5 {
+  padding-left: calc(var(--tsg-nesting-indent) * 5) !important;
+  width: calc(var(--tsg-nesting-indent) * 6) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 6) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-6 {
+  padding-left: calc(var(--tsg-nesting-indent) * 6) !important;
+  width: calc(var(--tsg-nesting-indent) * 7) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 7) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-7 {
+  padding-left: calc(var(--tsg-nesting-indent) * 7) !important;
+  width: calc(var(--tsg-nesting-indent) * 8) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 8) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-8 {
+  padding-left: calc(var(--tsg-nesting-indent) * 8) !important;
+  width: calc(var(--tsg-nesting-indent) * 9) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 9) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-9 {
+  padding-left: calc(var(--tsg-nesting-indent) * 9) !important;
+  width: calc(var(--tsg-nesting-indent) * 10) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 10) !important;
+}
+.tsg-table-body-cell-text-expander.nesting-max {
+  padding-left: calc(var(--tsg-nesting-indent) * 10) !important;
+  width: calc(var(--tsg-nesting-indent) * 11) !important;
+  min-width: calc(var(--tsg-nesting-indent) * 11) !important;
+}
+.tsg-table-body-cell-text {
+  position: relative;
+  overflow: hidden;
+  max-height: calc(var(--tsg-max-cell-text-lines) * var(--tsg-line-height));
+  font-size: var(--tsg-font-size);
+  line-height: var(--tsg-line-height);
+  display: -webkit-box;
+  -webkit-line-clamp: var(--tsg-max-cell-text-lines);
+  line-clamp: var(--tsg-max-cell-text-lines);
+  -webkit-box-orient: vertical;
+}
+.tsg-chart-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 50% ;
+  height: 100%;
+  min-width: var(--tsg-chart-min-width);
+  overflow-y: auto;
+  overflow-x: scroll;
+  background-color: var(--tsg-chart-background-color);
+}
+.tsg-chart {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.tsg-chart-header {
+  position: sticky;
+  top: 0;
+  cursor: ew-resize;
+}
+.tsg-chart-header-bg {
+  fill: var(--tsg-chart-header-color);
+  stroke-width: var(--tsg-gridlines-width);
+  stroke: var(--tsg-border-color);
+}
+.tsg-chart-header-text {
+  font-family: var(--tsg-font-family);
+  font-size: var(--tsg-font-size);
+  font-weight: bold;
+}
+.tsg-chart-header-text2 {
+  font-family: var(--tsg-font-family2);
+  font-size: var(--tsg-font-size2);
+}
+.tsg-chart-header-text3 {
+  font-family: var(--tsg-font-family3);
+  font-size: var(--tsg-font-size3);
+}
+.tsg-chart-body {
+  cursor: var(--tsg-cursor);
+}
+.tsg-chart-body-bg {
+  fill: transparent;
+}
+.tsg-chart-header-gl,
+.tsg-chart-body-gl-h {
+  stroke-width: var(--tsg-gridlines-width);
+  stroke: var(--tsg-hrz-border-color);
+  shape-rendering: crispEdges;
+}
+.tsg-chart-body-gl-v {
+  stroke-width: var(--tsg-gridlines-width);
+  stroke: var(--tsg-vrt-chart-border-color);
+  shape-rendering: crispEdges;
+}
+.tsg-chart-body-gl-v2 {
+  stroke-width: var(--tsg-gridlines-width2);
+  stroke: var(--tsg-vrt-chart-border-color);
+  shape-rendering: crispEdges;
+}
+.tsg-chart-body-gl-v3 {
+  stroke-width: var(--tsg-gridlines-width3);
+  stroke: var(--tsg-vrt-chart-border-color);
+  shape-rendering: crispEdges;
+}
+.tsg-chart-body-gl-today {
+  stroke-width: calc(var(--tsg-gridlines-width) + 1px);
+  stroke: var(--tsg-today-line-color);
+}
+.tsg-chart-row-bg {
+  fill: var(--tsg-chart-background-color);
+}
+.tsg-chart-row-bg.selected {
+  fill: var(--tsg-selection-color);
+}
+.tsg-chart-row {
+  fill: transparent;
+}
+.tsg-chart-bar-planned {
+  fill: var(--tsg-chart-bar-color);
+  stroke: var(--tsg-chart-bar-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.tsg-chart-bar-planned-sum {
+  fill: var(--tsg-chart-bar-sum-color);
+  stroke: var(--tsg-chart-bar-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.selected .tsg-chart-bar-planned {
+  stroke: var(--tsg-chart-bar-cmpl-color);
+}
+.tsg-chart-bar-planned-progress {
+  fill: var(--tsg-chart-bar-cmpl-color);
+  stroke: var(--tsg-chart-bar-cmpl-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.tsg-chart-bar-planned-progress-sum {
+  fill: var(--tsg-chart-bar-cmpl-sum-color);
+  stroke: var(--tsg-chart-bar-cmpl-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.tsg-chart-bar-bs {
+  fill: var(--tsg-chart-bar-bs-color);
+  stroke: var(--tsg-chart-bar-bs-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.tsg-chart-bar-bs-sum {
+  fill: var(--tsg-chart-bar-bs-sum-color);
+  stroke: var(--tsg-chart-bar-bs-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.selected .tsg-chart-bar-bs {
+  stroke: var(--tsg-chart-bar-bs-cmpl-color);
+}
+.tsg-chart-bar-bs-progress {
+  fill: var(--tsg-chart-bar-bs-cmpl-color);
+  stroke: var(--tsg-chart-bar-bs-cmpl-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.tsg-chart-bar-bs-progress-sum {
+  fill: var(--tsg-chart-bar-bs-cmpl-sum-color);
+  stroke: var(--tsg-chart-bar-bs-cmpl-sum-color);
+  stroke-width: var(--tsg-bar-stroke-width);
+}
+.tsg-drop-hide {
+  display: none;
+}
+.tsg-drop-hover {
+  background-color: silver;
+  position: relative;
+}
+.tsg-wait-cursor * {
+  cursor: progress !important;
+}
+.tsg-expander-icon {
+  vertical-align: middle;
+  background-color: var(--tsg-header-color);
+}
+.cpg-lp-cell {
+  vertical-align: top;
+  /* ensure the cell itself does not inherit pointer cursor from parent */
+  cursor: default !important;
+}
+/* Limit pointer cursor and hyperlink hover styles to anchors inside landing page cells */
+.cpg-lp-cell a {
+  cursor: pointer !important;
+  color: inherit;
+}
+.cpg-lp-cell a:hover {
+  text-decoration: underline;
+}
+/* .gantt-milestone {
+    fill: var( --tsg-chart-bar-color) ;
+    stroke: var(--tsg-chart-bar-sum-color);
+    stroke-width: 2px;  
+}
+.gantt-milestone-bs {
+    fill: var( --tsg-chart-bar-bs-color) ;
+    stroke: var(  --tsg-chart-bar-bs-sum-color);
+    stroke-width: 2px;    
+} */
+.gantt-milestone {
+  fill: var(--tsg-chart-milestone-fill);
+  stroke: var(--tsg-chart-milestone-stroke);
+  stroke-width: 2px;
+}
+.gantt-milestone-bs {
+  fill: var(--tsg-chart-milestone-bs-fill);
+  stroke: var(--tsg-chart-milestone-bs-stroke);
+  stroke-width: 2px;
+}
+/* CP Gantt license overlay styles */
+.cpg-license-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.6);
+}
+.cpg-license-overlay .cpg-license-box {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 18px 24px;
+  border-radius: 6px;
+  max-width: 80%;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+.cpg-license-overlay .cpg-license-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.cpg-license-overlay .cpg-license-msg {
+  font-size: 13px;
+}
+/* blurred state applied to children when overlay is present */
+.cpg-blurred {
+  filter: blur(4px);
+  pointer-events: none;
+}
+

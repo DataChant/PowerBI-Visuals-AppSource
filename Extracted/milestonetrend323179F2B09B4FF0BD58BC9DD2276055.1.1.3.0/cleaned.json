@@ -1,0 +1,828 @@
+{
+    "visual": {
+        "name": "milestonetrend",
+        "displayName": "ECS Milestone Trend",
+        "guid": "milestonetrend323179F2B09B4FF0BD58BC9DD2276055",
+        "visualClassName": "Visual",
+        "version": "1.1.3.0",
+        "description": "Track how milestone forecasts change over time. Professional project controls visualization for MS Project, Primavera P6, and other planning tools. Features variance analysis, baseline comparison, and intelligent timeline spacing.",
+        "supportUrl": "https://www.ecs.app",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "ECS Analytics",
+        "email": "support@ecs.app"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Milestone",
+                "name": "milestone",
+                "kind": "Grouping",
+                "description": "Milestone names or identifiers"
+            },
+            {
+                "displayName": "Data Date Label",
+                "name": "dataDateLabel",
+                "kind": "Grouping",
+                "description": "Reporting period labels (e.g., 'Baseline', 'Q1 Update')"
+            },
+            {
+                "displayName": "Data Date (Optional)",
+                "name": "dataDate",
+                "kind": "Grouping",
+                "description": "Actual reporting dates for proper timeline spacing"
+            },
+            {
+                "displayName": "Forecast Date",
+                "name": "forecastDate",
+                "kind": "Measure",
+                "description": "Milestone forecast completion date"
+            },
+            {
+                "displayName": "Baseline Date (Optional)",
+                "name": "baselineDate",
+                "kind": "Measure",
+                "description": "Original baseline dates for variance comparison"
+            },
+            {
+                "displayName": "Tooltips (Optional)",
+                "name": "tooltips",
+                "kind": "GroupingOrMeasure",
+                "description": "Additional fields to show in tooltips"
+            }
+        ],
+        "objects": {
+            "chart": {
+                "properties": {
+                    "showGridLines": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dateFormat": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dd-mmm-yyyy",
+                                    "displayName": "dd-mmm-yyyy"
+                                },
+                                {
+                                    "value": "mm/dd/yyyy",
+                                    "displayName": "mm/dd/yyyy"
+                                },
+                                {
+                                    "value": "dd/mm/yyyy",
+                                    "displayName": "dd/mm/yyyy"
+                                },
+                                {
+                                    "value": "yyyy-mm-dd",
+                                    "displayName": "yyyy-mm-dd"
+                                },
+                                {
+                                    "value": "mmm dd, yyyy",
+                                    "displayName": "mmm dd, yyyy"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "TopCenter",
+                                    "displayName": "Top center"
+                                },
+                                {
+                                    "value": "Bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "BottomCenter",
+                                    "displayName": "Bottom center"
+                                },
+                                {
+                                    "value": "Left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "LeftCenter",
+                                    "displayName": "Left center"
+                                },
+                                {
+                                    "value": "Right",
+                                    "displayName": "Right"
+                                },
+                                {
+                                    "value": "RightCenter",
+                                    "displayName": "Right center"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "markerStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "Line",
+                                    "displayName": "Line"
+                                },
+                                {
+                                    "value": "Square",
+                                    "displayName": "Square"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "trendLine": {
+                "properties": {
+                    "showTrendLines": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineThickness": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineInterpolation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear (straight)"
+                                },
+                                {
+                                    "value": "monotone",
+                                    "displayName": "Smooth curves"
+                                },
+                                {
+                                    "value": "step",
+                                    "displayName": "Step"
+                                }
+                            ]
+                        }
+                    },
+                    "showBaselines": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "baselineThickness": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baselineOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baselineStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "milestone": {
+                "properties": {
+                    "pointSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "showForecastPoints": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showBaselinePoints": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "baselinePointSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baselinePointShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "milestoneColors": {
+                "properties": {
+                    "color_0": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_1": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_2": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_3": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_4": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_5": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_6": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_7": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_8": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_9": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_10": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_11": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_12": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_13": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_14": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_15": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_16": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_17": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_18": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color_19": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "properties": {
+                    "showPointLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointLabelContent": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "both",
+                                    "displayName": "Date and delta"
+                                },
+                                {
+                                    "value": "date",
+                                    "displayName": "Date only"
+                                },
+                                {
+                                    "value": "delta",
+                                    "displayName": "Delta only"
+                                }
+                            ]
+                        }
+                    },
+                    "pointLabelFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "pointLabelFontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "pointLabelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showMilestoneEndLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneEndLabelFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "milestoneEndLabelFontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "milestoneEndLabelUseLineColor": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneEndLabelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "milestoneEndLabelWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "properties": {
+                    "showLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelRotation": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTitle": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "titleFontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "properties": {
+                    "showLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showTitle": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "titleFontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "milestone": {
+                            "max": 1
+                        },
+                        "dataDateLabel": {
+                            "max": 1
+                        },
+                        "dataDate": {
+                            "max": 1
+                        },
+                        "forecastDate": {
+                            "max": 1
+                        },
+                        "baselineDate": {
+                            "max": 1
+                        },
+                        "tooltips": {
+                            "max": 10
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "milestone"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dataDateLabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dataDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "forecastDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "baselineDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "supportEnhancedTooltips": true
+        },
+        "supportsEmptyDataView": true,
+        "supportsLandingPage": true,
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
