@@ -84,19 +84,109 @@ def get_file_from_git(file_path, commit_sha):
     return content
 
 
+_previous_snapshot = dict()  # Track previous state for diff comparison
+_comparison_fields = ["Popularity", "# of Ratings", "Average Rating"]
+
+
+def parse_numeric(value):
+    """Parse a string value to float, returning None if invalid."""
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return None
+
+
+def format_delta(delta):
+    """Format a delta value with +/- sign."""
+    if delta is None:
+        return ""
+    if delta > 0:
+        return f"+{delta:g}"
+    elif delta < 0:
+        return f"{delta:g}"
+    return "0"
+
+
+def calculate_deltas(old_row, new_row):
+    """Calculate numeric deltas between old and new row."""
+    deltas = {}
+    for field in _comparison_fields:
+        old_val = parse_numeric(old_row.get(field) if old_row else None)
+        new_val = parse_numeric(new_row.get(field))
+
+        if new_val is not None and old_val is not None:
+            deltas[f"{field} Change"] = new_val - old_val
+        
+    return deltas
+
+
+def has_visual_changed(old_row, new_row):
+    """Check if any tracked field has changed between two snapshots."""
+    if old_row is None:
+        return True  # New visual
+    for field in _comparison_fields:
+        if old_row.get(field, "") != new_row.get(field, ""):
+            return True
+    return False
+
+
 # Main execution
-def process_file(content, date):
+def process_file(content, date, is_first_commit):
+    global _previous_snapshot
     csv_dict_reader = csv.DictReader(io.StringIO(content))
-    visuals_in_date = _leaderboard_data.get(date, {})
-    
-    for i, row in enumerate(csv_dict_reader, 1):
+    current_snapshot = {}
+    changes_in_data = {}
+
+    for row in csv_dict_reader:
         guid = row.get("Visual GUID")
         if not guid:
             continue
-        
-        visuals_in_date[guid] = row
+        current_snapshot[guid] = row
 
-    _leaderboard_data[date] = visuals_in_date
+        if is_first_commit:
+            # First commit: include everything as baseline (no deltas)
+            row_with_deltas = dict(row)
+            row_with_deltas["_deltas"] = {f"{field} Change": None for field in _comparison_fields}
+            changes_in_data[guid] = row_with_deltas
+        else:
+            # Subsequent commits: only include if changed
+            old_row = _previous_snapshot.get(guid)
+            if has_visual_changed(old_row, row):
+                row_with_deltas = dict(row)
+                
+                deltas = calculate_deltas(old_row, row)
+                if deltas:
+                    row_with_deltas["_deltas"] = deltas
+                    changes_in_data[guid] = row_with_deltas
+                else:
+                    pass
+
+    # Track removed visuals (existed before, not in current)
+    if not is_first_commit:
+        for guid in _previous_snapshot:
+            if guid not in current_snapshot:
+                # Mark as removed by including with empty values
+                changes_in_data[guid] = {
+                    "Visual GUID": guid,
+                    "Name": _previous_snapshot[guid].get("Name", ""),
+                    "Publisher": _previous_snapshot[guid].get("Publisher", ""),
+                    "Version": "",
+                    "Popularity": "",
+                    "# of Ratings": "",
+                    "Average Rating": "",
+                    "Is Certified": "",
+                    "_removed": True,
+                    "_deltas": {f"{field} Change": None for field in _comparison_fields}
+                }
+
+    if changes_in_data:
+        _leaderboard_data[date] = changes_in_data
+    else:
+        pass
+    # Update previous snapshot for next iteration
+    _previous_snapshot = current_snapshot
                
 
 def get_workspace_path() -> str:
@@ -126,16 +216,27 @@ def create_github_image_link(url: str, img_src: str, alt_text: str, width: int =
 
 
 def generate_leadership_file():
-    
+
     try:
-        
+
         with open('leaderboard_data.csv', 'w', encoding='utf-8', newline='') as file:
             csv_dict_writer = csv.DictWriter(file, fieldnames=[
-                "Snapshot Date", "Visual GUID", "Name", "Publisher", "Version", "Popularity", "# of Ratings", "Average Rating", "Is Certified"
+                "Snapshot Date", "Visual GUID", "Name", "Publisher", "Version",
+                "Popularity", "Popularity Change",
+                "# of Ratings", "# of Ratings Change",
+                "Average Rating", "Average Rating Change",
+                "Is Certified", "Is Removed"
             ])
             csv_dict_writer.writeheader()
-            for date, visuals in _leaderboard_data.items():
+
+            # Sort dates chronologically for consistent output
+            sorted_dates = sorted(_leaderboard_data.keys())
+
+            for date in sorted_dates:
+                visuals = _leaderboard_data[date]
                 for guid, row in visuals.items():
+                    is_removed = row.get("_removed", False)
+                    deltas = row.get("_deltas", {})
                     output_row = {
                         "Snapshot Date": date,
                         "Visual GUID": guid,
@@ -143,15 +244,19 @@ def generate_leadership_file():
                         "Publisher": row.get("Publisher", ""),
                         "Version": row.get("Version", ""),
                         "Popularity": row.get("Popularity", ""),
-                        "# of Ratings": row.get("# of Ratings", "0"),
-                        "Average Rating": row.get("Average Rating", "0"),
-                        "Is Certified": row.get("Is Certified", "No"),
+                        "Popularity Change": format_delta(deltas.get("Popularity Change")),
+                        "# of Ratings": row.get("# of Ratings", ""),
+                        "# of Ratings Change": format_delta(deltas.get("# of Ratings Change")),
+                        "Average Rating": row.get("Average Rating", ""),
+                        "Average Rating Change": format_delta(deltas.get("Average Rating Change")),
+                        "Is Certified": row.get("Is Certified", ""),
+                        "Is Removed": "Yes" if is_removed else "",
                     }
                     csv_dict_writer.writerow(output_row)
 
-        logger.info("Created leaderboard_date.csv successfully.")
+        logger.info("Created leaderboard_data.csv successfully.")
     except Exception as e:
-        logger.error("Failed to write leaderboard_date.csv file: %s", str(e))
+        logger.error("Failed to write leaderboard_data.csv file: %s", str(e))
 
 
 # Main execution
@@ -167,13 +272,17 @@ def main():
         logger.error("Not enough commits found or error fetching commits.")
         return
 
-    for commit in commits:
+    # Process commits in chronological order (oldest first)
+    commits_chronological = list(reversed(commits))
+
+    for i, commit in enumerate(commits_chronological):
         sha = commit.get("sha")
         date = commit.get("date")
         file_content = get_file_from_git(FILENAME_TO_ANALYZE, sha)
-        
+
         if file_content:
-            process_file(file_content, date)
+            is_first_commit = (i == 0)
+            process_file(file_content, date, is_first_commit)
 
     generate_leadership_file()
 
