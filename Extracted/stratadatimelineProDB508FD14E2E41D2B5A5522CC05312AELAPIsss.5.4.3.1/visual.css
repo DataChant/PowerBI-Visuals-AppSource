@@ -1,0 +1,478 @@
+/*
+ *  ©Copyright 2020, PowerGraph LLC. All rights Reserved.
+ *
+ *  This PowerGraph software program and the accompanying procedures, functions, and documentation
+ *  are sold under license agreements. Their use, duplication, and disclosure are subject to the restrictions
+ *  stated in the license agreement with PowerGraph LLC.
+ *
+ *  Some components of this software program are derived from open source code.
+ *  PowerGraph LLC maintains the required licensing attributions here:
+ *  https://powergraph.com/products/open-source-licenses/ and are incorporated by reference herein
+ */
+/**
+ * Imports external styles.
+ * We compile it as a less file in order to wrap the external CSS rules.
+ */
+.gantt-body {
+  position: absolute;
+  overflow-x: hidden;
+}
+.slider-container {
+  pointer-events: none;
+}
+.noUi-touch-area {
+  cursor: grabbing;
+}
+.zooms-axis-svg {
+  height: 50px;
+  width: 100%;
+}
+rect.baseline-task-rect {
+  mask: url(#mask-stripe);
+}
+.clearCatcher {
+  fill-opacity: 0;
+}
+.gantt {
+  position: absolute;
+}
+.gantt .axis {
+  font-size: 10px;
+}
+.gantt .axis path {
+  fill: none;
+}
+.gantt .axis path,
+.gantt .axis line:not(.gridline) {
+  stroke: #000;
+  stroke-width: 1;
+}
+.gantt .tasks .task .task-resource {
+  font-size: medium;
+  font-weight: bold;
+}
+.gantt .chart-line {
+  stroke-width: 2px;
+  stroke-dasharray: 3, 3;
+  stroke: #000;
+}
+.gantt .task-labels {
+  width: 110px;
+}
+.gridline {
+  stroke-width: 2px !important;
+  stroke-dasharray: 3, 3;
+}
+.parent-logo-div {
+  position: absolute;
+  width: 100%;
+  height: 40px;
+}
+.stratada-logo-div {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  display: inline-block;
+  z-index: 9999;
+  right: 0px;
+  top: 10px;
+}
+.stratada-logo {
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  float: right;
+  content: url(data:image/png;base64,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);
+}
+.landingDiv {
+  z-index: 99999;
+  position: absolute;
+  top: 0px;
+  overflow: auto;
+}
+.customSetting {
+  float: left;
+  z-index: 9999;
+  position: absolute;
+  top: 10px;
+}
+.hidden {
+  display: none;
+}
+.scroll-sign {
+  display: inline;
+  font-size: 30px;
+}
+/* width */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #c2c0c0;
+  border-radius: 6px;
+}
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+/* Define the scrollbar corner (between vertical and horizontal scrollbars) */
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+  /* Background color of the corner */
+}
+/* Zoom slider styles */
+#parent-slider {
+  left: 30px !important;
+}
+.task-progress {
+  display: none;
+}
+.noUi-handle {
+  background-color: #fff !important;
+  width: 15px !important;
+  height: 20px !important;
+  border-radius: 25px !important;
+  border: 1px solid #c3c3c3;
+  top: -6px !important;
+  transform: translateX(-10px);
+}
+.noUi-base {
+  background-color: #cdcdcd !important;
+  height: 7px !important;
+  top: 3px !important;
+}
+.noUi-connect {
+  background-color: #000 !important;
+  height: 7px !important;
+  top: 0px !important;
+}
+.noUi-target {
+  border-style: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: none !important;
+}
+.noUi-handle::before {
+  display: none !important;
+}
+.noUi-handle:after {
+  display: none !important;
+}
+#slider {
+  width: calc(100% - 5%) !important;
+  /* Smaller than parent */
+  left: 30px !important;
+}
+
+/* Functional styling;
+ * These styles are required for noUiSlider to function.
+ * You don't need to change these rules to apply your design.
+ */
+.noUi-target,
+.noUi-target * {
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-user-select: none;
+  -ms-touch-action: none;
+  touch-action: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.noUi-target {
+  position: relative;
+}
+.noUi-base,
+.noUi-connects {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+/* Wrapper for all connect elements.
+ */
+.noUi-connects {
+  overflow: hidden;
+  z-index: 0;
+}
+.noUi-connect,
+.noUi-origin {
+  will-change: transform;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  -ms-transform-origin: 0 0;
+  -webkit-transform-origin: 0 0;
+  -webkit-transform-style: preserve-3d;
+  transform-origin: 0 0;
+  transform-style: flat;
+}
+/* Offset direction
+ */
+.noUi-txt-dir-rtl.noUi-horizontal .noUi-origin {
+  left: 0;
+  right: auto;
+}
+/* Give origins 0 height/width so they don't interfere with clicking the
+ * connect elements.
+ */
+.noUi-vertical .noUi-origin {
+  top: -100%;
+  width: 0;
+}
+.noUi-horizontal .noUi-origin {
+  height: 0;
+}
+.noUi-handle {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  position: absolute;
+}
+.noUi-touch-area {
+  height: 100%;
+  width: 100%;
+}
+.noUi-state-tap .noUi-connect,
+.noUi-state-tap .noUi-origin {
+  -webkit-transition: transform 0.3s;
+  transition: transform 0.3s;
+}
+.noUi-state-drag * {
+  cursor: inherit !important;
+}
+/* Slider size and handle placement;
+ */
+.noUi-horizontal {
+  height: 18px;
+}
+.noUi-horizontal .noUi-handle {
+  width: 34px;
+  height: 28px;
+  right: -17px;
+  top: -6px;
+}
+.noUi-vertical {
+  width: 18px;
+}
+.noUi-vertical .noUi-handle {
+  width: 28px;
+  height: 34px;
+  right: -6px;
+  bottom: -17px;
+}
+.noUi-txt-dir-rtl.noUi-horizontal .noUi-handle {
+  left: -17px;
+  right: auto;
+}
+/* Styling;
+ * Giving the connect element a border radius causes issues with using transform: scale
+ */
+.noUi-target {
+  background: #FAFAFA;
+  border-radius: 4px;
+  border: 1px solid #D3D3D3;
+  box-shadow: inset 0 1px 1px #F0F0F0, 0 3px 6px -5px #BBB;
+}
+.noUi-connects {
+  border-radius: 3px;
+}
+.noUi-connect {
+  background: #3FB8AF;
+}
+/* Handles and cursors;
+ */
+.noUi-draggable {
+  cursor: ew-resize;
+}
+.noUi-vertical .noUi-draggable {
+  cursor: ns-resize;
+}
+.noUi-handle {
+  border: 1px solid #D9D9D9;
+  border-radius: 3px;
+  background: #FFF;
+  cursor: default;
+  box-shadow: inset 0 0 1px #FFF, inset 0 1px 7px #EBEBEB, 0 3px 6px -3px #BBB;
+}
+.noUi-active {
+  box-shadow: inset 0 0 1px #FFF, inset 0 1px 7px #DDD, 0 3px 6px -3px #BBB;
+}
+/* Handle stripes;
+ */
+.noUi-handle:before,
+.noUi-handle:after {
+  content: "";
+  display: block;
+  position: absolute;
+  height: 14px;
+  width: 1px;
+  background: #E8E7E6;
+  left: 14px;
+  top: 6px;
+}
+.noUi-handle:after {
+  left: 17px;
+}
+.noUi-vertical .noUi-handle:before,
+.noUi-vertical .noUi-handle:after {
+  width: 14px;
+  height: 1px;
+  left: 6px;
+  top: 14px;
+}
+.noUi-vertical .noUi-handle:after {
+  top: 17px;
+}
+/* Disabled state;
+ */
+[disabled] .noUi-connect {
+  background: #B8B8B8;
+}
+[disabled].noUi-target,
+[disabled].noUi-handle,
+[disabled] .noUi-handle {
+  cursor: not-allowed;
+}
+/* Base;
+ *
+ */
+.noUi-pips,
+.noUi-pips * {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.noUi-pips {
+  position: absolute;
+  color: #999;
+}
+/* Values;
+ *
+ */
+.noUi-value {
+  position: absolute;
+  white-space: nowrap;
+  text-align: center;
+}
+.noUi-value-sub {
+  color: #ccc;
+  font-size: 10px;
+}
+/* Markings;
+ *
+ */
+.noUi-marker {
+  position: absolute;
+  background: #CCC;
+}
+.noUi-marker-sub {
+  background: #AAA;
+}
+.noUi-marker-large {
+  background: #AAA;
+}
+/* Horizontal layout;
+ *
+ */
+.noUi-pips-horizontal {
+  padding: 10px 0;
+  height: 80px;
+  top: 100%;
+  left: 0;
+  width: 100%;
+}
+.noUi-value-horizontal {
+  -webkit-transform: translate(-50%, 50%);
+  transform: translate(-50%, 50%);
+}
+.noUi-rtl .noUi-value-horizontal {
+  -webkit-transform: translate(50%, 50%);
+  transform: translate(50%, 50%);
+}
+.noUi-marker-horizontal.noUi-marker {
+  margin-left: -1px;
+  width: 2px;
+  height: 5px;
+}
+.noUi-marker-horizontal.noUi-marker-sub {
+  height: 10px;
+}
+.noUi-marker-horizontal.noUi-marker-large {
+  height: 15px;
+}
+/* Vertical layout;
+ *
+ */
+.noUi-pips-vertical {
+  padding: 0 10px;
+  height: 100%;
+  top: 0;
+  left: 100%;
+}
+.noUi-value-vertical {
+  -webkit-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+  padding-left: 25px;
+}
+.noUi-rtl .noUi-value-vertical {
+  -webkit-transform: translate(0, 50%);
+  transform: translate(0, 50%);
+}
+.noUi-marker-vertical.noUi-marker {
+  width: 5px;
+  height: 2px;
+  margin-top: -1px;
+}
+.noUi-marker-vertical.noUi-marker-sub {
+  width: 10px;
+}
+.noUi-marker-vertical.noUi-marker-large {
+  width: 15px;
+}
+.noUi-tooltip {
+  display: block;
+  position: absolute;
+  border: 1px solid #D9D9D9;
+  border-radius: 3px;
+  background: #fff;
+  color: #000;
+  padding: 5px;
+  text-align: center;
+  white-space: nowrap;
+}
+.noUi-horizontal .noUi-tooltip {
+  -webkit-transform: translate(-50%, 0);
+  transform: translate(-50%, 0);
+  left: 50%;
+  bottom: 120%;
+}
+.noUi-vertical .noUi-tooltip {
+  -webkit-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+  top: 50%;
+  right: 120%;
+}
+.noUi-horizontal .noUi-origin > .noUi-tooltip {
+  -webkit-transform: translate(50%, 0);
+  transform: translate(50%, 0);
+  left: auto;
+  bottom: 10px;
+}
+.noUi-vertical .noUi-origin > .noUi-tooltip {
+  -webkit-transform: translate(0, -18px);
+  transform: translate(0, -18px);
+  top: auto;
+  right: 28px;
+}
+
