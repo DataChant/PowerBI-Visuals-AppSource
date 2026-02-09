@@ -1,0 +1,1404 @@
+{
+    "visual": {
+        "name": "FlexiPivot",
+        "displayName": "FlexiPivot",
+        "guid": "FlexiPivot68FA63CBAD1547ACBEC544B4B7D4F358",
+        "visualClassName": "Visual",
+        "version": "1.5.0.0",
+        "description": "Interactive Pivot Table for Power BI with drag-and-drop functionality",
+        "supportUrl": "https://precisionbisolutions.com/flexipivot",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Precision BI Solutions",
+        "email": "info@precisionbisolutions.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "Field",
+                "kind": "Grouping",
+                "displayName": "Filters",
+                "description": "Fields to use in the pivot table"
+            },
+            {
+                "name": "Value",
+                "kind": "Measure",
+                "displayName": "Values",
+                "description": "Fields to aggregate"
+            },
+            {
+                "name": "Tooltips",
+                "kind": "Measure",
+                "displayName": "Tooltips",
+                "description": "Additional fields to show in tooltips"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Field": {
+                            "max": 10
+                        },
+                        "Value": {
+                            "max": 10
+                        },
+                        "Tooltips": {
+                            "max": 10
+                        }
+                    }
+                ],
+                "matrix": {
+                    "rows": {
+                        "for": {
+                            "in": "Field"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 100000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Value"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "valuesFormatting": {
+                "displayName": "Values",
+                "properties": {
+                    "valueFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for value cells (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "valueFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for value cells",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "valueFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for value cells",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "valueBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for value cells",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "valueBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for value cells",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "valueItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for value cells",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "valueUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for value cells",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "headersFormatting": {
+                "displayName": "Column Headers",
+                "properties": {
+                    "headerFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for headers (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "headerFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for headers",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "headerFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for headers",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "headerBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for headers",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "headerBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for headers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "headerItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for headers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "headerUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for headers",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "rowHeadersFormatting": {
+                "displayName": "Row Headers",
+                "properties": {
+                    "rowHeaderFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for row headers (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rowHeaderFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for row headers",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowHeaderFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for row headers",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowHeaderBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for row headers",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowHeaderBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for row headers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowHeaderItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for row headers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowHeaderUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for row headers",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "columnTotalsFormatting": {
+                "displayName": "Column Totals",
+                "properties": {
+                    "columnTotalFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for column totals (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "columnTotalFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for column totals",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "columnTotalFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for column totals",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "columnTotalBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for column totals",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "columnTotalBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for column totals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnTotalItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for column totals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnTotalUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for column totals",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "rowTotalsFormatting": {
+                "displayName": "Row Totals",
+                "properties": {
+                    "rowTotalFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for row totals (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rowTotalFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for row totals",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowTotalFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for row totals",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowTotalBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for row totals",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowTotalBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for row totals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowTotalItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for row totals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowTotalUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for row totals",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "grandTotalFormatting": {
+                "displayName": "Grand Total",
+                "properties": {
+                    "grandTotalFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for grand total (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "grandTotalFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for grand total",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "grandTotalFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for grand total",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "grandTotalBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for grand total",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "grandTotalBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for grand total",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "grandTotalItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for grand total",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "grandTotalUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for grand total",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "rowTotalLabelsFormatting": {
+                "displayName": "Row Total Labels",
+                "properties": {
+                    "rowTotalText": {
+                        "displayName": "Label Text",
+                        "description": "Custom text for row totals (default: Totals)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowTotalLabelFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for row total labels (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rowTotalLabelFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for row total labels",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowTotalLabelFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for row total labels",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowTotalLabelBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for row total labels",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowTotalLabelBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for row total labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowTotalLabelItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for row total labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rowTotalLabelUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for row total labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "columnTotalLabelsFormatting": {
+                "displayName": "Column Total Labels",
+                "properties": {
+                    "columnTotalText": {
+                        "displayName": "Label Text",
+                        "description": "Custom text for column totals (default: Totals)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "columnTotalLabelFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for column total labels (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "columnTotalLabelFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for column total labels",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "columnTotalLabelFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for column total labels",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "columnTotalLabelBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for column total labels",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "columnTotalLabelBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for column total labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnTotalLabelItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for column total labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnTotalLabelUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for column total labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "totalLabelsFormatting": {
+                "displayName": "Total Labels (Legacy)",
+                "properties": {
+                    "totalLabelFontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "totalLabelBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "filterAreaFormatting": {
+                "displayName": "Pivot Controls",
+                "properties": {
+                    "pivotControlsOrientation": {
+                        "displayName": "Orientation",
+                        "description": "Layout orientation for pivot controls (Auto adjusts based on available space)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "filterBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for pivot controls area",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "filtersFormatting": {
+                "displayName": "Filters",
+                "properties": {
+                    "fieldChipFontSize": {
+                        "displayName": "Field Tag Font Size",
+                        "description": "Font size for draggable field tags (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fieldChipFontFamily": {
+                        "displayName": "Field Tag Font",
+                        "description": "Font family for draggable field tags",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fieldChipFontColor": {
+                        "displayName": "Field Tag Font Color",
+                        "description": "Text color for draggable field tags",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fieldChipBackgroundColor": {
+                        "displayName": "Field Tag Background",
+                        "description": "Background color for draggable field tags",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownFontColor": {
+                        "displayName": "Dropdown Font Color",
+                        "description": "Text color for filter dropdown popup",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownBackgroundColor": {
+                        "displayName": "Dropdown Background",
+                        "description": "Background color for filter dropdown popup",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownItemBackgroundColor": {
+                        "displayName": "Dropdown Values Background",
+                        "description": "Background color for the values list in filter dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownSelectedItemBackgroundColor": {
+                        "displayName": "Dropdown Selected Background",
+                        "description": "Background color for selected (checked) values in filter dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownBorderColor": {
+                        "displayName": "Dropdown Border Color",
+                        "description": "Border color for filter dropdown popup",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "filterDropdownFormatting": {
+                "displayName": "Filter Dropdown",
+                "properties": {
+                    "filterDropdownFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for filter dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for filter dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownItemBackgroundColor": {
+                        "displayName": "Values Background",
+                        "description": "Background color for the values list in filter dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownSelectedItemBackgroundColor": {
+                        "displayName": "Selected Values Background",
+                        "description": "Background color for selected (checked) values in filter dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "filterDropdownBorderColor": {
+                        "displayName": "Border Color",
+                        "description": "Border color for filter dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "chartTypeSelectorFormatting": {
+                "displayName": "Chart Type Selector",
+                "properties": {
+                    "chartTypeFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for chart type selector (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "chartTypeFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for chart type selector",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "chartTypeFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for chart type selector",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartTypeBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for chart type selector",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "aggregatorDropdownFormatting": {
+                "displayName": "Measure Dropdown",
+                "properties": {
+                    "aggregatorFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for aggregator dropdown (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "aggregatorFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for aggregator dropdown",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "aggregatorFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for aggregator dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "aggregatorBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for aggregator dropdown",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "tableBordersFormatting": {
+                "displayName": "Table Borders",
+                "properties": {
+                    "tableBorderColor": {
+                        "displayName": "Border Color",
+                        "description": "Color of table cell borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "tableBorderWidth": {
+                        "displayName": "Border Width",
+                        "description": "Width of table cell borders (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "chartTitleFormatting": {
+                "displayName": "Chart Title",
+                "properties": {
+                    "showTitle": {
+                        "displayName": "Show Title",
+                        "description": "Toggle chart title visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "chartTitle": {
+                        "displayName": "Title Text",
+                        "description": "Static text for chart title (overrides auto-generated title)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "chartTitleFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for chart title (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "chartTitleFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for chart title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "chartTitleFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for chart title",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartTitleBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for chart title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "chartTitleItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for chart title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "chartTitleUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for chart title",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "xAxisTitleFormatting": {
+                "displayName": "X-Axis Title",
+                "properties": {
+                    "showXAxisTitle": {
+                        "displayName": "Show Title",
+                        "description": "Toggle X-axis title visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xAxisTitle": {
+                        "displayName": "Title Text",
+                        "description": "Static text for X-axis title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "xAxisTitleFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for X-axis title (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xAxisTitleFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for X-axis title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "xAxisTitleFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for X-axis title",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "xAxisTitleBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for X-axis title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xAxisTitleItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for X-axis title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "xAxisTitleUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for X-axis title",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "yAxisTitleFormatting": {
+                "displayName": "Y-Axis Title",
+                "properties": {
+                    "showYAxisTitle": {
+                        "displayName": "Show Title",
+                        "description": "Toggle Y-axis title visibility",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisTitle": {
+                        "displayName": "Title Text",
+                        "description": "Static text for Y-axis title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "yAxisTitleFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for Y-axis title (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "yAxisTitleFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for Y-axis title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "yAxisTitleFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for Y-axis title",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "yAxisTitleBold": {
+                        "displayName": "Bold",
+                        "description": "Bold text for Y-axis title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisTitleItalic": {
+                        "displayName": "Italic",
+                        "description": "Italic text for Y-axis title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisTitleUnderline": {
+                        "displayName": "Underline",
+                        "description": "Underline text for Y-axis title",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dropdownsFormatting": {
+                "displayName": "Dropdowns",
+                "properties": {
+                    "dropdownFontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for dropdowns (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dropdownFontFamily": {
+                        "displayName": "Font",
+                        "description": "Font family for dropdowns",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "dropdownFontColor": {
+                        "displayName": "Font Color",
+                        "description": "Text color for dropdowns",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dropdownBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for dropdowns",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "chartTypeDropdownFormatting": {
+                "displayName": "Chart Type Dropdown",
+                "properties": {
+                    "chartTypeDropdownFontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartTypeDropdownBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "measureDropdownFormatting": {
+                "displayName": "Measure Dropdown",
+                "properties": {
+                    "measureDropdownFontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "measureDropdownBackgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "stylePresets": {
+                "displayName": "Style Presets",
+                "properties": {
+                    "stylePreset": {
+                        "displayName": "Style Preset",
+                        "description": "Apply a predefined style preset to the visual",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "lastAppliedPreset": {
+                        "displayName": "Last Applied Preset",
+                        "description": "Internal: tracks the last applied preset to prevent re-applying on reload",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "pivotSettings": {
+                "displayName": "Pivot Settings",
+                "properties": {
+                    "state": {
+                        "displayName": "Pivot State",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "heatmapSettings": {
+                "displayName": "Heatmap",
+                "properties": {
+                    "heatmapColor": {
+                        "displayName": "Heatmap Color",
+                        "description": "The color used for heatmap visualization (highest values)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "chartColors": {
+                "displayName": "Chart Colors",
+                "properties": {
+                    "color1": {
+                        "displayName": "Color 1",
+                        "description": "Primary chart color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color2": {
+                        "displayName": "Color 2",
+                        "description": "Secondary chart color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color3": {
+                        "displayName": "Color 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color4": {
+                        "displayName": "Color 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color5": {
+                        "displayName": "Color 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color6": {
+                        "displayName": "Color 6",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color7": {
+                        "displayName": "Color 7",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color8": {
+                        "displayName": "Color 8",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "chartThemeFormatting": {
+                "displayName": "Chart Theme",
+                "properties": {
+                    "chartBackgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color for the chart area",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartPlotBackgroundColor": {
+                        "displayName": "Plot Background",
+                        "description": "Background color for the plot area",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartAxisTickColor": {
+                        "displayName": "Axis Text Color",
+                        "description": "Color for axis labels and tick marks",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartLegendFontColor": {
+                        "displayName": "Legend Text Color",
+                        "description": "Color for legend text",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chartGridColor": {
+                        "displayName": "Grid Line Color",
+                        "description": "Color for chart grid lines",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsLandingPage": false,
+        "supportsSynchronizingFilterState": true,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "Tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

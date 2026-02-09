@@ -1,0 +1,1445 @@
+{
+    "visual": {
+        "name": "retailbics",
+        "displayName": "RetailBICS Lite",
+        "guid": "RetailBICSLite",
+        "visualClassName": "Visual",
+        "version": "1.1.0.4",
+        "description": "RetailBICS Lite is a Power BI visual that enables interactive SVG floor maps and spatial retail analytics with data-driven highlighting and heatmaps.",
+        "supportUrl": "https://infobics.com/contact-us/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "InfoBICS",
+        "email": "info@infobics.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "category",
+                "kind": "Grouping",
+                "displayName": "Category (Shape Key)"
+            },
+            {
+                "name": "imageUrl",
+                "kind": "Grouping",
+                "displayName": "Image URL (optional)"
+            },
+            {
+                "name": "tenantName",
+                "kind": "Grouping",
+                "displayName": "Tenant / Unit name (for search)"
+            },
+            {
+                "name": "salesCategory",
+                "kind": "Grouping",
+                "displayName": "Sales Category (for search)"
+            },
+            {
+                "name": "group",
+                "kind": "Grouping",
+                "displayName": "Group (for search)"
+            },
+            {
+                "name": "unitId",
+                "kind": "Grouping",
+                "displayName": "Unit ID"
+            },
+            {
+                "name": "group1Field",
+                "kind": "Measure",
+                "displayName": "Group 1 Field"
+            },
+            {
+                "name": "group2Field",
+                "kind": "Measure",
+                "displayName": "Group 2 Field"
+            },
+            {
+                "name": "group3Field",
+                "kind": "Measure",
+                "displayName": "Group 3 Field"
+            },
+            {
+                "name": "group4Field",
+                "kind": "Measure",
+                "displayName": "Group 4 Field"
+            },
+            {
+                "name": "barField",
+                "kind": "Measure",
+                "displayName": "Bar Chart Field"
+            },
+            {
+                "name": "heatmapField",
+                "kind": "Measure",
+                "displayName": "Heatmap Field"
+            },
+            {
+                "name": "actualArea",
+                "kind": "Measure",
+                "displayName": "Actual Area"
+            },
+            {
+                "name": "tooltips",
+                "kind": "Measure",
+                "displayName": "Tooltips"
+            },
+            {
+                "name": "tooltipPage",
+                "kind": "Measure",
+                "displayName": "Tooltip page"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "imageUrl"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tenantName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "salesCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "group"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "unitId"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "group1Field"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "group2Field"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "group3Field"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "group4Field"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "barField"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "heatmapField"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "actualArea"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltipPage"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "suppressDefaultTitle": true,
+        "objects": {
+            "svgUrlSettings": {
+                "displayName": "SVG URL (per floor)",
+                "properties": {
+                    "floor0Url": {
+                        "displayName": "Floor 1 URL (Ground)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "floor1Url": {
+                        "displayName": "Floor 2 URL (1st)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "floor2Url": {
+                        "displayName": "Floor 3 URL (2nd)",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "heatmapThresholdsStore": {
+                "displayName": "Heatmap Thresholds (Internal)",
+                "properties": {
+                    "json": {
+                        "displayName": "JSON",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showValue": {
+                        "displayName": "Show Value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showInMap": {
+                        "displayName": "Show In Map",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showInTooltip": {
+                        "displayName": "Show In Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLegend": {
+                        "displayName": "Show Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendX": {
+                        "displayName": "Legend X",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendY": {
+                        "displayName": "Legend Y",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "svgState": {
+                "displayName": "SVG state (internal)",
+                "properties": {
+                    "activeFloor": {
+                        "displayName": "Active floor",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tx": {
+                        "displayName": "Pan X",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ty": {
+                        "displayName": "Pan Y",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "k": {
+                        "displayName": "Zoom",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "states": {
+                "displayName": "Heatmap",
+                "properties": {
+                    "enabled": {
+                        "displayName": "On",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data labels",
+                "properties": {
+                    "show": {
+                        "displayName": "On",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "display": {
+                        "displayName": "Display",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Data value",
+                                    "value": "value"
+                                },
+                                {
+                                    "displayName": "Area name",
+                                    "value": "area"
+                                },
+                                {
+                                    "displayName": "Area and value",
+                                    "value": "area_value"
+                                }
+                            ]
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Best",
+                                    "value": "best"
+                                },
+                                {
+                                    "displayName": "Top left",
+                                    "value": "tl"
+                                },
+                                {
+                                    "displayName": "Top",
+                                    "value": "t"
+                                },
+                                {
+                                    "displayName": "Top right",
+                                    "value": "tr"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "l"
+                                },
+                                {
+                                    "displayName": "Middle",
+                                    "value": "c"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "r"
+                                },
+                                {
+                                    "displayName": "Bottom left",
+                                    "value": "bl"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "b"
+                                },
+                                {
+                                    "displayName": "Bottom right",
+                                    "value": "br"
+                                }
+                            ]
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "thousandSeparator": {
+                        "displayName": "Thousand separator",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "catColor": {
+                        "displayName": "Category color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "catTextSize": {
+                        "displayName": "Category text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dataColors": {
+                "displayName": "Data colors",
+                "properties": {
+                    "borders": {
+                        "displayName": "Borders",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "defaultColor": {
+                        "displayName": "Default color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "unmatchedColor": {
+                        "displayName": "Unmatched color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "heatmapState": {
+                "displayName": "Heatmap (internal)",
+                "properties": {
+                    "configJson": {
+                        "displayName": "Config (internal)",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "tooltipsPlus": {
+                "displayName": "Tooltips+",
+                "properties": {
+                    "showImage": {
+                        "displayName": "Show image",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "imageMaxWidth": {
+                        "displayName": "Image max width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "imageMaxHeight": {
+                        "displayName": "Image max height (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "mapScale": {
+                "displayName": "Map Scale",
+                "properties": {
+                    "value": {
+                        "displayName": "Scale value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "sqm (m2)",
+                                    "value": "sqm"
+                                },
+                                {
+                                    "displayName": "sqft (ft2)",
+                                    "value": "sqft"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "svgHistory": {
+                "displayName": "SVG History",
+                "properties": {
+                    "urls": {
+                        "displayName": "URLs",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "svgStore": {
+                "displayName": "SVG Store (Zoom/Floor State)",
+                "description": "Internal floor and zoom state persistence.",
+                "properties": {
+                    "floor0": {
+                        "displayName": "Floor 0 SVG (internal)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "floor1": {
+                        "displayName": "Floor 1 SVG (internal)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "floor2": {
+                        "displayName": "Floor 2 SVG (internal)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "active": {
+                        "displayName": "Active floor",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tx": {
+                        "displayName": "Pan X (internal)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ty": {
+                        "displayName": "Pan Y (internal)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "k": {
+                        "displayName": "Zoom (internal)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "floorSettings": {
+                "displayName": "Floors",
+                "properties": {
+                    "floor0Name": {
+                        "displayName": "Floor name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "floor0Enabled": {
+                        "displayName": "Show floor",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "barChart": {
+                "displayName": "3D bar chart",
+                "properties": {
+                    "enabled": {
+                        "displayName": "Show 3D bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "width": {
+                        "displayName": "Bar width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxHeight": {
+                        "displayName": "Max height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "posColor": {
+                        "displayName": "Positive bar color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "negColor": {
+                        "displayName": "Negative bar color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showValue": {
+                        "displayName": "Show value on bar",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "search": {
+                "displayName": "Search",
+                "properties": {
+                    "enabled": {
+                        "displayName": "Enable search box",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "highlightColor": {
+                        "displayName": "Highlight color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "zoomOnMatch": {
+                        "displayName": "Zoom to match",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "g1": {
+                "displayName": "Group 1",
+                "properties": {
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "groupName": {
+                        "displayName": "Group name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "icon": {
+                        "displayName": "Icon",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "\u25a2 Area",
+                                    "value": "area"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb0 Rent",
+                                    "value": "rent"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc8 Sales",
+                                    "value": "sales"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb9 Revenue",
+                                    "value": "revenue"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfaf KPI",
+                                    "value": "kpi"
+                                },
+                                {
+                                    "displayName": "\ud83c\udff7 Category",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Unit / Shop",
+                                    "value": "unit"
+                                },
+                                {
+                                    "displayName": "\ud83d\udccf Measurement",
+                                    "value": "measurement"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6 Footfall",
+                                    "value": "footfall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc65 People counting",
+                                    "value": "people"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6\u200d\u27a1\ufe0f Traffic",
+                                    "value": "traffic"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Mall",
+                                    "value": "mall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udecd Shopping",
+                                    "value": "shopping"
+                                },
+                                {
+                                    "displayName": "\ud83d\uddfa Map",
+                                    "value": "map"
+                                },
+                                {
+                                    "displayName": "\ud83e\uddd1\u200d\ud83d\udcbc Management",
+                                    "value": "management"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb8 Cost",
+                                    "value": "cost"
+                                },
+                                {
+                                    "displayName": "\u2705 Profit",
+                                    "value": "profit"
+                                },
+                                {
+                                    "displayName": "\u274c Loss",
+                                    "value": "loss"
+                                },
+                                {
+                                    "displayName": "\ud83c\udd7f Parking",
+                                    "value": "parking"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf9f Tickets",
+                                    "value": "tickets"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf54 Food court",
+                                    "value": "foodcourt"
+                                },
+                                {
+                                    "displayName": "\u2615 Cafe",
+                                    "value": "cafe"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfac Cinema",
+                                    "value": "cinema"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfa1 Kids play",
+                                    "value": "kidsplay"
+                                },
+                                {
+                                    "displayName": "\ud83d\udebb Washroom",
+                                    "value": "washroom"
+                                },
+                                {
+                                    "displayName": "\u2b06 Escalator",
+                                    "value": "escalator"
+                                },
+                                {
+                                    "displayName": "\ud83d\uded7 Lift",
+                                    "value": "lift"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc4 Contract",
+                                    "value": "contract"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcca Dashboard",
+                                    "value": "dashboard"
+                                },
+                                {
+                                    "displayName": "S\u33a1 Sales / sqm",
+                                    "value": "sales_sqm"
+                                },
+                                {
+                                    "displayName": "R\u33a1 Rent / sqm",
+                                    "value": "rent_sqm"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "g2": {
+                "displayName": "Group 2",
+                "properties": {
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "groupName": {
+                        "displayName": "Group name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "icon": {
+                        "displayName": "Icon",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "\u25a2 Area",
+                                    "value": "area"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb0 Rent",
+                                    "value": "rent"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc8 Sales",
+                                    "value": "sales"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb9 Revenue",
+                                    "value": "revenue"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfaf KPI",
+                                    "value": "kpi"
+                                },
+                                {
+                                    "displayName": "\ud83c\udff7 Category",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Unit / Shop",
+                                    "value": "unit"
+                                },
+                                {
+                                    "displayName": "\ud83d\udccf Measurement",
+                                    "value": "measurement"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6 Footfall",
+                                    "value": "footfall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc65 People counting",
+                                    "value": "people"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6\u200d\u27a1\ufe0f Traffic",
+                                    "value": "traffic"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Mall",
+                                    "value": "mall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udecd Shopping",
+                                    "value": "shopping"
+                                },
+                                {
+                                    "displayName": "\ud83d\uddfa Map",
+                                    "value": "map"
+                                },
+                                {
+                                    "displayName": "\ud83e\uddd1\u200d\ud83d\udcbc Management",
+                                    "value": "management"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb8 Cost",
+                                    "value": "cost"
+                                },
+                                {
+                                    "displayName": "\u2705 Profit",
+                                    "value": "profit"
+                                },
+                                {
+                                    "displayName": "\u274c Loss",
+                                    "value": "loss"
+                                },
+                                {
+                                    "displayName": "\ud83c\udd7f Parking",
+                                    "value": "parking"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf9f Tickets",
+                                    "value": "tickets"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf54 Food court",
+                                    "value": "foodcourt"
+                                },
+                                {
+                                    "displayName": "\u2615 Cafe",
+                                    "value": "cafe"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfac Cinema",
+                                    "value": "cinema"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfa1 Kids play",
+                                    "value": "kidsplay"
+                                },
+                                {
+                                    "displayName": "\ud83d\udebb Washroom",
+                                    "value": "washroom"
+                                },
+                                {
+                                    "displayName": "\u2b06 Escalator",
+                                    "value": "escalator"
+                                },
+                                {
+                                    "displayName": "\ud83d\uded7 Lift",
+                                    "value": "lift"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc4 Contract",
+                                    "value": "contract"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcca Dashboard",
+                                    "value": "dashboard"
+                                },
+                                {
+                                    "displayName": "S\u33a1 Sales / sqm",
+                                    "value": "sales_sqm"
+                                },
+                                {
+                                    "displayName": "R\u33a1 Rent / sqm",
+                                    "value": "rent_sqm"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "g3": {
+                "displayName": "Group 3",
+                "properties": {
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "groupName": {
+                        "displayName": "Group name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "icon": {
+                        "displayName": "Icon",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "\u25a2 Area",
+                                    "value": "area"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb0 Rent",
+                                    "value": "rent"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc8 Sales",
+                                    "value": "sales"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb9 Revenue",
+                                    "value": "revenue"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfaf KPI",
+                                    "value": "kpi"
+                                },
+                                {
+                                    "displayName": "\ud83c\udff7 Category",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Unit / Shop",
+                                    "value": "unit"
+                                },
+                                {
+                                    "displayName": "\ud83d\udccf Measurement",
+                                    "value": "measurement"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6 Footfall",
+                                    "value": "footfall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc65 People counting",
+                                    "value": "people"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6\u200d\u27a1\ufe0f Traffic",
+                                    "value": "traffic"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Mall",
+                                    "value": "mall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udecd Shopping",
+                                    "value": "shopping"
+                                },
+                                {
+                                    "displayName": "\ud83d\uddfa Map",
+                                    "value": "map"
+                                },
+                                {
+                                    "displayName": "\ud83e\uddd1\u200d\ud83d\udcbc Management",
+                                    "value": "management"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb8 Cost",
+                                    "value": "cost"
+                                },
+                                {
+                                    "displayName": "\u2705 Profit",
+                                    "value": "profit"
+                                },
+                                {
+                                    "displayName": "\u274c Loss",
+                                    "value": "loss"
+                                },
+                                {
+                                    "displayName": "\ud83c\udd7f Parking",
+                                    "value": "parking"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf9f Tickets",
+                                    "value": "tickets"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf54 Food court",
+                                    "value": "foodcourt"
+                                },
+                                {
+                                    "displayName": "\u2615 Cafe",
+                                    "value": "cafe"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfac Cinema",
+                                    "value": "cinema"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfa1 Kids play",
+                                    "value": "kidsplay"
+                                },
+                                {
+                                    "displayName": "\ud83d\udebb Washroom",
+                                    "value": "washroom"
+                                },
+                                {
+                                    "displayName": "\u2b06 Escalator",
+                                    "value": "escalator"
+                                },
+                                {
+                                    "displayName": "\ud83d\uded7 Lift",
+                                    "value": "lift"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc4 Contract",
+                                    "value": "contract"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcca Dashboard",
+                                    "value": "dashboard"
+                                },
+                                {
+                                    "displayName": "S\u33a1 Sales / sqm",
+                                    "value": "sales_sqm"
+                                },
+                                {
+                                    "displayName": "R\u33a1 Rent / sqm",
+                                    "value": "rent_sqm"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "g4": {
+                "displayName": "Group 4",
+                "properties": {
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textSize": {
+                        "displayName": "Text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "groupName": {
+                        "displayName": "Group name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "icon": {
+                        "displayName": "Icon",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "\u25a2 Area",
+                                    "value": "area"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb0 Rent",
+                                    "value": "rent"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc8 Sales",
+                                    "value": "sales"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb9 Revenue",
+                                    "value": "revenue"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfaf KPI",
+                                    "value": "kpi"
+                                },
+                                {
+                                    "displayName": "\ud83c\udff7 Category",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Unit / Shop",
+                                    "value": "unit"
+                                },
+                                {
+                                    "displayName": "\ud83d\udccf Measurement",
+                                    "value": "measurement"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6 Footfall",
+                                    "value": "footfall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udc65 People counting",
+                                    "value": "people"
+                                },
+                                {
+                                    "displayName": "\ud83d\udeb6\u200d\u27a1\ufe0f Traffic",
+                                    "value": "traffic"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfec Mall",
+                                    "value": "mall"
+                                },
+                                {
+                                    "displayName": "\ud83d\udecd Shopping",
+                                    "value": "shopping"
+                                },
+                                {
+                                    "displayName": "\ud83d\uddfa Map",
+                                    "value": "map"
+                                },
+                                {
+                                    "displayName": "\ud83e\uddd1\u200d\ud83d\udcbc Management",
+                                    "value": "management"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcb8 Cost",
+                                    "value": "cost"
+                                },
+                                {
+                                    "displayName": "\u2705 Profit",
+                                    "value": "profit"
+                                },
+                                {
+                                    "displayName": "\u274c Loss",
+                                    "value": "loss"
+                                },
+                                {
+                                    "displayName": "\ud83c\udd7f Parking",
+                                    "value": "parking"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf9f Tickets",
+                                    "value": "tickets"
+                                },
+                                {
+                                    "displayName": "\ud83c\udf54 Food court",
+                                    "value": "foodcourt"
+                                },
+                                {
+                                    "displayName": "\u2615 Cafe",
+                                    "value": "cafe"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfac Cinema",
+                                    "value": "cinema"
+                                },
+                                {
+                                    "displayName": "\ud83c\udfa1 Kids play",
+                                    "value": "kidsplay"
+                                },
+                                {
+                                    "displayName": "\ud83d\udebb Washroom",
+                                    "value": "washroom"
+                                },
+                                {
+                                    "displayName": "\u2b06 Escalator",
+                                    "value": "escalator"
+                                },
+                                {
+                                    "displayName": "\ud83d\uded7 Lift",
+                                    "value": "lift"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcc4 Contract",
+                                    "value": "contract"
+                                },
+                                {
+                                    "displayName": "\ud83d\udcca Dashboard",
+                                    "value": "dashboard"
+                                },
+                                {
+                                    "displayName": "S\u33a1 Sales / sqm",
+                                    "value": "sales_sqm"
+                                },
+                                {
+                                    "displayName": "R\u33a1 Rent / sqm",
+                                    "value": "rent_sqm"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "heatmap": {
+                "displayName": "Heatmap",
+                "properties": {
+                    "colorMode": {
+                        "displayName": "Color mode",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "mode": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "measureKey": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "selectedKeys": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "modeByKey": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showValue": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLabelName": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showInMap": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showInTooltip": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLegend": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendX": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendY": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltipPage",
+                "tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
