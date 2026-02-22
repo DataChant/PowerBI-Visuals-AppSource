@@ -1,0 +1,573 @@
+{
+    "visual": {
+        "name": "leaplyticsWaterfallVariance",
+        "displayName": "Leaplytics Waterfall Variance",
+        "guid": "leaplyticsWaterfallVarianceF8A3B2C1D4E5967802143CAD",
+        "visualClassName": "Visual",
+        "version": "1.0.0.6",
+        "description": "Professional waterfall charts with variance analysis. Compare actuals vs budget/prior year with automatic variance calculation and color-coded insights.",
+        "supportUrl": "https://www.leaplytics.de/kontakt/",
+        "gitHubUrl": "https://github.com/spreusler/leaplytics_waterfall_variance_power_bi"
+    },
+    "author": {
+        "name": "LeapLytics GmbH",
+        "email": "info@leaplytics.de"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [
+            {
+                "name": "ExportContent",
+                "essential": true
+            }
+        ],
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "displayNameKey": "Role_Category",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "Categories for waterfall bars (e.g., Product, Month, Cost Center)"
+            },
+            {
+                "displayName": "Value",
+                "displayNameKey": "Role_Actual",
+                "name": "actual",
+                "kind": "Measure",
+                "description": "The primary value for each category"
+            },
+            {
+                "displayName": "PY",
+                "displayNameKey": "Role_PreviousYear",
+                "name": "previousYear",
+                "kind": "Measure",
+                "description": "Previous Year values for AC vs PY comparison (IBCS standard)"
+            },
+            {
+                "displayName": "PL",
+                "displayNameKey": "Role_Plan",
+                "name": "plan",
+                "kind": "Measure",
+                "description": "Plan/Budget values for AC vs PL comparison (IBCS - outline bars)"
+            },
+            {
+                "displayName": "Small Multiples",
+                "displayNameKey": "Role_SmallMultiples",
+                "name": "smallMultiples",
+                "kind": "Grouping",
+                "description": "Split chart into grid by this dimension (e.g., Region, Product Line)"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "actual": {
+                            "max": 1
+                        },
+                        "previousYear": {
+                            "max": 1
+                        },
+                        "plan": {
+                            "max": 1
+                        },
+                        "smallMultiples": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "category"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "smallMultiples"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "actual"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "previousYear"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "plan"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "license": {
+                "displayName": "License",
+                "properties": {
+                    "license": {
+                        "displayName": "License Key",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "chartSettings": {
+                "displayName": "Chart Type",
+                "properties": {
+                    "chartMode": {
+                        "displayName": "Chart Mode",
+                        "description": "Select the chart display mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "barChart",
+                                    "displayName": "Bar Chart"
+                                },
+                                {
+                                    "value": "waterfall",
+                                    "displayName": "Waterfall"
+                                },
+                                {
+                                    "value": "line",
+                                    "displayName": "Line"
+                                },
+                                {
+                                    "value": "area",
+                                    "displayName": "Area"
+                                },
+                                {
+                                    "value": "lollipop",
+                                    "displayName": "Lollipop"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "barSettings": {
+                "displayName": "Bar Settings",
+                "properties": {
+                    "barPadding": {
+                        "displayName": "Bar Spacing",
+                        "description": "Space between bars (0-0.8)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showConnectors": {
+                        "displayName": "Show Connectors",
+                        "description": "Show connector lines between bars",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "colorSettings": {
+                "displayName": "Colors",
+                "properties": {
+                    "positiveColor": {
+                        "displayName": "Positive Color",
+                        "description": "Color for positive values/increases",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "negativeColor": {
+                        "displayName": "Negative Color",
+                        "description": "Color for negative values/decreases",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "totalColor": {
+                        "displayName": "Total Color",
+                        "description": "Color for total/sum bars",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "labelSettings": {
+                "displayName": "Data Labels",
+                "properties": {
+                    "showLabels": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelPosition": {
+                        "displayName": "Label Position",
+                        "description": "Position of data labels on bars",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "inside",
+                                    "displayName": "Inside"
+                                },
+                                {
+                                    "value": "outside",
+                                    "displayName": "Outside"
+                                }
+                            ]
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelFormatState": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "varianceSettings": {
+                "displayName": "Variance Display",
+                "properties": {
+                    "showAbsoluteVariance": {
+                        "displayName": "Show Absolute Variance",
+                        "description": "Display the absolute difference (Actual - Comparison)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showRelativeVariance": {
+                        "displayName": "Show Relative Variance (%)",
+                        "description": "Display the percentage difference",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "valueComparison": {
+                "displayName": "Value comparison",
+                "properties": {
+                    "enabled": {
+                        "displayName": "Enabled",
+                        "description": "Enable value comparison indicator with reference lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelType": {
+                        "displayName": "Label",
+                        "description": "How to display the variance value",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "relative",
+                                    "displayName": "Relative (%)"
+                                },
+                                {
+                                    "value": "absolute",
+                                    "displayName": "Absolute"
+                                },
+                                {
+                                    "value": "both",
+                                    "displayName": "Both"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                }
+                            ]
+                        }
+                    },
+                    "fromToMode": {
+                        "displayName": "From/To",
+                        "description": "Which bars to compare",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "default",
+                                    "displayName": "Default"
+                                },
+                                {
+                                    "value": "firstLast",
+                                    "displayName": "First vs Last"
+                                },
+                                {
+                                    "value": "previousLast",
+                                    "displayName": "Previous vs Last"
+                                },
+                                {
+                                    "value": "actualComparison",
+                                    "displayName": "Actual vs Comparison"
+                                },
+                                {
+                                    "value": "lowestHighest",
+                                    "displayName": "Lowest vs Highest"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "measureLabelSettings": {
+                "displayName": "Measure Label",
+                "properties": {
+                    "showMeasureLabel": {
+                        "displayName": "Show Measure Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "customMeasureLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customDeltaPYLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customDeltaPYPercentLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customPYLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customPLLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customDeltaPLLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "customDeltaPLPercentLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "axisSettings": {
+                "displayName": "Axis",
+                "properties": {
+                    "showXAxis": {
+                        "displayName": "Show X Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showYAxis": {
+                        "displayName": "Show Y Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "yAxisFormat": {
+                        "displayName": "Y Axis Format",
+                        "description": "Number format for Y axis labels",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "thousands",
+                                    "displayName": "Thousands (K)"
+                                },
+                                {
+                                    "value": "millions",
+                                    "displayName": "Millions (M)"
+                                },
+                                {
+                                    "value": "billions",
+                                    "displayName": "Billions (B)"
+                                }
+                            ]
+                        }
+                    },
+                    "showGridlines": {
+                        "displayName": "Show Gridlines",
+                        "description": "Show horizontal gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableScaleBreak": {
+                        "displayName": "Enable Scale Break",
+                        "description": "Show scale break indicator in Line/Area modes",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scaleCompressed": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "smallMultiplesSettings": {
+                "displayName": "Small Multiples",
+                "properties": {
+                    "syncYAxis": {
+                        "displayName": "Sync Y Axis",
+                        "description": "Synchronize Y axis scale across all cells",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCellBorders": {
+                        "displayName": "Show Cell Borders",
+                        "description": "Show borders around each cell",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCellTitles": {
+                        "displayName": "Show Cell Titles",
+                        "description": "Show title for each cell",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Title Font Size",
+                        "description": "Font size for cell titles",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cellPadding": {
+                        "displayName": "Cell Padding",
+                        "description": "Padding between cells in pixels",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "layoutMode": {
+                        "displayName": "Layout Mode",
+                        "description": "How to arrange cells in the grid",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "fixedColumns",
+                                    "displayName": "Fixed Columns"
+                                },
+                                {
+                                    "value": "fixedRows",
+                                    "displayName": "Fixed Rows"
+                                }
+                            ]
+                        }
+                    },
+                    "fixedCount": {
+                        "displayName": "Fixed Count",
+                        "description": "Number of rows/columns when using fixed layout",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "about": {
+                "displayName": "About",
+                "description": "About This Visual",
+                "properties": {
+                    "version": {
+                        "displayName": "Version",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "developer": {
+                        "displayName": "Developed by",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "sorting": {
+            "default": {},
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "category",
+                        "direction": 1
+                    }
+                ]
+            }
+        },
+        "suppressDefaultTitle": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "supportEnhancedTooltips": true
+        },
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

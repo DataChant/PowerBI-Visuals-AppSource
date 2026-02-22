@@ -22,8 +22,8 @@
 # Script to download Power BI Custom Visuals metadata from the Power Automate API
 # and generate the output CSV/MD files. Replaces the Excel Power Query workbook.
 #
-# Configuration (environment variables or .env file):
-#   SUBSCRIPTION_EMAIL      - Email address for API authentication
+# Configuration (environment variables or .env file - all optional):
+#   SUBSCRIPTION_EMAIL      - Override the default subscription ID
 #
 # Usage:
 #   python DownloadMetadata.py
@@ -122,11 +122,7 @@ def load_config():
         '?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0'
         '&sig=0u8mxUYW2rKnQR0nUke6LI_PGCeuqqkKwtJR8Gf1d8c'
     )
-    email = os.environ.get('SUBSCRIPTION_EMAIL', '')
-
-    if not email:
-        logger.error("SUBSCRIPTION_EMAIL environment variable is not set.")
-        sys.exit(1)
+    email = os.environ.get('SUBSCRIPTION_EMAIL', '6b6e2128-85d6-4a17-a822-ad1fc85c7c48')
 
     return api_url, email
 
