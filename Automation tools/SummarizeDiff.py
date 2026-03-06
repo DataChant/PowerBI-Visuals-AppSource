@@ -20,14 +20,16 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2026-02-27'
-PREVIOUS_COMMIT_DATE = '2026-02-21'
+LATEST_COMMIT_DATE = '2026-03-06'
+PREVIOUS_COMMIT_DATE = '2026-02-27'
 
 import logging
 import csv
+import hashlib
 import io
 import os
 import subprocess
+import urllib.request
 from datetime import datetime
 
 # Set up logging
@@ -185,6 +187,19 @@ def create_github_image_link(url: str, img_src: str, alt_text: str, width: int =
 
 
 
+def are_images_identical(url1, url2):
+    """Fetch two image URLs and compare their content by SHA-256 hash."""
+    try:
+        with urllib.request.urlopen(url1, timeout=10) as resp1:
+            hash1 = hashlib.sha256(resp1.read()).hexdigest()
+        with urllib.request.urlopen(url2, timeout=10) as resp2:
+            hash2 = hashlib.sha256(resp2.read()).hexdigest()
+        return hash1 == hash2
+    except Exception as e:
+        logger.warning("Could not compare images: %s", str(e))
+        return False
+
+
 def getReleaseDateString(visual):
     release_date = visual.get("Release Date", "")
     release_date = release_date.split(" ")[0] if release_date else ""
@@ -270,14 +285,24 @@ def writeDiff(file, title, set_of_changes, data_dict):
             changes = _other_changes.get(guid, {})
             for key, value in changes.items():
                 if key == "Description Full":
-                    change_lines.append(f"Listing's description changed")  
+                    change_lines.append(f"Listing's description changed")
                     continue
                 elif key in ("Release Date", "Simple Filename", "Favorite New", "CSAT", "NPS", "Popularity"):
                     continue  # Ignore release date changes
 
                 if isinstance(value, dict):
-                    change_lines.append(f"{key}: {value['Old Value']} ➔ {value['New Value']}")  
-        else:    
+                    if key in ("Image", "LargeIconUri"):
+                        old_url = value['Old Value']
+                        new_url = value['New Value']
+                        if are_images_identical(old_url, new_url):
+                            continue  # Same image, different URL — skip
+                        change_lines.append(
+                            f'{key}: <img src="{old_url}" width="80" alt="Before" style="max-width:100%;height:auto;vertical-align:middle;"/> ➔ '
+                            f'<img src="{new_url}" width="80" alt="After" style="max-width:100%;height:auto;vertical-align:middle;"/>'
+                        )
+                    else:
+                        change_lines.append(f"{key}: {value['Old Value']} ➔ {value['New Value']}")
+        else:
             version_line = f"Version: {version}"
             
         if previous_release_date:
@@ -315,6 +340,33 @@ def writeDiff(file, title, set_of_changes, data_dict):
 
         file.write(f'<tr><td style="border: none !important; padding: 4px;"></td></tr>\n')
     file.write('</table>\n\n')
+
+
+def _filter_identical_image_changes():
+    """Remove image URL changes from _other_changes when the actual image content is identical."""
+    global _other_changes
+    ignored_keys = {"Release Date", "Simple Filename", "Favorite New", "CSAT", "NPS", "Popularity", "Description Full"}
+    image_keys = {"Image", "LargeIconUri"}
+
+    filtered = {}
+    for guid, changes in _other_changes.items():
+        remaining = {}
+        for key, value in changes.items():
+            if key in ignored_keys:
+                remaining[key] = value
+                continue
+            if key in image_keys and isinstance(value, dict):
+                old_url = value['Old Value']
+                new_url = value['New Value']
+                if are_images_identical(old_url, new_url):
+                    logger.info("Skipping identical image change for %s (%s)", guid, key)
+                    continue
+            remaining[key] = value
+        # Check if any visible changes remain (exclude ignored keys)
+        visible = {k: v for k, v in remaining.items() if k not in ignored_keys}
+        if visible:
+            filtered[guid] = remaining
+    _other_changes = filtered
 
 
 def generate_diff_file():
@@ -445,6 +497,7 @@ def main():
 
     if latest_content and previous_content:
         compare_csv(previous_content, latest_content)
+        _filter_identical_image_changes()
         generate_diff_file()
 
 if __name__ == "__main__":
