@@ -1,0 +1,390 @@
+/* ══════════════════════════════════════════════════════════════
+   Business Central Financial Report – Power BI Custom Visual
+   ══════════════════════════════════════════════════════════════ */
+.bc-financial-report {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Segoe UI", sans-serif;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  /* ── Report title ────────────────────────────────────────── */
+  /* ── Placeholder message ─────────────────────────────────── */
+  /* ── Tab bar ─────────────────────────────────────────────── */
+  /* ── Expand / Collapse All toolbar ─────────────────────── */
+  /* ── Scrollable table wrapper ────────────────────────────── */
+  /* ── Table ───────────────────────────────────────────────── */
+  /* ══════════════════════════════════════════════════════════════ */
+  /*  DuPont Pyramid – Graph mode                                  */
+  /* ══════════════════════════════════════════════════════════════ */
+}
+.bc-financial-report .bc-report-title {
+  padding: 8px 12px;
+  font-weight: 700;
+  border-bottom: 2px solid #444;
+  flex-shrink: 0;
+}
+.bc-financial-report .bc-message {
+  padding: 20px;
+  color: #999;
+  text-align: center;
+  font-style: italic;
+}
+.bc-financial-report .bc-tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 2px solid #444;
+  flex-shrink: 0;
+  padding: 0 4px;
+  background: #fafafa;
+}
+.bc-financial-report .bc-tab-bar.bc-tab-bar-bottom {
+  border-bottom: none;
+  border-top: 2px solid #444;
+}
+.bc-financial-report .bc-tab-bar .bc-tab {
+  padding: 6px 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: "Segoe UI", sans-serif;
+  color: #666;
+  margin-bottom: -2px;
+  border-radius: 4px 4px 0 0;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.bc-financial-report .bc-tab-bar .bc-tab:hover {
+  background: #eee;
+  color: #333;
+}
+.bc-financial-report .bc-tab-bar .bc-tab.bc-tab-active {
+  background: #fff;
+  color: #333;
+  font-weight: 600;
+  border-color: #444;
+  border-bottom: 2px solid #fff;
+}
+.bc-financial-report .bc-tab-bar.bc-tab-bar-bottom .bc-tab {
+  border-radius: 0 0 4px 4px;
+  margin-bottom: 0;
+  margin-top: -2px;
+  border-bottom: 1px solid transparent;
+  border-top: none;
+}
+.bc-financial-report .bc-tab-bar.bc-tab-bar-bottom .bc-tab.bc-tab-active {
+  border-bottom-color: #444;
+  border-top: 2px solid #fff;
+}
+.bc-financial-report .bc-collapse-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 4px 10px;
+  flex-shrink: 0;
+  background: #fafafa;
+  border-bottom: 1px solid #e0e0e0;
+}
+.bc-financial-report .bc-collapse-toolbar .bc-collapse-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-family: "Segoe UI", sans-serif;
+  cursor: pointer;
+  color: #C24B4B;
+  transition: background 0.15s, border-color 0.15s;
+}
+.bc-financial-report .bc-collapse-toolbar .bc-collapse-btn:hover {
+  background: rgba(194, 75, 75, 0.08);
+  border-color: #C24B4B;
+}
+.bc-financial-report .bc-table-wrapper {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+.bc-financial-report .bc-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  /* ── Sticky header ───────────────────────────────────── */
+  /* ── Body cells ──────────────────────────────────────── */
+}
+.bc-financial-report .bc-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+}
+.bc-financial-report .bc-table thead th {
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #444;
+  white-space: nowrap;
+}
+.bc-financial-report .bc-table thead th.bc-col-amount {
+  text-align: right;
+}
+.bc-financial-report .bc-table thead th.bc-col-group-header {
+  text-align: center;
+  border-bottom: 1px solid #aaa;
+  border-left: 1px solid #ddd;
+  font-weight: 700;
+}
+.bc-financial-report .bc-table tbody {
+  /* Heading – top-level section header */
+  /* Begin-Total – group header (e.g. "1009 Omsætning") */
+  /* Posting – regular account lines */
+  /* Total – summary total row */
+  /* End-Total – section total (e.g. "1099 Omsætning i alt") */
+  /* ── Expand / Collapse toggle ─────────────────────────── */
+  /* Border on amount cell – only added dynamically when amount is shown */
+  /* Removed: no underlines on total rows */
+  /* New-page separator */
+}
+.bc-financial-report .bc-table tbody td {
+  padding: 3px 10px;
+  vertical-align: top;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bc-financial-report .bc-table tbody td.bc-col-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.bc-financial-report .bc-table tbody tr.bc-row-heading td {
+  font-weight: 700;
+  text-transform: uppercase;
+  padding-top: 12px;
+  padding-bottom: 4px;
+}
+.bc-financial-report .bc-table tbody tr.bc-row-begin-total td {
+  font-weight: 600;
+  padding-top: 8px;
+  padding-bottom: 3px;
+}
+.bc-financial-report .bc-table tbody tr.bc-row-posting td {
+  font-weight: 400;
+}
+.bc-financial-report .bc-table tbody tr.bc-row-total td {
+  font-weight: 700;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.bc-financial-report .bc-table tbody tr.bc-row-end-total td {
+  font-weight: 700;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.bc-financial-report .bc-table tbody .bc-toggle {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  font-size: inherit;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  color: #C24B4B;
+  margin-right: 6px;
+  vertical-align: baseline;
+  user-select: none;
+  transition: opacity 0.15s;
+  opacity: 0.85;
+}
+.bc-financial-report .bc-table tbody .bc-toggle:hover {
+  opacity: 1;
+}
+.bc-financial-report .bc-table tbody .bc-toggle.bc-toggle-collapsed {
+  opacity: 0.9;
+}
+.bc-financial-report .bc-table tbody tr.bc-row-separator td {
+  height: 16px;
+}
+.bc-financial-report .bc-dupont-graph {
+  padding: 20px 10px;
+  text-align: center;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Each level is a horizontal strip containing the two tracks */
+  /* Track = colored background container for income or asset side */
+  /* Track column: wraps a track + its arrow so the arrow stays centered under its track */
+  /* Arrow connector (CSS triangle) – default points DOWN */
+  /* ── Reversed (Bottom-Up): arrows point UP, appear above track */
+  /* ── Horizontal direction (Left-Right / Right-Left) ─── */
+  /* ── Horizontal reversed (Right-to-Left): arrows point LEFT, appear before track */
+  /* ── Size modes ──────────────────────────────────────── */
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-level {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-track {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  width: 140px;
+  height: 58px;
+  box-sizing: border-box;
+  text-align: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-node .bc-dupont-label {
+  font-size: 0.7em;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 1px;
+  line-height: 1.15;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-node .bc-dupont-value {
+  font-size: 1.05em;
+  font-weight: 600;
+  color: #333;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-node.bc-dupont-highlight {
+  border-color: #1a73e8;
+  background: #e8f0fe;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-node.bc-dupont-highlight .bc-dupont-value {
+  color: #1a73e8;
+  font-size: 1.15em;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-op {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #888;
+  padding: 0 2px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-track-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bc-financial-report .bc-dupont-graph .bc-dupont-arrow {
+  --arrow-color: #cc0000;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 16px solid var(--arrow-color);
+  border-bottom: none;
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-reversed .bc-dupont-track-col {
+  flex-direction: column-reverse;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-reversed .bc-dupont-arrow {
+  border-top: none;
+  border-bottom: 16px solid var(--arrow-color);
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal {
+  flex-direction: row;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal .bc-dupont-level {
+  flex-direction: column;
+  gap: 12px;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal .bc-dupont-row {
+  flex-direction: column;
+  gap: 4px;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal .bc-dupont-track {
+  flex-direction: column;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal .bc-dupont-track-col {
+  flex-direction: row;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal .bc-dupont-arrow {
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 16px solid var(--arrow-color);
+  border-right: none;
+  margin: 0 6px;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal.bc-dupont-reversed .bc-dupont-track-col {
+  flex-direction: row-reverse;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-horizontal.bc-dupont-reversed .bc-dupont-arrow {
+  border-left: none;
+  border-right: 16px solid var(--arrow-color);
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-center {
+  justify-content: center;
+  min-height: 100%;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-center.bc-dupont-horizontal {
+  justify-content: center;
+  align-items: center;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-stretch {
+  width: 100%;
+  flex: 1 1 0;
+  justify-content: space-evenly;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-stretch.bc-dupont-horizontal {
+  justify-content: space-evenly;
+  align-items: center;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-zoom {
+  transform-origin: top left;
+  width: 100%;
+  min-height: 100%;
+  justify-content: center;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-zoom .bc-dupont-node {
+  width: 170px;
+  height: 70px;
+  padding: 8px 12px;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-zoom .bc-dupont-node .bc-dupont-label {
+  font-size: 0.8em;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-zoom .bc-dupont-node .bc-dupont-value {
+  font-size: 1.3em;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-zoom .bc-dupont-node.bc-dupont-highlight .bc-dupont-value {
+  font-size: 1.5em;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-zoom .bc-dupont-op {
+  font-size: 1.4em;
+}
+.bc-financial-report .bc-dupont-graph.bc-dupont-size-zoom.bc-dupont-horizontal {
+  flex-direction: row;
+}
+
