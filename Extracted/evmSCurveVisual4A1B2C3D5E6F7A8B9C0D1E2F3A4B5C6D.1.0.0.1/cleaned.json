@@ -1,0 +1,2560 @@
+{
+    "visual": {
+        "name": "evmSCurveVisual",
+        "displayName": "EVM S-Curve Visual",
+        "guid": "evmSCurveVisual4A1B2C3D5E6F7A8B9C0D1E2F3A4B5C6D",
+        "visualClassName": "EVMSCurveVisual",
+        "version": "1.0.0.1",
+        "description": "Earned Value Management (EVM) S-Curve visual for construction and project controls. Displays PV, EV, AC cumulative curves and periodic bars with full EVM metrics: CPI, SPI, CV, SV, VAC, TCPI, EAC forecasting, data date line, variance bands, and KPI scorecard panel.",
+        "supportUrl": "mailto:AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Abdalla Dabes, P.E, PSP, PMP",
+        "email": "AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Time Period",
+                "name": "timePeriod",
+                "kind": "Grouping",
+                "description": "Date column or period label for the X-axis. Use a Date column to enable Year/Quarter/Month/Day hierarchy."
+            },
+            {
+                "displayName": "Planned Value (PV)",
+                "name": "plannedValue",
+                "kind": "Measure",
+                "description": "Budgeted Cost of Work Scheduled (BCWS) \u2014 cumulative or periodic"
+            },
+            {
+                "displayName": "Earned Value (EV)",
+                "name": "earnedValue",
+                "kind": "Measure",
+                "description": "Budgeted Cost of Work Performed (BCWP) \u2014 cumulative or periodic"
+            },
+            {
+                "displayName": "Actual Cost (AC)",
+                "name": "actualCost",
+                "kind": "Measure",
+                "description": "Actual Cost of Work Performed (ACWP) \u2014 cumulative or periodic"
+            },
+            {
+                "displayName": "Budget at Completion (BAC)",
+                "name": "budgetAtCompletion",
+                "kind": "Measure",
+                "description": "Total authorized budget for the project or WBS element"
+            },
+            {
+                "displayName": "Estimate at Completion (EAC)",
+                "name": "estimateAtCompletion",
+                "kind": "Measure",
+                "description": "Forecasted total cost at project completion (optional \u2014 auto-calculated if not provided)"
+            },
+            {
+                "displayName": "Estimate to Complete (ETC)",
+                "name": "estimateToComplete",
+                "kind": "Measure",
+                "description": "Remaining cost forecast from data date to completion (optional)"
+            },
+            {
+                "displayName": "Periodic PV",
+                "name": "periodicPV",
+                "kind": "Measure",
+                "description": "Non-cumulative planned value for each period (for bar chart display)"
+            },
+            {
+                "displayName": "Periodic EV",
+                "name": "periodicEV",
+                "kind": "Measure",
+                "description": "Non-cumulative earned value for each period (for bar chart display)"
+            },
+            {
+                "displayName": "Periodic AC",
+                "name": "periodicAC",
+                "kind": "Measure",
+                "description": "Non-cumulative actual cost for each period (for bar chart display)"
+            },
+            {
+                "displayName": "Data Date Field",
+                "name": "dataDateField",
+                "kind": "Measure",
+                "description": "Numeric field marking the data date period (whole or decimal). The last non-null row is treated as the data date."
+            },
+            {
+                "displayName": "Tooltip Fields",
+                "name": "tooltipFields",
+                "kind": "Measure",
+                "description": "Additional fields to show in tooltips"
+            },
+            {
+                "displayName": "Periodic ETC",
+                "name": "periodicETC",
+                "kind": "Measure",
+                "description": "Non-cumulative estimate to complete for each future period (for bar/line display)"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "timePeriod": {
+                            "max": 1
+                        },
+                        "plannedValue": {
+                            "max": 1
+                        },
+                        "earnedValue": {
+                            "max": 1
+                        },
+                        "actualCost": {
+                            "max": 1
+                        },
+                        "budgetAtCompletion": {
+                            "max": 1
+                        },
+                        "estimateAtCompletion": {
+                            "max": 1
+                        },
+                        "estimateToComplete": {
+                            "max": 1
+                        },
+                        "periodicPV": {
+                            "max": 1
+                        },
+                        "periodicEV": {
+                            "max": 1
+                        },
+                        "periodicAC": {
+                            "max": 1
+                        },
+                        "dataDateField": {
+                            "max": 1
+                        },
+                        "periodicETC": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "timePeriod"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 500
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "plannedValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "earnedValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "actualCost"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "budgetAtCompletion"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "estimateAtCompletion"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "estimateToComplete"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "periodicPV"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "periodicEV"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "periodicAC"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "dataDateField"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltipFields"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "periodicETC"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "chartSettings": {
+                "displayName": "Chart Layout",
+                "description": "Overall chart appearance and layout settings",
+                "properties": {
+                    "showTitle": {
+                        "displayName": "Show Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Title Text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Title Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "titleFontColor": {
+                        "displayName": "Title Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleAlignment": {
+                        "displayName": "Title Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Center",
+                                    "value": "center"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "plotAreaColor": {
+                        "displayName": "Plot Area Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showGridLines": {
+                        "displayName": "Show Gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridLineColor": {
+                        "displayName": "Gridline Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridLineStyle": {
+                        "displayName": "Gridline Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "gridLineWidth": {
+                        "displayName": "Gridline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showMinorGridLines": {
+                        "displayName": "Show Minor Gridlines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "chartMode": {
+                        "displayName": "Chart Mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Cumulative Lines Only",
+                                    "value": "cumulative"
+                                },
+                                {
+                                    "displayName": "Periodic Bars Only",
+                                    "value": "periodic"
+                                },
+                                {
+                                    "displayName": "Combined (Bars + Lines)",
+                                    "value": "combined"
+                                }
+                            ]
+                        }
+                    },
+                    "barPosition": {
+                        "displayName": "Bar Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Behind Lines",
+                                    "value": "behind"
+                                },
+                                {
+                                    "displayName": "In Front of Lines",
+                                    "value": "front"
+                                }
+                            ]
+                        }
+                    },
+                    "marginTop": {
+                        "displayName": "Top Margin",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "marginRight": {
+                        "displayName": "Right Margin",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "marginBottom": {
+                        "displayName": "Bottom Margin",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "marginLeft": {
+                        "displayName": "Left Margin",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cornerRadius": {
+                        "displayName": "Panel Corner Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "enableAnimation": {
+                        "displayName": "Enable Draw Animation",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "animationDuration": {
+                        "displayName": "Animation Duration (ms)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "pvSettings": {
+                "displayName": "Planned Value (PV)",
+                "description": "Styling for the PV / BCWS curve",
+                "properties": {
+                    "show": {
+                        "displayName": "Show PV Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayName": "Dash-Dot",
+                                    "value": "dashdot"
+                                }
+                            ]
+                        }
+                    },
+                    "markerShape": {
+                        "displayName": "Marker Shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Circle",
+                                    "value": "circle"
+                                },
+                                {
+                                    "displayName": "Square",
+                                    "value": "square"
+                                },
+                                {
+                                    "displayName": "Diamond",
+                                    "value": "diamond"
+                                },
+                                {
+                                    "displayName": "Triangle",
+                                    "value": "triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "markerSize": {
+                        "displayName": "Marker Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBarChart": {
+                        "displayName": "Show as Periodic Bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "barColor": {
+                        "displayName": "Bar Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "barOpacity": {
+                        "displayName": "Bar Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showDataLabels": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "evSettings": {
+                "displayName": "Earned Value (EV)",
+                "description": "Styling for the EV / BCWP curve",
+                "properties": {
+                    "show": {
+                        "displayName": "Show EV Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayName": "Dash-Dot",
+                                    "value": "dashdot"
+                                }
+                            ]
+                        }
+                    },
+                    "markerShape": {
+                        "displayName": "Marker Shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Circle",
+                                    "value": "circle"
+                                },
+                                {
+                                    "displayName": "Square",
+                                    "value": "square"
+                                },
+                                {
+                                    "displayName": "Diamond",
+                                    "value": "diamond"
+                                },
+                                {
+                                    "displayName": "Triangle",
+                                    "value": "triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "markerSize": {
+                        "displayName": "Marker Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBarChart": {
+                        "displayName": "Show as Periodic Bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "barColor": {
+                        "displayName": "Bar Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "barOpacity": {
+                        "displayName": "Bar Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showDataLabels": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "acSettings": {
+                "displayName": "Actual Cost (AC)",
+                "description": "Styling for the AC / ACWP curve",
+                "properties": {
+                    "show": {
+                        "displayName": "Show AC Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayName": "Dash-Dot",
+                                    "value": "dashdot"
+                                }
+                            ]
+                        }
+                    },
+                    "markerShape": {
+                        "displayName": "Marker Shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Circle",
+                                    "value": "circle"
+                                },
+                                {
+                                    "displayName": "Square",
+                                    "value": "square"
+                                },
+                                {
+                                    "displayName": "Diamond",
+                                    "value": "diamond"
+                                },
+                                {
+                                    "displayName": "Triangle",
+                                    "value": "triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "markerSize": {
+                        "displayName": "Marker Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBarChart": {
+                        "displayName": "Show as Periodic Bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "barColor": {
+                        "displayName": "Bar Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "barOpacity": {
+                        "displayName": "Bar Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showDataLabels": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "eacSettings": {
+                "displayName": "EAC Forecast Line",
+                "properties": {
+                    "show": {
+                        "displayName": "Show EAC Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "source": {
+                        "displayName": "EAC Source",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "From Data Field",
+                                    "value": "field"
+                                },
+                                {
+                                    "displayName": "EAC = BAC / CPI",
+                                    "value": "cpi"
+                                },
+                                {
+                                    "displayName": "EAC = AC + (BAC - EV)",
+                                    "value": "budget"
+                                },
+                                {
+                                    "displayName": "EAC = AC + ETC (field)",
+                                    "value": "etc"
+                                }
+                            ]
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayName": "Dash-Dot",
+                                    "value": "dashdot"
+                                }
+                            ]
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "markerShape": {
+                        "displayName": "Marker Shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Circle",
+                                    "value": "circle"
+                                },
+                                {
+                                    "displayName": "Square",
+                                    "value": "square"
+                                },
+                                {
+                                    "displayName": "Diamond",
+                                    "value": "diamond"
+                                },
+                                {
+                                    "displayName": "Triangle",
+                                    "value": "triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "markerSize": {
+                        "displayName": "Marker Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showMarker": {
+                        "displayName": "Show EAC End Marker",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "markerColor": {
+                        "displayName": "End Marker Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show EAC Label on Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDataLabels": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataLabelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataLabelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "etcSettings": {
+                "displayName": "ETC Line & Bars",
+                "description": "Estimate to Complete line and periodic bar styling",
+                "properties": {
+                    "show": {
+                        "displayName": "Show ETC Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                },
+                                {
+                                    "displayName": "Dash-Dot",
+                                    "value": "dashdot"
+                                }
+                            ]
+                        }
+                    },
+                    "markerShape": {
+                        "displayName": "Marker Shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "None",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Circle",
+                                    "value": "circle"
+                                },
+                                {
+                                    "displayName": "Square",
+                                    "value": "square"
+                                },
+                                {
+                                    "displayName": "Diamond",
+                                    "value": "diamond"
+                                },
+                                {
+                                    "displayName": "Triangle",
+                                    "value": "triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "markerSize": {
+                        "displayName": "Marker Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBarChart": {
+                        "displayName": "Show as Periodic Bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "barColor": {
+                        "displayName": "Bar Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "barOpacity": {
+                        "displayName": "Bar Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "barWidth": {
+                        "displayName": "Bar Width (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showDataLabels": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataLabelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataLabelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "vacSettings": {
+                "displayName": "VAC Display",
+                "description": "Variance at Completion display on chart",
+                "properties": {
+                    "show": {
+                        "displayName": "Show VAC on Chart",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayMode": {
+                        "displayName": "Display Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Bracket (BAC \u2194 EAC)",
+                                    "value": "bracket"
+                                },
+                                {
+                                    "displayName": "Floating Label",
+                                    "value": "label"
+                                },
+                                {
+                                    "displayName": "Badge",
+                                    "value": "badge"
+                                }
+                            ]
+                        }
+                    },
+                    "colorPositive": {
+                        "displayName": "Color \u2014 Positive VAC (Under Budget)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorNegative": {
+                        "displayName": "Color \u2014 Negative VAC (Over Budget)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "xOffset": {
+                        "displayName": "Horizontal Offset (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "bacSettings": {
+                "displayName": "BAC Reference Line",
+                "description": "Budget at Completion horizontal reference line",
+                "properties": {
+                    "show": {
+                        "displayName": "Show BAC Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show BAC Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "dataDateSettings": {
+                "displayName": "Data Date Line",
+                "description": "Vertical line marking the reporting cut-off date",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Data Date Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataDate": {
+                        "displayName": "Data Date",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "showLabel": {
+                        "displayName": "Show Label",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelText": {
+                        "displayName": "Label Text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelPosition": {
+                        "displayName": "Label Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom"
+                                }
+                            ]
+                        }
+                    },
+                    "showShading": {
+                        "displayName": "Shade Past-Date Region",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "shadingColor": {
+                        "displayName": "Shading Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shadingOpacity": {
+                        "displayName": "Shading Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "kpiPanel": {
+                "displayName": "KPI Summary Panel",
+                "description": "Configure the KPI scorecard displayed on the visual",
+                "properties": {
+                    "show": {
+                        "displayName": "Show KPI Panel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "kpiButtonShow": {
+                        "displayName": "Show Toggle Button in Visual",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "kpiButtonLabel": {
+                        "displayName": "Button Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "panelMode": {
+                        "displayName": "Panel Mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Overlay (inside plot)",
+                                    "value": "overlay"
+                                },
+                                {
+                                    "displayName": "Sidebar (outside plot, right)",
+                                    "value": "sidebar"
+                                }
+                            ]
+                        }
+                    },
+                    "panelWidth": {
+                        "displayName": "Panel Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Panel Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top Right",
+                                    "value": "topRight"
+                                },
+                                {
+                                    "displayName": "Top Left",
+                                    "value": "topLeft"
+                                },
+                                {
+                                    "displayName": "Bottom Right",
+                                    "value": "bottomRight"
+                                },
+                                {
+                                    "displayName": "Bottom Left",
+                                    "value": "bottomLeft"
+                                }
+                            ]
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Panel Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundOpacity": {
+                        "displayName": "Panel Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Panel Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "displayName": "Panel Border Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderRadius": {
+                        "displayName": "Panel Corner Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "valueFontSize": {
+                        "displayName": "Value Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showCPI": {
+                        "displayName": "Show CPI",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSPI": {
+                        "displayName": "Show SPI",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCV": {
+                        "displayName": "Show CV (Cost Variance)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSV": {
+                        "displayName": "Show SV (Schedule Variance)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showVAC": {
+                        "displayName": "Show VAC (Variance at Completion)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTCPI": {
+                        "displayName": "Show TCPI",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPercentComplete": {
+                        "displayName": "Show % Complete",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showEAC": {
+                        "displayName": "Show EAC Value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showBAC": {
+                        "displayName": "Show BAC Value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "thresholdGood": {
+                        "displayName": "Green Threshold (CPI/SPI >=)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "thresholdWarning": {
+                        "displayName": "Amber Threshold (CPI/SPI >=)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "colorGood": {
+                        "displayName": "Good Color (Green)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorWarning": {
+                        "displayName": "Warning Color (Amber)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorBad": {
+                        "displayName": "Bad Color (Red)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showTrendArrows": {
+                        "displayName": "Show Trend Arrows",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "varianceBands": {
+                "displayName": "Variance Bands",
+                "description": "Shaded areas between curves showing cost and schedule variance",
+                "properties": {
+                    "showCVBand": {
+                        "displayName": "Show Cost Variance Band (EV vs AC)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cvBandOverColor": {
+                        "displayName": "CV Band \u2014 Over Budget Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cvBandUnderColor": {
+                        "displayName": "CV Band \u2014 Under Budget Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cvBandOpacity": {
+                        "displayName": "CV Band Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showSVBand": {
+                        "displayName": "Show Schedule Variance Band (PV vs EV)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "svBandAheadColor": {
+                        "displayName": "SV Band \u2014 Ahead of Schedule Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "svBandBehindColor": {
+                        "displayName": "SV Band \u2014 Behind Schedule Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "svBandOpacity": {
+                        "displayName": "SV Band Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "displayName": "X Axis (Time)",
+                "properties": {
+                    "show": {
+                        "displayName": "Show X Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelRotation": {
+                        "displayName": "Label Rotation (degrees)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelMaxWidth": {
+                        "displayName": "Max Label Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisLineColor": {
+                        "displayName": "Axis Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "axisLineWidth": {
+                        "displayName": "Axis Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Axis Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Title Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTickMarks": {
+                        "displayName": "Show Tick Marks",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Y Axis (Value)",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Y Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisLineColor": {
+                        "displayName": "Axis Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "axisLineWidth": {
+                        "displayName": "Axis Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Axis Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Title Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minValue": {
+                        "displayName": "Min Value (blank = auto)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxValue": {
+                        "displayName": "Max Value (blank = auto)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "numberFormat": {
+                        "displayName": "Number Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "None (raw)",
+                                    "value": "none"
+                                },
+                                {
+                                    "displayName": "Thousands (K)",
+                                    "value": "K"
+                                },
+                                {
+                                    "displayName": "Millions (M)",
+                                    "value": "M"
+                                },
+                                {
+                                    "displayName": "Billions (B)",
+                                    "value": "B"
+                                },
+                                {
+                                    "displayName": "Currency",
+                                    "value": "currency"
+                                }
+                            ]
+                        }
+                    },
+                    "currencySymbol": {
+                        "displayName": "Currency Symbol",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTickMarks": {
+                        "displayName": "Show Tick Marks",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "yAxis2": {
+                "displayName": "Y Axis 2 (Index)",
+                "description": "Secondary axis for SPI/CPI index lines",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Secondary Y Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisLineColor": {
+                        "displayName": "Axis Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Axis Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "yAxis3": {
+                "displayName": "Y Axis 3 (Lines)",
+                "description": "Right-side axis for cumulative PV/EV/AC lines",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Lines Y Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisLineColor": {
+                        "displayName": "Axis Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Axis Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minValue": {
+                        "displayName": "Min Value (0 = auto)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxValue": {
+                        "displayName": "Max Value (0 = auto)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "cpiLine": {
+                "displayName": "CPI Trend Line",
+                "description": "Cost Performance Index plotted on secondary axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show CPI Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "showThresholdLine": {
+                        "displayName": "Show CPI = 1.0 Reference",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "thresholdLineColor": {
+                        "displayName": "Threshold Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "spiLine": {
+                "displayName": "SPI Trend Line",
+                "description": "Schedule Performance Index plotted on secondary axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show SPI Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "showThresholdLine": {
+                        "displayName": "Show SPI = 1.0 Reference",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "thresholdLineColor": {
+                        "displayName": "Threshold Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayName": {
+                        "displayName": "Legend Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                },
+                                {
+                                    "displayName": "Top Left",
+                                    "value": "topLeft"
+                                },
+                                {
+                                    "displayName": "Top Right",
+                                    "value": "topRight"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontBold": {
+                        "displayName": "Bold Text",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundOpacity": {
+                        "displayName": "Background Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "iconSize": {
+                        "displayName": "Icon Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBorder": {
+                        "displayName": "Show Legend Border",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "displayName": "Tooltips",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Tooltips",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showEVMMetrics": {
+                        "displayName": "Show EVM Metrics in Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderRadius": {
+                        "displayName": "Corner Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data Labels",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "format": {
+                        "displayName": "Number Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Thousands (K)",
+                                    "value": "K"
+                                },
+                                {
+                                    "displayName": "Millions (M)",
+                                    "value": "M"
+                                },
+                                {
+                                    "displayName": "Billions (B)",
+                                    "value": "B"
+                                }
+                            ]
+                        }
+                    },
+                    "showBackground": {
+                        "displayName": "Label Background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Label Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelPosition": {
+                        "displayName": "Label Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Above",
+                                    "value": "above"
+                                },
+                                {
+                                    "displayName": "Below",
+                                    "value": "below"
+                                },
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "annotations": {
+                "displayName": "Annotations",
+                "description": "Variance callouts and milestone markers",
+                "properties": {
+                    "showMilestones": {
+                        "displayName": "Show Milestone Markers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneColor": {
+                        "displayName": "Milestone Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "milestoneSize": {
+                        "displayName": "Milestone Symbol Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showVarianceCallouts": {
+                        "displayName": "Show Variance Callouts at Data Date",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "calloutFontSize": {
+                        "displayName": "Callout Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "calloutPositiveColor": {
+                        "displayName": "Callout Positive Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "calloutNegativeColor": {
+                        "displayName": "Callout Negative Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "interactivity": {
+                "displayName": "Interactivity",
+                "properties": {
+                    "enableCrosshair": {
+                        "displayName": "Enable Crosshair",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "crosshairColor": {
+                        "displayName": "Crosshair Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "crosshairWidth": {
+                        "displayName": "Crosshair Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "crosshairStyle": {
+                        "displayName": "Crosshair Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Dashed",
+                                    "value": "dashed"
+                                },
+                                {
+                                    "displayName": "Solid",
+                                    "value": "solid"
+                                },
+                                {
+                                    "displayName": "Dotted",
+                                    "value": "dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "enableZoom": {
+                        "displayName": "Enable Scroll Zoom",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enablePan": {
+                        "displayName": "Enable Pan",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "highlightHoveredSeries": {
+                        "displayName": "Highlight Hovered Series",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dimUnhoveredOpacity": {
+                        "displayName": "Dimmed Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "tooltips": {
+            "roles": [
+                "tooltipFields"
+            ]
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

@@ -1,0 +1,3475 @@
+{
+    "visual": {
+        "name": "BFVZPowerGantt",
+        "displayName": "BFVZ PowerGantt v5.7",
+        "guid": "BFVZPowerGantt",
+        "visualClassName": "Visual",
+        "version": "5.7.10.0",
+        "description": "Professional schedule visualization with typed dependencies (FS/SS/FF/SF with lag), critical path detection with longest-path fallback, program-level critical path across all projects, phase grouping, 2-level hierarchy (Project \u2192 Phase \u2192 Tasks), light/dark theme, synchronized dual-panel layout, adaptive time scaling, fiscal year labeling with configurable FY start month, near-critical path highlighting with total float, reference lines and bands, data grid columns, conditional RAG formatting with rules engine, hybrid progress, baseline variance shading with drift ribbons, configurable look-ahead schedule filter with days/weeks/months units, multi-utility dependency color coding with user-defined discipline slots, special milestone markers with aging alerts, custom milestone shapes (Diamond/Triangle/Circle/Star/Flag), cross-project resource conflict detection, program health metrics in summary tooltips, weekend and holiday non-working period shading, resource management, self-service filterable data roles (Company, Owner PM, Owner Controller, Contractor PM), and fully customizable theming. Supports datasets up to 30,000 rows.",
+        "supportUrl": "https://bfvztech.com/support.html",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Tristan Weir",
+        "email": "tweir@gmail.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Project Name",
+                "name": "projectName",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Phase",
+                "name": "phase",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Task Name",
+                "name": "taskName",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Task ID",
+                "name": "taskId",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Milestone Type",
+                "name": "milestoneType",
+                "kind": "Grouping",
+                "description": "Optional. Values: 'permit', 'regulatory', 'inspection', 'handoff', or blank for standard. Permit milestones render as shield icons with aging alerts."
+            },
+            {
+                "displayName": "Predecessors",
+                "name": "predecessors",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Start Date",
+                "name": "startDate",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Finish Date",
+                "name": "finishDate",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Planned Start Date",
+                "name": "plannedStartDate",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Planned End Date",
+                "name": "plannedEndDate",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Progress",
+                "name": "progress",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Progress Baseline",
+                "name": "progressBaseline",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Data Label",
+                "name": "dataLabel",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Resource Name",
+                "name": "resourceName",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Resource Discipline",
+                "name": "resourceDiscipline",
+                "kind": "Grouping",
+                "description": "Optional. Trade discipline for dependency color coding (e.g., Electrical, Mechanical, Telecom, Fire/LS, Civil). Dependencies inherit color from successor task discipline."
+            },
+            {
+                "displayName": "Budgeted Work (Hours)",
+                "name": "budgetedWork",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Actual Work (Hours)",
+                "name": "actualWork",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Resource Capacity (Hours/Day)",
+                "name": "resourceCapacity",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Reference Line Date",
+                "name": "refLineDate",
+                "kind": "Grouping",
+                "description": "Date column for dynamic reference lines. Unique non-null values create vertical markers."
+            },
+            {
+                "displayName": "Reference Line Label",
+                "name": "refLineLabel",
+                "kind": "Grouping",
+                "description": "Label column for dynamic reference lines."
+            },
+            {
+                "displayName": "Reference Band Start",
+                "name": "refBandStart",
+                "kind": "Grouping",
+                "description": "Start date column for dynamic reference bands (shaded ranges)."
+            },
+            {
+                "displayName": "Reference Band End",
+                "name": "refBandEnd",
+                "kind": "Grouping",
+                "description": "End date column for dynamic reference bands."
+            },
+            {
+                "displayName": "Reference Band Label",
+                "name": "refBandLabel",
+                "kind": "Grouping",
+                "description": "Label column for dynamic reference bands."
+            },
+            {
+                "displayName": "Grid Column 1",
+                "name": "gridColumn1",
+                "kind": "Grouping",
+                "description": "Custom data column displayed in the left-panel data grid."
+            },
+            {
+                "displayName": "Grid Column 2",
+                "name": "gridColumn2",
+                "kind": "Grouping",
+                "description": "Custom data column displayed in the left-panel data grid."
+            },
+            {
+                "displayName": "Company",
+                "name": "company",
+                "kind": "Grouping",
+                "description": "Responsible company or organization for each task. Use as a slicer to filter by contractor."
+            },
+            {
+                "displayName": "Owner Project Manager",
+                "name": "ownerProjectManager",
+                "kind": "Grouping",
+                "description": "Owner-side project manager assigned to this task. Use as a slicer to filter by owner PM."
+            },
+            {
+                "displayName": "Owner Controller",
+                "name": "ownerController",
+                "kind": "Grouping",
+                "description": "Owner-side project controller assigned to this task. Use as a slicer to filter by controller."
+            },
+            {
+                "displayName": "Contractor Project Manager",
+                "name": "contractorProjectManager",
+                "kind": "Grouping",
+                "description": "Contractor-side project manager for each task. Use as a slicer to filter by contractor PM."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "projectName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "phase"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "taskName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "taskId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "milestoneType"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "predecessors"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "startDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "finishDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "plannedStartDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "plannedEndDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "progress"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "progressBaseline"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dataLabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "resourceName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "resourceDiscipline"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "budgetedWork"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "actualWork"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "resourceCapacity"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "refLineDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "refLineLabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "refBandStart"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "refBandEnd"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "refBandLabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "gridColumn1"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "gridColumn2"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "company"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ownerProjectManager"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ownerController"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "contractorProjectManager"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "theme": {
+                "displayName": "\ud83c\udfa8 Theme & Colors",
+                "properties": {
+                    "themeMode": {
+                        "displayName": "Theme",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "\ud83c\udf19 Dark",
+                                    "value": "Dark"
+                                },
+                                {
+                                    "displayName": "\u2600\ufe0f Light",
+                                    "value": "Light"
+                                }
+                            ]
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundOpacity": {
+                        "displayName": "Background Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "headerBackground": {
+                        "displayName": "Header Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "headerBgOpacity": {
+                        "displayName": "Header Background Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelBackground": {
+                        "displayName": "Label Panel Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBgOpacity": {
+                        "displayName": "Label Panel Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Primary Text",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textOpacity": {
+                        "displayName": "Primary Text Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textMutedColor": {
+                        "displayName": "Secondary Text",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textMutedOpacity": {
+                        "displayName": "Secondary Text Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderOpacity": {
+                        "displayName": "Border Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "projectRowColor": {
+                        "displayName": "Project Row Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "projectRowOpacity": {
+                        "displayName": "Project Row Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "phaseRowColor": {
+                        "displayName": "Phase Row Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "phaseRowOpacity": {
+                        "displayName": "Phase Row Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rowAlternateColor": {
+                        "displayName": "Alternate Row Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowAlternateOpacity": {
+                        "displayName": "Alternate Row Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "fontConfig": {
+                "displayName": "\ud83d\udd24 Typography",
+                "properties": {
+                    "headerFontSize": {
+                        "displayName": "Header Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Task Name Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisFontSize": {
+                        "displayName": "Timeline Axis Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "scheduleConfig": {
+                "displayName": "\u2699\ufe0f Schedule Settings",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "progressMode": {
+                        "displayName": "Progress Mode",
+                        "description": "Manual: use Progress field. Hybrid: use Progress if >0, else auto-calc from Data Date. DataDate: always auto-calc. None: hide progress.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "progressDisplay": {
+                        "displayName": "Progress Bar Style",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowHeight": {
+                        "displayName": "Row Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "barHeightPct": {
+                        "displayName": "Actual Bar Height %",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baselineHeightPct": {
+                        "displayName": "Baseline Bar Height %",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "headerHeight": {
+                        "displayName": "Header Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "barSpacing": {
+                        "displayName": "Bar Spacing",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dateFormat": {
+                        "displayName": "Date Format",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showBaseline": {
+                        "displayName": "Show Baseline Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showVariance": {
+                        "displayName": "Show Variance (vs Baseline)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "displayTotals": {
+                        "displayName": "Display Totals Row",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideBlanks": {
+                        "displayName": "Hide Blank Dates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideParentBar": {
+                        "displayName": "Hide Parent/Summary Bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideParentOnCollapse": {
+                        "displayName": "Hide Parent Row When Collapsed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDataDate": {
+                        "displayName": "Show Data Date Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDependencies": {
+                        "displayName": "Show Dependency Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCriticalPath": {
+                        "displayName": "Highlight Critical Path",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLagLabels": {
+                        "displayName": "Show Lead/Lag Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dataDateValue": {
+                        "displayName": "Data Date (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "labelColumnWidth": {
+                        "displayName": "Label Column Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Header Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDetails": {
+                        "displayName": "Show Task Details in Panel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "detailFontSize": {
+                        "displayName": "Detail Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "gridConfig": {
+                "displayName": "\ud83d\udcca Data Grid (Left Panel)",
+                "description": "Transform the left panel into a configurable multi-column data grid. Enable columns for Duration, Dates, Progress, Float, Resources, and custom data fields.",
+                "properties": {
+                    "gridShow": {
+                        "displayName": "Enable Data Grid",
+                        "description": "Transform left panel from simple labels into a multi-column data grid.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridHeaderH": {
+                        "displayName": "Column Header Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gridHeaderBg": {
+                        "displayName": "Header Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridHeaderColor": {
+                        "displayName": "Header Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridHeaderFS": {
+                        "displayName": "Header Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gridCellFS": {
+                        "displayName": "Cell Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gridShowLines": {
+                        "displayName": "Show Column Dividers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_name_show": {
+                        "displayName": "\u2500 Task Name \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_name_w": {
+                        "displayName": "Task Name Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_name_label": {
+                        "displayName": "Task Name Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_name_align": {
+                        "displayName": "Task Name Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_dur_show": {
+                        "displayName": "\u2500 Duration \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_dur_w": {
+                        "displayName": "Duration Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_dur_label": {
+                        "displayName": "Duration Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_dur_align": {
+                        "displayName": "Duration Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_start_show": {
+                        "displayName": "\u2500 Start Date \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_start_w": {
+                        "displayName": "Start Date Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_start_label": {
+                        "displayName": "Start Date Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_start_align": {
+                        "displayName": "Start Date Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_finish_show": {
+                        "displayName": "\u2500 Finish Date \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_finish_w": {
+                        "displayName": "Finish Date Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_finish_label": {
+                        "displayName": "Finish Date Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_finish_align": {
+                        "displayName": "Finish Date Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_pct_show": {
+                        "displayName": "\u2500 % Complete \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_pct_w": {
+                        "displayName": "% Complete Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_pct_label": {
+                        "displayName": "% Complete Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_pct_align": {
+                        "displayName": "% Complete Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_float_show": {
+                        "displayName": "\u2500 Float \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_float_w": {
+                        "displayName": "Float Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_float_label": {
+                        "displayName": "Float Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_float_align": {
+                        "displayName": "Float Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_res_show": {
+                        "displayName": "\u2500 Resource \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_res_w": {
+                        "displayName": "Resource Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_res_label": {
+                        "displayName": "Resource Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_res_align": {
+                        "displayName": "Resource Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_gc1_show": {
+                        "displayName": "\u2500 Custom 1 \u2014 Show",
+                        "description": "Drag a column into the 'Grid Column 1' data role to populate.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_gc1_w": {
+                        "displayName": "Custom 1 Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_gc1_label": {
+                        "displayName": "Custom 1 Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_gc1_align": {
+                        "displayName": "Custom 1 Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "gc_gc2_show": {
+                        "displayName": "\u2500 Custom 2 \u2014 Show",
+                        "description": "Drag a column into the 'Grid Column 2' data role to populate.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gc_gc2_w": {
+                        "displayName": "Custom 2 Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gc_gc2_label": {
+                        "displayName": "Custom 2 Header",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gc_gc2_align": {
+                        "displayName": "Custom 2 Align",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "conditionalFormat": {
+                "displayName": "\ud83d\udea6 Conditional Formatting (RAG)",
+                "properties": {
+                    "ragShow": {
+                        "displayName": "Enable RAG Formatting",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ragApplyBars": {
+                        "displayName": "Apply to Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ragApplyDots": {
+                        "displayName": "Show Status Dots",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ragDotSize": {
+                        "displayName": "Dot Size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "ragDotPos": {
+                        "displayName": "Dot Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Left of Name",
+                                    "value": "Left"
+                                },
+                                {
+                                    "displayName": "Right of Name",
+                                    "value": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "r1Field": {
+                        "displayName": "Rule 1 \u2014 Field",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Total Float",
+                                    "value": "Float"
+                                },
+                                {
+                                    "displayName": "% Complete",
+                                    "value": "PctComplete"
+                                },
+                                {
+                                    "displayName": "Schedule Variance",
+                                    "value": "SchedVariance"
+                                }
+                            ]
+                        }
+                    },
+                    "r1Op": {
+                        "displayName": "Rule 1 \u2014 Operator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "> Greater Than",
+                                    "value": "gt"
+                                },
+                                {
+                                    "displayName": "< Less Than",
+                                    "value": "lt"
+                                },
+                                {
+                                    "displayName": "= Equals",
+                                    "value": "eq"
+                                },
+                                {
+                                    "displayName": "\u2265 Greater or Equal",
+                                    "value": "gte"
+                                },
+                                {
+                                    "displayName": "\u2264 Less or Equal",
+                                    "value": "lte"
+                                },
+                                {
+                                    "displayName": "Between",
+                                    "value": "between"
+                                }
+                            ]
+                        }
+                    },
+                    "r1Val": {
+                        "displayName": "Rule 1 \u2014 Threshold",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "r1Val2": {
+                        "displayName": "Rule 1 \u2014 Upper Bound (Between)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "r1Color": {
+                        "displayName": "Rule 1 \u2014 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "r2Field": {
+                        "displayName": "Rule 2 \u2014 Field",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Total Float",
+                                    "value": "Float"
+                                },
+                                {
+                                    "displayName": "% Complete",
+                                    "value": "PctComplete"
+                                },
+                                {
+                                    "displayName": "Schedule Variance",
+                                    "value": "SchedVariance"
+                                }
+                            ]
+                        }
+                    },
+                    "r2Op": {
+                        "displayName": "Rule 2 \u2014 Operator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "> Greater Than",
+                                    "value": "gt"
+                                },
+                                {
+                                    "displayName": "< Less Than",
+                                    "value": "lt"
+                                },
+                                {
+                                    "displayName": "= Equals",
+                                    "value": "eq"
+                                },
+                                {
+                                    "displayName": "\u2265 Greater or Equal",
+                                    "value": "gte"
+                                },
+                                {
+                                    "displayName": "\u2264 Less or Equal",
+                                    "value": "lte"
+                                },
+                                {
+                                    "displayName": "Between",
+                                    "value": "between"
+                                }
+                            ]
+                        }
+                    },
+                    "r2Val": {
+                        "displayName": "Rule 2 \u2014 Threshold",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "r2Val2": {
+                        "displayName": "Rule 2 \u2014 Upper Bound (Between)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "r2Color": {
+                        "displayName": "Rule 2 \u2014 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "r3Field": {
+                        "displayName": "Rule 3 \u2014 Field",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Total Float",
+                                    "value": "Float"
+                                },
+                                {
+                                    "displayName": "% Complete",
+                                    "value": "PctComplete"
+                                },
+                                {
+                                    "displayName": "Schedule Variance",
+                                    "value": "SchedVariance"
+                                }
+                            ]
+                        }
+                    },
+                    "r3Op": {
+                        "displayName": "Rule 3 \u2014 Operator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "> Greater Than",
+                                    "value": "gt"
+                                },
+                                {
+                                    "displayName": "< Less Than",
+                                    "value": "lt"
+                                },
+                                {
+                                    "displayName": "= Equals",
+                                    "value": "eq"
+                                },
+                                {
+                                    "displayName": "\u2265 Greater or Equal",
+                                    "value": "gte"
+                                },
+                                {
+                                    "displayName": "\u2264 Less or Equal",
+                                    "value": "lte"
+                                },
+                                {
+                                    "displayName": "Between",
+                                    "value": "between"
+                                }
+                            ]
+                        }
+                    },
+                    "r3Val": {
+                        "displayName": "Rule 3 \u2014 Threshold",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "r3Val2": {
+                        "displayName": "Rule 3 \u2014 Upper Bound (Between)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "r3Color": {
+                        "displayName": "Rule 3 \u2014 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "varianceConfig": {
+                "displayName": "\ud83d\udcd0 Baseline Variance Shading",
+                "description": "Semi-transparent ribbon between baseline and actual bars showing schedule drift. Green when ahead/on-plan, red when behind baseline.",
+                "properties": {
+                    "varShow": {
+                        "displayName": "Show Variance Ribbon",
+                        "description": "Display shaded polygon connecting baseline bar edges to actual bar edges.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "varAheadColor": {
+                        "displayName": "Ahead/On-Plan Color",
+                        "description": "Ribbon color when actual is ahead of or equal to baseline.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "varAheadOp": {
+                        "displayName": "Ahead Opacity",
+                        "description": "Opacity of the ahead/on-plan ribbon (0-100).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "varBehindColor": {
+                        "displayName": "Behind Color",
+                        "description": "Ribbon color when actual is behind baseline.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "varBehindOp": {
+                        "displayName": "Behind Opacity",
+                        "description": "Opacity of the behind-baseline ribbon (0-100).",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "permitConfig": {
+                "displayName": "\u2b50 Special Milestones",
+                "description": "Special rendering for user-flagged milestone markers. Milestones matching the Special Type value display as shield icons with aging alerts when overdue. Set milestoneType in your dataset to any value (e.g. 'permit', 'inspection', 'hold').",
+                "properties": {
+                    "permitShow": {
+                        "displayName": "Enable Special Markers",
+                        "description": "Render milestones whose milestoneType matches the Special Type value as shield icons with aging behavior.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "specialType": {
+                        "displayName": "Special Type",
+                        "description": "Value to match in the milestoneType data field. Case-insensitive. Default: 'permit'. Change to match your dataset (e.g. 'inspection', 'hold', 'regulatory').",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "permitShieldColor": {
+                        "displayName": "Shield Color",
+                        "description": "Base fill/outline color for special milestone shield icon.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "permitAmberDays": {
+                        "displayName": "Amber Threshold (days)",
+                        "description": "Days overdue before special milestone pulses amber. Default: 15.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "permitRedDays": {
+                        "displayName": "Red Threshold (days)",
+                        "description": "Days overdue before special milestone pulses red. Default: 30.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "permitAmberColor": {
+                        "displayName": "Amber Alert Color",
+                        "description": "Pulse color for special milestones overdue beyond amber threshold.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "permitRedColor": {
+                        "displayName": "Red Alert Color",
+                        "description": "Pulse color for special milestones overdue beyond red threshold.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "permitPulseSpeed": {
+                        "displayName": "Pulse Speed (seconds)",
+                        "description": "Animation cycle duration for aging pulse effect.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "disciplineColors": {
+                "displayName": "\ud83d\udd17 Discipline Dep Colors",
+                "description": "Color-code dependency arrows by the successor task's resource discipline. Define up to 8 discipline names to match values in the Resource Discipline data role. Critical path deps always override.",
+                "properties": {
+                    "discShow": {
+                        "displayName": "Enable Discipline Colors",
+                        "description": "Color dependency arrows based on the successor task's resource discipline.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "disc0Name": {
+                        "displayName": "Discipline 1 Name",
+                        "description": "Discipline name to match against Resource Discipline values (e.g. Electrical, HVAC, Networking).",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc0Color": {
+                        "displayName": "Discipline 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "disc1Name": {
+                        "displayName": "Discipline 2 Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc1Color": {
+                        "displayName": "Discipline 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "disc2Name": {
+                        "displayName": "Discipline 3 Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc2Color": {
+                        "displayName": "Discipline 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "disc3Name": {
+                        "displayName": "Discipline 4 Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc3Color": {
+                        "displayName": "Discipline 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "disc4Name": {
+                        "displayName": "Discipline 5 Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc4Color": {
+                        "displayName": "Discipline 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "disc5Name": {
+                        "displayName": "Discipline 6 Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc5Color": {
+                        "displayName": "Discipline 6 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "disc6Name": {
+                        "displayName": "Discipline 7 Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc6Color": {
+                        "displayName": "Discipline 7 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "disc7Name": {
+                        "displayName": "Discipline 8 Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "disc7Color": {
+                        "displayName": "Discipline 8 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "discFallback": {
+                        "displayName": "Fallback / Other",
+                        "description": "Color for disciplines not matching any of the 8 slots above. Leave blank to use default dep color.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "calendarConfig": {
+                "displayName": "\ud83d\udcc5 Calendar",
+                "description": "Fiscal year labeling, weekend shading, and holiday non-working periods.",
+                "properties": {
+                    "fyStart": {
+                        "displayName": "Fiscal Year Start Month",
+                        "description": "Month number (1\u201312) that begins the fiscal year. 1 = Calendar Year (Jan), 10 = US Federal FY (Oct), 4 = UK/India FY (Apr).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "calShowWeekends": {
+                        "displayName": "Show Weekend Shading",
+                        "description": "Shade Saturday/Sunday with a subtle background band at Month and Week zoom levels.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "calWeekendColor": {
+                        "displayName": "Weekend Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "calWeekendOp": {
+                        "displayName": "Weekend Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "calHolidays": {
+                        "displayName": "Holiday Dates",
+                        "description": "Comma-separated non-working dates (YYYY-MM-DD). Example: 2025-01-01,2025-07-04,2025-12-25",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "calHolidayColor": {
+                        "displayName": "Holiday Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "calHolidayOp": {
+                        "displayName": "Holiday Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "lookAheadConfig": {
+                "displayName": "\ud83d\udd2d Look-Ahead Window",
+                "description": "Configure 3 quick-access look-ahead buttons with customizable durations. Days (D), Weeks (W), or Months (M). Construction PMs use 2-week and 6-week look-ahead windows daily.",
+                "properties": {
+                    "laActive": {
+                        "displayName": "Active Window",
+                        "description": "Which button is active. 1/2/3 = slot, All = no filter. Typically set via the floating overlay buttons.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "All (No Filter)",
+                                    "value": "All"
+                                },
+                                {
+                                    "displayName": "Button 1",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "Button 2",
+                                    "value": "2"
+                                },
+                                {
+                                    "displayName": "Button 3",
+                                    "value": "3"
+                                }
+                            ]
+                        }
+                    },
+                    "laDimOp": {
+                        "displayName": "Dimmed Task Opacity",
+                        "description": "Opacity for tasks outside the look-ahead window (0\u2013100). Lower = more dimmed.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "laV1": {
+                        "displayName": "Button 1 \u2014 Value",
+                        "description": "Duration value for the first look-ahead button. Default: 2.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "laU1": {
+                        "displayName": "Button 1 \u2014 Unit",
+                        "description": "D = Days, W = Weeks, M = Months.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Days",
+                                    "value": "D"
+                                },
+                                {
+                                    "displayName": "Weeks",
+                                    "value": "W"
+                                },
+                                {
+                                    "displayName": "Months",
+                                    "value": "M"
+                                }
+                            ]
+                        }
+                    },
+                    "laV2": {
+                        "displayName": "Button 2 \u2014 Value",
+                        "description": "Duration value for the second look-ahead button. Default: 4.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "laU2": {
+                        "displayName": "Button 2 \u2014 Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Days",
+                                    "value": "D"
+                                },
+                                {
+                                    "displayName": "Weeks",
+                                    "value": "W"
+                                },
+                                {
+                                    "displayName": "Months",
+                                    "value": "M"
+                                }
+                            ]
+                        }
+                    },
+                    "laV3": {
+                        "displayName": "Button 3 \u2014 Value",
+                        "description": "Duration value for the third look-ahead button. Default: 6.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "laU3": {
+                        "displayName": "Button 3 \u2014 Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Days",
+                                    "value": "D"
+                                },
+                                {
+                                    "displayName": "Weeks",
+                                    "value": "W"
+                                },
+                                {
+                                    "displayName": "Months",
+                                    "value": "M"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "barActive": {
+                "displayName": "\u25ac Bars \u2014 Active",
+                "properties": {
+                    "actFill": {
+                        "displayName": "Active Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "actFillOp": {
+                        "displayName": "Active Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "actOutline": {
+                        "displayName": "Active Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "actOutlineOp": {
+                        "displayName": "Active Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "actOutlineW": {
+                        "displayName": "Active Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "remFill": {
+                        "displayName": "Remaining Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "remFillOp": {
+                        "displayName": "Remaining Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "remOutline": {
+                        "displayName": "Remaining Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "remOutlineOp": {
+                        "displayName": "Remaining Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "remOutlineW": {
+                        "displayName": "Remaining Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "progFill": {
+                        "displayName": "Progress Overlay Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "progFillOp": {
+                        "displayName": "Progress Overlay Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "barBaseline": {
+                "displayName": "\u25ac Bars \u2014 Baseline & Completed",
+                "properties": {
+                    "baseFill": {
+                        "displayName": "Baseline Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "baseFillOp": {
+                        "displayName": "Baseline Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baseOutline": {
+                        "displayName": "Baseline Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "baseOutlineOp": {
+                        "displayName": "Baseline Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baseOutlineW": {
+                        "displayName": "Baseline Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "doneFill": {
+                        "displayName": "Completed Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "doneFillOp": {
+                        "displayName": "Completed Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "doneOutline": {
+                        "displayName": "Completed Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "doneOutlineOp": {
+                        "displayName": "Completed Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "doneOutlineW": {
+                        "displayName": "Completed Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "barStatus": {
+                "displayName": "\u25ac Bars \u2014 Status Alerts",
+                "properties": {
+                    "lateFill": {
+                        "displayName": "Behind Schedule Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lateFillOp": {
+                        "displayName": "Behind Schedule Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lateOutline": {
+                        "displayName": "Behind Schedule Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lateOutlineOp": {
+                        "displayName": "Behind Schedule Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lateOverlayOp": {
+                        "displayName": "Variance Highlight Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "critFill": {
+                        "displayName": "Critical Path Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "critFillOp": {
+                        "displayName": "Critical Path Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "critOutline": {
+                        "displayName": "Critical Path Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "critOutlineOp": {
+                        "displayName": "Critical Path Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "critOutlineW": {
+                        "displayName": "Critical Path Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "critLabelColor": {
+                        "displayName": "Critical Path Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "critLabelOp": {
+                        "displayName": "Critical Path Label Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "nearCritConfig": {
+                "displayName": "\u25ac Bars \u2014 Near-Critical Path",
+                "description": "Styling for tasks with total float between 1 day and the configured threshold. These tasks are at risk of becoming critical.",
+                "properties": {
+                    "nearCritThreshold": {
+                        "displayName": "Float Threshold (days)",
+                        "description": "Tasks with total float between 1 and this value are highlighted as near-critical. Default: 10 days.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nearCritFill": {
+                        "displayName": "Bar Fill Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "nearCritFillOp": {
+                        "displayName": "Bar Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nearCritOutline": {
+                        "displayName": "Outline Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "nearCritOutlineOp": {
+                        "displayName": "Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nearCritOutlineW": {
+                        "displayName": "Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nearCritLabelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "nearCritLabelOp": {
+                        "displayName": "Label Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nearCritPulseDisplay": {
+                        "displayName": "Highlight Mode",
+                        "description": "Static: solid colored outline. Pulse: animated flashing outline. None: no outline indicator (bar fill still applies).",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Static",
+                                    "displayName": "Static Outline"
+                                },
+                                {
+                                    "value": "Pulse",
+                                    "displayName": "Flashing Outline"
+                                },
+                                {
+                                    "value": "None",
+                                    "displayName": "Off"
+                                }
+                            ]
+                        }
+                    },
+                    "nearCritPulseSpeed": {
+                        "displayName": "Flash Speed (seconds)",
+                        "description": "Duration of one flash cycle in seconds. Lower = faster.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showFloat": {
+                        "displayName": "Show Float Labels",
+                        "description": "Display total float value (in days) above task bars. Only shown for tasks with float > 0.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "floatFontSize": {
+                        "displayName": "Float Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "floatColor": {
+                        "displayName": "Float Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "floatOp": {
+                        "displayName": "Float Label Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "barSpecial": {
+                "displayName": "\u25ac Bars \u2014 Milestones & Summary",
+                "properties": {
+                    "mkFill": {
+                        "displayName": "Milestone Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "mkFillOp": {
+                        "displayName": "Milestone Fill Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "mkOutline": {
+                        "displayName": "Milestone Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "mkOutlineOp": {
+                        "displayName": "Milestone Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "mkOutlineW": {
+                        "displayName": "Milestone Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "mkSize": {
+                        "displayName": "Milestone Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "mkShape": {
+                        "displayName": "Milestone Shape",
+                        "description": "Default shape for standard milestones. Special milestones always use shield. Diamond is the PMBOK standard.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "\u25c6 Diamond",
+                                    "value": "Diamond"
+                                },
+                                {
+                                    "displayName": "\u25b2 Triangle",
+                                    "value": "Triangle"
+                                },
+                                {
+                                    "displayName": "\u25cf Circle",
+                                    "value": "Circle"
+                                },
+                                {
+                                    "displayName": "\u2605 Star",
+                                    "value": "Star"
+                                },
+                                {
+                                    "displayName": "\u2691 Flag",
+                                    "value": "Flag"
+                                }
+                            ]
+                        }
+                    },
+                    "grpFill": {
+                        "displayName": "Summary Bar Fill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "grpFillOp": {
+                        "displayName": "Summary Background Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "grpOutline": {
+                        "displayName": "Summary Outline",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "grpOutlineOp": {
+                        "displayName": "Summary Outline Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "grpProgressOp": {
+                        "displayName": "Summary Progress Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "grpCapFill": {
+                        "displayName": "End-Cap Diamond Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "grpCapOp": {
+                        "displayName": "End-Cap Diamond Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "labelPrimary": {
+                "displayName": "\ud83c\udff7\ufe0f Labels \u2014 Task Name",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "content": {
+                        "displayName": "Content Source",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontWeight": {
+                        "displayName": "Font Weight",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontStyle": {
+                        "displayName": "Font Style",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorOpacity": {
+                        "displayName": "Color Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bgShow": {
+                        "displayName": "Show Background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bgColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bgOpacity": {
+                        "displayName": "Background Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bgPadding": {
+                        "displayName": "Background Padding",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bgRadius": {
+                        "displayName": "Background Corner Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "labelProgress": {
+                "displayName": "\ud83c\udff7\ufe0f Labels \u2014 Progress",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontWeight": {
+                        "displayName": "Font Weight",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorOpacity": {
+                        "displayName": "Color Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "format": {
+                        "displayName": "Format",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "labelDates": {
+                "displayName": "\ud83c\udff7\ufe0f Labels \u2014 Dates",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorOpacity": {
+                        "displayName": "Color Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "content": {
+                        "displayName": "Content",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "labelDuration": {
+                "displayName": "\ud83c\udff7\ufe0f Labels \u2014 Duration",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorOpacity": {
+                        "displayName": "Color Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Unit",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "gridLines": {
+                "displayName": "\ud83d\udccf Timeline \u2014 Grid & Axes",
+                "properties": {
+                    "dependencyColor": {
+                        "displayName": "Dependency Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dependencyOpacity": {
+                        "displayName": "Dependency Line Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dependencyWidth": {
+                        "displayName": "Dependency Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "criticalDepColor": {
+                        "displayName": "Critical Dependency Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "criticalDepOpacity": {
+                        "displayName": "Critical Dependency Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "criticalDepWidth": {
+                        "displayName": "Critical Dependency Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataDateColor": {
+                        "displayName": "Data Date Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dataDateOpacity": {
+                        "displayName": "Data Date Line Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataDateWidth": {
+                        "displayName": "Data Date Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gridColor": {
+                        "displayName": "Grid Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridOpacity": {
+                        "displayName": "Grid Line Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataDateDash": {
+                        "displayName": "Data Date Dash Pattern",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "dataDateFontSize": {
+                        "displayName": "Data Date Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dataDateLabel": {
+                        "displayName": "Data Date Label Text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "dataDateLabelPos": {
+                        "displayName": "Data Date Label Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "Bottom",
+                                    "displayName": "Bottom"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "refLineConfig": {
+                "displayName": "\ud83d\udccf Timeline \u2014 Reference Lines",
+                "description": "Vertical reference lines at specific dates. Use data roles for dynamic lines from your dataset, or manually define up to 5 static lines below.",
+                "properties": {
+                    "rlShow": {
+                        "displayName": "Enable Reference Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rlColor": {
+                        "displayName": "Default Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rlWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rlDash": {
+                        "displayName": "Dash Pattern",
+                        "description": "SVG dash-array pattern. Default: '4 3'. Use '0' for solid lines.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rlOp": {
+                        "displayName": "Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rlLabelPos": {
+                        "displayName": "Label Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "Bottom",
+                                    "displayName": "Bottom"
+                                }
+                            ]
+                        }
+                    },
+                    "rlFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rl1Show": {
+                        "displayName": "\u2500\u2500 Line 1 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rl1Date": {
+                        "displayName": "Line 1 Date (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl1Label": {
+                        "displayName": "Line 1 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl1Color": {
+                        "displayName": "Line 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rl2Show": {
+                        "displayName": "\u2500\u2500 Line 2 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rl2Date": {
+                        "displayName": "Line 2 Date (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl2Label": {
+                        "displayName": "Line 2 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl2Color": {
+                        "displayName": "Line 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rl3Show": {
+                        "displayName": "\u2500\u2500 Line 3 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rl3Date": {
+                        "displayName": "Line 3 Date (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl3Label": {
+                        "displayName": "Line 3 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl3Color": {
+                        "displayName": "Line 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rl4Show": {
+                        "displayName": "\u2500\u2500 Line 4 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rl4Date": {
+                        "displayName": "Line 4 Date (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl4Label": {
+                        "displayName": "Line 4 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl4Color": {
+                        "displayName": "Line 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rl5Show": {
+                        "displayName": "\u2500\u2500 Line 5 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rl5Date": {
+                        "displayName": "Line 5 Date (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl5Label": {
+                        "displayName": "Line 5 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rl5Color": {
+                        "displayName": "Line 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "refBandConfig": {
+                "displayName": "\ud83d\udccf Timeline \u2014 Reference Bands",
+                "description": "Shaded date ranges overlaid on the Gantt chart. Use data roles for dynamic bands from your dataset, or manually define up to 5 static bands below.",
+                "properties": {
+                    "rbShow": {
+                        "displayName": "Enable Reference Bands",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rbColor": {
+                        "displayName": "Default Band Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rbOp": {
+                        "displayName": "Default Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rbLabelPos": {
+                        "displayName": "Label Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "Bottom",
+                                    "displayName": "Bottom"
+                                }
+                            ]
+                        }
+                    },
+                    "rbFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rb1Show": {
+                        "displayName": "\u2500\u2500 Band 1 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rb1Start": {
+                        "displayName": "Band 1 Start (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb1End": {
+                        "displayName": "Band 1 End (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb1Label": {
+                        "displayName": "Band 1 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb1Color": {
+                        "displayName": "Band 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rb1Op": {
+                        "displayName": "Band 1 Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rb2Show": {
+                        "displayName": "\u2500\u2500 Band 2 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rb2Start": {
+                        "displayName": "Band 2 Start (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb2End": {
+                        "displayName": "Band 2 End (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb2Label": {
+                        "displayName": "Band 2 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb2Color": {
+                        "displayName": "Band 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rb2Op": {
+                        "displayName": "Band 2 Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rb3Show": {
+                        "displayName": "\u2500\u2500 Band 3 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rb3Start": {
+                        "displayName": "Band 3 Start (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb3End": {
+                        "displayName": "Band 3 End (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb3Label": {
+                        "displayName": "Band 3 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb3Color": {
+                        "displayName": "Band 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rb3Op": {
+                        "displayName": "Band 3 Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rb4Show": {
+                        "displayName": "\u2500\u2500 Band 4 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rb4Start": {
+                        "displayName": "Band 4 Start (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb4End": {
+                        "displayName": "Band 4 End (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb4Label": {
+                        "displayName": "Band 4 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb4Color": {
+                        "displayName": "Band 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rb4Op": {
+                        "displayName": "Band 4 Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rb5Show": {
+                        "displayName": "\u2500\u2500 Band 5 \u2014 Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rb5Start": {
+                        "displayName": "Band 5 Start (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb5End": {
+                        "displayName": "Band 5 End (YYYY-MM-DD)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb5Label": {
+                        "displayName": "Band 5 Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rb5Color": {
+                        "displayName": "Band 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rb5Op": {
+                        "displayName": "Band 5 Opacity (0\u2013100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "resourceConfig": {
+                "displayName": "\ud83d\udc77 Resource Indicators",
+                "properties": {
+                    "show": {
+                        "displayName": "Enable Resource Indicators",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "overallocThreshold": {
+                        "displayName": "Overallocation Threshold (%)",
+                        "description": "Percentage of capacity above which a resource is considered overallocated. Default 100%.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pulseColor": {
+                        "displayName": "Overallocation Pulse Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pulseSpeed": {
+                        "displayName": "Pulse Speed (seconds)",
+                        "description": "Duration of one pulse cycle in seconds.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "overallocDisplay": {
+                        "displayName": "Overallocation Indicator",
+                        "description": "How overallocated tasks are visually highlighted. Static: solid colored border. Pulse: animated pulsing border. None: no visual indicator (tooltip data still shown).",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Static",
+                                    "displayName": "Static Border"
+                                },
+                                {
+                                    "value": "Pulse",
+                                    "displayName": "Pulsing Border"
+                                },
+                                {
+                                    "value": "None",
+                                    "displayName": "Off"
+                                }
+                            ]
+                        }
+                    },
+                    "showInTooltip": {
+                        "displayName": "Show Resources in Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showBudgetedHours": {
+                        "displayName": "Show Budgeted Hours",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showActualHours": {
+                        "displayName": "Show Actual Hours",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showConflicts": {
+                        "displayName": "Show Overallocation Conflicts",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "tooltipConfig": {
+                "displayName": "\ud83d\udcac Tooltip",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bgColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bgOpacity": {
+                        "displayName": "Background Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderRadius": {
+                        "displayName": "Border Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dimColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxWidth": {
+                        "displayName": "Max Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showProject": {
+                        "displayName": "Show Project Name",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPhase": {
+                        "displayName": "Show Phase",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDates": {
+                        "displayName": "Show Dates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showBaseline": {
+                        "displayName": "Show Baseline Dates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDuration": {
+                        "displayName": "Show Duration",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showProgress": {
+                        "displayName": "Show Progress",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showVariance": {
+                        "displayName": "Show Variance",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTaskId": {
+                        "displayName": "Show Task ID",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPredecessors": {
+                        "displayName": "Show Predecessors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showWarning": {
+                        "displayName": "Show Behind Schedule Warning",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "warningThreshold": {
+                        "displayName": "Warning Threshold (days)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "warningBg": {
+                        "displayName": "Warning Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "warningColor": {
+                        "displayName": "Warning Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "programCritConfig": {
+                "displayName": "Program Critical Path",
+                "description": "Cross-project program-level critical path. Identifies the longest path through the entire program, spanning all projects.",
+                "properties": {
+                    "progCritShow": {
+                        "displayName": "Show Program Critical Path",
+                        "description": "Enable program-level critical path analysis across all projects",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "progCritFill": {
+                        "displayName": "Bar Fill Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "progCritFillOp": {
+                        "displayName": "Bar Fill Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "progCritOutline": {
+                        "displayName": "Outline Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "progCritOutlineOp": {
+                        "displayName": "Outline Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "progCritOutlineW": {
+                        "displayName": "Outline Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "progCritLabelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "progCritLabelOp": {
+                        "displayName": "Label Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "progCritDepColor": {
+                        "displayName": "Dependency Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "progCritDepOp": {
+                        "displayName": "Dependency Line Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "progCritDepW": {
+                        "displayName": "Dependency Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "suppressDefaultTitle": true,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        },
+        "privileges": [
+            {
+                "name": "LocalStorage",
+                "essential": false
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

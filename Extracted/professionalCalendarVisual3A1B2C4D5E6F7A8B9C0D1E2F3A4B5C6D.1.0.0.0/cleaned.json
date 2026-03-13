@@ -1,0 +1,735 @@
+{
+    "visual": {
+        "name": "professionalCalendarVisual",
+        "displayName": "Professional Calendar Visual",
+        "guid": "professionalCalendarVisual3A1B2C4D5E6F7A8B9C0D1E2F3A4B5C6D",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Professional Power BI Calendar Visual with Day, Week, Month, and Year views, holiday support, multi-category event bars, and full formatting customization",
+        "supportUrl": "mailto:AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Abdalla Dabes, P.E, PSP, PMP",
+        "email": "AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Start Date",
+                "name": "startDate",
+                "kind": "Grouping",
+                "description": "The start date of the calendar range"
+            },
+            {
+                "displayName": "End Date",
+                "name": "endDate",
+                "kind": "Grouping",
+                "description": "The end date of the calendar range"
+            },
+            {
+                "displayName": "Event Title",
+                "name": "eventTitle",
+                "kind": "Grouping",
+                "description": "Title or label for the event/task"
+            },
+            {
+                "displayName": "Event Category",
+                "name": "eventCategory",
+                "kind": "Grouping",
+                "description": "Category or type of event for color-coding"
+            },
+            {
+                "displayName": "Holidays",
+                "name": "holidays",
+                "kind": "Grouping",
+                "description": "Holiday dates to highlight on the calendar"
+            },
+            {
+                "displayName": "Holiday Name",
+                "name": "holidayName",
+                "kind": "Grouping",
+                "description": "Name/label for each holiday"
+            },
+            {
+                "displayName": "Event Value",
+                "name": "eventValue",
+                "kind": "Measure",
+                "description": "Numeric value or metric associated with the event"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "startDate": {
+                            "max": 1
+                        },
+                        "endDate": {
+                            "max": 1
+                        },
+                        "eventTitle": {
+                            "max": 1
+                        },
+                        "eventCategory": {
+                            "max": 1
+                        },
+                        "holidays": {
+                            "max": 1
+                        },
+                        "holidayName": {
+                            "max": 1
+                        },
+                        "eventValue": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "startDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "endDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "eventTitle"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "eventCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "holidays"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "holidayName"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 10000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "eventValue"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "calendarSettings": {
+                "displayName": "Calendar Settings",
+                "properties": {
+                    "defaultView": {
+                        "displayName": "Default View",
+                        "description": "Initial calendar view mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "day",
+                                    "displayName": "Daily"
+                                },
+                                {
+                                    "value": "week",
+                                    "displayName": "Weekly"
+                                },
+                                {
+                                    "value": "month",
+                                    "displayName": "Monthly"
+                                },
+                                {
+                                    "value": "year",
+                                    "displayName": "Yearly"
+                                }
+                            ]
+                        }
+                    },
+                    "firstDayOfWeek": {
+                        "displayName": "First Day of Week",
+                        "description": "Set the first day of the week",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Sunday"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Monday"
+                                },
+                                {
+                                    "value": "6",
+                                    "displayName": "Saturday"
+                                }
+                            ]
+                        }
+                    },
+                    "showWeekNumbers": {
+                        "displayName": "Show Week Numbers",
+                        "description": "Display ISO week numbers",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showToday": {
+                        "displayName": "Highlight Today",
+                        "description": "Highlight the current date",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "currentView": {
+                        "displayName": "Current View",
+                        "description": "Persisted current view state",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showLunarCalendar": {
+                        "displayName": "Show Lunar Dates",
+                        "description": "Display lunar calendar dates",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dateRangeView": {
+                        "displayName": "Date Range View",
+                        "description": "Control which date range is visible on the calendar",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "full",
+                                    "displayName": "Full Calendar (all months)"
+                                },
+                                {
+                                    "value": "range",
+                                    "displayName": "Data Range Only (start to finish)"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "colorSettings": {
+                "displayName": "Color & Theme",
+                "properties": {
+                    "colorTheme": {
+                        "displayName": "Color Theme",
+                        "description": "Select a preset color theme",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "professional",
+                                    "displayName": "Professional Blue"
+                                },
+                                {
+                                    "value": "emerald",
+                                    "displayName": "Emerald Green"
+                                },
+                                {
+                                    "value": "crimson",
+                                    "displayName": "Crimson Red"
+                                },
+                                {
+                                    "value": "amethyst",
+                                    "displayName": "Amethyst Purple"
+                                },
+                                {
+                                    "value": "slate",
+                                    "displayName": "Slate Dark"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom"
+                                }
+                            ]
+                        }
+                    },
+                    "primaryColor": {
+                        "displayName": "Primary Color",
+                        "description": "Main accent color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "todayColor": {
+                        "displayName": "Today Highlight Color",
+                        "description": "Color for today's date highlight",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "holidayColor": {
+                        "displayName": "Holiday Color",
+                        "description": "Color for holiday highlights",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "weekendColor": {
+                        "displayName": "Weekend Color",
+                        "description": "Background color for weekend columns",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "eventColor1": {
+                        "displayName": "Event Color 1",
+                        "description": "First event category color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "eventColor2": {
+                        "displayName": "Event Color 2",
+                        "description": "Second event category color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "eventColor3": {
+                        "displayName": "Event Color 3",
+                        "description": "Third event category color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Calendar background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "headerBackgroundColor": {
+                        "displayName": "Header Background",
+                        "description": "Color of calendar header",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "fontSettings": {
+                "displayName": "Font & Text",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "description": "Font used across the calendar",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                }
+                            ]
+                        }
+                    },
+                    "headerFontSize": {
+                        "displayName": "Header Font Size",
+                        "description": "Font size for month/year header",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dayFontSize": {
+                        "displayName": "Day Number Font Size",
+                        "description": "Font size for day numbers",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "eventFontSize": {
+                        "displayName": "Event Label Font Size",
+                        "description": "Font size for event labels",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "weekDayFontSize": {
+                        "displayName": "Weekday Header Font Size",
+                        "description": "Font size for Mon, Tue, etc.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "boldDayNumbers": {
+                        "displayName": "Bold Day Numbers",
+                        "description": "Make day numbers bold",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "headerSettings": {
+                "displayName": "Header & Navigation",
+                "properties": {
+                    "showNavigationButtons": {
+                        "displayName": "Show Navigation Buttons",
+                        "description": "Show previous/next navigation arrows",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showViewToggle": {
+                        "displayName": "Show View Toggle",
+                        "description": "Display Day/Week/Month/Year toggle buttons",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTodayButton": {
+                        "displayName": "Show Today Button",
+                        "description": "Display a button to jump to today",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMiniCalendar": {
+                        "displayName": "Show Mini Calendar",
+                        "description": "Display a mini navigation calendar in header",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "headerDateFormat": {
+                        "displayName": "Header Date Format",
+                        "description": "Format for displaying current period in header",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "MMMM YYYY",
+                                    "displayName": "January 2025"
+                                },
+                                {
+                                    "value": "MMM YYYY",
+                                    "displayName": "Jan 2025"
+                                },
+                                {
+                                    "value": "MM/YYYY",
+                                    "displayName": "01/2025"
+                                },
+                                {
+                                    "value": "Q# YYYY",
+                                    "displayName": "Q1 2025"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "eventSettings": {
+                "displayName": "Events & Tasks",
+                "properties": {
+                    "showEventBars": {
+                        "displayName": "Show Event Bars",
+                        "description": "Display events as colored bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showEventCount": {
+                        "displayName": "Show Event Count Badge",
+                        "description": "Show number of events per day when collapsed",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "maxEventsPerDay": {
+                        "displayName": "Max Visible Events Per Day",
+                        "description": "Maximum number of events shown per day cell",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "eventBarHeight": {
+                        "displayName": "Event Bar Height (px)",
+                        "description": "Height of event bars in pixels",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showEventTime": {
+                        "displayName": "Show Event Time",
+                        "description": "Display time on event bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "roundedEventBars": {
+                        "displayName": "Rounded Event Bars",
+                        "description": "Use rounded corners on event bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showEventTooltip": {
+                        "displayName": "Show Tooltips",
+                        "description": "Show tooltip on event hover",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "holidaySettings": {
+                "displayName": "Holidays",
+                "properties": {
+                    "showHolidayBadge": {
+                        "displayName": "Show Holiday Badge",
+                        "description": "Show holiday indicator on date cells",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showHolidayName": {
+                        "displayName": "Show Holiday Name",
+                        "description": "Display holiday name in the cell",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "holidayDisplayStyle": {
+                        "displayName": "Holiday Display Style",
+                        "description": "How holidays are displayed",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dot",
+                                    "displayName": "Dot Indicator"
+                                },
+                                {
+                                    "value": "highlight",
+                                    "displayName": "Cell Highlight"
+                                },
+                                {
+                                    "value": "banner",
+                                    "displayName": "Banner Label"
+                                },
+                                {
+                                    "value": "stripe",
+                                    "displayName": "Diagonal Stripe"
+                                },
+                                {
+                                    "value": "fullcolor",
+                                    "displayName": "Full Color Fill"
+                                },
+                                {
+                                    "value": "leftborder",
+                                    "displayName": "Bold Left Border"
+                                },
+                                {
+                                    "value": "underline",
+                                    "displayName": "Underline Accent"
+                                },
+                                {
+                                    "value": "icon",
+                                    "displayName": "Star Icon + Dot"
+                                }
+                            ]
+                        }
+                    },
+                    "greyOutHolidays": {
+                        "displayName": "Grey Out Holiday Text",
+                        "description": "Grey out day numbers on holidays",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "gridSettings": {
+                "displayName": "Grid & Layout",
+                "properties": {
+                    "showGridLines": {
+                        "displayName": "Show Grid Lines",
+                        "description": "Display cell border lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridLineColor": {
+                        "displayName": "Grid Line Color",
+                        "description": "Color of cell borders",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridLineThickness": {
+                        "displayName": "Grid Line Thickness (px)",
+                        "description": "Thickness of grid lines",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cellPadding": {
+                        "displayName": "Cell Padding (px)",
+                        "description": "Inner padding for each date cell",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "roundedCells": {
+                        "displayName": "Rounded Cells",
+                        "description": "Use rounded corners on date cells",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showRowShading": {
+                        "displayName": "Alternate Row Shading",
+                        "description": "Apply alternating row background shading",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "tooltipSettings": {
+                "displayName": "Tooltips",
+                "properties": {
+                    "enableTooltips": {
+                        "displayName": "Enable Tooltips",
+                        "description": "Show tooltips on hover",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltipDateFormat": {
+                        "displayName": "Tooltip Date Format",
+                        "description": "Date format in tooltip",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dddd, MMMM D, YYYY",
+                                    "displayName": "Monday, January 1, 2025"
+                                },
+                                {
+                                    "value": "MM/DD/YYYY",
+                                    "displayName": "01/01/2025"
+                                },
+                                {
+                                    "value": "DD/MM/YYYY",
+                                    "displayName": "01/01/2025 (EU)"
+                                },
+                                {
+                                    "value": "YYYY-MM-DD",
+                                    "displayName": "2025-01-01 (ISO)"
+                                }
+                            ]
+                        }
+                    },
+                    "showEventDetailsInTooltip": {
+                        "displayName": "Show Event Details",
+                        "description": "Include event details in tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "general": {
+                "displayName": "General",
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": {
+                                "selfFilter": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": [],
+        "supportsHighlight": true,
+        "suppressDefaultTitle": false
+    },
+    "visualEntryPoint": "",
+    "toolsVersion": null,
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
