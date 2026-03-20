@@ -1,0 +1,546 @@
+{
+    "visual": {
+        "name": "MarkdownMermaidRenderer",
+        "displayName": "Markdown / Mermaid Renderer",
+        "guid": "markdownMermaidRenderer",
+        "visualClassName": "Visual",
+        "version": "1.1.0.0",
+        "description": "Render Markdown content with embedded Mermaid diagrams in Power BI. Perfect for documentation, flowcharts, and process diagrams.",
+        "supportUrl": "https://github.com/pmoldmann/mermaid-powerbi",
+        "gitHubUrl": "https://github.com/pmoldmann/mermaid-powerbi"
+    },
+    "author": {
+        "name": "Paul Moldmann",
+        "email": "mail@paulmoldmann.de"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Markdown Content",
+                "name": "markdown",
+                "kind": "GroupingOrMeasure",
+                "description": "Columns or measures containing Markdown text to render. Each row or measure value is rendered as a separate section."
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": "Columns or measures to display in the tooltip when hovering over a markdown section."
+            }
+        ],
+        "objects": {
+            "view": {
+                "displayName": "View settings",
+                "descriptionKey": "Visual_View",
+                "properties": {
+                    "colorMode": {
+                        "displayName": "Color mode",
+                        "description": "Switch between light and dark theme for the visual",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "light",
+                                    "displayName": "Light"
+                                },
+                                {
+                                    "value": "dark",
+                                    "displayName": "Dark"
+                                }
+                            ]
+                        }
+                    },
+                    "enableCopyMenu": {
+                        "displayName": "Copy markdown menu",
+                        "description": "Show a custom right-click menu with options to copy markdown content to the clipboard",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "deduplicateValues": {
+                        "displayName": "Deduplicate values",
+                        "description": "Remove duplicate values per column before rendering. When enabled, each column is treated independently and only distinct values are shown. Useful when mixing measures and columns to avoid repeated measure values.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "useSearchBar": {
+                        "displayName": "Use search bar",
+                        "description": "Show a search bar to find and highlight text within the rendered markdown content",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "mermaid": {
+                "displayName": "Mermaid settings",
+                "description": "Settings for Mermaid diagram rendering",
+                "properties": {
+                    "flowchartOrientation": {
+                        "displayName": "Flowchart orientation",
+                        "description": "Override the orientation of flowchart diagrams. 'Default' uses the orientation defined in the diagram code.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "default",
+                                    "displayName": "Default (from diagram)"
+                                },
+                                {
+                                    "value": "TB",
+                                    "displayName": "Top to Bottom"
+                                },
+                                {
+                                    "value": "BT",
+                                    "displayName": "Bottom to Top"
+                                },
+                                {
+                                    "value": "LR",
+                                    "displayName": "Left to Right"
+                                },
+                                {
+                                    "value": "RL",
+                                    "displayName": "Right to Left"
+                                }
+                            ]
+                        }
+                    },
+                    "maxEdges": {
+                        "displayName": "Max edges",
+                        "description": "Maximum number of edges allowed in a diagram",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "securityLevel": {
+                        "displayName": "Security level",
+                        "description": "Security level for Mermaid rendering (loose, strict, sandbox)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "loose",
+                                    "displayName": "Loose"
+                                },
+                                {
+                                    "value": "strict",
+                                    "displayName": "Strict"
+                                },
+                                {
+                                    "value": "sandbox",
+                                    "displayName": "Sandbox"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "mermaidDebug": {
+                "displayName": "Mermaid debug settings",
+                "description": "Advanced settings for Mermaid diagram rendering and line break handling",
+                "properties": {
+                    "showDebugPanel": {
+                        "displayName": "Show debug panel",
+                        "description": "Shows debug information including raw Mermaid code",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "htmlLabels": {
+                        "displayName": "HTML labels",
+                        "description": "Enable HTML rendering in node labels (needed for line breaks)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "markdownAutoWrap": {
+                        "displayName": "Markdown auto wrap",
+                        "description": "Enable automatic line wrapping in markdown labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "convertBrToNewline": {
+                        "displayName": "Convert <br> to newline",
+                        "description": "Converts <br/> tags to newlines. Mermaid escapes <br> as text, this fixes line breaks.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoBacktickLabels": {
+                        "displayName": "Auto backtick labels",
+                        "description": "Automatically wraps labels containing newlines in backticks. Mermaid only renders newlines in backtick-wrapped labels.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "preserveLineBreaksCSS": {
+                        "displayName": "Preserve line breaks CSS",
+                        "description": "Applies CSS to preserve line breaks in Mermaid labels (white-space: pre-wrap, br display: block)",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "markdown": {
+                "displayName": "Markdown settings",
+                "description": "Settings for Markdown text rendering",
+                "properties": {
+                    "enableLineBreaks": {
+                        "displayName": "Enable line breaks",
+                        "description": "Render single line breaks in Markdown as <br> (line break). When disabled, consecutive lines are joined into one paragraph.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "codeBlockWordWrap": {
+                        "displayName": "Code block word wrap",
+                        "description": "Wrap long lines in code blocks instead of showing a horizontal scrollbar",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "interactivity": {
+                "displayName": "Interactivity",
+                "description": "Settings for cross-filtering and selection behavior",
+                "properties": {
+                    "enableCrossFilter": {
+                        "displayName": "Cross filter",
+                        "description": "When enabled, clicking on a markdown section filters other visuals based on the corresponding data row. Ctrl+Click to select multiple sections. Only available when a column (not a measure) provides the markdown data.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "markdownFunctions": {
+                "displayName": "Markdown functions",
+                "description": "Visual-wide settings for content formatting functions (definition lists, ordered/unordered lists)",
+                "properties": {
+                    "definitionHeadingLevel": {
+                        "displayName": "Definition list heading",
+                        "description": "Heading level (H1\u2013H6) applied to the term in definition lists",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None (plain text)"
+                                },
+                                {
+                                    "value": "h1",
+                                    "displayName": "H1"
+                                },
+                                {
+                                    "value": "h2",
+                                    "displayName": "H2"
+                                },
+                                {
+                                    "value": "h3",
+                                    "displayName": "H3"
+                                },
+                                {
+                                    "value": "h4",
+                                    "displayName": "H4"
+                                },
+                                {
+                                    "value": "h5",
+                                    "displayName": "H5"
+                                },
+                                {
+                                    "value": "h6",
+                                    "displayName": "H6"
+                                }
+                            ]
+                        }
+                    },
+                    "blankText": {
+                        "displayName": "Definition list blank text",
+                        "description": "Text shown when the value is null or empty in definition lists (e.g. '(blank)', 'n/a', '(leer)')",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "listHeadingLevel": {
+                        "displayName": "List heading",
+                        "description": "Heading level (H1\u2013H6) for the title of ordered and unordered lists. Uses the column/measure display name.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None (no heading)"
+                                },
+                                {
+                                    "value": "h1",
+                                    "displayName": "H1"
+                                },
+                                {
+                                    "value": "h2",
+                                    "displayName": "H2"
+                                },
+                                {
+                                    "value": "h3",
+                                    "displayName": "H3"
+                                },
+                                {
+                                    "value": "h4",
+                                    "displayName": "H4"
+                                },
+                                {
+                                    "value": "h5",
+                                    "displayName": "H5"
+                                },
+                                {
+                                    "value": "h6",
+                                    "displayName": "H6"
+                                }
+                            ]
+                        }
+                    },
+                    "blockquoteAddHeader": {
+                        "displayName": "Blockquote: Add header",
+                        "description": "Adds a heading above blockquote sections using the column/measure display name for identification",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "blockquoteHeaderFormat": {
+                        "displayName": "Blockquote: Header format",
+                        "description": "Heading level (H1\u2013H6) for the header above blockquote sections",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "h1",
+                                    "displayName": "H1"
+                                },
+                                {
+                                    "value": "h2",
+                                    "displayName": "H2"
+                                },
+                                {
+                                    "value": "h3",
+                                    "displayName": "H3"
+                                },
+                                {
+                                    "value": "h4",
+                                    "displayName": "H4"
+                                },
+                                {
+                                    "value": "h5",
+                                    "displayName": "H5"
+                                },
+                                {
+                                    "value": "h6",
+                                    "displayName": "H6"
+                                }
+                            ]
+                        }
+                    },
+                    "codeBlockAddHeader": {
+                        "displayName": "Code Block: Add header",
+                        "description": "Adds a heading above code block sections using the column/measure display name for identification",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "codeBlockHeaderFormat": {
+                        "displayName": "Code Block: Header format",
+                        "description": "Heading level (H1\u2013H6) for the header above code block sections",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "h1",
+                                    "displayName": "H1"
+                                },
+                                {
+                                    "value": "h2",
+                                    "displayName": "H2"
+                                },
+                                {
+                                    "value": "h3",
+                                    "displayName": "H3"
+                                },
+                                {
+                                    "value": "h4",
+                                    "displayName": "H4"
+                                },
+                                {
+                                    "value": "h5",
+                                    "displayName": "H5"
+                                },
+                                {
+                                    "value": "h6",
+                                    "displayName": "H6"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "measureFormat": {
+                "displayName": "Content formatting",
+                "description": "Apply markdown formatting to individual columns or measures. For columns, each row value is formatted accordingly.",
+                "properties": {
+                    "formatFunction": {
+                        "displayName": "Format as",
+                        "description": "Wrap the measure value in a markdown element",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "heading_h1",
+                                    "displayName": "Heading (H1)"
+                                },
+                                {
+                                    "value": "heading_h2",
+                                    "displayName": "Heading (H2)"
+                                },
+                                {
+                                    "value": "heading_h3",
+                                    "displayName": "Heading (H3)"
+                                },
+                                {
+                                    "value": "code_block",
+                                    "displayName": "Code Block"
+                                },
+                                {
+                                    "value": "highlight",
+                                    "displayName": "Highlight"
+                                },
+                                {
+                                    "value": "definition_list",
+                                    "displayName": "Definition List"
+                                },
+                                {
+                                    "value": "blockquote",
+                                    "displayName": "Blockquote"
+                                },
+                                {
+                                    "value": "list_unordered",
+                                    "displayName": "Unordered List"
+                                },
+                                {
+                                    "value": "list_ordered",
+                                    "displayName": "Ordered List"
+                                }
+                            ]
+                        }
+                    },
+                    "codeLanguage": {
+                        "displayName": "Define language",
+                        "description": "Language identifier for syntax highlighting in code blocks (e.g. json, sql, dax, mermaid)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "listDelimiter": {
+                        "displayName": "List delimiter",
+                        "description": "Character(s) used to split the value into list items (e.g. ',' or ';')",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "font": {
+                "displayName": "Font settings",
+                "description": "Font family and size settings for Markdown content and Mermaid diagrams",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "description": "Font family for Markdown content and Mermaid diagrams",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "headingFontSize": {
+                        "displayName": "Heading font size (h1)",
+                        "description": "Font size in pt for the largest heading (h1). Smaller headings (h2\u2013h6) scale down proportionally relative to the body font size.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bodyFontSize": {
+                        "displayName": "Body font size",
+                        "description": "Font size in pt for paragraphs, tables, lists, and other body text.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "mermaidFontSize": {
+                        "displayName": "Mermaid font size",
+                        "description": "Font size in pt for text in Mermaid diagrams.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "markdown": {
+                            "max": 10
+                        },
+                        "tooltips": {
+                            "max": 5
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "markdown"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 10000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "advancedEditModeSupport": 0,
+        "supportsHighlight": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "sorting": {
+            "default": {}
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
