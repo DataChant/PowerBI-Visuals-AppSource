@@ -1,0 +1,57 @@
+name: "Phase 2: Download Visuals"
+
+# Downloads new/updated visual artifacts (PBIVIZ, PBIX, images)
+# and commits them as a "{date} refresh" commit.
+#
+# Trigger this manually after merging the Phase 1 metadata PR.
+
+on:
+  workflow_dispatch:
+    # Manual trigger only
+
+permissions:
+  contents: write
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history needed for subsequent scripts
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run DownloadVisuals.py
+        run: python "Automation tools/DownloadVisuals.py"
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No new visual files to commit."
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "New/updated visual files detected."
+          fi
+
+      - name: Commit and push
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          DATE=$(date +%Y-%m-%d)
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "${DATE} refresh"
+          git push

@@ -1,0 +1,92 @@
+name: "Phase 1: Refresh Metadata"
+
+# Fetches latest visual metadata from the Power Automate API
+# and creates a PR with the updated CSV/MD files for review.
+
+on:
+  schedule:
+    # Daily at 8 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      - name: Run DownloadMetadata.py
+        env:
+          POWERBI_VISUALS_API_URL: ${{ secrets.POWERBI_VISUALS_API_URL }}
+          SUBSCRIPTION_EMAIL: ${{ secrets.SUBSCRIPTION_EMAIL }}
+        run: python "Automation tools/DownloadMetadata.py"
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected."
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected:"
+            git diff --stat
+          fi
+
+      - name: Create PR with changes
+        if: steps.check_changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          BRANCH="automated/refresh-${DATE}"
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create branch and commit
+          git checkout -b "$BRANCH"
+          git add "Custom Visuals.csv" "Visuals Summary.csv" "Visuals Summary.md" "Unlisted Visuals.csv"
+          git commit -m "[${DATE}] Automated metadata refresh"
+          git push origin "$BRANCH"
+
+          # Generate PR body with diff summary
+          DIFF_SUMMARY=$(git diff main --stat -- "Custom Visuals.csv" "Visuals Summary.csv" "Visuals Summary.md" "Unlisted Visuals.csv")
+
+          gh pr create \
+            --title "[${DATE}] Automated refresh" \
+            --body "$(cat <<EOF
+          ## Automated Metadata Refresh
+
+          This PR contains updated Power BI custom visuals metadata fetched from AppSource.
+
+          ### Changes
+          \`\`\`
+          ${DIFF_SUMMARY}
+          \`\`\`
+
+          ### Next Steps
+          1. Review the diff to verify the changes look correct
+          2. Merge this PR
+          3. Manually trigger **Phase 2: Download Visuals** workflow
+          4. Manually trigger **Phase 3: Finalize Refresh** workflow
+          EOF
+          )" \
+            --base main \
+            --head "$BRANCH"

@@ -19,10 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Define the latest and previous commit dates
-LATEST_COMMIT_DATE = '2026-03-13'
-PREVIOUS_COMMIT_DATE = '2026-03-06'
-
+import argparse
 import logging
 import csv
 import hashlib
@@ -31,6 +28,17 @@ import os
 import subprocess
 import urllib.request
 from datetime import datetime
+
+# Parse command-line arguments for commit dates
+_parser = argparse.ArgumentParser(description='Summarize diff between two Custom Visuals.csv snapshots')
+_parser.add_argument('--latest', default='2026-03-20',
+                     help='Latest commit date (YYYY-MM-DD). Auto-detected from git if set to "auto".')
+_parser.add_argument('--previous', default='2026-03-13',
+                     help='Previous commit date (YYYY-MM-DD). Auto-detected from git if set to "auto".')
+_args = _parser.parse_args()
+
+LATEST_COMMIT_DATE = _args.latest
+PREVIOUS_COMMIT_DATE = _args.previous
 
 # Set up logging
 logging.basicConfig(
@@ -478,14 +486,24 @@ def get_files(commits):
 def main():
     """
     Main function that generates a GitHub Discussions-compatible summary of Power BI visual changes.
-    
-    The generated HTML uses simple markup that GitHub allows. Links include visual 
+
+    The generated HTML uses simple markup that GitHub allows. Links include visual
     indicators (🔗) to show they're external. Users can Ctrl+click or right-click to open in new tabs.
     """
+    global LATEST_COMMIT_DATE, PREVIOUS_COMMIT_DATE
+
     commits = get_all_commit_shas()
     if not commits or len(commits) < 2:
         logger.error("Not enough commits found or error fetching commits.")
         return
+
+    # Auto-detect dates from git history if set to "auto"
+    if LATEST_COMMIT_DATE == 'auto':
+        LATEST_COMMIT_DATE = commits[0][1][:10]
+        logger.info(f"Auto-detected latest date: {LATEST_COMMIT_DATE}")
+    if PREVIOUS_COMMIT_DATE == 'auto':
+        PREVIOUS_COMMIT_DATE = commits[1][1][:10]
+        logger.info(f"Auto-detected previous date: {PREVIOUS_COMMIT_DATE}")
 
     latest_content, previous_content = get_files(commits)
 

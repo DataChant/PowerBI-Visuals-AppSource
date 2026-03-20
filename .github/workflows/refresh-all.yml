@@ -1,0 +1,118 @@
+name: "Refresh All: Metadata + Visuals"
+
+# Runs DownloadMetadata.py to fetch the latest AppSource metadata,
+# then DownloadVisuals.py to download new/updated visual artifacts.
+# Commits changes, runs analysis scripts, creates a GitHub Discussion,
+# and commits the leaderboard + diff results.
+
+on:
+  workflow_dispatch:
+    # Manual trigger from GitHub Actions UI
+
+permissions:
+  contents: write
+  discussions: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git-based analysis
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run DownloadMetadata.py
+        env:
+          POWERBI_VISUALS_API_URL: ${{ secrets.POWERBI_VISUALS_API_URL }}
+          SUBSCRIPTION_EMAIL: ${{ secrets.SUBSCRIPTION_EMAIL }}
+        run: python "Automation tools/DownloadMetadata.py"
+
+      - name: Run DownloadVisuals.py
+        run: python "Automation tools/DownloadVisuals.py"
+
+      - name: Commit refresh
+        id: commit_refresh
+        run: |
+          DATE=$(date +%Y-%m-%d)
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "committed=false" >> $GITHUB_OUTPUT
+            echo "No changes to commit."
+          else
+            git commit -m "${DATE} refresh"
+            git push
+            echo "committed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run SummarizeDiff.py
+        if: steps.commit_refresh.outputs.committed == 'true'
+        run: python "Automation tools/SummarizeDiff.py" --latest auto --previous auto
+
+      - name: Create GitHub Discussion announcement
+        if: steps.commit_refresh.outputs.committed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE=$(head -1 visual_summary_diff.md)
+          BODY=$(tail -n +3 visual_summary_diff.md)
+
+          REPO_ID=$(gh api graphql -f query='
+            query($owner:String!,$name:String!) {
+              repository(owner:$owner, name:$name) { id }
+            }' -f owner="${GITHUB_REPOSITORY_OWNER}" \
+               -f name="${GITHUB_REPOSITORY#*/}" \
+               -q '.data.repository.id')
+
+          CAT_ID=$(gh api graphql -f query='
+            query($owner:String!,$name:String!) {
+              repository(owner:$owner, name:$name) {
+                discussionCategories(first:10) {
+                  nodes { id name }
+                }
+              }
+            }' -f owner="${GITHUB_REPOSITORY_OWNER}" \
+               -f name="${GITHUB_REPOSITORY#*/}" \
+               -q '.data.repository.discussionCategories.nodes[] | select(.name=="Announcements") | .id')
+
+          jq -n \
+            --arg repoId "$REPO_ID" \
+            --arg catId "$CAT_ID" \
+            --arg title "$TITLE" \
+            --arg body "$BODY" \
+            '{
+              query: "mutation($repoId:ID!,$catId:ID!,$title:String!,$body:String!){createDiscussion(input:{repositoryId:$repoId,categoryId:$catId,title:$title,body:$body}){discussion{url}}}",
+              variables: {repoId: $repoId, catId: $catId, title: $title, body: $body}
+            }' | gh api graphql --input -
+
+      - name: Run AnalyzeLeaderboard.py
+        if: steps.commit_refresh.outputs.committed == 'true'
+        run: python "Automation tools/AnalyzeLeaderboard.py"
+
+      - name: Commit leaderboard + diff
+        if: steps.commit_refresh.outputs.committed == 'true'
+        run: |
+          DATE=$(date +%Y-%m-%d)
+
+          git add visual_summary_diff.md leaderboard_data.csv
+          if git diff --cached --quiet; then
+            echo "No analysis changes to commit."
+          else
+            git commit -m "${DATE} leaderboard + diff"
+            git push
+          fi
