@@ -6,6 +6,8 @@ name: "Refresh All: Metadata + Visuals"
 # and commits the leaderboard + diff results.
 
 on:
+  schedule:
+    - cron: '0 23 * * *'  # Daily at 5 PM CST (UTC-6)
   workflow_dispatch:
     # Manual trigger from GitHub Actions UI
 
@@ -53,19 +55,31 @@ jobs:
           git add -A
           if git diff --cached --quiet; then
             echo "committed=false" >> $GITHUB_OUTPUT
+            echo "csv_changed=false" >> $GITHUB_OUTPUT
             echo "No changes to commit."
           else
+            # Check if Custom Visuals.csv is among the staged changes
+            if git diff --cached --name-only | grep -q "^Custom Visuals.csv$"; then
+              echo "csv_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "csv_changed=false" >> $GITHUB_OUTPUT
+            fi
             git commit -m "${DATE} refresh"
             git push
             echo "committed=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Run SummarizeDiff.py
-        if: steps.commit_refresh.outputs.committed == 'true'
+        if: steps.commit_refresh.outputs.csv_changed == 'true'
         run: python "Automation tools/SummarizeDiff.py" --latest auto --previous auto
 
+      - name: Fix image URLs for GitHub Discussions
+        if: steps.commit_refresh.outputs.csv_changed == 'true'
+        run: |
+          sed -i 's|"\.\./blob/main/|"https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/|g' visual_summary_diff.md
+
       - name: Create GitHub Discussion announcement
-        if: steps.commit_refresh.outputs.committed == 'true'
+        if: steps.commit_refresh.outputs.csv_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -101,11 +115,11 @@ jobs:
             }' | gh api graphql --input -
 
       - name: Run AnalyzeLeaderboard.py
-        if: steps.commit_refresh.outputs.committed == 'true'
+        if: steps.commit_refresh.outputs.csv_changed == 'true'
         run: python "Automation tools/AnalyzeLeaderboard.py"
 
       - name: Commit leaderboard + diff
-        if: steps.commit_refresh.outputs.committed == 'true'
+        if: steps.commit_refresh.outputs.csv_changed == 'true'
         run: |
           DATE=$(date +%Y-%m-%d)
 
