@@ -27,7 +27,7 @@ import io
 import os
 import subprocess
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Parse command-line arguments for commit dates
 _parser = argparse.ArgumentParser(description='Summarize diff between two Custom Visuals.csv snapshots')
@@ -71,7 +71,7 @@ def get_all_commit_shas():
     
     
     result = subprocess.run(
-        ['git', '-C', repo_path, 'log', '--pretty=format:%H|%cI', FILENAME_TO_ANALYZE],
+        ['git', '-C', repo_path, 'log', '--pretty=format:%H|%cI', '--', FILENAME_TO_ANALYZE],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         encoding='utf-8'
@@ -377,6 +377,20 @@ def _filter_identical_image_changes():
     _other_changes = filtered
 
 
+def _date_range_text():
+    """Return a user-friendly date range string based on how far apart the two dates are."""
+    try:
+        latest_dt = datetime.strptime(LATEST_COMMIT_DATE, "%Y-%m-%d")
+        previous_dt = datetime.strptime(PREVIOUS_COMMIT_DATE, "%Y-%m-%d")
+        delta_days = (latest_dt - previous_dt).days
+    except ValueError:
+        delta_days = None
+
+    if delta_days is not None and delta_days <= 1:
+        return f"as of {LATEST_COMMIT_DATE}"
+    return f"between {PREVIOUS_COMMIT_DATE} and {LATEST_COMMIT_DATE}"
+
+
 def generate_diff_file():
     new_count_str = ""
     if _new_visuals:
@@ -417,9 +431,9 @@ def generate_diff_file():
             file.write(title)
 
             if not _new_visuals and not _removed_visuals and not _version_changes and not _new_certs and not _other_changes:
-                file.write(f"No changes were detected in the Power BI visuals on Microsoft Marketplace between {PREVIOUS_COMMIT_DATE} and {LATEST_COMMIT_DATE}. Check back next week!\n")
+                file.write(f"No changes were detected in the Power BI visuals on Microsoft Marketplace {_date_range_text()}. Check back next week!\n")
             elif _new_visuals or _removed_visuals or _other_changes:
-                file.write(f"Here are the latest updates to the Power BI Visuals on Microsoft Marketplace between {PREVIOUS_COMMIT_DATE} and {LATEST_COMMIT_DATE}:")
+                file.write(f"Here are the latest updates to the Power BI Visuals on Microsoft Marketplace {_date_range_text()}:")
             if _new_visuals:
                 writeDiff(file, "New Custom Visuals", _new_visuals, _latest_data)
 

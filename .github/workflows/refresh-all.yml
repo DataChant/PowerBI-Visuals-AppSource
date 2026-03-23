@@ -71,7 +71,13 @@ jobs:
 
       - name: Run SummarizeDiff.py
         if: steps.commit_refresh.outputs.csv_changed == 'true'
-        run: python "Automation tools/SummarizeDiff.py" --latest auto --previous auto
+        run: |
+          # Compute dates from commits that actually changed Custom Visuals.csv
+          # (git log <file> without -- can be unreliable in blobless/partial clones)
+          LATEST_DATE=$(git log -1 --pretty=format:%cd --date=short -- "Custom Visuals.csv")
+          PREVIOUS_DATE=$(git log --skip=1 -1 --pretty=format:%cd --date=short -- "Custom Visuals.csv")
+          echo "Latest CSV date: $LATEST_DATE, Previous CSV date: $PREVIOUS_DATE"
+          python "Automation tools/SummarizeDiff.py" --latest "$LATEST_DATE" --previous "$PREVIOUS_DATE"
 
       - name: Fix image URLs for GitHub Discussions
         if: steps.commit_refresh.outputs.csv_changed == 'true'
