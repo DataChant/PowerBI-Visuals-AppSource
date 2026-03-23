@@ -444,17 +444,27 @@ def write_summary_markdown(visuals, scan_date, total_versions, path):
             high_cert = [v for v in high_risk if v["Is Certified"]]
             high_uncert = [v for v in high_risk if not v["Is Certified"]]
 
+            MAX_TABLE_ROWS = 30
+
             if high_cert:
-                f.write(f"### {len(high_cert)} Certified Visuals\n\n")
+                shown = min(len(high_cert), MAX_TABLE_ROWS)
+                of_total = f" (of {len(high_cert)})" if len(high_cert) > shown else ""
+                f.write(f"### Top {shown} Most Popular Certified Visuals{of_total}\n\n")
                 f.write("These visuals passed Microsoft's source code review. Patterns found in the compiled code ")
                 f.write("most likely originate from bundled third-party libraries.\n\n")
-                _write_visual_table(f, high_cert[:30])
+                _write_visual_table(f, high_cert[:MAX_TABLE_ROWS])
+                if len(high_cert) > shown:
+                    f.write(f"*...and {len(high_cert) - shown} more. See `visual_security_scores.csv` for the full list.*\n\n")
 
             if high_uncert:
-                f.write(f"### {len(high_uncert)} Uncertified Visuals (most popular first)\n\n")
+                shown = min(len(high_uncert), MAX_TABLE_ROWS)
+                of_total = f" (of {len(high_uncert)})" if len(high_uncert) > shown else ""
+                f.write(f"### Top {shown} Most Popular Uncertified Visuals{of_total}\n\n")
                 f.write("These visuals have not been reviewed by Microsoft. ")
                 f.write("Sorted by popularity so you can assess the most widely-used visuals first.\n\n")
-                _write_visual_table(f, high_uncert[:30])
+                _write_visual_table(f, high_uncert[:MAX_TABLE_ROWS])
+                if len(high_uncert) > shown:
+                    f.write(f"*...and {len(high_uncert) - shown} more. See `visual_security_scores.csv` for the full list.*\n\n")
 
         # Pattern glossary
         f.write("## What do these patterns mean?\n\n")
