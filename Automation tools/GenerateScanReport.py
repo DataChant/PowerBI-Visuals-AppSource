@@ -650,6 +650,220 @@ def _scan_single_visual_unified(args):
     return sec_row, oss_row
 
 
+def load_previous_scores(scores_csv_path):
+    """Load the previous visual_security_scores.csv for diffing.
+
+    Returns dict keyed by GUID -> row dict, or empty dict if file doesn't exist.
+    """
+    prev = {}
+    if not os.path.exists(scores_csv_path):
+        return prev
+    try:
+        with open(scores_csv_path, 'r', encoding='utf-8-sig') as f:
+            for row in csv.DictReader(f):
+                guid = row.get("GUID", "")
+                if guid:
+                    prev[guid] = row
+    except Exception:
+        pass
+    return prev
+
+
+def write_diff_markdown(visuals, previous_scores, scan_date, path):
+    """Write a What's New security diff report comparing current vs previous scan.
+
+    Categories:
+      - New visuals scanned (not in previous)
+      - Visuals that improved (lower risk or resolved findings)
+      - Visuals that got worse (higher risk or new findings)
+      - Certification changes
+      - Removed visuals (in previous but not current)
+    """
+    RISK_ORDER = {"High": 3, "Medium": 2, "Low": 1, "None": 0}
+    current_by_guid = {v["GUID"]: v for v in visuals}
+    prev_guids = set(previous_scores.keys())
+    curr_guids = set(current_by_guid.keys())
+
+    new_visuals = []
+    improved = []
+    worsened = []
+    newly_certified = []
+    lost_certification = []
+    removed_visuals = []
+
+    # New visuals
+    for guid in sorted(curr_guids - prev_guids):
+        new_visuals.append(current_by_guid[guid])
+
+    # Removed visuals
+    for guid in sorted(prev_guids - curr_guids):
+        removed_visuals.append(previous_scores[guid])
+
+    # Changed visuals
+    for guid in curr_guids & prev_guids:
+        curr = current_by_guid[guid]
+        prev = previous_scores[guid]
+
+        curr_risk = RISK_ORDER.get(curr["Risk Level"], 0)
+        prev_risk = RISK_ORDER.get(prev.get("Risk Level", "None"), 0)
+
+        curr_cert = curr["Is Certified"]
+        prev_cert = prev.get("Is Certified", "").lower() in ("true", "yes")
+
+        if curr_cert and not prev_cert:
+            newly_certified.append(curr)
+        elif not curr_cert and prev_cert:
+            lost_certification.append(curr)
+
+        if curr_risk < prev_risk or curr.get("Findings Resolved in Latest", 0) > 0:
+            improved.append(curr)
+        elif curr_risk > prev_risk:
+            worsened.append(curr)
+
+    # Don't write if nothing changed
+    total_changes = (len(new_visuals) + len(improved) + len(worsened) +
+                     len(newly_certified) + len(lost_certification) + len(removed_visuals))
+    if total_changes == 0 and previous_scores:
+        logger.info("No security changes detected -- skipping diff report")
+        # Write a minimal diff file
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(f"# Security Scan Diff -- {scan_date}\n\n")
+            f.write("No changes detected since the previous scan.\n")
+        return
+
+    with open(path, 'w', encoding='utf-8') as f:
+        # Title line matching SummarizeDiff.py style
+        parts = []
+        if new_visuals:
+            parts.append(f"{len(new_visuals)} new visual{'s' if len(new_visuals) != 1 else ''}")
+        if improved:
+            parts.append(f"{len(improved)} improved")
+        if worsened:
+            parts.append(f"{len(worsened)} worsened")
+        if newly_certified:
+            parts.append(f"{len(newly_certified)} newly certified")
+        if removed_visuals:
+            parts.append(f"{len(removed_visuals)} removed")
+        title_summary = ", ".join(parts) if parts else "no changes"
+
+        f.write(f"# [{scan_date}] Security Scan: {title_summary}\n\n")
+        f.write(f"> {DISCLAIMER}\n\n")
+
+        if not previous_scores:
+            f.write("*This is the first scan -- all visuals are listed as new.*\n\n")
+
+        # New visuals scanned
+        if new_visuals:
+            # Sort by popularity descending
+            new_visuals.sort(key=lambda v: (-v["Popularity"], v["Visual Name"]))
+            f.write(f"## {len(new_visuals)} New Visual{'s' if len(new_visuals) != 1 else ''} Scanned: ##\n\n")
+            _write_diff_table(f, new_visuals, change_type="new")
+
+        # Improved
+        if improved:
+            improved.sort(key=lambda v: (-v["Popularity"], v["Visual Name"]))
+            f.write(f"## {len(improved)} Visual{'s' if len(improved) != 1 else ''} Improved: ##\n\n")
+            f.write("Visuals that resolved findings or reduced their risk level.\n\n")
+            _write_diff_table(f, improved, change_type="improved", prev=previous_scores)
+
+        # Worsened
+        if worsened:
+            worsened.sort(key=lambda v: (-v["Popularity"], v["Visual Name"]))
+            f.write(f"## {len(worsened)} Visual{'s' if len(worsened) != 1 else ''} Worsened: ##\n\n")
+            f.write("Visuals with a higher finding level than the previous scan.\n\n")
+            _write_diff_table(f, worsened, change_type="worsened", prev=previous_scores)
+
+        # Certification changes
+        if newly_certified:
+            f.write(f"## {len(newly_certified)} Newly Certified: ##\n\n")
+            _write_diff_table(f, newly_certified, change_type="certified")
+
+        if lost_certification:
+            f.write(f"## {len(lost_certification)} Lost Certification: ##\n\n")
+            _write_diff_table(f, lost_certification, change_type="decertified")
+
+        # Removed
+        if removed_visuals:
+            f.write(f"## {len(removed_visuals)} Removed: ##\n\n")
+            f.write("Visuals no longer on AppSource.\n\n")
+            f.write("| Visual | Publisher | Previous Level |\n")
+            f.write("|--------|-----------|----------------|\n")
+            for v in removed_visuals:
+                f.write(f"| {v.get('Visual Name', '')} | {v.get('Publisher', '')} | "
+                        f"{v.get('Risk Level', '')} |\n")
+            f.write("\n")
+
+    logger.info(f"Wrote diff report to {path} ({total_changes} changes)")
+
+
+def _write_diff_table(f, visuals, change_type="new", prev=None):
+    """Write an HTML table for diff entries, matching SummarizeDiff.py style."""
+    f.write('<table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">\n')
+
+    for v in visuals:
+        name = v["Visual Name"]
+        publisher = v.get("Publisher", "")
+        guid = v["GUID"]
+        cert = "Certified" if v["Is Certified"] else "Uncertified"
+        risk = v["Risk Level"]
+        version = v.get("Latest Version", "")
+
+        thumbnail_filename = v.get("_meta", {}).get("Simple Filename", "")
+        if thumbnail_filename:
+            thumbnail_url = f"../blob/main/All%20Visuals/Images/{thumbnail_filename}.png?raw=true"
+            image_html = f'<a href="https://appsource.microsoft.com/product/power-bi-visuals/{guid}"><img src="{thumbnail_url}" width="100" alt="{name}" style="max-width:100%;height:auto;"/></a>'
+        else:
+            image_html = "No thumbnail"
+
+        # Build detail lines based on change type
+        detail_lines = [f"<b>{name}</b>"]
+        detail_lines.append(f"Publisher: {publisher} | {cert}")
+
+        if change_type == "new":
+            detail_lines.append(f"Finding Level: {risk} | Version: {version}")
+            findings = _format_findings_short(v)
+            if findings:
+                detail_lines.append(f"Patterns: {findings}")
+
+        elif change_type in ("improved", "worsened") and prev:
+            prev_v = prev.get(guid, {})
+            prev_risk = prev_v.get("Risk Level", "?")
+            detail_lines.append(f"Finding Level: {prev_risk} ➔ {risk}")
+            if v.get("Findings Resolved in Latest", 0):
+                detail_lines.append(f"Resolved {v['Findings Resolved in Latest']} pattern(s) in latest version")
+
+        elif change_type == "certified":
+            detail_lines.append(f"Now certified by Microsoft | Finding Level: {risk}")
+
+        elif change_type == "decertified":
+            detail_lines.append(f"Certification removed | Finding Level: {risk}")
+
+        rowspan = len(detail_lines)
+        f.write('<tr>\n')
+        f.write(f'  <td rowspan="{rowspan}" style="width: 120px; border: none !important; '
+                f'vertical-align: top; text-align: center;">{image_html}</td>\n')
+        f.write(f'  <td style="width: 680px; border: none !important; padding: 4px;">'
+                f'{detail_lines[0]}</td>\n')
+        f.write('</tr>\n')
+        for line in detail_lines[1:]:
+            f.write(f'<tr><td style="border: none !important; padding: 4px;">{line}</td></tr>\n')
+        f.write('<tr><td style="border: none !important; padding: 4px;"></td></tr>\n')
+
+    f.write('</table>\n\n')
+
+
+def _format_findings_short(v):
+    """Format a visual's findings as a short string for diff tables."""
+    parts = []
+    if v.get("Dynamic Code (Author)"):
+        parts.append(f"Dynamic Code: {v['Dynamic Code (Author)']}")
+    if v.get("Network Access (Author)"):
+        parts.append(f"Network: {v['Network Access (Author)']}")
+    if v.get("DOM Manipulation (Author)"):
+        parts.append(f"DOM: {v['DOM Manipulation (Author)']}")
+    return "; ".join(parts[:2]) if parts else ""
+
+
 SCAN_CACHE_FILE = ".scan_cache.json"
 
 
@@ -696,6 +910,7 @@ def main():
 
     # Output paths
     summary_md = os.path.join(workspace, "security_scan_summary.md")
+    diff_md = os.path.join(workspace, "security_scan_diff.md")
     scores_csv = os.path.join(workspace, "visual_security_scores.csv")
     findings_csv = os.path.join(workspace, "security_findings_detail.csv")
     oss_out_csv = os.path.join(workspace, "oss_licenses.csv")
@@ -774,11 +989,15 @@ def main():
     visuals = build_visual_data(security_rows, oss_index, metadata)
     logger.info(f"Built data for {len(visuals)} unique visuals")
 
+    # Load previous scores BEFORE overwriting (for diff)
+    previous_scores = load_previous_scores(scores_csv)
+
     # Generate all final outputs
     write_csv(visuals, SCORES_COLUMNS, scores_csv)
     write_csv(build_findings_detail(visuals), FINDINGS_COLUMNS, findings_csv)
     write_csv(build_oss_detail(visuals), OSS_COLUMNS, oss_out_csv)
     write_summary_markdown(visuals, scan_date, len(security_rows), summary_md)
+    write_diff_markdown(visuals, previous_scores, scan_date, diff_md)
     write_scan_metadata(visuals, scan_date, len(security_rows), metadata_json)
 
     # Summary
