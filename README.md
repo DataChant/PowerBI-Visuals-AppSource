@@ -1,5 +1,7 @@
 # PowerBI-Visuals-AppSource
-Welcome to the PowerBI-Visuals-AppSource wiki! This is a repository of Power BI custom visuals that are periodically exported from Microsoft AppSource to support the Power BI community. The repository includes pbiviz files, sample report (pbix) files, thumbnails, and automation.
+Welcome to the PowerBI-Visuals-AppSource wiki! This is a repository of Power BI custom visuals that are exported daily from Microsoft Marketplace (Formerly known as AppSource) to support the Power BI community. The repository includes pbiviz files, sample report (pbix) files, thumbnails, and automations.
+
+(Starting from Mar 3rd, 2026 this repository is refreshed daily and not weekly).
 
 Learn more in our Wiki [here](https://github.com/DataChant/PowerBI-Visuals-AppSource/wiki).
 
@@ -12,7 +14,7 @@ For a full list of all the custom visuals in this repository, their publishers, 
 
 Q: What is the source of the files in this repository?
 
-> A: The single source of truth for all of the Power BI Custom Visuals in this repository is [Microsoft AppSource](https://appsource.microsoft.com/en-us/marketplace/apps?product=power-bi-visuals). All the files in this repository are periodically imported using a Microsoft public API (which is available to Microsoft partners).
+> A: The single source of truth for all of the Power BI Custom Visuals in this repository is [Microsoft Marketplace](https://marketplace.microsoft.com/en-us/marketplace/apps?product=power-bi-visuals). All the files in this repository are periodically imported using a Microsoft public API (which is available to Microsoft partners).
 
 Q: Are the custom visuals here up to date?
 
