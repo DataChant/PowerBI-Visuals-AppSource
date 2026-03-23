@@ -300,19 +300,15 @@ def is_library_context(content, match_pos, radius=LIBRARY_CONTEXT_RADIUS):
     return False
 
 
-def scan_js_file(js_path):
-    """Scan internal.js for security patterns with library-aware filtering.
+def scan_js_content(content):
+    """Scan JavaScript content string for security patterns.
 
-    For each check, reports:
-      total  = raw regex match count
-      library = matches near known library fingerprints (false positives)
-      author  = matches NOT near any known library (potential real findings)
+    This is the core scanning function -- accepts pre-read content so callers
+    can avoid redundant file I/O when multiple scanners need the same file.
+
+    Returns dict mapping check_id -> {total, library, author}.
     """
-    try:
-        with open(js_path, 'r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
-    except Exception as e:
-        logger.warning(f"Could not read {js_path}: {e}")
+    if not content:
         return {}
 
     results = {}
@@ -339,22 +335,27 @@ def scan_js_file(js_path):
     return results
 
 
-def scan_privileges(cleaned_json_path):
-    """Scan cleaned.json for privilege declarations.
+def scan_js_file(js_path):
+    """Scan internal.js for security patterns. Convenience wrapper around scan_js_content."""
+    try:
+        with open(js_path, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+    except Exception as e:
+        logger.warning(f"Could not read {js_path}: {e}")
+        return {}
+    return scan_js_content(content)
 
-    Returns a dict of privilege details.
+
+def scan_privileges_data(data):
+    """Scan parsed cleaned.json dict for privilege declarations.
+
+    Accepts pre-parsed JSON data so callers can reuse the same parsed dict.
     """
     priv_info = {
         "WebAccess": False, "WebAccess Wildcard": False, "WebAccess URLs": "",
         "ExportContent": False, "LocalStorage": False, "AADAuthentication": False,
         "All Privileges": "",
     }
-
-    try:
-        with open(cleaned_json_path, 'r', encoding='utf-8', errors='ignore') as f:
-            data = json.load(f)
-    except Exception:
-        return priv_info
 
     privileges = data.get('capabilities', {}).get('privileges', [])
     priv_names = []
@@ -380,8 +381,33 @@ def scan_privileges(cleaned_json_path):
     return priv_info
 
 
+def scan_privileges(cleaned_json_path):
+    """Scan cleaned.json file for privileges. Convenience wrapper."""
+    try:
+        with open(cleaned_json_path, 'r', encoding='utf-8', errors='ignore') as f:
+            data = json.load(f)
+    except Exception:
+        return scan_privileges_data({})
+    return scan_privileges_data(data)
+
+
+def get_metadata_from_data(data):
+    """Extract visual metadata from pre-parsed cleaned.json dict."""
+    visual = data.get('visual', {})
+    author = data.get('author', {})
+    if isinstance(author, str):
+        author = {"name": author}
+    return {
+        'guid': visual.get('guid', ''),
+        'name': visual.get('displayName', visual.get('name', '')),
+        'version': visual.get('version', ''),
+        'api_version': data.get('apiVersion', ''),
+        'publisher': author.get('name', ''),
+    }
+
+
 def get_visual_metadata_from_json(cleaned_json_path):
-    """Extract visual metadata from cleaned.json."""
+    """Extract visual metadata from cleaned.json file. Convenience wrapper."""
     try:
         with open(cleaned_json_path, 'r', encoding='utf-8', errors='ignore') as f:
             data = json.load(f)
@@ -517,31 +543,36 @@ def scan_single_visual(args):
     return row
 
 
-def write_results_csv(results, output_path):
-    """Write scan results to CSV."""
-    with open(output_path, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
-        writer.writeheader()
-        for row in sorted(results, key=lambda r: r.get("Folder", "")):
-            writer.writerow(row)
+def scan_all(extracted_path=None, metadata=None):
+    """Scan all extracted visuals and return results in memory.
 
+    This is the primary entry point when called from GenerateScanReport.py.
+    No intermediate CSV files are written.
 
-def main():
+    Args:
+        extracted_path: Path to Extracted/ folder. Defaults to cwd/Extracted.
+        metadata: Dict of visual metadata keyed by GUID. If None, loads from
+                  Custom Visuals.csv in the workspace.
+
+    Returns:
+        List of dicts, one per visual version, with all scan columns.
+    """
     workspace_path = os.getcwd()
-    extracted_path = os.path.join(workspace_path, "Extracted")
-    csv_path = os.path.join(workspace_path, "Custom Visuals.csv")
-    output_path = os.path.join(workspace_path, "security_scan_results.csv")
+    if extracted_path is None:
+        extracted_path = os.path.join(workspace_path, "Extracted")
 
     if not os.path.isdir(extracted_path):
         logger.error(f"Extracted directory not found: {extracted_path}")
-        return
+        return []
 
-    metadata = load_metadata(csv_path)
-    logger.info(f"Loaded metadata for {len(metadata)} visuals from Custom Visuals.csv")
+    if metadata is None:
+        csv_path = os.path.join(workspace_path, "Custom Visuals.csv")
+        metadata = load_metadata(csv_path)
+        logger.info(f"Loaded metadata for {len(metadata)} visuals")
 
     folders = [f for f in os.listdir(extracted_path)
                if os.path.isdir(os.path.join(extracted_path, f))]
-    logger.info(f"Found {len(folders)} extracted visual folders to scan")
+    logger.info(f"Security scan: {len(folders)} visual folders")
 
     results = []
     total = len(folders)
@@ -568,6 +599,28 @@ def main():
                 folder_name = futures[future]
                 logger.error(f"Error scanning {folder_name}: {e}")
 
+    logger.info(f"Security scan complete: {len(results)} visuals")
+    return results
+
+
+def write_results_csv(results, output_path):
+    """Write scan results to CSV (for standalone/debug use)."""
+    with open(output_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
+        writer.writeheader()
+        for row in sorted(results, key=lambda r: r.get("Folder", "")):
+            writer.writerow(row)
+
+
+def main():
+    """Standalone entry point -- scans and writes CSV for debugging."""
+    workspace_path = os.getcwd()
+    output_path = os.path.join(workspace_path, "security_scan_results.csv")
+
+    results = scan_all()
+    if not results:
+        return
+
     write_results_csv(results, output_path)
     logger.info(f"Wrote {len(results)} results to {output_path}")
 
@@ -582,16 +635,6 @@ def main():
         count = level_counts.get(lvl, 0)
         pct = 100 * count / len(results) if results else 0
         logger.info(f"  {lvl:10s}: {count:5d} ({pct:.1f}%)")
-
-    # Author-code findings summary
-    for check in SECURITY_CHECKS:
-        cid = check["id"]
-        author_total = sum(int(r.get(f"{cid} Author", 0) or 0) for r in results)
-        library_total = sum(int(r.get(f"{cid} Library", 0) or 0) for r in results)
-        visuals_with = sum(1 for r in results if int(r.get(f"{cid} Author", 0) or 0) > 0)
-        if author_total > 0 or library_total > 0:
-            logger.info(f"  {check['name']:22s}: {visuals_with:4d} visuals "
-                        f"(author: {author_total:5d}, library: {library_total:5d})")
 
 
 if __name__ == "__main__":

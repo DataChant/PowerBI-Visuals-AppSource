@@ -254,51 +254,25 @@ def read_cleaned_json(cleaned_path):
         return {}
 
 
-def scan_single_visual(args):
-    """Scan a single visual folder for OSS libraries and licenses."""
-    extracted_path, folder = args
+def scan_oss_content(js_content, css_content, cleaned_data, folder, simple_name, guid, version):
+    """Scan pre-read content for OSS libraries and licenses.
 
-    folder_path = os.path.join(extracted_path, folder)
-    if not os.path.isdir(folder_path):
-        return None
+    This is the core scanning function -- accepts pre-read content strings
+    so callers can share I/O with other scanners (read-once optimization).
 
-    simple_name, guid, version = parse_folder_name(folder)
-
-    # Read cleaned.json -- the authoritative source for metadata and external JS
-    cleaned_path = os.path.join(folder_path, 'cleaned.json')
-    cleaned_data = read_cleaned_json(cleaned_path)
-
-    if not guid:
-        guid = cleaned_data.get('visual', {}).get('guid', '')
-
-    # Get external JS list directly from cleaned.json (authoritative source)
-    # This replaces reading the separate externalJs.txt file
+    Args:
+        js_content: internal.js content string (or empty)
+        css_content: visual.css content string (or empty)
+        cleaned_data: Parsed cleaned.json dict
+        folder: Folder name (for row identification)
+        simple_name, guid, version: Pre-parsed folder identity
+    """
     external_js = cleaned_data.get('externalJS', []) or []
 
-    # Read internal.js
-    all_content = ''
-    js_path = os.path.join(folder_path, 'internal.js')
-    if os.path.exists(js_path):
-        try:
-            with open(js_path, 'r', encoding='utf-8', errors='ignore') as f:
-                all_content = f.read()
-        except Exception:
-            pass
-
-    # Also read visual.css for license headers
-    css_path = os.path.join(folder_path, 'visual.css')
-    css_content = ''
-    if os.path.exists(css_path):
-        try:
-            with open(css_path, 'r', encoding='utf-8', errors='ignore') as f:
-                css_content = f.read()
-        except Exception:
-            pass
-
-    combined_content = all_content + '\n' + css_content
+    combined_content = (js_content or '') + '\n' + (css_content or '')
 
     # Detect libraries from code signatures
-    libraries = detect_libraries(all_content)
+    libraries = detect_libraries(js_content or '')
 
     # Detect licenses from both JS and CSS
     licenses = detect_licenses(combined_content)
@@ -315,14 +289,11 @@ def scan_single_visual(args):
     has_gpl = any(lic in ('GPL-2.0', 'GPL-3.0') for lic in licenses)
     has_restrictive = any(LICENSE_RISK.get(lic, 'Low') in ('High', 'Medium')
                          for lic in licenses)
-
-    # Also check library known licenses for GPL
     for _, _, lib_lic in libraries:
         if 'GPL' in lib_lic:
             has_gpl = True
             has_restrictive = True
 
-    # Highest license risk
     risk_level = 'Low'
     for lic in licenses:
         lr = LICENSE_RISK.get(lic, 'Low')
@@ -352,18 +323,70 @@ def scan_single_visual(args):
     }
 
 
-def main():
-    workspace_path = os.getcwd()
-    extracted_path = os.path.join(workspace_path, "Extracted")
-    output_path = os.path.join(workspace_path, "oss_scan_results.csv")
+def scan_single_visual(args):
+    """Scan a single visual folder for OSS libraries and licenses.
+
+    Standalone entry point for ProcessPoolExecutor. For the read-once pipeline,
+    use scan_oss_content() directly with pre-read content.
+    """
+    extracted_path, folder = args
+
+    folder_path = os.path.join(extracted_path, folder)
+    if not os.path.isdir(folder_path):
+        return None
+
+    simple_name, guid, version = parse_folder_name(folder)
+
+    cleaned_path = os.path.join(folder_path, 'cleaned.json')
+    cleaned_data = read_cleaned_json(cleaned_path)
+
+    if not guid:
+        guid = cleaned_data.get('visual', {}).get('guid', '')
+
+    # Read files
+    js_content = ''
+    js_path = os.path.join(folder_path, 'internal.js')
+    if os.path.exists(js_path):
+        try:
+            with open(js_path, 'r', encoding='utf-8', errors='ignore') as f:
+                js_content = f.read()
+        except Exception:
+            pass
+
+    css_content = ''
+    css_path = os.path.join(folder_path, 'visual.css')
+    if os.path.exists(css_path):
+        try:
+            with open(css_path, 'r', encoding='utf-8', errors='ignore') as f:
+                css_content = f.read()
+        except Exception:
+            pass
+
+    return scan_oss_content(js_content, css_content, cleaned_data,
+                            folder, simple_name, guid, version)
+
+
+def scan_all(extracted_path=None):
+    """Scan all extracted visuals for OSS libraries and return results in memory.
+
+    This is the primary entry point when called from GenerateScanReport.py.
+
+    Args:
+        extracted_path: Path to Extracted/ folder. Defaults to cwd/Extracted.
+
+    Returns:
+        List of dicts, one per visual version, with all OSS scan columns.
+    """
+    if extracted_path is None:
+        extracted_path = os.path.join(os.getcwd(), "Extracted")
 
     if not os.path.isdir(extracted_path):
         logger.error(f"Extracted directory not found: {extracted_path}")
-        return
+        return []
 
     folders = [f for f in os.listdir(extracted_path)
                if os.path.isdir(os.path.join(extracted_path, f))]
-    logger.info(f"Found {len(folders)} extracted visual folders to scan")
+    logger.info(f"OSS scan: {len(folders)} visual folders")
 
     results = []
     total = len(folders)
@@ -390,7 +413,19 @@ def main():
                 folder_name = futures[future]
                 logger.error(f"Error scanning {folder_name}: {e}")
 
-    # Write results
+    logger.info(f"OSS scan complete: {len(results)} visuals")
+    return results
+
+
+def main():
+    """Standalone entry point -- scans and writes CSV for debugging."""
+    workspace_path = os.getcwd()
+    output_path = os.path.join(workspace_path, "oss_scan_results.csv")
+
+    results = scan_all()
+    if not results:
+        return
+
     with open(output_path, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS)
         writer.writeheader()
@@ -398,24 +433,6 @@ def main():
             writer.writerow(row)
 
     logger.info(f"Wrote {len(results)} results to {output_path}")
-
-    # Print summary
-    lib_counts = {}
-    for r in results:
-        for lib in r.get("Detected Libraries", "").split("; "):
-            lib = lib.strip()
-            if lib:
-                lib_counts[lib] = lib_counts.get(lib, 0) + 1
-
-    logger.info("=== Top Libraries ===")
-    for lib, count in sorted(lib_counts.items(), key=lambda x: -x[1])[:15]:
-        pct = 100 * count / len(results) if results else 0
-        logger.info(f"  {lib:25s}: {count:5d} ({pct:.1f}%)")
-
-    gpl_count = sum(1 for r in results if r.get("Has GPL") == "Yes")
-    restrictive_count = sum(1 for r in results if r.get("Has Restrictive License") == "Yes")
-    logger.info(f"  Visuals with GPL: {gpl_count}")
-    logger.info(f"  Visuals with restrictive licenses: {restrictive_count}")
 
 
 if __name__ == "__main__":
