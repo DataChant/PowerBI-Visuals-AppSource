@@ -454,7 +454,7 @@ def write_summary_markdown(visuals, scan_date, total_versions, path):
                 f.write("most likely originate from bundled third-party libraries.\n\n")
                 _write_visual_table(f, high_cert[:MAX_TABLE_ROWS])
                 if len(high_cert) > shown:
-                    f.write(f"*...and {len(high_cert) - shown} more. See `visual_security_scores.csv` for the full list.*\n\n")
+                    f.write(f"*...and {len(high_cert) - shown} more. See [visual_security_scores.csv](Reports/visual_security_scores.csv) for the full list.*\n\n")
 
             if high_uncert:
                 shown = min(len(high_uncert), MAX_TABLE_ROWS)
@@ -464,7 +464,7 @@ def write_summary_markdown(visuals, scan_date, total_versions, path):
                 f.write("Sorted by popularity so you can assess the most widely-used visuals first.\n\n")
                 _write_visual_table(f, high_uncert[:MAX_TABLE_ROWS])
                 if len(high_uncert) > shown:
-                    f.write(f"*...and {len(high_uncert) - shown} more. See `visual_security_scores.csv` for the full list.*\n\n")
+                    f.write(f"*...and {len(high_uncert) - shown} more. See [visual_security_scores.csv](Reports/visual_security_scores.csv) for the full list.*\n\n")
 
         # Pattern glossary
         f.write("## What do these patterns mean?\n\n")
@@ -488,8 +488,10 @@ def write_summary_markdown(visuals, scan_date, total_versions, path):
         f.write("Full methodology and column definitions: "
                 "[Scanner User Guide](https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/"
                 "feature/security-scanning/Automation%20tools/scanner-user-guide.md)\n\n")
-        f.write("Detailed CSV files: `visual_security_scores.csv`, `security_findings_detail.csv`, "
-                "`oss_licenses.csv`\n")
+        f.write("Detailed CSV files: "
+                "[visual_security_scores.csv](Reports/visual_security_scores.csv), "
+                "[security_findings_detail.csv](Reports/security_findings_detail.csv), "
+                "[oss_licenses.csv](Reports/oss_licenses.csv)\n")
 
     logger.info(f"Wrote summary to {path}")
 
