@@ -650,12 +650,47 @@ def _scan_single_visual_unified(args):
     return sec_row, oss_row
 
 
-def main():
-    """Run the full pipeline with read-once optimization.
+SCAN_CACHE_FILE = ".scan_cache.json"
 
-    Each file is read from disk exactly once. Both security and OSS scanners
-    receive pre-read content strings. No intermediate CSV files are written.
+
+def load_scan_cache(cache_path):
+    """Load cached scan results from previous runs.
+
+    Returns dict: {folder_name: {"sec": sec_row_dict, "oss": oss_row_dict}}.
     """
+    if not os.path.exists(cache_path):
+        return {}
+    try:
+        with open(cache_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        logger.warning(f"Could not load scan cache: {e}")
+        return {}
+
+
+def save_scan_cache(cache, cache_path):
+    """Save scan results cache for incremental runs."""
+    with open(cache_path, 'w', encoding='utf-8') as f:
+        json.dump(cache, f, separators=(',', ':'))
+    size_mb = os.path.getsize(cache_path) / (1024 * 1024)
+    logger.info(f"Saved scan cache ({len(cache)} entries, {size_mb:.1f} MB)")
+
+
+def main():
+    """Run the full pipeline with incremental scanning.
+
+    On first run: scans all folders (~43 min), saves results to cache.
+    On subsequent runs: loads cache, scans ONLY new folders (~30 sec for ~30 new visuals),
+    merges results, regenerates all outputs.
+
+    Use --full to force a complete rescan ignoring the cache.
+    """
+    import argparse
+    parser = argparse.ArgumentParser(description='Generate security scan report')
+    parser.add_argument('--full', action='store_true',
+                        help='Force full rescan, ignoring cache')
+    args = parser.parse_args()
+
     workspace = os.getcwd()
     extracted_path = os.path.join(workspace, "Extracted")
 
@@ -665,46 +700,71 @@ def main():
     findings_csv = os.path.join(workspace, "security_findings_detail.csv")
     oss_out_csv = os.path.join(workspace, "oss_licenses.csv")
     metadata_json = os.path.join(workspace, "scan_metadata.json")
+    cache_path = os.path.join(workspace, SCAN_CACHE_FILE)
 
     if not os.path.isdir(extracted_path):
         logger.error(f"Extracted directory not found: {extracted_path}")
         return
 
-    # Load shared metadata once
+    # Load shared metadata
     metadata_csv = os.path.join(workspace, "Custom Visuals.csv")
     metadata = load_metadata(metadata_csv)
     logger.info(f"Loaded metadata for {len(metadata)} visuals")
 
-    folders = [f for f in os.listdir(extracted_path)
-               if os.path.isdir(os.path.join(extracted_path, f))]
-    total = len(folders)
-    logger.info(f"Scanning {total} visual folders (read-once mode)...")
+    # Load scan cache (unless --full)
+    cache = {} if args.full else load_scan_cache(cache_path)
 
-    # Unified scan: read each file once, run both scanners
-    security_rows = []
-    oss_rows = []
-    completed = 0
+    # Determine which folders need scanning
+    all_folders = [f for f in os.listdir(extracted_path)
+                   if os.path.isdir(os.path.join(extracted_path, f))]
+    new_folders = [f for f in all_folders if f not in cache]
+    cached_folders = [f for f in all_folders if f in cache]
 
-    args_list = [(extracted_path, folder, metadata) for folder in folders]
-    max_workers = min(os.cpu_count() or 4, 8)
+    logger.info(f"Total folders: {len(all_folders)} | "
+                f"Cached: {len(cached_folders)} | "
+                f"New to scan: {len(new_folders)}")
 
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        futures = {executor.submit(_scan_single_visual_unified, args): args[1]
-                   for args in args_list}
-        for future in as_completed(futures):
-            completed += 1
-            if completed % 200 == 0 or completed == total:
-                logger.info(f"Scanned {completed}/{total} ({100*completed/total:.1f}%)")
-            try:
-                sec_row, oss_row = future.result()
-                if sec_row:
-                    security_rows.append(sec_row)
-                if oss_row:
-                    oss_rows.append(oss_row)
-            except Exception as e:
-                logger.error(f"Error scanning {futures[future]}: {e}")
+    # Scan only new folders
+    if new_folders:
+        completed = 0
+        total_new = len(new_folders)
+        args_list = [(extracted_path, folder, metadata) for folder in new_folders]
+        max_workers = min(os.cpu_count() or 4, 8)
 
-    logger.info(f"Scan complete: {len(security_rows)} security, {len(oss_rows)} OSS")
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(_scan_single_visual_unified, a): a[1]
+                       for a in args_list}
+            for future in as_completed(futures):
+                completed += 1
+                if completed % 200 == 0 or completed == total_new:
+                    logger.info(f"Scanned {completed}/{total_new} new folders "
+                               f"({100*completed/total_new:.1f}%)")
+                try:
+                    sec_row, oss_row = future.result()
+                    folder_name = futures[future]
+                    if sec_row and oss_row:
+                        cache[folder_name] = {"sec": sec_row, "oss": oss_row}
+                except Exception as e:
+                    logger.error(f"Error scanning {futures[future]}: {e}")
+
+        logger.info(f"Scanned {len(new_folders)} new folders")
+
+    # Also remove cache entries for folders that no longer exist
+    all_folder_set = set(all_folders)
+    removed = [f for f in cache if f not in all_folder_set]
+    for f in removed:
+        del cache[f]
+    if removed:
+        logger.info(f"Removed {len(removed)} stale cache entries")
+
+    # Save updated cache
+    save_scan_cache(cache, cache_path)
+
+    # Assemble full results from cache
+    security_rows = [entry["sec"] for entry in cache.values()]
+    oss_rows = [entry["oss"] for entry in cache.values()]
+
+    logger.info(f"Total results: {len(security_rows)} security, {len(oss_rows)} OSS")
 
     # Index OSS data by folder for merging
     oss_index = {row.get("Folder", ""): row for row in oss_rows}
