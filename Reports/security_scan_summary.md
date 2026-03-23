@@ -79,7 +79,7 @@
 
 ## 929 Visuals with Multiple Patterns (by popularity)
 
-### 455 Certified Visuals
+### Top 30 Most Popular Certified Visuals (of 455)
 
 These visuals passed Microsoft's source code review. Patterns found in the compiled code most likely originate from bundled third-party libraries.
 
@@ -116,7 +116,9 @@ These visuals passed Microsoft's source code review. Patterns found in the compi
 | Bullet Chart 🟢-4 | Microsoft Corporation | 0.99 | Net: 1; DOM: 3 | -- | Globalize |
 | Inforiver Reporting Matrix | xViz LLC dba Lumel | 0.99 | Code: 4; DOM: 40 | Export | jQuery; Leaflet; DOMPurify; Quill; Globa... |
 
-### 474 Uncertified Visuals (most popular first)
+*...and 425 more. See [visual_security_scores.csv](Reports/visual_security_scores.csv) for the full list.*
+
+### Top 30 Most Popular Uncertified Visuals (of 474)
 
 These visuals have not been reviewed by Microsoft. Sorted by popularity so you can assess the most widely-used visuals first.
 
@@ -153,6 +155,8 @@ These visuals have not been reviewed by Microsoft. Sorted by popularity so you c
 | Clustered Stacked Column (Standard) 🟢-1 | PBIVizEdit.com | 0.96 | DOM: 12 | -- | jQuery; Leaflet; Plotly.js; Globalize; T... |
 | Multi Axis Line Chart for Power BI by ChartExpo | polyvista.com | 0.96 | Code: 4; Net: 3; DOM: 101 | Web, Export | jQuery; Leaflet |
 
+*...and 444 more. See [visual_security_scores.csv](Reports/visual_security_scores.csv) for the full list.*
+
 ## What do these patterns mean?
 
 | Category | Patterns Checked | What it means | Severity |
@@ -175,4 +179,4 @@ These visuals have not been reviewed by Microsoft. Sorted by popularity so you c
 
 Full methodology and column definitions: [Scanner User Guide](https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/feature/security-scanning/Automation%20tools/scanner-user-guide.md)
 
-Detailed CSV files: `visual_security_scores.csv`, `security_findings_detail.csv`, `oss_licenses.csv`
+Detailed CSV files: [visual_security_scores.csv](Reports/visual_security_scores.csv), [security_findings_detail.csv](Reports/security_findings_detail.csv), [oss_licenses.csv](Reports/oss_licenses.csv)
