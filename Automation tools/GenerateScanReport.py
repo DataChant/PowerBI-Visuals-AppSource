@@ -696,7 +696,8 @@ def write_diff_markdown(visuals, previous_scores, scan_date, prev_scan_date, pat
     curr_guids = set(current_by_guid.keys())
 
     new_visuals = []
-    improved = []
+    improved = []        # Risk level dropped
+    reduced = []         # Same risk level but fewer author findings
     worsened = []
     newly_certified = []
     lost_certification = []
@@ -726,14 +727,27 @@ def write_diff_markdown(visuals, previous_scores, scan_date, prev_scan_date, pat
         elif not curr_cert and prev_cert:
             lost_certification.append(curr)
 
-        # Only count as improved if risk level actually dropped
+        curr_findings = int(curr.get("Author Findings", 0) or 0)
+        prev_findings = int(prev.get("Author Findings", 0) or 0)
+
         if curr_risk < prev_risk:
+            # Risk level dropped -- clear improvement
+            curr["_prev_risk"] = prev.get("Risk Level", "None")
+            curr["_prev_findings"] = prev_findings
             improved.append(curr)
         elif curr_risk > prev_risk:
+            curr["_prev_risk"] = prev.get("Risk Level", "None")
+            curr["_prev_findings"] = prev_findings
             worsened.append(curr)
+        elif prev_findings > 0 and curr_findings < prev_findings:
+            # Same risk level but fewer findings -- partial progress
+            pct = round(100 * (prev_findings - curr_findings) / prev_findings)
+            curr["_prev_findings"] = prev_findings
+            curr["_reduction_pct"] = pct
+            reduced.append(curr)
 
     # Don't write if nothing changed
-    total_changes = (len(new_visuals) + len(improved) + len(worsened) +
+    total_changes = (len(new_visuals) + len(improved) + len(reduced) + len(worsened) +
                      len(newly_certified) + len(lost_certification) + len(removed_visuals))
     if total_changes == 0 and previous_scores:
         logger.info("No security changes detected -- skipping diff report")
@@ -750,6 +764,8 @@ def write_diff_markdown(visuals, previous_scores, scan_date, prev_scan_date, pat
             parts.append(f"{len(new_visuals)} new visual{'s' if len(new_visuals) != 1 else ''}")
         if improved:
             parts.append(f"{len(improved)} improved")
+        if reduced:
+            parts.append(f"{len(reduced)} reduced patterns")
         if worsened:
             parts.append(f"{len(worsened)} worsened")
         if newly_certified:
@@ -772,12 +788,27 @@ def write_diff_markdown(visuals, previous_scores, scan_date, prev_scan_date, pat
             f.write(f"## {len(new_visuals)} New Visual{'s' if len(new_visuals) != 1 else ''} Scanned: ##\n\n")
             _write_diff_table(f, new_visuals, change_type="new")
 
-        # Improved
+        # Improved (risk level dropped)
         if improved:
             improved.sort(key=lambda v: (-v["Popularity"], v["Visual Name"]))
             f.write(f"## {len(improved)} Visual{'s' if len(improved) != 1 else ''} Improved: ##\n\n")
-            f.write("Visuals that resolved findings or reduced their risk level.\n\n")
+            f.write("Visuals whose finding level dropped.\n\n")
             _write_diff_table(f, improved, change_type="improved", prev=previous_scores)
+
+        # Reduced patterns (same risk level, fewer findings)
+        if reduced:
+            reduced.sort(key=lambda v: (-v.get("_reduction_pct", 0), -v["Popularity"]))
+            f.write(f"## {len(reduced)} Visual{'s' if len(reduced) != 1 else ''} Reduced Patterns: ##\n\n")
+            f.write("Same finding level, but fewer patterns detected than the previous scan.\n\n")
+            f.write("| Visual | Publisher | Finding Level | Patterns | Change |\n")
+            f.write("|--------|-----------|---------------|----------|--------|\n")
+            for v in reduced:
+                curr_f = int(v.get("Author Findings", 0) or 0)
+                prev_f = v.get("_prev_findings", 0)
+                pct = v.get("_reduction_pct", 0)
+                f.write(f"| {v['Visual Name']} | {v['Publisher']} | {v['Risk Level']} | "
+                        f"{prev_f} ➔ {curr_f} | -{pct}% |\n")
+            f.write("\n")
 
         # Worsened
         if worsened:
