@@ -400,23 +400,26 @@ def generate_diff_file():
             versions_count_str = f", {versions_count} new version"
         else:
             versions_count_str = f", {versions_count} new versions"
-    else:
-        new_count_str = ", no new versions"
 
     certified_count_str = ""
     if _new_certs:
         certified_count = len(_new_certs)
         certified_count_str = f", {certified_count} certified"
 
-    title = f"[{LATEST_COMMIT_DATE}] {new_count_str}{removed_count_str}{versions_count_str}{certified_count_str}\n\n"
+    if not _new_visuals and not _removed_visuals and not _version_changes and not _new_certs and not _other_changes:
+        title = f"[{LATEST_COMMIT_DATE}] All quiet on the Marketplace front\n\n"
+    else:
+        title = f"[{LATEST_COMMIT_DATE}] {new_count_str}{removed_count_str}{versions_count_str}{certified_count_str}\n\n"
 
     try:
         with open('visual_summary_diff.md', 'w', encoding='utf-8') as file:
             
             file.write(title)
 
-            if _new_visuals or _removed_visuals or _other_changes:
-                file.write(f"Here are the latest updates to the Power BI Visuals on Microsoft AppSource between {PREVIOUS_COMMIT_DATE} and {LATEST_COMMIT_DATE}:")
+            if not _new_visuals and not _removed_visuals and not _version_changes and not _new_certs and not _other_changes:
+                file.write(f"No changes were detected in the Power BI visuals on Microsoft Marketplace between {PREVIOUS_COMMIT_DATE} and {LATEST_COMMIT_DATE}. Check back next week!\n")
+            elif _new_visuals or _removed_visuals or _other_changes:
+                file.write(f"Here are the latest updates to the Power BI Visuals on Microsoft Marketplace between {PREVIOUS_COMMIT_DATE} and {LATEST_COMMIT_DATE}:")
             if _new_visuals:
                 writeDiff(file, "New Custom Visuals", _new_visuals, _latest_data)
 
