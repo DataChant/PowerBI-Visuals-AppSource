@@ -908,14 +908,17 @@ def main():
     workspace = os.getcwd()
     extracted_path = os.path.join(workspace, "Extracted")
 
-    # Output paths
-    summary_md = os.path.join(workspace, "security_scan_summary.md")
-    diff_md = os.path.join(workspace, "security_scan_diff.md")
-    scores_csv = os.path.join(workspace, "visual_security_scores.csv")
-    findings_csv = os.path.join(workspace, "security_findings_detail.csv")
-    oss_out_csv = os.path.join(workspace, "oss_licenses.csv")
-    metadata_json = os.path.join(workspace, "scan_metadata.json")
-    cache_path = os.path.join(workspace, SCAN_CACHE_FILE)
+    # Output paths -- all security content goes in Reports/
+    reports_dir = os.path.join(workspace, "Reports")
+    os.makedirs(reports_dir, exist_ok=True)
+
+    summary_md = os.path.join(reports_dir, "security_scan_summary.md")
+    diff_md = os.path.join(reports_dir, "security_scan_diff.md")
+    scores_csv = os.path.join(reports_dir, "visual_security_scores.csv")
+    findings_csv = os.path.join(reports_dir, "security_findings_detail.csv")
+    oss_out_csv = os.path.join(reports_dir, "oss_licenses.csv")
+    metadata_json = os.path.join(reports_dir, "scan_metadata.json")
+    cache_path = os.path.join(reports_dir, SCAN_CACHE_FILE)
 
     if not os.path.isdir(extracted_path):
         logger.error(f"Extracted directory not found: {extracted_path}")
