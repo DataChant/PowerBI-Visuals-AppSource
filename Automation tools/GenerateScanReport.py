@@ -650,14 +650,25 @@ def _scan_single_visual_unified(args):
     return sec_row, oss_row
 
 
-def load_previous_scores(scores_csv_path):
-    """Load the previous visual_security_scores.csv for diffing.
+def load_previous_scores(scores_csv_path, metadata_json_path):
+    """Load the previous visual_security_scores.csv and scan date for diffing.
 
-    Returns dict keyed by GUID -> row dict, or empty dict if file doesn't exist.
+    Returns (dict keyed by GUID -> row dict, previous_scan_date str or None).
     """
     prev = {}
+    prev_date = None
+
+    # Get previous scan date from metadata
+    if os.path.exists(metadata_json_path):
+        try:
+            with open(metadata_json_path, 'r', encoding='utf-8') as f:
+                meta = json.load(f)
+            prev_date = meta.get("scan_date")
+        except Exception:
+            pass
+
     if not os.path.exists(scores_csv_path):
-        return prev
+        return prev, prev_date
     try:
         with open(scores_csv_path, 'r', encoding='utf-8-sig') as f:
             for row in csv.DictReader(f):
@@ -666,10 +677,10 @@ def load_previous_scores(scores_csv_path):
                     prev[guid] = row
     except Exception:
         pass
-    return prev
+    return prev, prev_date
 
 
-def write_diff_markdown(visuals, previous_scores, scan_date, path):
+def write_diff_markdown(visuals, previous_scores, scan_date, prev_scan_date, path):
     """Write a What's New security diff report comparing current vs previous scan.
 
     Categories:
@@ -715,7 +726,8 @@ def write_diff_markdown(visuals, previous_scores, scan_date, path):
         elif not curr_cert and prev_cert:
             lost_certification.append(curr)
 
-        if curr_risk < prev_risk or curr.get("Findings Resolved in Latest", 0) > 0:
+        # Only count as improved if risk level actually dropped
+        if curr_risk < prev_risk:
             improved.append(curr)
         elif curr_risk > prev_risk:
             worsened.append(curr)
@@ -745,8 +757,9 @@ def write_diff_markdown(visuals, previous_scores, scan_date, path):
         if removed_visuals:
             parts.append(f"{len(removed_visuals)} removed")
         title_summary = ", ".join(parts) if parts else "no changes"
+        since_str = f" since {prev_scan_date}" if prev_scan_date else ""
 
-        f.write(f"# [{scan_date}] Security Scan: {title_summary}\n\n")
+        f.write(f"# [{scan_date}] Security Scan: {title_summary}{since_str}\n\n")
         f.write(f"> {DISCLAIMER}\n\n")
 
         if not previous_scores:
@@ -993,14 +1006,14 @@ def main():
     logger.info(f"Built data for {len(visuals)} unique visuals")
 
     # Load previous scores BEFORE overwriting (for diff)
-    previous_scores = load_previous_scores(scores_csv)
+    previous_scores, prev_scan_date = load_previous_scores(scores_csv, metadata_json)
 
     # Generate all final outputs
     write_csv(visuals, SCORES_COLUMNS, scores_csv)
     write_csv(build_findings_detail(visuals), FINDINGS_COLUMNS, findings_csv)
     write_csv(build_oss_detail(visuals), OSS_COLUMNS, oss_out_csv)
     write_summary_markdown(visuals, scan_date, len(security_rows), summary_md)
-    write_diff_markdown(visuals, previous_scores, scan_date, diff_md)
+    write_diff_markdown(visuals, previous_scores, scan_date, prev_scan_date, diff_md)
     write_scan_metadata(visuals, scan_date, len(security_rows), metadata_json)
 
     # Summary
