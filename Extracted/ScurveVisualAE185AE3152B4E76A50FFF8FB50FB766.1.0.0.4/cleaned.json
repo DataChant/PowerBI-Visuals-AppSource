@@ -1,0 +1,557 @@
+{
+    "visual": {
+        "name": "Scurve",
+        "displayName": "Scurve by elwaha.net",
+        "guid": "ScurveVisualAE185AE3152B4E76A50FFF8FB50FB766",
+        "visualClassName": "Visual",
+        "version": "1.0.0.4",
+        "description": "Create S-Curve in Power BI",
+        "supportUrl": "https://www.elwaha.net/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Mahmoud Salama",
+        "email": "eng.mahmoud3863@outlook.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Date / Period",
+                "name": "period",
+                "kind": "Grouping",
+                "description": "Time axis labels (dates, months, weeks)"
+            },
+            {
+                "displayName": "Planned Value",
+                "name": "plannedPeriodic",
+                "kind": "Measure",
+                "description": "Planned cost/value for each period (bar)"
+            },
+            {
+                "displayName": "Actual Value",
+                "name": "actualPeriodic",
+                "kind": "Measure",
+                "description": "Actual cost/value for each period (bar)"
+            },
+            {
+                "displayName": "Cumulative Planned",
+                "name": "cumulativePlanned",
+                "kind": "Measure",
+                "description": "Cumulative planned cost/value (S-curve line)"
+            },
+            {
+                "displayName": "Cumulative Actual",
+                "name": "cumulativeActual",
+                "kind": "Measure",
+                "description": "Cumulative actual cost/value (S-curve line)"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "period": {
+                            "max": 1
+                        },
+                        "plannedPeriodic": {
+                            "max": 1
+                        },
+                        "actualPeriodic": {
+                            "max": 1
+                        },
+                        "cumulativePlanned": {
+                            "max": 1
+                        },
+                        "cumulativeActual": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "period"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "plannedPeriodic"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "actualPeriodic"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "cumulativePlanned"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "cumulativeActual"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "chartSettings": {
+                "displayName": "Chart Settings",
+                "description": "General chart configuration",
+                "properties": {
+                    "chartTitle": {
+                        "displayName": "Chart Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showDataLabels": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDataTable": {
+                        "displayName": "Show Data Table",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showRangeSlider": {
+                        "displayName": "Show Range Slider",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "animationDuration": {
+                        "displayName": "Animation Duration (ms)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineTension": {
+                        "displayName": "Line Smoothness",
+                        "description": "0 = straight lines, 0.4 = very smooth",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "barRadius": {
+                        "displayName": "Bar Corner Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "barPercentage": {
+                        "displayName": "Bar Width (%)",
+                        "description": "Width of bars as percentage (10-100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointDisplayMode": {
+                        "displayName": "Line Points Display",
+                        "description": "Control how often points appear on lines",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "All Points",
+                                    "value": "all"
+                                },
+                                {
+                                    "displayName": "First & Last Only",
+                                    "value": "firstLast"
+                                },
+                                {
+                                    "displayName": "Every 2 Points",
+                                    "value": "every2"
+                                },
+                                {
+                                    "displayName": "Every 3 Points",
+                                    "value": "every3"
+                                },
+                                {
+                                    "displayName": "Every 5 Points",
+                                    "value": "every5"
+                                },
+                                {
+                                    "displayName": "Every 10 Points",
+                                    "value": "every10"
+                                },
+                                {
+                                    "displayName": "Monthly (if daily data)",
+                                    "value": "monthly"
+                                },
+                                {
+                                    "displayName": "No Points",
+                                    "value": "none"
+                                }
+                            ]
+                        }
+                    },
+                    "weekStartDay": {
+                        "displayName": "Week Starts On",
+                        "description": "Choose which day the week starts on",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Saturday",
+                                    "value": "saturday"
+                                },
+                                {
+                                    "displayName": "Sunday",
+                                    "value": "sunday"
+                                },
+                                {
+                                    "displayName": "Monday",
+                                    "value": "monday"
+                                },
+                                {
+                                    "displayName": "Tuesday",
+                                    "value": "tuesday"
+                                },
+                                {
+                                    "displayName": "Wednesday",
+                                    "value": "wednesday"
+                                },
+                                {
+                                    "displayName": "Thursday",
+                                    "value": "thursday"
+                                },
+                                {
+                                    "displayName": "Friday",
+                                    "value": "friday"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "dataLabelSettings": {
+                "displayName": "Data Label Font",
+                "description": "Font settings for data labels displayed on the chart",
+                "properties": {
+                    "labelFontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Segoe UI",
+                                    "value": "Segoe UI"
+                                },
+                                {
+                                    "displayName": "Arial",
+                                    "value": "Arial"
+                                },
+                                {
+                                    "displayName": "Calibri",
+                                    "value": "Calibri"
+                                },
+                                {
+                                    "displayName": "Helvetica",
+                                    "value": "Helvetica"
+                                },
+                                {
+                                    "displayName": "Verdana",
+                                    "value": "Verdana"
+                                },
+                                {
+                                    "displayName": "Tahoma",
+                                    "value": "Tahoma"
+                                },
+                                {
+                                    "displayName": "Trebuchet MS",
+                                    "value": "Trebuchet MS"
+                                },
+                                {
+                                    "displayName": "Georgia",
+                                    "value": "Georgia"
+                                },
+                                {
+                                    "displayName": "Times New Roman",
+                                    "value": "Times New Roman"
+                                },
+                                {
+                                    "displayName": "Courier New",
+                                    "value": "Courier New"
+                                },
+                                {
+                                    "displayName": "Comic Sans MS",
+                                    "value": "Comic Sans MS"
+                                },
+                                {
+                                    "displayName": "Impact",
+                                    "value": "Impact"
+                                },
+                                {
+                                    "displayName": "Lucida Console",
+                                    "value": "Lucida Console"
+                                }
+                            ]
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelFontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelFontItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Label Color (Override)",
+                        "description": "If set, overrides per-dataset label colors. Leave empty to use default colors.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBackgroundOpacity": {
+                        "displayName": "Background Opacity (%)",
+                        "description": "0 = transparent background, 100 = fully opaque background behind labels",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "colorSettings": {
+                "displayName": "Color Settings",
+                "description": "Colors for chart elements",
+                "properties": {
+                    "plannedBarColor": {
+                        "displayName": "Planned Bar Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "actualBarColor": {
+                        "displayName": "Actual Bar Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cumulativePlannedColor": {
+                        "displayName": "Cum. Planned Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cumulativeActualColor": {
+                        "displayName": "Cum. Actual Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pointRadius": {
+                        "displayName": "Point Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "displayMode": {
+                "displayName": "Display Mode",
+                "description": "Value or percentage display",
+                "properties": {
+                    "mode": {
+                        "displayName": "Mode",
+                        "description": "Show values or percentages",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Cost / Value",
+                                    "value": "value"
+                                },
+                                {
+                                    "displayName": "Percentage",
+                                    "value": "pct"
+                                }
+                            ]
+                        }
+                    },
+                    "numberFormat": {
+                        "displayName": "Number Format",
+                        "description": "How to format large numbers",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto (K/M)",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Full Number",
+                                    "value": "full"
+                                },
+                                {
+                                    "displayName": "Thousands (K)",
+                                    "value": "thousands"
+                                },
+                                {
+                                    "displayName": "Millions (M)",
+                                    "value": "millions"
+                                }
+                            ]
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "axisSettings": {
+                "displayName": "Axis Settings",
+                "description": "Configure chart axes",
+                "properties": {
+                    "leftAxisTitle": {
+                        "displayName": "Left Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rightAxisTitle": {
+                        "displayName": "Right Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showGridLines": {
+                        "displayName": "Show Grid Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisFontSize": {
+                        "displayName": "Axis Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "legendSettings": {
+                "displayName": "Legend",
+                "description": "Legend configuration",
+                "properties": {
+                    "showLegend": {
+                        "displayName": "Show Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendPosition": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Bottom",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "legendFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "tooltipSettings": {
+                "displayName": "Tooltip",
+                "description": "Tooltip configuration",
+                "properties": {
+                    "showTooltip": {
+                        "displayName": "Show Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tooltipFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "sorting": {
+            "default": {}
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
