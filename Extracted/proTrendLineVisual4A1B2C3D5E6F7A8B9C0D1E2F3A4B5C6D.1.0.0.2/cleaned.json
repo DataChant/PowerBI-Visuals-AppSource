@@ -1,0 +1,1540 @@
+{
+    "visual": {
+        "name": "proTrendLineVisual",
+        "displayName": "Pro Trend Line Chart",
+        "guid": "proTrendLineVisual4A1B2C3D5E6F7A8B9C0D1E2F3A4B5C6D",
+        "visualClassName": "Visual",
+        "version": "1.0.0.2",
+        "description": "Professional trend-line chart for Power BI. Compares planned vs actual hourly units over time with full statistical analysis: variance bands, reference lines (avg/max/min/median/target), regression trend lines, anomaly detection, linear forecast with confidence bands, KPI summary cards, conditional formatting, crosshair interaction, and mini sparkline panel.",
+        "supportUrl": "mailto:AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Abdalla Dabes, P.E, PSP, PMP",
+        "email": "AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Time Axis",
+                "name": "timeAxis",
+                "kind": "Grouping",
+                "description": "Date or time field for the X-axis"
+            },
+            {
+                "displayName": "Actual Units",
+                "name": "actualValues",
+                "kind": "Measure",
+                "description": "Actual hourly units (measured values)"
+            },
+            {
+                "displayName": "Planned / Estimated Units",
+                "name": "plannedValues",
+                "kind": "Measure",
+                "description": "Planned or estimated hourly units (target values)"
+            },
+            {
+                "displayName": "Remaining Units",
+                "name": "remainingValues",
+                "kind": "Measure",
+                "description": "Remaining units per period for forecast basis"
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": "Additional measures shown in the tooltip"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "timeAxis": {
+                            "max": 1
+                        },
+                        "actualValues": {
+                            "max": 1
+                        },
+                        "plannedValues": {
+                            "max": 1
+                        },
+                        "remainingValues": {
+                            "max": 1
+                        },
+                        "tooltips": {
+                            "max": 5
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "timeAxis"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 10000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "actualValues"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "plannedValues"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "remainingValues"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "chartTitle": {
+                "displayName": "Chart Title",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Title Text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "alignment": {
+                        "displayName": "Alignment",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "actualLine": {
+                "displayName": "Actual Units Line",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "showDataPoints": {
+                        "displayName": "Show Data Points",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointRadius": {
+                        "displayName": "Point Radius (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "curvature": {
+                        "displayName": "Curve Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "smooth",
+                                    "displayName": "Smooth"
+                                },
+                                {
+                                    "value": "step",
+                                    "displayName": "Step"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "plannedLine": {
+                "displayName": "Planned Units Line",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "showDataPoints": {
+                        "displayName": "Show Data Points",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointRadius": {
+                        "displayName": "Point Radius (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "curvature": {
+                        "displayName": "Curve Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "smooth",
+                                    "displayName": "Smooth"
+                                },
+                                {
+                                    "value": "step",
+                                    "displayName": "Step"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "remainingLine": {
+                "displayName": "Remaining / Forecast Line",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineStyle": {
+                        "displayName": "Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "showDataPoints": {
+                        "displayName": "Show Data Points",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pointRadius": {
+                        "displayName": "Point Radius (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showArea": {
+                        "displayName": "Show Area Fill",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "displayName": "Area Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "varianceBand": {
+                "displayName": "Variance Band",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Variance Band",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "positiveColor": {
+                        "displayName": "Positive Variance Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "negativeColor": {
+                        "displayName": "Negative Variance Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "referenceLine": {
+                "displayName": "Reference Lines",
+                "properties": {
+                    "showAverage": {
+                        "displayName": "Show Average (Actual)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPlannedAverage": {
+                        "displayName": "Show Average (Planned)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMaxLine": {
+                        "displayName": "Show Max Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMinLine": {
+                        "displayName": "Show Min Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMedianLine": {
+                        "displayName": "Show Median Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTargetLine": {
+                        "displayName": "Show Custom Target",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "targetValue": {
+                        "displayName": "Target Value",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "averageColor": {
+                        "displayName": "Average Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "displayName": "Max Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minColor": {
+                        "displayName": "Min Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "medianColor": {
+                        "displayName": "Median Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "targetColor": {
+                        "displayName": "Target Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineWidth": {
+                        "displayName": "Line Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showLabels": {
+                        "displayName": "Show Reference Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "trendLine": {
+                "displayName": "Trend Lines (Regression)",
+                "properties": {
+                    "showActualTrend": {
+                        "displayName": "Show Trend (Actual)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPlannedTrend": {
+                        "displayName": "Show Trend (Planned)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "trendLineType": {
+                        "displayName": "Trend Type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "movingAverage",
+                                    "displayName": "Moving Average"
+                                }
+                            ]
+                        }
+                    },
+                    "movingAveragePeriod": {
+                        "displayName": "Moving Avg Period",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "actualTrendColor": {
+                        "displayName": "Actual Trend Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "plannedTrendColor": {
+                        "displayName": "Planned Trend Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "trendLineWidth": {
+                        "displayName": "Trend Line Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "anomalyDetection": {
+                "displayName": "Anomaly Detection",
+                "properties": {
+                    "show": {
+                        "displayName": "Enable Anomaly Detection",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "method": {
+                        "displayName": "Detection Method",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "stddev",
+                                    "displayName": "Standard Deviation"
+                                },
+                                {
+                                    "value": "iqr",
+                                    "displayName": "IQR (Interquartile Range)"
+                                },
+                                {
+                                    "value": "zscore",
+                                    "displayName": "Z-Score"
+                                }
+                            ]
+                        }
+                    },
+                    "sensitivity": {
+                        "displayName": "Sensitivity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "markerColor": {
+                        "displayName": "Anomaly Marker Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "markerSize": {
+                        "displayName": "Marker Size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "forecastSettings": {
+                "displayName": "Forecast",
+                "properties": {
+                    "show": {
+                        "displayName": "Enable Forecast",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "forecastBasis": {
+                        "displayName": "Forecast Basis",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "remainingUnits",
+                                    "displayName": "Remaining Units (data field)"
+                                },
+                                {
+                                    "value": "avgPerformance",
+                                    "displayName": "Average Current Performance"
+                                }
+                            ]
+                        }
+                    },
+                    "forecastPeriods": {
+                        "displayName": "Forecast Periods (avg basis)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "confidenceInterval": {
+                        "displayName": "Confidence Interval (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showConfidenceBand": {
+                        "displayName": "Show Confidence Band",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "performanceZone": {
+                "displayName": "Performance Zones",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Performance Zones",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "overperformColor": {
+                        "displayName": "Overperform Zone Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "underperformColor": {
+                        "displayName": "Underperform Zone Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "zoneOpacity": {
+                        "displayName": "Zone Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "chartMargins": {
+                "displayName": "Chart Margins",
+                "properties": {
+                    "marginTop": {
+                        "displayName": "Top Margin (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "marginBottom": {
+                        "displayName": "Bottom Margin (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "marginLeft": {
+                        "displayName": "Left Margin (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "marginRight": {
+                        "displayName": "Right Margin (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "xAxis": {
+                "displayName": "X-Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show X-Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisColor": {
+                        "displayName": "Axis Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelAngle": {
+                        "displayName": "Label Angle",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Horizontal"
+                                },
+                                {
+                                    "value": "-30",
+                                    "displayName": "-30\u00b0"
+                                },
+                                {
+                                    "value": "-45",
+                                    "displayName": "-45\u00b0"
+                                },
+                                {
+                                    "value": "-90",
+                                    "displayName": "Vertical"
+                                }
+                            ]
+                        }
+                    },
+                    "showGridLines": {
+                        "displayName": "Show Grid Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridColor": {
+                        "displayName": "Grid Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridOpacity": {
+                        "displayName": "Grid Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Axis Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisTitle": {
+                        "displayName": "Axis Title Text",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "yAxis": {
+                "displayName": "Y-Axis",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Y-Axis",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisColor": {
+                        "displayName": "Axis Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showGridLines": {
+                        "displayName": "Show Grid Lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridColor": {
+                        "displayName": "Grid Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridOpacity": {
+                        "displayName": "Grid Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startFromZero": {
+                        "displayName": "Start from Zero",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minValue": {
+                        "displayName": "Min Value (override)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxValue": {
+                        "displayName": "Max Value (override)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayUnit": {
+                        "displayName": "Display Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "thousands",
+                                    "displayName": "Thousands (K)"
+                                },
+                                {
+                                    "value": "millions",
+                                    "displayName": "Millions (M)"
+                                },
+                                {
+                                    "value": "billions",
+                                    "displayName": "Billions (B)"
+                                }
+                            ]
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show Axis Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisTitle": {
+                        "displayName": "Axis Title Text",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom (below chart)"
+                                },
+                                {
+                                    "value": "top",
+                                    "displayName": "Top (above chart)"
+                                },
+                                {
+                                    "value": "inPlotTopLeft",
+                                    "displayName": "Inside Plot \u2014 Top Left"
+                                },
+                                {
+                                    "value": "inPlotTopRight",
+                                    "displayName": "Inside Plot \u2014 Top Right"
+                                },
+                                {
+                                    "value": "inPlotBotLeft",
+                                    "displayName": "Inside Plot \u2014 Bottom Left"
+                                },
+                                {
+                                    "value": "inPlotBotRight",
+                                    "displayName": "Inside Plot \u2014 Bottom Right"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showBackground": {
+                        "displayName": "Show Background (in-plot only)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundOpacity": {
+                        "displayName": "Background Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "tooltipSettings": {
+                "displayName": "Tooltip",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showVariance": {
+                        "displayName": "Show Variance",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showVariancePct": {
+                        "displayName": "Show Variance %",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showRollingAvg": {
+                        "displayName": "Show Rolling Average",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rollingAvgPeriod": {
+                        "displayName": "Rolling Avg Period",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showCumulative": {
+                        "displayName": "Show Cumulative Total",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data Labels",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Data Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "series": {
+                        "displayName": "Apply To",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "actual",
+                                    "displayName": "Actual Only"
+                                },
+                                {
+                                    "value": "planned",
+                                    "displayName": "Planned Only"
+                                },
+                                {
+                                    "value": "both",
+                                    "displayName": "Both"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "displayUnit": {
+                        "displayName": "Display Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "thousands",
+                                    "displayName": "K"
+                                },
+                                {
+                                    "value": "millions",
+                                    "displayName": "M"
+                                }
+                            ]
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Label Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "above",
+                                    "displayName": "Above"
+                                },
+                                {
+                                    "value": "below",
+                                    "displayName": "Below"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "conditionalFormatting": {
+                "displayName": "Conditional Formatting",
+                "properties": {
+                    "show": {
+                        "displayName": "Enable Conditional Coloring",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "thresholdAbove": {
+                        "displayName": "Upper Threshold",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "thresholdBelow": {
+                        "displayName": "Lower Threshold",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "aboveColor": {
+                        "displayName": "Above Threshold Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "belowColor": {
+                        "displayName": "Below Threshold Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "withinColor": {
+                        "displayName": "Within Range Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "chartBackground": {
+                "displayName": "Background & Border",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBorder": {
+                        "displayName": "Show Border",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderRadius": {
+                        "displayName": "Border Radius (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderWidth": {
+                        "displayName": "Border Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "crosshair": {
+                "displayName": "Crosshair",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Crosshair",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "crosshairColor": {
+                        "displayName": "Crosshair Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "crosshairWidth": {
+                        "displayName": "Crosshair Width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "sparklinePanel": {
+                "displayName": "Mini Sparkline Panel",
+                "properties": {
+                    "show": {
+                        "displayName": "Show Sparkline Panel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "height": {
+                        "displayName": "Panel Height (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "analysisPanel": {
+                "displayName": "Analysis Panel",
+                "properties": {
+                    "showButton": {
+                        "displayName": "Show Analysis Button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "buttonLabel": {
+                        "displayName": "Button Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "buttonBgColor": {
+                        "displayName": "Button Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "buttonTextColor": {
+                        "displayName": "Button Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showPerformance": {
+                        "displayName": "Show Performance Section",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showActualAvg": {
+                        "displayName": "Show Avg Actual",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPlannedAvg": {
+                        "displayName": "Show Avg Planned",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showVariancePct": {
+                        "displayName": "Show Overall Variance %",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showAchievement": {
+                        "displayName": "Show Achievement Rate",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTotals": {
+                        "displayName": "Show Totals Section",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTotalActual": {
+                        "displayName": "Show Total Actual",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTotalPlanned": {
+                        "displayName": "Show Total Planned",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTotalVar": {
+                        "displayName": "Show Total Variance",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDistribution": {
+                        "displayName": "Show Distribution Section",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMax": {
+                        "displayName": "Show Max Actual",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMin": {
+                        "displayName": "Show Min Actual",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMedian": {
+                        "displayName": "Show Median Actual",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showStdDev": {
+                        "displayName": "Show Std Deviation",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPeriods": {
+                        "displayName": "Show Periods Section",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showOverPeriods": {
+                        "displayName": "Show Over Plan Periods",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showUnderPeriods": {
+                        "displayName": "Show Under Plan Periods",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showForecastInfo": {
+                        "displayName": "Show Forecast Information",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "suppressDefaultTitle": false,
+        "supportsSynchronizingFilterState": true,
+        "sorting": {
+            "default": {}
+        },
+        "drilldown": {
+            "roles": [
+                "timeAxis"
+            ]
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
