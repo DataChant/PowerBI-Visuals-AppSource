@@ -1,0 +1,946 @@
+{
+    "visual": {
+        "name": "kanbanBoard",
+        "displayName": "KanbanFlow \u2014 Kanban & Scrum Board",
+        "guid": "kanbanBoardA1B2C3D4E5",
+        "visualClassName": "Visual",
+        "version": "1.2.2.0",
+        "description": "Interactive Kanban and Scrum board for Power BI. Visualise tasks, sprints, and workflows by stage with aging indicators, due dates, drag-and-drop, and write-back to SharePoint via Power Automate. Fully configurable formatting, layout presets, and Pro licensing via KanbanFlow.",
+        "supportUrl": "https://www.ectrics.com/kanbanflow",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Pim Kouwenhoven",
+        "email": "powerbi@f.institute"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [],
+        "dataRoles": [
+            {
+                "name": "task",
+                "kind": "Grouping",
+                "displayName": "Task"
+            },
+            {
+                "name": "stage",
+                "kind": "Grouping",
+                "displayName": "Stage"
+            },
+            {
+                "name": "client",
+                "kind": "Grouping",
+                "displayName": "Client"
+            },
+            {
+                "name": "owner",
+                "kind": "Grouping",
+                "displayName": "Assignee"
+            },
+            {
+                "name": "daysInStage",
+                "kind": "GroupingOrMeasure",
+                "displayName": "Days in Stage"
+            },
+            {
+                "name": "taskGroup",
+                "kind": "Grouping",
+                "displayName": "Task Group"
+            },
+            {
+                "name": "status",
+                "kind": "Grouping",
+                "displayName": "Status"
+            },
+            {
+                "name": "reportingPeriod",
+                "kind": "Grouping",
+                "displayName": "Reporting Period"
+            },
+            {
+                "name": "stageSort",
+                "kind": "GroupingOrMeasure",
+                "displayName": "Stage sort order (optional)"
+            },
+            {
+                "name": "dueDate",
+                "kind": "Grouping",
+                "displayName": "Due Date"
+            },
+            {
+                "name": "eventId",
+                "kind": "Grouping",
+                "displayName": "Event ID (write-back key)"
+            },
+            {
+                "name": "note",
+                "kind": "Grouping",
+                "displayName": "Note"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "task"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "stage"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "client"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "owner"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "daysInStage"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "taskGroup"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "status"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "reportingPeriod"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "stageSort"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dueDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "eventId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "note"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 10000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "aging": {
+                "displayName": "Aging thresholds",
+                "properties": {
+                    "mediumThreshold": {
+                        "displayName": "Medium aging threshold (days)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "highThreshold": {
+                        "displayName": "High aging threshold (days)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dueSoonThreshold": {
+                        "displayName": "Due-soon warning (days before due date)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "display": {
+                "displayName": "Display options",
+                "properties": {
+                    "showOwner": {
+                        "displayName": "Show assignee",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDays": {
+                        "displayName": "Show days in stage",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showClient": {
+                        "displayName": "Show client",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTaskGroup": {
+                        "displayName": "Show task group",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showStatus": {
+                        "displayName": "Show status chip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showStageNumber": {
+                        "displayName": "Show stage number prefix (e.g. '1.')",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDueDate": {
+                        "displayName": "Show due date",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "overviewPanel": {
+                "displayName": "Overview panel",
+                "properties": {
+                    "titleText": {
+                        "displayName": "Title text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Title \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleFontColor": {
+                        "displayName": "Title \u2014 font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayName": "Title \u2014 font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "periodPrefix": {
+                        "displayName": "Period label prefix",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "periodFontSize": {
+                        "displayName": "Period label \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "periodFontColor": {
+                        "displayName": "Period label \u2014 font color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "periodFontFamily": {
+                        "displayName": "Period label \u2014 font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "tasksLabel": {
+                        "displayName": "Tasks label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "staleLabel": {
+                        "displayName": "Needs attention label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "ownersLabel": {
+                        "displayName": "Owners label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "completedLabel": {
+                        "displayName": "Completed label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "metricValueFontSize": {
+                        "displayName": "Value \u2014 font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "metricLabelFontSize": {
+                        "displayName": "Label \u2014 font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "metricBackground": {
+                        "displayName": "KPI card background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "subtitleColor": {
+                        "displayName": "Subtitle color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gradientStart": {
+                        "displayName": "Background gradient \u2014 start",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gradientEnd": {
+                        "displayName": "Background gradient \u2014 end",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gradientAngle": {
+                        "displayName": "Background gradient \u2014 angle (\u00b0)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "metricValueColor": {
+                        "displayName": "KPI value color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "metricLabelColor": {
+                        "displayName": "KPI label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "colors": {
+                "displayName": "Colors",
+                "properties": {
+                    "boardBackground": {
+                        "displayName": "Visual background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "agingLow": {
+                        "displayName": "Low aging accent",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "agingMedium": {
+                        "displayName": "Medium aging accent",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "agingHigh": {
+                        "displayName": "High aging accent",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "agingNone": {
+                        "displayName": "No-age accent",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "laneBackground": {
+                        "displayName": "Lane background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cardBackground": {
+                        "displayName": "Card background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "layout": {
+                "displayName": "Layout & sizing",
+                "properties": {
+                    "preset": {
+                        "displayName": "Preset",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Custom",
+                                    "value": "custom"
+                                },
+                                {
+                                    "displayName": "Default",
+                                    "value": "default"
+                                },
+                                {
+                                    "displayName": "Compact",
+                                    "value": "compact"
+                                },
+                                {
+                                    "displayName": "Mini overview",
+                                    "value": "mini"
+                                }
+                            ]
+                        }
+                    },
+                    "laneWidth": {
+                        "displayName": "Lane width (px)  [Custom preset \u00b7 Pro+]",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "laneGap": {
+                        "displayName": "Gap between lanes (px)  [Custom preset \u00b7 Pro+]",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cardGap": {
+                        "displayName": "Gap between cards (px)  [Custom preset \u00b7 Pro+]",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cardPadding": {
+                        "displayName": "Card padding (px)  [Custom preset \u00b7 Pro+]",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "laneFormat": {
+                "displayName": "Lane headers",
+                "properties": {
+                    "laneTitleFontSize": {
+                        "displayName": "Title \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "laneTitleColor": {
+                        "displayName": "Title \u2014 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "laneTitleFontFamily": {
+                        "displayName": "Title \u2014 font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "laneCaptionFontSize": {
+                        "displayName": "Task count \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "laneCaptionColor": {
+                        "displayName": "Task count \u2014 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lanePillFontSize": {
+                        "displayName": "Age pill \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "lanePillColor": {
+                        "displayName": "Age pill \u2014 text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lanePillBackground": {
+                        "displayName": "Age pill \u2014 background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "stageColors": {
+                "displayName": "Stage colors  [Pro]",
+                "properties": {
+                    "enableStageColors": {
+                        "displayName": "Enable stage colors  [Pro]",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "stage1Color": {
+                        "displayName": "Stage 1 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage2Color": {
+                        "displayName": "Stage 2 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage3Color": {
+                        "displayName": "Stage 3 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage4Color": {
+                        "displayName": "Stage 4 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage5Color": {
+                        "displayName": "Stage 5 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage6Color": {
+                        "displayName": "Stage 6 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage7Color": {
+                        "displayName": "Stage 7 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage8Color": {
+                        "displayName": "Stage 8 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage9Color": {
+                        "displayName": "Stage 9 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "stage10Color": {
+                        "displayName": "Stage 10 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "headerFormat": {
+                "displayName": "Overview panel  [Pro]",
+                "properties": {
+                    "gradientStart": {
+                        "displayName": "Background gradient start",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gradientEnd": {
+                        "displayName": "Background gradient end",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gradientAngle": {
+                        "displayName": "Gradient angle (degrees)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "metricBackground": {
+                        "displayName": "KPI card background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "metricValueColor": {
+                        "displayName": "KPI value color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "metricLabelColor": {
+                        "displayName": "KPI label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "subtitleColor": {
+                        "displayName": "Subtitle color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "writeBack": {
+                "displayName": "Write-back [Premium]",
+                "properties": {
+                    "flowUrl": {
+                        "displayName": "Notes flow URL  [Premium]",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "stageFlowUrl": {
+                        "displayName": "Stage move flow URL  [Premium]",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "license": {
+                "displayName": "License",
+                "properties": {
+                    "licenseKey": {
+                        "displayName": "License key",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "cardFormat": {
+                "displayName": "Card fields",
+                "properties": {
+                    "titleFontSize": {
+                        "displayName": "Title \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Title \u2014 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayName": "Title \u2014 font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "agePillFontSize": {
+                        "displayName": "Age pill \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "agePillColor": {
+                        "displayName": "Age pill \u2014 text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "agePillBackground": {
+                        "displayName": "Age pill \u2014 background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "chipFontSize": {
+                        "displayName": "Chips \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "clientChipColor": {
+                        "displayName": "Client chip \u2014 text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "clientChipBackground": {
+                        "displayName": "Client chip \u2014 background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "taskGroupChipColor": {
+                        "displayName": "Task group chip \u2014 text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "taskGroupChipBackground": {
+                        "displayName": "Task group chip \u2014 background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "metaFontSize": {
+                        "displayName": "Footer meta \u2014 font size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "metaColor": {
+                        "displayName": "Footer meta \u2014 color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
