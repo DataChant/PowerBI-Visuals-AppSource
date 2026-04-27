@@ -1,0 +1,368 @@
+{
+    "visual": {
+        "name": "ProcessMiningVisual",
+        "displayName": "Process Mining Flow 1.0.5.0",
+        "guid": "ProcessMiningVisual1A2B3C4D5E6F7890",
+        "visualClassName": "Visual",
+        "version": "1.0.5.0",
+        "description": "A process mining visual that displays sequential stage flow with measure-based durations between stages. Supports vertical and horizontal orientations and cross-filtering.",
+        "supportUrl": "https://github.com/rlg37/PowerBIVisual-ProcessMining",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Ryan G",
+        "email": "ryan.gex@afs.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "stage",
+                "kind": "Grouping",
+                "displayName": "Stage",
+                "description": "Sequential process stage field (e.g. ava_stageindex)."
+            },
+            {
+                "name": "count",
+                "kind": "Measure",
+                "displayName": "Count",
+                "description": "Measure for how many times each stage was visited."
+            },
+            {
+                "name": "measure",
+                "kind": "Measure",
+                "displayName": "Duration Measure",
+                "description": "Numeric measure shown on edges (e.g. ava_dayswaiting)."
+            },
+            {
+                "name": "expand",
+                "kind": "Grouping",
+                "displayName": "Expand By",
+                "description": "Optional: categorical field to break each stage into sub-nodes (e.g. Owner)."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "stage": {
+                            "max": 1
+                        },
+                        "count": {
+                            "max": 1
+                        },
+                        "measure": {
+                            "max": 1
+                        },
+                        "expand": {
+                            "max": 0
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "stage"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 500
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "count"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "conditions": [
+                    {
+                        "stage": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "expand": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "count": {
+                            "max": 1
+                        },
+                        "measure": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "stage"
+                                },
+                                "dataReductionAlgorithm": {
+                                    "top": {
+                                        "count": 2000
+                                    }
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "expand"
+                                }
+                            }
+                        ]
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "count"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "layout": {
+                "displayName": "Layout",
+                "properties": {
+                    "orientation": {
+                        "displayName": "Orientation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "vertical",
+                                    "displayName": "Vertical"
+                                },
+                                {
+                                    "value": "horizontal",
+                                    "displayName": "Horizontal"
+                                }
+                            ]
+                        }
+                    },
+                    "expandMode": {
+                        "displayName": "Expand Owners",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "nodeSpacing": {
+                        "displayName": "Node Spacing",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "zoomLevel": {
+                        "displayName": "Zoom Level %",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "nodeFormat": {
+                "displayName": "Stage Nodes",
+                "properties": {
+                    "fillColor": {
+                        "displayName": "Fill Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size (pt)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderRadius": {
+                        "displayName": "Corner Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "expandFormat": {
+                "displayName": "Expand Nodes",
+                "properties": {
+                    "fillColor": {
+                        "displayName": "Fill Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size (pt)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "useDataColors": {
+                        "displayName": "Use Data Colors",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "edgeFormat": {
+                "displayName": "Edges & Arrows",
+                "properties": {
+                    "arrowColor": {
+                        "displayName": "Arrow Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Label Font Size (pt)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelFontColor": {
+                        "displayName": "Label Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBgColor": {
+                        "displayName": "Label Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "measureUnit": {
+                        "displayName": "Duration Unit",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "selectionFormat": {
+                "displayName": "Selection",
+                "properties": {
+                    "highlightColor": {
+                        "displayName": "Highlight Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dimOpacity": {
+                        "displayName": "Dim Opacity %",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsMultiVisualSelection": true,
+        "supportsLandingPage": true,
+        "sorting": {
+            "default": {}
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
