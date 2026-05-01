@@ -1,0 +1,4668 @@
+{
+    "visual": {
+        "name": "prosankey",
+        "displayName": "ProSankey",
+        "guid": "prosankey15EE2451103167596D2F59FE6BFCEDED",
+        "visualClassName": "Visual",
+        "version": "1.0.0.2",
+        "description": "Professional Sankey / flow diagram visual for Power BI with loop-safe layout, path tracing, and auto-bucket.",
+        "supportUrl": "https://vectras-software.com/products/prosankey/support/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Vectras Software",
+        "email": "support@vectras-software.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Visual_EmptyState_Title": "ProSankey",
+            "Visual_EmptyState_NoFields": "Drop at least two fields into Levels and a measure into Value, or bind Source + Target + Value.",
+            "Visual_EmptyState_PartialLevels": "Drop a second field into Levels to complete the flow \u2014 e.g., Region, then Category.",
+            "Visual_EmptyState_NoValue": "Drag a numeric measure into the Value field to define flow size.",
+            "Visual_EmptyState_NoRows": "No data matches the current filter context.",
+            "Visual_EmptyState_NoSource": "Add a Source Node field.",
+            "Visual_EmptyState_NoTarget": "Add a Target Node field.",
+            "Visual_EmptyState_NeedGraphFields": "Graph mode needs Source, Target, and Value fields.",
+            "Visual_EmptyState_NeedHybridFields": "Hybrid mode: bind Levels and Source/Target.",
+            "Visual_EmptyState_HybridRequiresPro": "Hybrid Mode requires Pro \u2014 using Path Mode.",
+            "Visual_EmptyState_ProLevelsLocked": "Levels 4+ require ProSankey Pro. Showing the first 3 levels (up to 16 levels with Pro).",
+            "EmptyState_Title": "ProSankey",
+            "EmptyState_NoFields": "Drop at least two fields into Levels and a measure into Value, or bind Source + Target + Value.",
+            "EmptyState_PartialLevels": "Drop a second field into Levels to complete the flow \u2014 e.g., Region, then Category.",
+            "EmptyState_NoValue": "Drag a numeric measure into the Value field to define flow size.",
+            "EmptyState_NoRows": "No data matches the current filter context.",
+            "EmptyState_ProLevelsLocked": "Levels 4+ require ProSankey Pro. Showing the first 3 levels (up to 16 levels with Pro).",
+            "Feature_LoopSafe": "Loop-safe layout",
+            "Feature_PathTrace": "Path-level click-to-trace",
+            "Feature_Bucket": "Auto-bucket small flows into Other",
+            "Feature_ManualOrder": "Manual node ordering",
+            "Tooltip_Source": "Source",
+            "Tooltip_Target": "Target",
+            "Tooltip_Value": "Value",
+            "Tooltip_Percent": "% of total",
+            "Tooltip_Level": "Level",
+            "Mode_Path": "Path (Levels)",
+            "Mode_Graph": "Graph (Source \u2192 Target)",
+            "Mode_Hybrid": "Hybrid (Path + Graph)",
+            "Preview_Title": "Flow preview",
+            "Preview_Mode": "Mode",
+            "Preview_Rows": "Rows",
+            "Preview_Edges": "Edges",
+            "Preview_Dropped": "Dropped",
+            "Preview_TopFlows": "Top flows",
+            "Preview_Conflict": "Conflicts",
+            "Debug_Title": "Debug",
+            "Debug_ParseMs": "Parse",
+            "Debug_LayoutMs": "Layout",
+            "Debug_RenderMs": "Render",
+            "Debug_Warnings": "Warnings",
+            "ModeData_AggSum": "Sum",
+            "ModeData_AggCount": "Count",
+            "ModeData_AggAvg": "Average",
+            "ModeData_AggMin": "Min",
+            "ModeData_AggMax": "Max",
+            "ModeData_NullIgnore": "Ignore",
+            "ModeData_NullUnknown": "Group as Unknown",
+            "ModeData_NullCustom": "Custom label",
+            "ModeData_IdentityPerLevel": "Per level",
+            "ModeData_IdentityCrossLevel": "Cross level (merge same label)",
+            "Card_Visual": "Visual",
+            "Card_ModeData": "Mode & Data",
+            "Card_Nodes": "Nodes",
+            "Card_Links": "Flows",
+            "Card_EdgeStyling": "Edge styling",
+            "Card_FlowLabels": "Flow labels",
+            "Card_NodeLabels": "Node labels",
+            "Card_ColorRules": "Color rules",
+            "Card_ColorFieldRules": "Color field rules",
+            "Card_LoopDisplay": "Loop display",
+            "Card_PathTracing": "Path tracing",
+            "Card_Bucketing": "Bucketing",
+            "Card_Legend": "Legend",
+            "Card_Tooltip": "Tooltip",
+            "Card_Performance": "Performance",
+            "Card_Debug": "Debug"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Source Node",
+                "name": "source",
+                "kind": "Grouping",
+                "description": "Source node (Graph Mode). Binding Source + Target switches to explicit edge list."
+            },
+            {
+                "displayName": "Target Node",
+                "name": "target",
+                "kind": "Grouping",
+                "description": "Target node (Graph Mode)."
+            },
+            {
+                "displayName": "Source Node Category",
+                "name": "sourceCategory",
+                "kind": "Grouping",
+                "description": "Optional node category for Source Node. Graph/Hybrid only; pure Path mode ignores this role."
+            },
+            {
+                "displayName": "Target Node Category",
+                "name": "targetCategory",
+                "kind": "Grouping",
+                "description": "Optional node category for Target Node. Graph/Hybrid only; pure Path mode ignores this role."
+            },
+            {
+                "displayName": "Time",
+                "name": "time",
+                "kind": "Grouping",
+                "description": "Optional time/period field for temporal unfolding in Graph Mode."
+            },
+            {
+                "displayName": "Edge Type (Graph/Hybrid Pro)",
+                "name": "edgeType",
+                "kind": "Grouping",
+                "description": "Optional Graph/Hybrid edge category used to split and style flows by type. Pure Path mode ignores this role."
+            },
+            {
+                "displayName": "Value",
+                "name": "value",
+                "kind": "Measure",
+                "description": "Flow weight (typically a SUM measure)."
+            },
+            {
+                "displayName": "Tooltip Fields",
+                "name": "tooltipFields",
+                "kind": "GroupingOrMeasure",
+                "description": "Extra data shown in flow hover tooltips. Graph uses edge-row summaries; Path propagates path-row summaries to generated segments."
+            },
+            {
+                "displayName": "Levels",
+                "name": "levels",
+                "kind": "Grouping",
+                "description": "Flow hierarchy (Path Mode). Drop up to 16 fields; order in the well is level order. First 3 levels are Free; 4-16 require ProSankey Pro."
+            }
+        ],
+        "objects": {
+            "visual": {
+                "properties": {
+                    "orientation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "horizontal",
+                                    "displayName": "Horizontal"
+                                },
+                                {
+                                    "value": "vertical",
+                                    "displayName": "Vertical (Pro)"
+                                }
+                            ]
+                        }
+                    },
+                    "backgroundColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showBorder": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "modeData": {
+                "properties": {
+                    "aggregationMethod": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "sum",
+                                    "displayName": "Sum"
+                                },
+                                {
+                                    "value": "count",
+                                    "displayName": "Count (Pro)"
+                                },
+                                {
+                                    "value": "avg",
+                                    "displayName": "Average (Pro)"
+                                },
+                                {
+                                    "value": "min",
+                                    "displayName": "Min (Pro)"
+                                },
+                                {
+                                    "value": "max",
+                                    "displayName": "Max (Pro)"
+                                }
+                            ]
+                        }
+                    },
+                    "nullStrategy": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "drop-row",
+                                    "displayName": "Drop row"
+                                },
+                                {
+                                    "value": "unknown",
+                                    "displayName": "Group as \"Unknown\""
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom null label"
+                                },
+                                {
+                                    "value": "skip-missing-levels",
+                                    "displayName": "Skip missing levels"
+                                }
+                            ]
+                        }
+                    },
+                    "nullLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "nodeIdentity": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "per-level",
+                                    "displayName": "Per level (distinct across levels)"
+                                },
+                                {
+                                    "value": "cross-level",
+                                    "displayName": "Cross level (merge same label) (Pro)"
+                                }
+                            ]
+                        }
+                    },
+                    "caseInsensitiveMatching": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showFlowPreview": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "nodes": {
+                "properties": {
+                    "nodeWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodePadding": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "defaultColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "nodeOrdering": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (by value)"
+                                },
+                                {
+                                    "value": "manual",
+                                    "displayName": "Manual (data order) (Pro)"
+                                }
+                            ]
+                        }
+                    },
+                    "level1Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level2Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level3Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level4Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level5Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level6Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level7Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level8Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level9Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level10Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level11Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level12Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level13Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level14Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level15Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "level16Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "links": {
+                "properties": {
+                    "curvature": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "defaultOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "colorSource": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "gradient",
+                                    "displayName": "Gradient"
+                                },
+                                {
+                                    "value": "source",
+                                    "displayName": "Source node color"
+                                },
+                                {
+                                    "value": "target",
+                                    "displayName": "Target node color"
+                                },
+                                {
+                                    "value": "fixed",
+                                    "displayName": "Fixed color"
+                                }
+                            ]
+                        }
+                    },
+                    "fixedColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "edgeStyling": {
+                "properties": {
+                    "rule1Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule1Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule1Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule1Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rule2Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule2Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule2Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule2Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rule3Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule3Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule3Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule3Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rule4Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule4Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule4Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule4Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rule5Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule5Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule5Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule5Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rule6Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule6Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule6Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule6Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rule7Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule7Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule7Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule7Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rule8Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule8Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule8Dash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "rule8Opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "flowLabels": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minWidthPx": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "placement": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "above",
+                                    "displayName": "Above"
+                                },
+                                {
+                                    "value": "below",
+                                    "displayName": "Below"
+                                }
+                            ]
+                        }
+                    },
+                    "contentMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "value",
+                                    "displayName": "Value"
+                                },
+                                {
+                                    "value": "share-of-total",
+                                    "displayName": "Share of total"
+                                }
+                            ]
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "haloEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "haloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "haloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "formatOverride": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeLabels": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showName": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showValue": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPercent": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "placement": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inside",
+                                    "displayName": "Inside"
+                                },
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                },
+                                {
+                                    "value": "above",
+                                    "displayName": "Above"
+                                },
+                                {
+                                    "value": "below",
+                                    "displayName": "Below"
+                                }
+                            ]
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "haloEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "haloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "haloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "colorRules": {
+                "properties": {
+                    "rule1Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule1Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule2Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule2Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule3Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule3Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule4Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule4Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule5Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule5Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule6Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule6Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule7Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule7Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule8Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule8Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule9Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule9Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule10Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule10Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule11Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule11Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule12Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule12Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule13Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule13Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule14Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule14Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule15Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule15Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule16Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule16Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule17Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule17Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule18Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule18Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule19Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule19Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule20Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule20Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule21Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule21Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule22Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule22Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule23Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule23Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule24Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule24Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule25Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule25Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule26Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule26Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule27Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule27Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule28Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule28Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule29Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule29Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule30Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule30Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule31Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule31Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule32Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule32Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "loopDisplay": {
+                "properties": {
+                    "showLoopArcs": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "arcColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "arcDash": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "loopNodeIndicatorColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "pathTracing": {
+                "properties": {
+                    "fadeOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "highlightAccentColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "bucketing": {
+                "properties": {
+                    "enabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "thresholdPercent": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bucketLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "otherNodeColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "performance": {
+                "properties": {
+                    "maxNodes": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxEdges": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxFlowLabels": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showSamplingLabel": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableViewportCulling": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableCache": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "layoutQuality": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (adaptive)"
+                                },
+                                {
+                                    "value": "fast",
+                                    "displayName": "Fast (few iterations)"
+                                },
+                                {
+                                    "value": "balanced",
+                                    "displayName": "Balanced"
+                                },
+                                {
+                                    "value": "high",
+                                    "displayName": "High (best quality)"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "debug": {
+                "properties": {
+                    "enabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle1": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle2": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle3": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle4": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle5": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle6": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle7": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle8": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle9": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle10": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle11": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle12": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle13": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle14": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle15": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle16": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle17": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle18": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle19": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle20": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle21": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle22": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle23": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle24": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle25": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle26": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle27": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle28": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle29": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle30": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle31": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "nodeCategoryStyle32": {
+                "properties": {
+                    "fillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal stripes"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Crosshatch"
+                                },
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                }
+                            ]
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelHaloColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "labelHaloWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categoryLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "levels": {
+                            "max": 16
+                        },
+                        "source": {
+                            "max": 1
+                        },
+                        "target": {
+                            "max": 1
+                        },
+                        "time": {
+                            "max": 1
+                        },
+                        "edgeType": {
+                            "max": 1
+                        },
+                        "value": {
+                            "max": 1
+                        },
+                        "tooltipFields": {
+                            "max": 20
+                        },
+                        "sourceCategory": {
+                            "max": 1
+                        },
+                        "targetCategory": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "levels"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "source"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "target"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "sourceCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "targetCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "time"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "edgeType"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "value"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltipFields"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "tooltips": {
+            "supportedTypes": {
+                "default": true
+            },
+            "roles": [
+                "tooltipFields"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true,
+        "supportsHighlight": true,
+        "supportsLandingPage": true,
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

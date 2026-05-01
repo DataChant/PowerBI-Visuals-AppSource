@@ -1,0 +1,907 @@
+{
+    "visual": {
+        "name": "RiskOpportunityMatrix",
+        "displayName": "Risk & Opportunity Matrix",
+        "guid": "RiskOpportunityMatrix_A1B2C3D4E5F6",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Combined 5x5 Risk and Opportunity Matrix with animated pre/post mitigation bubble visualization",
+        "supportUrl": "https://visuals.cilver.app",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Cilver",
+        "email": "connect@cilver.app"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "category",
+                "kind": "Grouping",
+                "displayName": "Risk ID"
+            },
+            {
+                "name": "riskType",
+                "kind": "Grouping",
+                "displayName": "Type (Risk/Opportunity)"
+            },
+            {
+                "name": "likelihood",
+                "kind": "Measure",
+                "displayName": "Likelihood (1-5)"
+            },
+            {
+                "name": "impact",
+                "kind": "Measure",
+                "displayName": "Impact (1-5)"
+            },
+            {
+                "name": "residualLikelihood",
+                "kind": "Measure",
+                "displayName": "Residual Likelihood  (1-5)"
+            },
+            {
+                "name": "residualImpact",
+                "kind": "Measure",
+                "displayName": "Residual Impact (1-5)"
+            },
+            {
+                "name": "cost",
+                "kind": "Measure",
+                "displayName": "Cost / Size"
+            },
+            {
+                "name": "status",
+                "kind": "Grouping",
+                "displayName": "Status (optional)"
+            },
+            {
+                "name": "reportingPeriod",
+                "kind": "Grouping",
+                "displayName": "Reporting Period"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "riskType": {
+                            "max": 1
+                        },
+                        "likelihood": {
+                            "max": 1
+                        },
+                        "impact": {
+                            "max": 1
+                        },
+                        "residualLikelihood": {
+                            "max": 1
+                        },
+                        "residualImpact": {
+                            "max": 1
+                        },
+                        "cost": {
+                            "max": 1
+                        },
+                        "status": {
+                            "max": 1
+                        },
+                        "reportingPeriod": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "riskType"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "likelihood"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "impact"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "residualLikelihood"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "residualImpact"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "cost"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "status"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "reportingPeriod"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "gridColors": {
+                "displayName": "Matrix Colors",
+                "properties": {
+                    "riskColor1": {
+                        "displayName": "Risk \u2014 Low (1\u20133)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "riskColor2": {
+                        "displayName": "Risk \u2014 Medium (4\u20136)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "riskColor3": {
+                        "displayName": "Risk \u2014 High (7\u201310)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "riskColor4": {
+                        "displayName": "Risk \u2014 Critical (11\u201325)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "oppColor1": {
+                        "displayName": "Opportunity \u2014 Low (1\u20133)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "oppColor2": {
+                        "displayName": "Opportunity \u2014 Medium (4\u20136)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "oppColor3": {
+                        "displayName": "Opportunity \u2014 High (7\u201310)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "oppColor4": {
+                        "displayName": "Opportunity \u2014 Critical (11\u201325)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "matrixBubbles": {
+                "displayName": "Matrix & Bubbles",
+                "properties": {
+                    "visibilityMode": {
+                        "displayName": "Show",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "both",
+                                    "displayName": "Show Both"
+                                },
+                                {
+                                    "value": "risk",
+                                    "displayName": "Show Risk only"
+                                },
+                                {
+                                    "value": "opportunity",
+                                    "displayName": "Show Opportunity only"
+                                }
+                            ]
+                        }
+                    },
+                    "showRatingNumbers": {
+                        "displayName": "Show Cell Score Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCountBadge": {
+                        "displayName": "Count Badge",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bubbleSizeMultiplier": {
+                        "displayName": "Bubble Size (1-10)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "riskBubbleColor": {
+                        "displayName": "Risk Bubble Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opportunityBubbleColor": {
+                        "displayName": "Opportunity Bubble Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showBubbleLabels": {
+                        "displayName": "Show Bubble Name Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTrajectory": {
+                        "displayName": "Show Trajectory",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showExtendedPeriod": {
+                        "displayName": "Show Extended Period Trail",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "trajectoryStyle": {
+                        "displayName": "Trail Line Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "straight",
+                                    "displayName": "Straight"
+                                },
+                                {
+                                    "value": "curved",
+                                    "displayName": "Curved"
+                                }
+                            ]
+                        }
+                    },
+                    "trajectoryLineStyle": {
+                        "displayName": "Trail Line Design",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                }
+                            ]
+                        }
+                    },
+                    "trajectoryLineWidth": {
+                        "displayName": "Trail Line Width",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "3",
+                                    "displayName": "Thick (3px)"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Medium (2px)"
+                                },
+                                {
+                                    "value": "1.5",
+                                    "displayName": "Thin (1.5px)"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Fine (1px)"
+                                }
+                            ]
+                        }
+                    },
+                    "enableCollisionDetection": {
+                        "displayName": "Separate Overlapping Bubbles",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "labelsText": {
+                "displayName": "Labels & Text",
+                "properties": {
+                    "riskLabel": {
+                        "displayName": "Risk Section Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "opportunityLabel": {
+                        "displayName": "Opportunity Section Label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "impactAxisTitle": {
+                        "displayName": "Y-Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "likelihoodAxisTitle": {
+                        "displayName": "X-Axis Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "axisTitleFontSize": {
+                        "displayName": "Axis Title Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisTitleFontFamily": {
+                        "displayName": "Axis Title Font",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Cambria",
+                                    "displayName": "Cambria"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Lucida Console",
+                                    "displayName": "Lucida Console"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "Tahoma"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana"
+                                }
+                            ]
+                        }
+                    },
+                    "axisTickFontSize": {
+                        "displayName": "Axis Tick Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisTickFontFamily": {
+                        "displayName": "Axis Tick Label Font",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Cambria",
+                                    "displayName": "Cambria"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Lucida Console",
+                                    "displayName": "Lucida Console"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "Tahoma"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "impactLabels": {
+                "displayName": "Impact Labels (Y-Axis)",
+                "properties": {
+                    "impactLabel1": {
+                        "displayName": "Impact Level 1 (lowest)",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "impactLabel2": {
+                        "displayName": "Impact Level 2",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "impactLabel3": {
+                        "displayName": "Impact Level 3",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "impactLabel4": {
+                        "displayName": "Impact Level 4",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "impactLabel5": {
+                        "displayName": "Impact Level 5 (highest)",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "likelihoodLabels": {
+                "displayName": "Likelihood Labels (X-Axis)",
+                "properties": {
+                    "riskL1": {
+                        "displayName": "Risk \u2014 Likelihood 1",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "riskL2": {
+                        "displayName": "Risk \u2014 Likelihood 2",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "riskL3": {
+                        "displayName": "Risk \u2014 Likelihood 3",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "riskL4": {
+                        "displayName": "Risk \u2014 Likelihood 4",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "riskL5": {
+                        "displayName": "Risk \u2014 Likelihood 5",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "oppL1": {
+                        "displayName": "Opportunity \u2014 Likelihood 1",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "oppL2": {
+                        "displayName": "Opportunity \u2014 Likelihood 2",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "oppL3": {
+                        "displayName": "Opportunity \u2014 Likelihood 3",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "oppL4": {
+                        "displayName": "Opportunity \u2014 Likelihood 4",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "oppL5": {
+                        "displayName": "Opportunity \u2014 Likelihood 5",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "timelineSettings": {
+                "displayName": "Reporting Timeline",
+                "properties": {
+                    "granularity": {
+                        "displayName": "Period Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "weekly",
+                                    "displayName": "Weekly"
+                                },
+                                {
+                                    "value": "monthly",
+                                    "displayName": "Monthly"
+                                },
+                                {
+                                    "value": "quarterly",
+                                    "displayName": "Quarterly"
+                                },
+                                {
+                                    "value": "yearly",
+                                    "displayName": "Yearly"
+                                }
+                            ]
+                        }
+                    },
+                    "sliderLabelFontSize": {
+                        "displayName": "Slider Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "sliderLabelFontFamily": {
+                        "displayName": "Slider Label Font",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Cambria",
+                                    "displayName": "Cambria"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Lucida Console",
+                                    "displayName": "Lucida Console"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "Tahoma"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "legendFont": {
+                "displayName": "Legend",
+                "properties": {
+                    "showLegend": {
+                        "displayName": "Show Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendFontFamily": {
+                        "displayName": "Font",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Cambria",
+                                    "displayName": "Cambria"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Lucida Console",
+                                    "displayName": "Lucida Console"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "Tahoma"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "kpiFont": {
+                "displayName": "KPI Summary Strip",
+                "properties": {
+                    "showKpiStrip": {
+                        "displayName": "Show KPI Strip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "kpiLabelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "kpiValueFontSize": {
+                        "displayName": "Value Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "kpiFontFamily": {
+                        "displayName": "Font",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Cambria",
+                                    "displayName": "Cambria"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Lucida Console",
+                                    "displayName": "Lucida Console"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "Tahoma"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "heatmapControls": {
+                "displayName": "Heatmap Controls",
+                "properties": {
+                    "showHeatmap": {
+                        "displayName": "Enable Heatmap Controls",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showHeatmapLabel": {
+                        "displayName": "Show Label",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": [],
+        "supportsHighlight": false,
+        "supportsSynchronizingFilterState": true,
+        "supportsMultiVisualSelection": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
