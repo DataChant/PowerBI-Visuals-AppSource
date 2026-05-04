@@ -1,0 +1,1012 @@
+{
+    "visual": {
+        "name": "KMLKMZGeoJSONMapViewer",
+        "displayName": "KML-KMZ-GeoJSON-MapViewer",
+        "guid": "kmlKmzGeoJsonMapViewerX1Y2Z3",
+        "visualClassName": "Visual",
+        "version": "1.0.0.3",
+        "description": "KML-KMZ-GeoJSON-MapViewer: professional geospatial data viewer for Power BI with many map layer options, tooltip and measure bindings, configurable large-file persistence, and certification-ready bundled Leaflet",
+        "supportUrl": "mailto:AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com",
+        "gitHubUrl": "mailto:AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com"
+    },
+    "author": {
+        "name": "Abdalla Dabes, P.E, PSP, PMP",
+        "email": "AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Visual_GeoUrl": "KML/KMZ URL (Optional)",
+            "Visual_Layers": "Layers (Filter)",
+            "Visual_Tooltips": "Tooltips",
+            "Visual_Measure": "Measure",
+            "Visual_GeoData": "Geo Data",
+            "Visual_Appearance": "Appearance",
+            "Visual_Controls": "Controls",
+            "Visual_FeaturePanel": "Feature Panel",
+            "Visual_MapOptions": "Map Options",
+            "Visual_TooltipSettings": "Tooltip Settings",
+            "Visual_MeasureSettings": "Measure Settings",
+            "Visual_MapView": "Map View",
+            "Visual_Units": "Units",
+            "Visual_Styling": "Styling",
+            "Visual_Performance": "Performance",
+            "Visual_Analytics": "Analytics",
+            "Visual_PersistGeoData": "Persist Geo Data",
+            "Visual_AutoRestore": "Auto Restore",
+            "Visual_MaxPersistMB": "Max Persist Size (MB)",
+            "Visual_BackgroundColor": "Background Color",
+            "Visual_LayerTheme": "Layer Theme",
+            "Visual_ShowLayersButton": "Show Layers Button",
+            "Visual_ShowPropertiesButton": "Show Properties Button",
+            "Visual_ShowDrawButton": "Show Draw Button",
+            "Visual_ShowRulerButton": "Show Ruler Button",
+            "Visual_ShowToolsButton": "Show Tools Button",
+            "Visual_ShowNewButton": "Show New Button",
+            "Visual_EnableZoom": "Enable Zoom",
+            "Visual_EnablePan": "Enable Pan",
+            "Visual_ShowScaleBar": "Show Scale Bar",
+            "Visual_ShowFeaturePanel": "Show Feature Panel",
+            "Visual_PanelWidth": "Panel Width",
+            "Visual_PanelPosition": "Panel Position",
+            "Visual_BaseMapLayer": "Base Map Layer",
+            "Visual_MaxZoom": "Max Zoom",
+            "Visual_MinZoom": "Min Zoom",
+            "Visual_EnableTooltips": "Enable Tooltips",
+            "Visual_TooltipDelay": "Tooltip Delay (ms)",
+            "Visual_EnableMeasure": "Enable Measure",
+            "Visual_MeasureUnit": "Measure Unit",
+            "Visual_DefaultLat": "Default Latitude",
+            "Visual_DefaultLng": "Default Longitude",
+            "Visual_DefaultZoom": "Default Zoom",
+            "Visual_DistanceUnit": "Distance Unit",
+            "Visual_AreaUnit": "Area Unit",
+            "Visual_PointColor": "Point Color",
+            "Visual_LineColor": "Line Color",
+            "Visual_PolygonColor": "Polygon Color",
+            "Visual_LineWeight": "Line Weight",
+            "Visual_FillOpacity": "Fill Opacity",
+            "Visual_MaxFeatures": "Max Features",
+            "Visual_ClusterPoints": "Cluster Points",
+            "Visual_EnableAnalytics": "Enable Analytics",
+            "Visual_ShowStats": "Show Statistics",
+            "Visual_ButtonLayers": "Layers",
+            "Visual_ButtonProperties": "Properties",
+            "Visual_ButtonDraw": "Draw",
+            "Visual_ButtonRuler": "Ruler",
+            "Visual_ButtonTools": "Tools",
+            "Visual_ButtonNew": "New Map"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "geoUrl",
+                "displayName": "KML/KMZ URL (Optional)",
+                "displayNameKey": "Visual_GeoUrl",
+                "kind": "GroupingOrMeasure",
+                "description": "Optional: URL or path to KML/KMZ file"
+            },
+            {
+                "name": "layers",
+                "displayName": "Layers (Filter)",
+                "displayNameKey": "Visual_Layers",
+                "kind": "Grouping",
+                "description": "Filter layers by name/category"
+            },
+            {
+                "name": "tooltips",
+                "displayName": "Tooltips",
+                "displayNameKey": "Visual_Tooltips",
+                "kind": "GroupingOrMeasure",
+                "description": "Fields shown in the tooltip when hovering over a feature"
+            },
+            {
+                "name": "measure",
+                "displayName": "Measure",
+                "displayNameKey": "Visual_Measure",
+                "kind": "Measure",
+                "description": "Numeric measure associated with each layer/feature"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "layers"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "geoData": {
+                "displayName": "Geo Data",
+                "description": "Geospatial data persistence settings",
+                "properties": {
+                    "persistGeoData": {
+                        "displayName": "Persist Geo Data",
+                        "description": "Keep KML/KMZ file saved with the report",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoRestore": {
+                        "displayName": "Auto Restore",
+                        "description": "Automatically restore data when report opens",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "maxPersistMB": {
+                        "displayName": "Max Persist Size (MB)",
+                        "description": "Maximum file size (in MB) that will be saved with the report",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "geoContent": {
+                        "displayName": "Geo Content",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "geoBackup1": {
+                        "displayName": "Geo Backup 1",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "geoBackup2": {
+                        "displayName": "Geo Backup 2",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fileName": {
+                        "displayName": "File Name",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "uploadTime": {
+                        "displayName": "Upload Time",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "featuresJson": {
+                        "displayName": "Combined Features",
+                        "description": "Serialized JSON of all loaded + appended + imported features (persists across reloads)",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "appearance": {
+                "displayName": "Appearance",
+                "description": "Visual appearance settings",
+                "properties": {
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color of the visual",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "controlColor": {
+                        "displayName": "Control Color",
+                        "description": "Color of buttons and controls",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showLayersButton": {
+                        "displayName": "Show Layers Button",
+                        "description": "Show the floating Layers button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "layersButtonLabel": {
+                        "displayName": "Layers Button Label",
+                        "description": "Text shown on the Layers button (leave default for '\ud83d\udcc2 Layers')",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showPropertiesButton": {
+                        "displayName": "Show Properties Button",
+                        "description": "Show the Properties button in toolbar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDrawButton": {
+                        "displayName": "Show Draw Button",
+                        "description": "Show the Draw button in toolbar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showRulerButton": {
+                        "displayName": "Show Ruler Button",
+                        "description": "Show the Ruler button in toolbar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showToolsButton": {
+                        "displayName": "Show Tools Button",
+                        "description": "Show the Tools button in toolbar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showNewButton": {
+                        "displayName": "Show New Button",
+                        "description": "Show the New button in toolbar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lineThickness": {
+                        "displayName": "Line Thickness",
+                        "description": "Thickness of lines and polygon borders (1-10 pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showAttributes": {
+                        "displayName": "Show Attributes",
+                        "description": "Show feature attributes (length, area, etc.)",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "controls": {
+                "displayName": "Controls",
+                "description": "Control visibility settings",
+                "properties": {
+                    "showMapControls": {
+                        "displayName": "Show Map Controls",
+                        "description": "Show the map control buttons",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLayerPanel": {
+                        "displayName": "Show Layer Panel",
+                        "description": "Show the layers panel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showFeaturePanel": {
+                        "displayName": "Show Feature Panel",
+                        "description": "Show the feature properties panel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLayerSwitcher": {
+                        "displayName": "Show Map Type Switcher",
+                        "description": "Show the map type switcher (Satellite/Topo/etc)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "layerPanelOpen": {
+                        "displayName": "Layer Panel Open",
+                        "description": "Remembers whether the user had the layer panel open",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "featurePanelOpen": {
+                        "displayName": "Feature Panel Open",
+                        "description": "Remembers whether the user had the feature panel open",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "layerPanelWidth": {
+                        "displayName": "Layer Panel Width",
+                        "description": "Width of the layer panel in pixels",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "layerPanelFontSize": {
+                        "displayName": "Layer Panel Font Size",
+                        "description": "Font size for layer panel items (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "layerPanelFontFamily": {
+                        "displayName": "Layer Panel Font",
+                        "description": "Font family for layer panel",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "Tahoma"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Impact",
+                                    "displayName": "Impact"
+                                },
+                                {
+                                    "value": "Lucida Sans Unicode",
+                                    "displayName": "Lucida Sans"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "featurePanel": {
+                "displayName": "Feature Panel",
+                "description": "Feature properties panel formatting",
+                "properties": {
+                    "backgroundColor": {
+                        "displayName": "Background Color",
+                        "description": "Background color of the feature panel",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Text Color",
+                        "description": "Text color in the feature panel",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "description": "Font size for feature panel text (in pixels)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "description": "Font family for feature panel",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "Segoe UI",
+                                    "displayName": "Segoe UI"
+                                },
+                                {
+                                    "value": "Arial",
+                                    "displayName": "Arial"
+                                },
+                                {
+                                    "value": "Calibri",
+                                    "displayName": "Calibri"
+                                },
+                                {
+                                    "value": "Verdana",
+                                    "displayName": "Verdana"
+                                },
+                                {
+                                    "value": "Tahoma",
+                                    "displayName": "Tahoma"
+                                },
+                                {
+                                    "value": "Georgia",
+                                    "displayName": "Georgia"
+                                },
+                                {
+                                    "value": "Times New Roman",
+                                    "displayName": "Times New Roman"
+                                },
+                                {
+                                    "value": "Courier New",
+                                    "displayName": "Courier New"
+                                },
+                                {
+                                    "value": "Trebuchet MS",
+                                    "displayName": "Trebuchet MS"
+                                },
+                                {
+                                    "value": "Comic Sans MS",
+                                    "displayName": "Comic Sans MS"
+                                },
+                                {
+                                    "value": "Impact",
+                                    "displayName": "Impact"
+                                },
+                                {
+                                    "value": "Lucida Sans Unicode",
+                                    "displayName": "Lucida Sans"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "mapOptions": {
+                "displayName": "Map Options",
+                "description": "Map display options",
+                "properties": {
+                    "defaultMapType": {
+                        "displayName": "Default Map Type",
+                        "description": "Initial map layer",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "google-terrain",
+                                    "displayName": "Google Terrain"
+                                },
+                                {
+                                    "value": "google-road",
+                                    "displayName": "Google Road"
+                                },
+                                {
+                                    "value": "google-satellite",
+                                    "displayName": "Google Satellite"
+                                },
+                                {
+                                    "value": "google-hybrid",
+                                    "displayName": "Google Hybrid"
+                                },
+                                {
+                                    "value": "carto-voyager",
+                                    "displayName": "Carto Voyager"
+                                },
+                                {
+                                    "value": "carto-positron",
+                                    "displayName": "Carto Positron (Light)"
+                                },
+                                {
+                                    "value": "carto-dark",
+                                    "displayName": "Carto Dark Matter"
+                                },
+                                {
+                                    "value": "osm-hot",
+                                    "displayName": "OSM Humanitarian"
+                                },
+                                {
+                                    "value": "cyclosm",
+                                    "displayName": "CyclOSM"
+                                },
+                                {
+                                    "value": "opentopomap",
+                                    "displayName": "OpenTopoMap"
+                                },
+                                {
+                                    "value": "esri-streets",
+                                    "displayName": "Esri World Street Map"
+                                },
+                                {
+                                    "value": "esri-imagery",
+                                    "displayName": "Esri World Imagery (Satellite)"
+                                },
+                                {
+                                    "value": "esri-topo",
+                                    "displayName": "Esri World Topographic"
+                                },
+                                {
+                                    "value": "esri-terrain",
+                                    "displayName": "Esri World Terrain"
+                                },
+                                {
+                                    "value": "esri-natgeo",
+                                    "displayName": "Esri National Geographic"
+                                },
+                                {
+                                    "value": "esri-dark-gray",
+                                    "displayName": "Esri Dark Gray Canvas"
+                                },
+                                {
+                                    "value": "esri-light-gray",
+                                    "displayName": "Esri Light Gray Canvas"
+                                },
+                                {
+                                    "value": "esri-ocean",
+                                    "displayName": "Esri World Ocean"
+                                },
+                                {
+                                    "value": "usgs-topo",
+                                    "displayName": "USGS US Topo"
+                                },
+                                {
+                                    "value": "usgs-imagery",
+                                    "displayName": "USGS US Imagery"
+                                },
+                                {
+                                    "value": "usgs-imagery-topo",
+                                    "displayName": "USGS US Imagery Topo"
+                                }
+                            ]
+                        }
+                    },
+                    "showLabels": {
+                        "displayName": "Show Labels",
+                        "description": "Show feature labels on map",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTerrain": {
+                        "displayName": "Show Terrain",
+                        "description": "Show terrain features",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "currentMapLayer": {
+                        "displayName": "Current Map Layer",
+                        "description": "Currently selected map layer (persisted)",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "tooltipSettings": {
+                "displayName": "Tooltip",
+                "description": "Tooltip behavior",
+                "properties": {
+                    "enabled": {
+                        "displayName": "Enable Tooltip",
+                        "description": "Show tooltip when hovering over features",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showOnHover": {
+                        "displayName": "Show On Hover",
+                        "description": "Display the tooltip on hover (otherwise only on click)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showFeatureName": {
+                        "displayName": "Show Feature Name",
+                        "description": "Include feature name in the tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showMeasure": {
+                        "displayName": "Show Measure Value",
+                        "description": "Include the bound measure value in the tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "drawings": {
+                "displayName": "Drawings",
+                "description": "User-drawn measurement lines (persisted with the report)",
+                "properties": {
+                    "data": {
+                        "displayName": "Drawings Data",
+                        "description": "Serialized JSON of all drawn lines",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "bookmarks": {
+                "displayName": "Bookmarks",
+                "description": "Saved map views (persisted with the report)",
+                "properties": {
+                    "data": {
+                        "displayName": "Bookmarks Data",
+                        "description": "Serialized JSON of saved map bookmarks",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "mapView": {
+                "displayName": "Map View",
+                "description": "Remembers the last map center and zoom",
+                "properties": {
+                    "lastCenterLat": {
+                        "displayName": "Last Center Lat",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lastCenterLng": {
+                        "displayName": "Last Center Lng",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lastZoom": {
+                        "displayName": "Last Zoom",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rememberView": {
+                        "displayName": "Remember View",
+                        "description": "Restore the last center/zoom on open",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "units": {
+                "displayName": "Units",
+                "description": "Measurement unit preferences",
+                "properties": {
+                    "distanceUnit": {
+                        "displayName": "Distance Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto-metric",
+                                    "displayName": "Auto (Metric: m / km)"
+                                },
+                                {
+                                    "value": "auto-imperial",
+                                    "displayName": "Auto (Imperial: ft / mi)"
+                                },
+                                {
+                                    "value": "meters",
+                                    "displayName": "Meters"
+                                },
+                                {
+                                    "value": "kilometers",
+                                    "displayName": "Kilometers"
+                                },
+                                {
+                                    "value": "feet",
+                                    "displayName": "Feet"
+                                },
+                                {
+                                    "value": "miles",
+                                    "displayName": "Miles"
+                                },
+                                {
+                                    "value": "nautical-miles",
+                                    "displayName": "Nautical Miles"
+                                }
+                            ]
+                        }
+                    },
+                    "areaUnit": {
+                        "displayName": "Area Unit",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto-metric",
+                                    "displayName": "Auto (m\u00b2 / km\u00b2 / ha)"
+                                },
+                                {
+                                    "value": "auto-imperial",
+                                    "displayName": "Auto (ft\u00b2 / ac / mi\u00b2)"
+                                },
+                                {
+                                    "value": "square-meters",
+                                    "displayName": "Square Meters"
+                                },
+                                {
+                                    "value": "hectares",
+                                    "displayName": "Hectares"
+                                },
+                                {
+                                    "value": "square-kilometers",
+                                    "displayName": "Square Kilometers"
+                                },
+                                {
+                                    "value": "square-feet",
+                                    "displayName": "Square Feet"
+                                },
+                                {
+                                    "value": "acres",
+                                    "displayName": "Acres"
+                                },
+                                {
+                                    "value": "square-miles",
+                                    "displayName": "Square Miles"
+                                }
+                            ]
+                        }
+                    },
+                    "coordinateFormat": {
+                        "displayName": "Coordinate Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dd",
+                                    "displayName": "Decimal Degrees (45.1234)"
+                                },
+                                {
+                                    "value": "dms",
+                                    "displayName": "Deg Min Sec (45\u00b0 7\u2032 24\u2033)"
+                                },
+                                {
+                                    "value": "dmm",
+                                    "displayName": "Deg Decimal Min (45\u00b0 7.4\u2032)"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "styling": {
+                "displayName": "Feature Styling",
+                "description": "Default styling for imported features",
+                "properties": {
+                    "pointColor": {
+                        "displayName": "Point Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pointRadius": {
+                        "displayName": "Point Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "lineColor": {
+                        "displayName": "Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "polygonFillColor": {
+                        "displayName": "Polygon Fill Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "polygonFillOpacity": {
+                        "displayName": "Polygon Fill Opacity",
+                        "description": "0-100 opacity for polygon fill",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showLegend": {
+                        "displayName": "Show Legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showFeatureLabels": {
+                        "displayName": "Show Feature Labels",
+                        "description": "Always show name labels on features",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "featureStyles": {
+                        "displayName": "Feature Styles",
+                        "description": "Per-feature style overrides (JSON)",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "performance": {
+                "displayName": "Performance",
+                "description": "Performance tuning",
+                "properties": {
+                    "simplifyLines": {
+                        "displayName": "Simplify Lines",
+                        "description": "Simplify dense polylines while rendering",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "simplifyTolerance": {
+                        "displayName": "Simplify Tolerance",
+                        "description": "Douglas-Peucker tolerance in meters (higher = more aggressive)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "useCluster": {
+                        "displayName": "Cluster Points",
+                        "description": "Cluster nearby point markers when zoomed out",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "useHeatmap": {
+                        "displayName": "Heatmap Points",
+                        "description": "Render point features as a heatmap",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "analytics": {
+                "displayName": "Analytics",
+                "description": "Analytics panel display",
+                "properties": {
+                    "showAnalytics": {
+                        "displayName": "Show Analytics Panel",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "measureSettings": {
+                "displayName": "Measure",
+                "description": "Measure field display options",
+                "properties": {
+                    "enabled": {
+                        "displayName": "Enable Measure",
+                        "description": "Apply values from the Measure field to features",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "label": {
+                        "displayName": "Measure Label",
+                        "description": "Label shown next to the measure value",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "decimals": {
+                        "displayName": "Decimals",
+                        "description": "Number of decimal places for numeric measures",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showInLayerPanel": {
+                        "displayName": "Show In Layer Panel",
+                        "description": "Show measure value next to each feature in the layers panel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showInFeaturePanel": {
+                        "displayName": "Show In Feature Panel",
+                        "description": "Show measure value in the feature properties panel",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": false,
+        "suppressDefaultTitle": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true,
+        "supportsSynchronizingFilterState": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": true,
+                "parameters": [
+                    "https://*.tile.openstreetmap.fr",
+                    "https://*.tile-cyclosm.openstreetmap.fr",
+                    "https://*.tile.opentopomap.org",
+                    "https://*.basemaps.cartocdn.com",
+                    "https://server.arcgisonline.com",
+                    "https://basemap.nationalmap.gov",
+                    "https://*.google.com"
+                ]
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

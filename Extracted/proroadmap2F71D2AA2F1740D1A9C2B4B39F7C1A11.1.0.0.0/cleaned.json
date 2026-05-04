@@ -1,0 +1,3184 @@
+{
+    "visual": {
+        "name": "proroadmap",
+        "displayName": "ProRoadmap",
+        "guid": "proroadmap2F71D2AA2F1740D1A9C2B4B39F7C1A11",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Strategic product roadmap visual for Power BI with quarter-first timelines, swimlanes, milestones, OKR binding, and status color rules.",
+        "supportUrl": "https://vectras-software.com/products/proroadmap/support/",
+        "gitHubUrl": "https://github.com/MS-PBI-Team/proroadmap-review"
+    },
+    "author": {
+        "name": "Vectras Software",
+        "email": "support@vectras-software.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "visual.name": "ProRoadmap",
+            "visual.displayName": "ProRoadmap",
+            "visual.description": "Strategic product roadmap visual for Power BI with swimlanes, milestones, OKR binding, and status color rules."
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "itemName",
+                "kind": "Grouping",
+                "displayName": "Item Name",
+                "description": "The name of the roadmap item (Epic, Feature, Initiative)"
+            },
+            {
+                "name": "startDate",
+                "kind": "Grouping",
+                "displayName": "Start Date"
+            },
+            {
+                "name": "endDate",
+                "kind": "Grouping",
+                "displayName": "End Date"
+            },
+            {
+                "name": "itemId",
+                "kind": "Grouping",
+                "displayName": "Item ID",
+                "description": "Unique identifier - enables cross-filter selection IDs and hierarchy"
+            },
+            {
+                "name": "parentId",
+                "kind": "Grouping",
+                "displayName": "Parent ID",
+                "description": "Parent item ID - enables 2-level Theme > Epic/Feature hierarchy"
+            },
+            {
+                "name": "teamArea",
+                "kind": "Grouping",
+                "displayName": "Team / Area",
+                "description": "Swimlane grouping field (Team, Product Area, OKR category)"
+            },
+            {
+                "name": "goal",
+                "kind": "Grouping",
+                "displayName": "Goal / OKR",
+                "description": "Strategic goal or OKR this item supports"
+            },
+            {
+                "name": "status",
+                "kind": "Grouping",
+                "displayName": "Status",
+                "description": "Status value for color rules (e.g. On Track, At Risk, Behind, Done)"
+            },
+            {
+                "name": "itemType",
+                "kind": "Grouping",
+                "displayName": "Item Type",
+                "description": "Type tag: milestone, release, theme, epic, feature"
+            },
+            {
+                "name": "colorField",
+                "kind": "Grouping",
+                "displayName": "Color Field",
+                "description": "Field value used for Color-by-Field rules"
+            },
+            {
+                "name": "percentComplete",
+                "kind": "Measure",
+                "displayName": "% Complete",
+                "description": "Completion percentage (0-1 or 0-100)"
+            },
+            {
+                "name": "tooltipFields",
+                "kind": "Grouping",
+                "displayName": "Tooltip Fields",
+                "description": "Additional fields shown in hover tooltip"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "itemName": {
+                            "max": 1
+                        },
+                        "startDate": {
+                            "max": 1
+                        },
+                        "endDate": {
+                            "max": 1
+                        },
+                        "itemId": {
+                            "max": 1
+                        },
+                        "parentId": {
+                            "max": 1
+                        },
+                        "teamArea": {
+                            "max": 1
+                        },
+                        "goal": {
+                            "max": 1
+                        },
+                        "status": {
+                            "max": 1
+                        },
+                        "itemType": {
+                            "max": 1
+                        },
+                        "colorField": {
+                            "max": 1
+                        },
+                        "percentComplete": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "itemName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "startDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "endDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "itemId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "parentId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "teamArea"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "goal"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "status"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "itemType"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "colorField"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "percentComplete"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltipFields"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 10000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "supportsLandingPage": true,
+        "supportsHighlight": true,
+        "supportsSynchronizingFilterState": true,
+        "objects": {
+            "general": {
+                "properties": {
+                    "rowHeight": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showAlternateRowColor": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "alternateRowColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showTodayLine": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "todayLineColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showQuarterMarkers": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "quarterMarkerColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "timeline": {
+                "properties": {
+                    "unitHeight": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "unitWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "topTimeScale": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "year",
+                                    "displayName": "Year"
+                                },
+                                {
+                                    "value": "quarter",
+                                    "displayName": "Quarter"
+                                },
+                                {
+                                    "value": "month",
+                                    "displayName": "Month"
+                                }
+                            ]
+                        }
+                    },
+                    "middleTimeScale": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "year",
+                                    "displayName": "Year"
+                                },
+                                {
+                                    "value": "quarter",
+                                    "displayName": "Quarter"
+                                },
+                                {
+                                    "value": "month",
+                                    "displayName": "Month"
+                                }
+                            ]
+                        }
+                    },
+                    "bottomTimeScale": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "year",
+                                    "displayName": "Year"
+                                },
+                                {
+                                    "value": "quarter",
+                                    "displayName": "Quarter"
+                                },
+                                {
+                                    "value": "month",
+                                    "displayName": "Month"
+                                }
+                            ]
+                        }
+                    },
+                    "axisColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "topTextColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "middleTextColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bottomTextColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "topBackgroundColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "middleBackgroundColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bottomBackgroundColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "itemBars": {
+                "properties": {
+                    "defaultBarColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "progressColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "themeBarColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "barHeightRatio": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cornerRadius": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBarLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "barLabelPosition": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inside",
+                                    "displayName": "Inside"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right of bar"
+                                }
+                            ]
+                        }
+                    },
+                    "barLabelContent": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "labelFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "colorByFieldEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "colorRule1Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule1Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorRule2Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule2Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorRule3Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule3Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorRule4Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule4Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorRule5Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule5Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorRule6Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule6Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorRule7Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule7Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorRule8Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "colorRule8Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "milestones": {
+                "properties": {
+                    "showMilestones": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    },
+                    "milestoneColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "milestoneSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "status": {
+                "properties": {
+                    "rule1Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule1Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule2Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule2Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule3Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule3Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule4Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule4Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule5Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule5Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule6Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule6Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule7Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule7Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule8Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule8Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "swimlanes": {
+                "properties": {
+                    "showSwimlanes": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "swimlaneSortOrder": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "asData",
+                                    "displayName": "As data"
+                                },
+                                {
+                                    "value": "alphabetical",
+                                    "displayName": "Alphabetical"
+                                },
+                                {
+                                    "value": "byStartDate",
+                                    "displayName": "By start date"
+                                }
+                            ]
+                        }
+                    },
+                    "swimlaneHeaderHeight": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "swimlaneHeaderBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "swimlaneHeaderFontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "swimlaneHeaderFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "swimlaneHeaderFontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "swimlaneBorderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "collapseByDefault": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTaskCount": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDateRange": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "properties": {
+                    "showLegend": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendPosition": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                }
+                            ]
+                        }
+                    },
+                    "legendTitle": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "legendFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendFontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legendBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legendSwatchSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendSwatchShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "rectangle",
+                                    "displayName": "Rectangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "line",
+                                    "displayName": "Line"
+                                }
+                            ]
+                        }
+                    },
+                    "legendMaxRows": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "infoPanel": {
+                "properties": {
+                    "showInfoPanel": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "infoPanelWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showGoalInPanel": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "gridHeader": {
+                "properties": {
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "gridBody": {
+                "properties": {
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "categoryStyle1": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle2": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle3": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle4": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle5": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle6": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle7": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle8": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle9": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle10": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle11": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle12": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle13": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle14": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle15": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle16": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle17": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle18": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle19": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle20": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle21": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle22": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle23": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle24": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle25": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle26": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle27": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle28": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle29": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle30": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle31": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "categoryStyle32": {
+                "properties": {
+                    "barColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "milestoneShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "inherit",
+                                    "displayName": "Inherit global"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
