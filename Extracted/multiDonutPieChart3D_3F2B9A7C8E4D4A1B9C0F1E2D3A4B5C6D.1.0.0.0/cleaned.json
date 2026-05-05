@@ -1,0 +1,1950 @@
+{
+    "visual": {
+        "name": "multiDonutPieChart3D",
+        "displayName": "Multi-Layer 3D Donut & Pie Chart",
+        "guid": "multiDonutPieChart3D_3F2B9A7C8E4D4A1B9C0F1E2D3A4B5C6D",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "A professional, dynamic 2D/3D Donut and Pie chart with multi-ring (concentric) support. Features per-category color customization, rich tooltips, context menu, cross-filtering and a fully organized formatting pane.",
+        "supportUrl": "mailto:AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Abdalla Dabes, P.E, PSP, PMP",
+        "email": "AbdallaDabes@AbdallaAIsolutions.onmicrosoft.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Visual_Legend": "Legend",
+            "Visual_Details": "Details",
+            "Visual_Values": "Values",
+            "Visual_Tooltips": "Tooltips"
+        }
+    },
+    "capabilities": {
+        "privileges": [],
+        "dataRoles": [
+            {
+                "displayName": "Legend",
+                "displayNameKey": "Visual_Legend",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "Categories that define the slices of the chart."
+            },
+            {
+                "displayName": "Details",
+                "displayNameKey": "Visual_Details",
+                "name": "details",
+                "kind": "Grouping",
+                "description": "Optional sub-categories used to split each slice (enables multiple concentric rings)."
+            },
+            {
+                "displayName": "Values",
+                "displayNameKey": "Visual_Values",
+                "name": "measure",
+                "kind": "Measure",
+                "description": "One or more numeric measures. Each measure becomes a concentric ring when 'Multiple Rings' is enabled.",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    },
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Tooltips",
+                "displayNameKey": "Visual_Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": "Additional fields shown in the tooltip."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "details": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "measure": {
+                            "min": 0,
+                            "max": 64
+                        },
+                        "tooltips": {
+                            "min": 0,
+                            "max": 16
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "details",
+                            "select": [
+                                {
+                                    "for": {
+                                        "in": "measure"
+                                    }
+                                },
+                                {
+                                    "for": {
+                                        "in": "tooltips"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 1000
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "details": {
+                            "max": 0
+                        },
+                        "measure": {
+                            "min": 0,
+                            "max": 64
+                        },
+                        "tooltips": {
+                            "min": 0,
+                            "max": 16
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "measure"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "chartType": {
+                "displayName": "Chart Type",
+                "properties": {
+                    "shape": {
+                        "displayName": "Shape",
+                        "description": "Choose between Donut and Pie.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Donut",
+                                    "value": "donut"
+                                },
+                                {
+                                    "displayName": "Pie",
+                                    "value": "pie"
+                                }
+                            ]
+                        }
+                    },
+                    "dimension": {
+                        "displayName": "Dimension",
+                        "description": "Switch between flat 2D rendering and a 3D rendering with depth.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "2D",
+                                    "value": "2d"
+                                },
+                                {
+                                    "displayName": "3D",
+                                    "value": "3d"
+                                }
+                            ]
+                        }
+                    },
+                    "multipleRings": {
+                        "displayName": "Multiple Rings",
+                        "description": "Render multiple concentric rings (one per measure or per Details group).",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ringSpacing": {
+                        "displayName": "Ring Spacing (%)",
+                        "description": "Gap between concentric rings as a percentage of ring width.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "innerRadiusPct": {
+                        "displayName": "Donut Hole Size (%)",
+                        "description": "Inner radius for donuts as a percentage of outer radius (0\u201395).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "depth3D": {
+                        "displayName": "3D Depth",
+                        "description": "Pixel depth used in 3D rendering (0\u201380).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tilt3D": {
+                        "displayName": "3D Tilt",
+                        "description": "Vertical tilt for 3D rendering (0.3\u20131).",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startAngle": {
+                        "displayName": "Start Angle",
+                        "description": "Starting angle of the first slice in degrees.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "padAngle": {
+                        "displayName": "Slice Spacing",
+                        "description": "Padding angle between slices.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cornerRadius": {
+                        "displayName": "Corner Radius",
+                        "description": "Rounded corner radius for slices.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dataColors": {
+                "displayName": "Data Colors",
+                "properties": {
+                    "categoryColor0": {
+                        "displayName": "Category 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor1": {
+                        "displayName": "Category 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor2": {
+                        "displayName": "Category 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor3": {
+                        "displayName": "Category 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor4": {
+                        "displayName": "Category 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor5": {
+                        "displayName": "Category 6 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor6": {
+                        "displayName": "Category 7 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor7": {
+                        "displayName": "Category 8 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor8": {
+                        "displayName": "Category 9 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor9": {
+                        "displayName": "Category 10 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor10": {
+                        "displayName": "Category 11 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor11": {
+                        "displayName": "Category 12 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor12": {
+                        "displayName": "Category 13 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor13": {
+                        "displayName": "Category 14 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor14": {
+                        "displayName": "Category 15 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor15": {
+                        "displayName": "Category 16 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor16": {
+                        "displayName": "Category 17 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor17": {
+                        "displayName": "Category 18 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor18": {
+                        "displayName": "Category 19 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor19": {
+                        "displayName": "Category 20 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor20": {
+                        "displayName": "Category 21 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor21": {
+                        "displayName": "Category 22 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor22": {
+                        "displayName": "Category 23 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor23": {
+                        "displayName": "Category 24 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor24": {
+                        "displayName": "Category 25 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor25": {
+                        "displayName": "Category 26 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor26": {
+                        "displayName": "Category 27 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor27": {
+                        "displayName": "Category 28 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor28": {
+                        "displayName": "Category 29 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor29": {
+                        "displayName": "Category 30 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor30": {
+                        "displayName": "Category 31 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColor31": {
+                        "displayName": "Category 32 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor0": {
+                        "displayName": "Ring 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor1": {
+                        "displayName": "Ring 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor2": {
+                        "displayName": "Ring 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor3": {
+                        "displayName": "Ring 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor4": {
+                        "displayName": "Ring 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor5": {
+                        "displayName": "Ring 6 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor6": {
+                        "displayName": "Ring 7 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor7": {
+                        "displayName": "Ring 8 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor8": {
+                        "displayName": "Ring 9 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor9": {
+                        "displayName": "Ring 10 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor10": {
+                        "displayName": "Ring 11 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor11": {
+                        "displayName": "Ring 12 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor12": {
+                        "displayName": "Ring 13 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor13": {
+                        "displayName": "Ring 14 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor14": {
+                        "displayName": "Ring 15 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringColor15": {
+                        "displayName": "Ring 16 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor0": {
+                        "displayName": "Slice 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor1": {
+                        "displayName": "Slice 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor2": {
+                        "displayName": "Slice 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor3": {
+                        "displayName": "Slice 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor4": {
+                        "displayName": "Slice 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor5": {
+                        "displayName": "Slice 6 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor6": {
+                        "displayName": "Slice 7 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor7": {
+                        "displayName": "Slice 8 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor8": {
+                        "displayName": "Slice 9 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor9": {
+                        "displayName": "Slice 10 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor10": {
+                        "displayName": "Slice 11 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor11": {
+                        "displayName": "Slice 12 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor12": {
+                        "displayName": "Slice 13 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor13": {
+                        "displayName": "Slice 14 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor14": {
+                        "displayName": "Slice 15 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor15": {
+                        "displayName": "Slice 16 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor16": {
+                        "displayName": "Slice 17 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor17": {
+                        "displayName": "Slice 18 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor18": {
+                        "displayName": "Slice 19 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor19": {
+                        "displayName": "Slice 20 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor20": {
+                        "displayName": "Slice 21 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor21": {
+                        "displayName": "Slice 22 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor22": {
+                        "displayName": "Slice 23 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor23": {
+                        "displayName": "Slice 24 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor24": {
+                        "displayName": "Slice 25 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor25": {
+                        "displayName": "Slice 26 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor26": {
+                        "displayName": "Slice 27 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor27": {
+                        "displayName": "Slice 28 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor28": {
+                        "displayName": "Slice 29 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor29": {
+                        "displayName": "Slice 30 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor30": {
+                        "displayName": "Slice 31 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor31": {
+                        "displayName": "Slice 32 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor32": {
+                        "displayName": "Slice 33 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor33": {
+                        "displayName": "Slice 34 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor34": {
+                        "displayName": "Slice 35 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor35": {
+                        "displayName": "Slice 36 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor36": {
+                        "displayName": "Slice 37 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor37": {
+                        "displayName": "Slice 38 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor38": {
+                        "displayName": "Slice 39 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor39": {
+                        "displayName": "Slice 40 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor40": {
+                        "displayName": "Slice 41 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor41": {
+                        "displayName": "Slice 42 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor42": {
+                        "displayName": "Slice 43 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor43": {
+                        "displayName": "Slice 44 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor44": {
+                        "displayName": "Slice 45 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor45": {
+                        "displayName": "Slice 46 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor46": {
+                        "displayName": "Slice 47 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor47": {
+                        "displayName": "Slice 48 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor48": {
+                        "displayName": "Slice 49 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor49": {
+                        "displayName": "Slice 50 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor50": {
+                        "displayName": "Slice 51 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor51": {
+                        "displayName": "Slice 52 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor52": {
+                        "displayName": "Slice 53 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor53": {
+                        "displayName": "Slice 54 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor54": {
+                        "displayName": "Slice 55 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor55": {
+                        "displayName": "Slice 56 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor56": {
+                        "displayName": "Slice 57 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor57": {
+                        "displayName": "Slice 58 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor58": {
+                        "displayName": "Slice 59 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor59": {
+                        "displayName": "Slice 60 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor60": {
+                        "displayName": "Slice 61 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor61": {
+                        "displayName": "Slice 62 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor62": {
+                        "displayName": "Slice 63 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "sliceColor63": {
+                        "displayName": "Slice 64 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "displayName": "Data Labels",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelStyle": {
+                        "displayName": "Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Category",
+                                    "value": "category"
+                                },
+                                {
+                                    "displayName": "Value",
+                                    "value": "value"
+                                },
+                                {
+                                    "displayName": "Percent",
+                                    "value": "percent"
+                                },
+                                {
+                                    "displayName": "Category, Percent",
+                                    "value": "category_percent"
+                                },
+                                {
+                                    "displayName": "Category, Value",
+                                    "value": "category_value"
+                                },
+                                {
+                                    "displayName": "All",
+                                    "value": "all"
+                                }
+                            ]
+                        }
+                    },
+                    "labelPosition": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Inside",
+                                    "value": "inside"
+                                },
+                                {
+                                    "displayName": "Outside",
+                                    "value": "outside"
+                                }
+                            ]
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "underline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "Thousands",
+                                    "value": "1000"
+                                },
+                                {
+                                    "displayName": "Millions",
+                                    "value": "1000000"
+                                },
+                                {
+                                    "displayName": "Billions",
+                                    "value": "1000000000"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "gaugeMode": {
+                "displayName": "Gauge Mode",
+                "description": "KPI / progress mode. Mark category names as background and add a curved label per ring.",
+                "properties": {
+                    "backgroundCategories": {
+                        "displayName": "Background Categories",
+                        "description": "Comma-separated category names rendered but excluded from the legend and data labels (case-insensitive, e.g. 'Remaining, Remaining Percentage').",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showRingLabels": {
+                        "displayName": "Show Ring Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ringLabelStyle": {
+                        "displayName": "Ring Label Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Name + %",
+                                    "value": "name_pct"
+                                },
+                                {
+                                    "displayName": "Name only",
+                                    "value": "name"
+                                },
+                                {
+                                    "displayName": "% only",
+                                    "value": "pct"
+                                }
+                            ]
+                        }
+                    },
+                    "ringLabelColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "ringLabelFontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "ringLabelFontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "ringLabelBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "ringLabelDecimals": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "source": {
+                        "displayName": "Legend Source",
+                        "description": "Choose what the displayed legend lists. Affects the legend only, not the chart slices or colors.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Legend (Categories)",
+                                    "value": "legend"
+                                },
+                                {
+                                    "displayName": "Values (Rings)",
+                                    "value": "values"
+                                }
+                            ]
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Top Left",
+                                    "value": "top"
+                                },
+                                {
+                                    "displayName": "Top Center",
+                                    "value": "topcenter"
+                                },
+                                {
+                                    "displayName": "Bottom Left",
+                                    "value": "bottom"
+                                },
+                                {
+                                    "displayName": "Bottom Center",
+                                    "value": "bottomcenter"
+                                },
+                                {
+                                    "displayName": "Left",
+                                    "value": "left"
+                                },
+                                {
+                                    "displayName": "Right",
+                                    "value": "right"
+                                }
+                            ]
+                        }
+                    },
+                    "title": {
+                        "displayName": "Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Title Text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "underline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "centerLabel": {
+                "displayName": "Center Label",
+                "description": "Visible only when shape is Donut.",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "text": {
+                        "displayName": "Text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "auto": {
+                        "displayName": "Auto Total",
+                        "description": "When on, shows the sum of values automatically.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Text Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "0"
+                                },
+                                {
+                                    "displayName": "None",
+                                    "value": "1"
+                                },
+                                {
+                                    "displayName": "Thousands",
+                                    "value": "1000"
+                                },
+                                {
+                                    "displayName": "Millions",
+                                    "value": "1000000"
+                                },
+                                {
+                                    "displayName": "Billions",
+                                    "value": "1000000000"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "displayName": "Tooltip",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPercent": {
+                        "displayName": "Show Percent",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showValue": {
+                        "displayName": "Show Value",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSeries": {
+                        "displayName": "Show Series Name",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "border": {
+                "displayName": "Slice Border",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "width": {
+                        "displayName": "Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "background": {
+                "displayName": "Background",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "transparency": {
+                        "displayName": "Transparency",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "selection": {
+                "displayName": "Selection",
+                "properties": {
+                    "fadeOpacity": {
+                        "displayName": "Unselected Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "hoverOpacity": {
+                        "displayName": "Hover Opacity",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "animation": {
+                "displayName": "Animation",
+                "properties": {
+                    "enable": {
+                        "displayName": "Enable",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "duration": {
+                        "displayName": "Duration (ms)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsMultiVisualSelection": true,
+        "supportsLandingPage": true,
+        "supportsKeyboardFocus": true,
+        "supportsSynchronizingFilterState": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "sorting": {
+            "default": {}
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
