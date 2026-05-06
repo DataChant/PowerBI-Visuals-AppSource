@@ -1,0 +1,1540 @@
+{
+    "visual": {
+        "name": "procalendarHeatmap",
+        "displayName": "ProCalendar Heatmap",
+        "guid": "procalendar9B8E7F6A5D4C438A91B2C3D4E5F60718",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Calendar heatmap analytics for Power BI with annual, month, multi-year, fiscal quarter, and week-hour heatmaps.",
+        "supportUrl": "https://vectras-software.com/products/procalendar-heatmap/support/",
+        "gitHubUrl": "https://github.com/MS-PBI-Team/procalendar-heatmap-review"
+    },
+    "author": {
+        "name": "Vectras Software",
+        "email": "support@vectras-software.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "visual.name": "ProCalendar Heatmap",
+            "visual.displayName": "ProCalendar Heatmap",
+            "visual.description": "Calendar heatmap analytics for Power BI with annual, month, multi-year, fiscal quarter, and week-hour heatmaps.",
+            "Watermark_Free": "ProCalendar Heatmap Free - Upgrade to Pro",
+            "Button_Today": "Today",
+            "Button_Today_Aria": "Scroll to today",
+            "EmptyState_Welcome_Title": "Welcome to ProCalendar Heatmap",
+            "EmptyState_Welcome_Body": "Drag a Date column and a numeric Value column into the visual to begin.",
+            "EmptyState_AddField_Title": "Add a {0} field",
+            "EmptyState_AddDate_Body": "ProCalendar Heatmap needs a date column to render.",
+            "EmptyState_AddValue_Body": "ProCalendar Heatmap needs a numeric value column to color cells.",
+            "EmptyState_WeekHourNeedsDateTime_Title": "Use a DateTime field",
+            "EmptyState_WeekHourNeedsDateTime_Body": "Week x Hour Heatmap requires the Date role to contain real time-of-day values. Date-only fields can be shifted by timezone conversion and are ignored in this mode.",
+            "EmptyState_AnnualNoOverlap_Title": "Selected year is outside the date range",
+            "EmptyState_AnnualNoOverlap_Body": "Choose a different Annual Focus year or expand the Date Range settings.",
+            "Legend_Annual_Title": "Year intensity",
+            "Legend_CurrentView_Title": "View scale",
+            "Legend_DateRange_Title": "Date range scale",
+            "Legend_AllData_Title": "All data scale",
+            "Legend_Manual_Title": "Manual scale",
+            "EmptyState_NoData_Title": "No data",
+            "EmptyState_NoData_Body": "All required fields are bound but no rows produced valid dates."
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "dateField",
+                "kind": "Grouping",
+                "displayName": "Date",
+                "description": "The date column. Date or DateTime values are accepted."
+            },
+            {
+                "name": "valueField",
+                "kind": "Measure",
+                "displayName": "Value",
+                "description": "Primary numeric value driving cell color intensity."
+            },
+            {
+                "name": "secondaryValue",
+                "kind": "Measure",
+                "displayName": "Secondary Value",
+                "description": "Optional second metric shown in tooltip and future multi-metric modes."
+            },
+            {
+                "name": "tertiaryValue",
+                "kind": "Measure",
+                "displayName": "Tertiary Value",
+                "description": "Optional third metric shown in tooltip and future multi-metric modes."
+            },
+            {
+                "name": "holidayField",
+                "kind": "Grouping",
+                "displayName": "Holiday",
+                "description": "Optional holiday indicator for future holiday rendering."
+            },
+            {
+                "name": "tooltipFields",
+                "kind": "Grouping",
+                "displayName": "Tooltip Fields",
+                "description": "Additional fields shown in the hover tooltip."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "dateField": {
+                            "max": 1
+                        },
+                        "valueField": {
+                            "max": 1
+                        },
+                        "secondaryValue": {
+                            "max": 1
+                        },
+                        "tertiaryValue": {
+                            "max": 1
+                        },
+                        "holidayField": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "dateField"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "valueField"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "secondaryValue"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tertiaryValue"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "holidayField"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltipFields"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "tooltips": {
+            "supportedTypes": {
+                "default": true
+            },
+            "roles": [
+                "tooltipFields"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true,
+        "supportsLandingPage": true,
+        "supportsHighlight": true,
+        "supportsSynchronizingFilterState": true,
+        "drilldown": {
+            "roles": [
+                "dateField"
+            ]
+        },
+        "objects": {
+            "calendarView": {
+                "properties": {
+                    "mode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "annual",
+                                    "displayName": "Annual Heatmap"
+                                },
+                                {
+                                    "value": "monthGrid",
+                                    "displayName": "Month Heatmap"
+                                },
+                                {
+                                    "value": "multiYear",
+                                    "displayName": "Multi-Year Heatmap"
+                                },
+                                {
+                                    "value": "quarter",
+                                    "displayName": "Fiscal Quarter Heatmap"
+                                },
+                                {
+                                    "value": "weekHour",
+                                    "displayName": "Week x Hour Heatmap"
+                                }
+                            ]
+                        }
+                    },
+                    "rangeMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (from data)"
+                                },
+                                {
+                                    "value": "fixed",
+                                    "displayName": "Fixed range"
+                                },
+                                {
+                                    "value": "relative",
+                                    "displayName": "Relative to today"
+                                }
+                            ]
+                        }
+                    },
+                    "fixedStart": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fixedEnd": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "relativePeriod": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "thisYear",
+                                    "displayName": "This year"
+                                },
+                                {
+                                    "value": "lastYear",
+                                    "displayName": "Last year"
+                                },
+                                {
+                                    "value": "last12Months",
+                                    "displayName": "Last 12 months"
+                                },
+                                {
+                                    "value": "last3Years",
+                                    "displayName": "Last 3 years"
+                                },
+                                {
+                                    "value": "last5Years",
+                                    "displayName": "Last 5 years"
+                                },
+                                {
+                                    "value": "thisMonth",
+                                    "displayName": "This month"
+                                },
+                                {
+                                    "value": "lastMonth",
+                                    "displayName": "Last month"
+                                }
+                            ]
+                        }
+                    },
+                    "selectedYear": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fiscalYearStartMonth": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "1",
+                                    "displayName": "January"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "February"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "March"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "April"
+                                },
+                                {
+                                    "value": "5",
+                                    "displayName": "May"
+                                },
+                                {
+                                    "value": "6",
+                                    "displayName": "June"
+                                },
+                                {
+                                    "value": "7",
+                                    "displayName": "July"
+                                },
+                                {
+                                    "value": "8",
+                                    "displayName": "August"
+                                },
+                                {
+                                    "value": "9",
+                                    "displayName": "September"
+                                },
+                                {
+                                    "value": "10",
+                                    "displayName": "October"
+                                },
+                                {
+                                    "value": "11",
+                                    "displayName": "November"
+                                },
+                                {
+                                    "value": "12",
+                                    "displayName": "December"
+                                }
+                            ]
+                        }
+                    },
+                    "weekStartDay": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Sunday"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Monday"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Tuesday"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "Wednesday"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "Thursday"
+                                },
+                                {
+                                    "value": "5",
+                                    "displayName": "Friday"
+                                },
+                                {
+                                    "value": "6",
+                                    "displayName": "Saturday"
+                                }
+                            ]
+                        }
+                    },
+                    "aggregation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "sum",
+                                    "displayName": "Sum"
+                                },
+                                {
+                                    "value": "avg",
+                                    "displayName": "Average"
+                                },
+                                {
+                                    "value": "max",
+                                    "displayName": "Maximum"
+                                },
+                                {
+                                    "value": "min",
+                                    "displayName": "Minimum"
+                                },
+                                {
+                                    "value": "count",
+                                    "displayName": "Count"
+                                }
+                            ]
+                        }
+                    },
+                    "hourFormat": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "h24",
+                                    "displayName": "24-hour"
+                                },
+                                {
+                                    "value": "h12",
+                                    "displayName": "12-hour"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "cellAppearance": {
+                "properties": {
+                    "cellShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "roundedSquare",
+                                    "displayName": "Rounded square"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                }
+                            ]
+                        }
+                    },
+                    "cellSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cellGap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cellBorderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cellBorderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showMonthDividers": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "monthDividerColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "emptyCellColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showCellLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cellLabelContent": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dayNumber",
+                                    "displayName": "Day of month"
+                                },
+                                {
+                                    "value": "value",
+                                    "displayName": "Value"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "colorScale": {
+                "properties": {
+                    "scaleType": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "sequential",
+                                    "displayName": "Sequential"
+                                },
+                                {
+                                    "value": "diverging",
+                                    "displayName": "Diverging"
+                                },
+                                {
+                                    "value": "threshold",
+                                    "displayName": "Threshold rules"
+                                }
+                            ]
+                        }
+                    },
+                    "domainSource": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto by mode"
+                                },
+                                {
+                                    "value": "currentView",
+                                    "displayName": "Current view"
+                                },
+                                {
+                                    "value": "dateRange",
+                                    "displayName": "Date range"
+                                },
+                                {
+                                    "value": "allData",
+                                    "displayName": "All loaded data"
+                                },
+                                {
+                                    "value": "manual",
+                                    "displayName": "Manual"
+                                }
+                            ]
+                        }
+                    },
+                    "palette": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "githubGreen",
+                                    "displayName": "GitHub Green"
+                                },
+                                {
+                                    "value": "viridis",
+                                    "displayName": "Viridis"
+                                },
+                                {
+                                    "value": "cividis",
+                                    "displayName": "Cividis"
+                                },
+                                {
+                                    "value": "magma",
+                                    "displayName": "Magma"
+                                },
+                                {
+                                    "value": "powerBI",
+                                    "displayName": "Power BI"
+                                },
+                                {
+                                    "value": "inferno",
+                                    "displayName": "Inferno"
+                                },
+                                {
+                                    "value": "plasma",
+                                    "displayName": "Plasma"
+                                },
+                                {
+                                    "value": "ylOrRd",
+                                    "displayName": "Yellow Orange Red"
+                                },
+                                {
+                                    "value": "ylGnBu",
+                                    "displayName": "Yellow Green Blue"
+                                },
+                                {
+                                    "value": "rdYlGn",
+                                    "displayName": "Red Yellow Green"
+                                },
+                                {
+                                    "value": "blues",
+                                    "displayName": "Blues"
+                                },
+                                {
+                                    "value": "greens",
+                                    "displayName": "Greens"
+                                },
+                                {
+                                    "value": "reds",
+                                    "displayName": "Reds"
+                                },
+                                {
+                                    "value": "purples",
+                                    "displayName": "Purples"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom colors"
+                                }
+                            ]
+                        }
+                    },
+                    "minColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "midColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "midValue": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "manualMin": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "manualMax": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "midValueMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (median)"
+                                },
+                                {
+                                    "value": "zero",
+                                    "displayName": "Zero"
+                                },
+                                {
+                                    "value": "manual",
+                                    "displayName": "Manual value"
+                                }
+                            ]
+                        }
+                    },
+                    "binningMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "log",
+                                    "displayName": "Logarithmic"
+                                },
+                                {
+                                    "value": "quantile",
+                                    "displayName": "Quantile"
+                                }
+                            ]
+                        }
+                    },
+                    "nullColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showOutOfRangeColors": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "underflowColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "overflowColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "thresholdRules": {
+                "properties": {
+                    "rule1Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule1Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule1Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule1Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule2Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule2Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule2Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule2Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule3Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule3Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule3Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule3Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule4Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule4Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule4Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule4Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule5Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule5Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule5Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule5Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule6Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule6Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule6Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule6Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule7Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule7Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule7Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule7Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rule8Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "<"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "<="
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "="
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": ">="
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": ">"
+                                },
+                                {
+                                    "value": "between",
+                                    "displayName": "Between"
+                                }
+                            ]
+                        }
+                    },
+                    "rule8Value": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule8Value2": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rule8Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "holidays": {
+                "properties": {
+                    "holidaySource": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "dataField",
+                                    "displayName": "From Holiday data role"
+                                },
+                                {
+                                    "value": "json",
+                                    "displayName": "From JSON list"
+                                }
+                            ]
+                        }
+                    },
+                    "holidayJson": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "holidayCellColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "holidayBorderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "weekendRule": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "No weekend highlighting"
+                                },
+                                {
+                                    "value": "satSun",
+                                    "displayName": "Saturday and Sunday"
+                                },
+                                {
+                                    "value": "friSat",
+                                    "displayName": "Friday and Saturday"
+                                },
+                                {
+                                    "value": "satOnly",
+                                    "displayName": "Saturday only"
+                                },
+                                {
+                                    "value": "sunOnly",
+                                    "displayName": "Sunday only"
+                                }
+                            ]
+                        }
+                    },
+                    "weekendCellColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "todayIndicator": {
+                "properties": {
+                    "showToday": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "todayBorderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "todayBorderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "properties": {
+                    "showMonthLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "monthLabelFormat": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "short",
+                                    "displayName": "Short"
+                                },
+                                {
+                                    "value": "long",
+                                    "displayName": "Long"
+                                },
+                                {
+                                    "value": "number",
+                                    "displayName": "Number"
+                                }
+                            ]
+                        }
+                    },
+                    "showDayOfWeekLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dayOfWeekFormat": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "narrow",
+                                    "displayName": "Narrow"
+                                },
+                                {
+                                    "value": "short",
+                                    "displayName": "Short"
+                                },
+                                {
+                                    "value": "long",
+                                    "displayName": "Long"
+                                }
+                            ]
+                        }
+                    },
+                    "showYearLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showWeekNumbers": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "multiMetric": {
+                "properties": {
+                    "displayMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "primary",
+                                    "displayName": "Primary value only"
+                                },
+                                {
+                                    "value": "splitCell",
+                                    "displayName": "Split cell"
+                                },
+                                {
+                                    "value": "compositeColor",
+                                    "displayName": "Composite color"
+                                }
+                            ]
+                        }
+                    },
+                    "primaryWeight": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "secondaryWeight": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tertiaryWeight": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "properties": {
+                    "showDate": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dateFormat": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showValueLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showWeekday": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showHolidayName": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "properties": {
+                    "showLegend": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendPosition": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                }
+                            ]
+                        }
+                    },
+                    "legendTitle": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "legendShowMin": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendShowMax": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendShowMid": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendNumberFormat": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "raw",
+                                    "displayName": "Raw"
+                                },
+                                {
+                                    "value": "thousands",
+                                    "displayName": "Thousands"
+                                },
+                                {
+                                    "value": "millions",
+                                    "displayName": "Millions"
+                                },
+                                {
+                                    "value": "billions",
+                                    "displayName": "Billions"
+                                },
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                }
+                            ]
+                        }
+                    },
+                    "legendFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendFontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "advanced": {
+                "properties": {
+                    "themeOverride": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "light",
+                                    "displayName": "Force light"
+                                },
+                                {
+                                    "value": "dark",
+                                    "displayName": "Force dark"
+                                }
+                            ]
+                        }
+                    },
+                    "renderMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "svg",
+                                    "displayName": "Force SVG"
+                                },
+                                {
+                                    "value": "canvas",
+                                    "displayName": "Force Canvas"
+                                }
+                            ]
+                        }
+                    },
+                    "canvasThreshold": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "cellTextStyle": {
+                "properties": {
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "autoContrast": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "labelTextStyle": {
+                "properties": {
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
