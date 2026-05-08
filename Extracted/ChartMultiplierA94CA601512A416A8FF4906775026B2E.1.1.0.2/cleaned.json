@@ -1,0 +1,950 @@
+{
+    "visual": {
+        "name": "ChartMultiplier",
+        "displayName": "Chart Multiplier",
+        "guid": "ChartMultiplierA94CA601512A416A8FF4906775026B2E",
+        "visualClassName": "Visual",
+        "version": "1.1.0.2",
+        "description": "Small-multiples visual rendering one card per category as a gauge, pie, or bubble chart with optional detail table, color thresholds, cross-filtering, and an overall summary card.",
+        "supportUrl": "https://danbistudio.com/visuals/chart-multiplier/docs/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Daniel Abdel Sater",
+        "email": "support@danbistudio.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "REQUIRED. The outer grouping \u2014 one card per unique value (e.g. project, department). Bound to the matrix rows axis. The Overall card aggregates across all Category values."
+            },
+            {
+                "displayName": "Segment",
+                "name": "tableCategory",
+                "kind": "Grouping",
+                "description": "Optional inner grouping \u2014 breaks each Category card into sub-rows / pie slices / bubbles (e.g. status). Bound to the matrix columns axis so PBI emits per-category \u00d7 per-segment cells AND per-segment grand totals (used by the Overall pie/bubble slice values). Use ISINSCOPE in measures to scope per level."
+            },
+            {
+                "displayName": "Value",
+                "name": "value",
+                "kind": "Measure",
+                "description": "REQUIRED. The primary measure. PBI evaluates this measure at every matrix level: grand total (Overall card), per first-grouping subtotal (category gauge / center number), per leaf (segment row, pie slice, bubble). Use DAX ISINSCOPE in the measure to switch behavior per level \u2014 see USER_GUIDE for the recommended pattern. The data-model format string (currency, percent, etc.) is honored at every render site."
+            },
+            {
+                "displayName": "Min",
+                "name": "minValue",
+                "kind": "Measure",
+                "description": "Gauge scale floor. Optional \u2014 defaults to 0. Used only by the Gauge chart type to anchor the start of the arc. Ignored for Pie and Bubble."
+            },
+            {
+                "displayName": "Max",
+                "name": "maxValue",
+                "kind": "Measure",
+                "description": "Gauge scale ceiling. Optional \u2014 defaults to 100. Used by the Gauge chart type to anchor the end of the arc, and by the 'Show as %' toggle to compute (value / max) \u00d7 100. Ignored for Pie and Bubble (slice / bubble size is determined by Value alone)."
+            },
+            {
+                "displayName": "FX Color",
+                "name": "fxColor",
+                "kind": "Measure",
+                "description": "Optional DAX measure returning a CSS hex color. Like Value, FX Color is evaluated at EVERY matrix level: grand total (Overall card color), per category subtotal (gauge arc color), per leaf (slice / bubble / row color). Use ISINSCOPE in the measure to return different colors per level \u2014 see USER_GUIDE for the recommended pattern. Overrides the Color Mode setting wherever bound."
+            },
+            {
+                "displayName": "Segment Bg fx Color",
+                "name": "tableCategoryBgColor",
+                "kind": "Measure",
+                "description": "Optional DAX measure returning a CSS hex color for the detail-table row background (e.g. '#1e3a5f'). Applies to per-card detail rows and Overall card detail rows (gauge chart type only). Use ISINSCOPE in the measure to scope per level."
+            },
+            {
+                "displayName": "Value Pill fx Color",
+                "name": "tableValueBgColor",
+                "kind": "Measure",
+                "description": "Optional DAX measure returning a CSS hex color for the pill-shaped background behind each row's Segment Value (e.g. '#10b981'). Evaluated per Category \u00d7 Segment. Used only by the Gauge chart type's detail table. Opacity is controlled by Colors \u2192 Pill Bg Opacity."
+            },
+            {
+                "displayName": "Value Text fx Color",
+                "name": "tableValueTextColor",
+                "kind": "Measure",
+                "description": "Optional DAX measure returning a CSS hex color for the Segment Value text (e.g. '#ffffff'). Evaluated per Category \u00d7 Segment. Used only by the Gauge chart type's detail table. When omitted, the visual computes an auto-contrast color from the pill background."
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": "Optional measures shown in the tooltip on hover. Bind any number of measures here \u2014 they appear as additional rows below the visual's built-in tooltip content. Applies to all chart types and to both Category cards and Segment rows."
+            }
+        ],
+        "objects": {
+            "general": {
+                "properties": {
+                    "darkMode": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showAsPercent": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showToolbar": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSummaryBar": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "layout": {
+                "properties": {
+                    "chartType": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowDirection": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "sectionAlign": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showOverall": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showPerGroup": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showNeedle": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minChartSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxChartSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "thickness": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "table": {
+                "properties": {
+                    "showTables": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideTableWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxVisibleRows": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxVisibleRowsOnSnap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rowGap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rowPadding": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "colors": {
+                "properties": {
+                    "bgColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cardBgColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "toolbarBgColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "pillBgColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryTitleColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "centerValueColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "tableCategoryColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "tableValueColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lowThreshold": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "midThreshold": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "colorMode": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "gradientPreset": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showGradientPreview": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "blendSliceBoundaries": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "colorLow": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorMid": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorHigh": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "needleColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "valueBgOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "colorModeScope": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "selectedSegment": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "indexMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "segColor0": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor1": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor2": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor3": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor4": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor5": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor6": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor7": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor8": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor9": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor10": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor11": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor12": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor13": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor14": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor15": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor16": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor17": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor18": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "segColor19": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "spacing": {
+                "properties": {
+                    "toolbarChartGap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "chartTitleGap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "titleTableGap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelValueGap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "typography": {
+                "properties": {
+                    "valueSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "categorySize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minMaxSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "summaryFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "toolbarSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "scale": {
+                "properties": {
+                    "view": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "scaleMode": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "autoRefSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "autoMinScale": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "autoMaxScale": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fixedScale": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tbScaleMode": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "tbAutoRefSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tbAutoMinScale": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tbAutoMaxScale": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tbFixedScale": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "scroll": {
+                "properties": {
+                    "syncScroll": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scrollEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scrollSpeed": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "enableScrollSnap": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableSnapTolerance": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "snapTolerance": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "autoScrollToFiltered": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "scrollToFilteredSpeed": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "toolbar": {
+                "properties": {
+                    "showAsPercent": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showAsPercentDefault": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "syncScroll": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "syncScrollDefault": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "license": {
+                "properties": {
+                    "licenseKey": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "subTotals": {
+                "displayName": "Subtotals",
+                "properties": {
+                    "rowSubtotals": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "perRowLevel": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "columnSubtotals": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "perColumnLevel": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "levelSubtotalEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "tableCategory": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "value": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "minValue": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "maxValue": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "fxColor": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "tableCategoryBgColor": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "tableValueBgColor": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "tableValueTextColor": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "tooltips": {
+                            "min": 0
+                        }
+                    }
+                ],
+                "matrix": {
+                    "rows": {
+                        "for": {
+                            "in": "category"
+                        }
+                    },
+                    "columns": {
+                        "for": {
+                            "in": "tableCategory"
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "value"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "minValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "maxValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "fxColor"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tableCategoryBgColor"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tableValueBgColor"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tableValueTextColor"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "subtotals": {
+            "matrix": {
+                "rowSubtotals": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "rowSubtotals"
+                    },
+                    "defaultValue": true
+                },
+                "rowSubtotalsPerLevel": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "perRowLevel"
+                    },
+                    "defaultValue": false
+                },
+                "columnSubtotals": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "columnSubtotals"
+                    },
+                    "defaultValue": true
+                },
+                "columnSubtotalsPerLevel": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "perColumnLevel"
+                    },
+                    "defaultValue": false
+                },
+                "levelSubtotalEnabled": {
+                    "propertyIdentifier": {
+                        "objectName": "subTotals",
+                        "propertyName": "levelSubtotalEnabled"
+                    },
+                    "defaultValue": true
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "expandCollapse": {
+            "roles": [
+                "category"
+            ],
+            "addDataViewFlags": {
+                "defaultValue": true
+            }
+        },
+        "drilldown": {
+            "roles": [
+                "category"
+            ]
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
