@@ -1,0 +1,366 @@
+{
+    "visual": {
+        "name": "codexHeatmapMatrix",
+        "displayName": "Codex Heatmap Matrix",
+        "guid": "codexHeatmapMatrixD1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6",
+        "visualClassName": "Visual",
+        "version": "1.1.0.21",
+        "description": "Colour-coded heatmap grid for two-dimensional data analysis with flexible colour schemes.",
+        "supportUrl": "https://nexuscodex.nexus/support",
+        "gitHubUrl": "https://github.com/Nexus-Codex-pbi/codex-heatmap-matrix"
+    },
+    "author": {
+        "name": "Nexus Codex",
+        "email": "support@nexuscodex.nexus"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Visual_Short_Description": "Colour-coded heatmap grid for two-dimensional data analysis with flexible colour schemes.",
+            "Visual_Landing_Message": "Drop Row Category, Column Category, and a Measure to build the heatmap."
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Row Category",
+                "name": "rowCategory",
+                "kind": "Grouping",
+                "description": "Row axis category (e.g. Beat, Region, Product)"
+            },
+            {
+                "displayName": "Column Category",
+                "name": "columnCategory",
+                "kind": "Grouping",
+                "description": "Column axis category (e.g. Day of Week, Month, Shift)"
+            },
+            {
+                "displayName": "Cell Value",
+                "name": "cellValue",
+                "kind": "Measure",
+                "description": "Numeric value displayed in each cell"
+            },
+            {
+                "displayName": "Sort Order",
+                "name": "sortOrder",
+                "kind": "Measure",
+                "description": "Optional numeric value to control row sort order (ascending)"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "rowCategory": {
+                            "max": 1
+                        },
+                        "columnCategory": {
+                            "max": 1
+                        },
+                        "cellValue": {
+                            "max": 1
+                        },
+                        "sortOrder": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "rowCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "columnCategory"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "cellValue"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "sortOrder"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "heatmapSettings": {
+                "properties": {
+                    "colorScheme": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Green to Red",
+                                    "value": "greenToRed"
+                                },
+                                {
+                                    "displayName": "Red to Green",
+                                    "value": "redToGreen"
+                                },
+                                {
+                                    "displayName": "Sequential",
+                                    "value": "sequential"
+                                },
+                                {
+                                    "displayName": "Custom",
+                                    "value": "custom"
+                                }
+                            ]
+                        },
+                        "displayName": "Color Scheme"
+                    },
+                    "lowColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "Low Color"
+                    },
+                    "midColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "Mid Color"
+                    },
+                    "highColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "High Color"
+                    },
+                    "zeroColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "Zero Color"
+                    },
+                    "cellBorderRadius": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Cell Border Radius"
+                    },
+                    "showValues": {
+                        "type": {
+                            "bool": true
+                        },
+                        "displayName": "Show Values"
+                    },
+                    "valueFormat": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Number",
+                                    "value": "number"
+                                },
+                                {
+                                    "displayName": "Percent",
+                                    "value": "percent"
+                                }
+                            ]
+                        },
+                        "displayName": "Value Format"
+                    },
+                    "decimalPlaces": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Decimal Places"
+                    }
+                },
+                "displayName": "Heatmap Settings"
+            },
+            "columnSettings": {
+                "properties": {
+                    "columnOrder": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Weekday",
+                                    "value": "weekday"
+                                }
+                            ]
+                        },
+                        "displayName": "Column Order"
+                    }
+                },
+                "displayName": "Column Settings"
+            },
+            "labelSettings": {
+                "properties": {
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Font Size"
+                    },
+                    "headerFontSize": {
+                        "type": {
+                            "numeric": true
+                        },
+                        "displayName": "Header Font Size"
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "displayName": "Font Color"
+                    }
+                },
+                "displayName": "Label Settings"
+            },
+            "axisSettings": {
+                "properties": {
+                    "showAxisTitles": {
+                        "type": {
+                            "bool": true
+                        },
+                        "displayName": "Show Axis Titles"
+                    },
+                    "xAxisTitle": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "X Axis Title"
+                    },
+                    "yAxisTitle": {
+                        "type": {
+                            "text": true
+                        },
+                        "displayName": "Y Axis Title"
+                    }
+                },
+                "displayName": "Axis Settings"
+            },
+            "titleSettings": {
+                "displayName": "Visual Title",
+                "properties": {
+                    "showTitle": {
+                        "displayName": "Show Title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Title Text",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "titleFontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "titleBold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleItalic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleUnderline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleAlign": {
+                        "displayName": "Alignment",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "titleColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": [],
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
