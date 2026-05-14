@@ -1,0 +1,363 @@
+{
+    "visual": {
+        "name": "lookupVisual",
+        "displayName": "Advanced Lookup",
+        "guid": "D7888BF471AE42F6B950393BA60765EB",
+        "visualClassName": "lookupVisual",
+        "version": "1.2.0.0",
+        "description": "Paste lookup values, filter across multiple columns, review matched and unmatched keywords in a results table, and apply a fallback filter when no input or active filters are present.",
+        "supportUrl": "https://pongsu.me/pbi-lookup/support.php",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Kontorn Pongsurachevin",
+        "email": "pkontorn@outlook.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [
+            {
+                "name": "ExportContent",
+                "essential": false
+            }
+        ],
+        "dataRoles": [
+            {
+                "name": "lookupColumn",
+                "kind": "Grouping",
+                "displayName": "Lookup Column",
+                "description": "The column to search/filter against"
+            },
+            {
+                "name": "resultColumns",
+                "kind": "GroupingOrMeasure",
+                "displayName": "Result Columns",
+                "description": "Columns to display in the results table"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "lookupColumn": {
+                            "min": 1,
+                            "max": 5,
+                            "areHierarchicallyRelated": true
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "lookupColumn"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "resultColumns"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "displayName": "General",
+                "displayNameKey": "formattingGeneral",
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    }
+                }
+            },
+            "inputSettings": {
+                "displayName": "Input Box",
+                "description": "Controls lookup input behavior and button appearance.",
+                "properties": {
+                    "colDelim": {
+                        "displayName": "Column Delimiter",
+                        "description": "Optional delimiter to treat as a column separator. It is converted to a tab before filtering.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "rowDelim": {
+                        "displayName": "Row Delimiter",
+                        "description": "Optional delimiter to treat as a new lookup row. It is converted to a line break before filtering.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "background": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "padding": {
+                        "displayName": "Padding (px)",
+                        "description": "Adds spacing around the input and table inside the visual.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "inputHeight": {
+                        "displayName": "Inputbox Size (px)",
+                        "description": "Controls the height of the input box in vertical layout, or its width in horizontal layout. Enter 0 for default value.",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "inputBorderColor": {
+                        "displayName": "Input Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "inputBackground": {
+                        "displayName": "Input Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "inputTextColor": {
+                        "displayName": "Input Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "applyButtonColor": {
+                        "displayName": "Apply Button Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "buttonTextColor": {
+                        "displayName": "Button Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "tableSettings": {
+                "displayName": "Table",
+                "description": "Controls table behavior, layout, and display styling.",
+                "properties": {
+                    "orientation": {
+                        "displayName": "Orientation",
+                        "description": "Places the input above the results table or beside it.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Vertical",
+                                    "value": "vertical"
+                                },
+                                {
+                                    "displayName": "Horizontal",
+                                    "value": "horizontal"
+                                }
+                            ]
+                        }
+                    },
+                    "enDownload": {
+                        "displayName": "Enable Download",
+                        "description": "Shows the CSV download button when the results table is enabled.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enTable": {
+                        "displayName": "Enable Table",
+                        "description": "Shows or hides the lookup results table.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCount": {
+                        "displayName": "Show Count",
+                        "description": "Shows a Count column with the number of matching dataset rows for each lookup value.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size (px)",
+                        "description": "Controls the text size in the results table.",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "headerBackground": {
+                        "displayName": "Header Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "headerTextColor": {
+                        "displayName": "Header Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowBackground": {
+                        "displayName": "Row Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "alternateRowBackground": {
+                        "displayName": "Alternate Row Background",
+                        "description": "Background color for every other result row.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rowTextColor": {
+                        "displayName": "Row Text Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "noMatchTextColor": {
+                        "displayName": "No Match Row Text Color",
+                        "description": "Text color used for lookup values that do not match any dataset row.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "displayName": "Border Width (px)",
+                        "description": "Thickness of result table grid lines in pixels.",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "defaultFilterSetting": {
+                "displayName": "Fallback Filter",
+                "description": "Controls the optional fallback filter applied by the visual.",
+                "properties": {
+                    "DefaultFilter": {
+                        "displayName": "Enable Fallback Filter",
+                        "description": "Applies the fallback filter value when the visual is cleared or first loads without an active filter.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "DefaultFilterValue": {
+                        "displayName": "Fallback Filter Value",
+                        "description": "Filter value applied automatically when the visual has no typed input.",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "DetectFilter": {
+                        "displayName": "Enable Detect Filter",
+                        "description": "Keeps the fallback filter value active while no other filters affect this visual.",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "HideAllDisplay": {
+                        "displayName": "Hide All Display",
+                        "description": "Hides all visual HTML elements, leaving a blank visual.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": false,
+        "suppressDefaultTitle": true,
+        "supportsSynchronizingFilterState": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
