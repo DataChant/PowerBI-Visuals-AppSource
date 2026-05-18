@@ -1,0 +1,501 @@
+{
+    "visual": {
+        "name": "InfraLayout",
+        "displayName": "Infra Progress Layout by elwaha.net",
+        "guid": "InfraLayoutVisualAE185AE3152B4E76A50FFF8FB50FB766",
+        "visualClassName": "Visual",
+        "version": "1.0.0.4",
+        "description": "Create {rogress Layout in Power BI",
+        "supportUrl": "https://www.elwaha.net/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Mahmoud Salama",
+        "email": "eng.mahmoud3863@outlook.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Base ID",
+                "name": "baseId",
+                "kind": "Grouping",
+                "description": "Unique ID for each base shape"
+            },
+            {
+                "displayName": "Base Coordinates",
+                "name": "baseCoordinates",
+                "kind": "Grouping",
+                "description": "Polygon points for base layer shapes (format: x,y x,y x,y)"
+            },
+            {
+                "displayName": "Base Label",
+                "name": "baseLabel",
+                "kind": "Grouping",
+                "description": "Optional label shown inside each base shape"
+            },
+            {
+                "displayName": "Base Progress Value",
+                "name": "baseProgressValue",
+                "kind": "GroupingOrMeasure",
+                "description": "Progress 0 to 1 for each base shape. 0 = no fill."
+            },
+            {
+                "displayName": "Infrastructure ID",
+                "name": "infraId",
+                "kind": "Grouping",
+                "description": "Unique ID for each infrastructure geometry"
+            },
+            {
+                "displayName": "Infrastructure Coordinates",
+                "name": "infraCoordinates",
+                "kind": "Grouping",
+                "description": "Linear: X1,Y1 X2,Y2 X3,Y3 ... | Circle: X,Y"
+            },
+            {
+                "displayName": "Infrastructure Network",
+                "name": "infraNetwork",
+                "kind": "Grouping",
+                "description": "Top level network name (Sewage, Storm, Water...)"
+            },
+            {
+                "displayName": "Infrastructure Sub Network",
+                "name": "infraSubNetwork",
+                "kind": "Grouping",
+                "description": "Sub network name (Main Line, Branch A, Manhole...)"
+            },
+            {
+                "displayName": "Activity Geo ID",
+                "name": "activityGeoId",
+                "kind": "Grouping",
+                "description": "Links activity rows to infrastructure geometry ID"
+            },
+            {
+                "displayName": "Activity Name",
+                "name": "activityName",
+                "kind": "Grouping",
+                "description": "Activity name (Excavation, Backfill, Test...)"
+            },
+            {
+                "displayName": "Activity Value",
+                "name": "activityValue",
+                "kind": "GroupingOrMeasure",
+                "description": "Value 0 to 1 or text status"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "baseId": {
+                            "max": 1
+                        },
+                        "baseCoordinates": {
+                            "max": 1
+                        },
+                        "baseLabel": {
+                            "max": 1
+                        },
+                        "baseProgressValue": {
+                            "max": 1
+                        },
+                        "infraId": {
+                            "max": 1
+                        },
+                        "infraCoordinates": {
+                            "max": 1
+                        },
+                        "infraNetwork": {
+                            "max": 1
+                        },
+                        "infraSubNetwork": {
+                            "max": 1
+                        },
+                        "activityGeoId": {
+                            "max": 1
+                        },
+                        "activityName": {
+                            "max": 1
+                        },
+                        "activityValue": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "baseId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "baseCoordinates"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "baseLabel"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "baseProgressValue"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "infraId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "infraCoordinates"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "infraNetwork"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "infraSubNetwork"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "activityGeoId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "activityName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "activityValue"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "baseLayer": {
+                "displayName": "Base Layer",
+                "properties": {
+                    "showBase": {
+                        "displayName": "Show Base Layer",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "baseStrokeColor": {
+                        "displayName": "Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "baseStrokeWidth": {
+                        "displayName": "Border Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showBaseLabels": {
+                        "displayName": "Show Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "baseLabelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "baseLabelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "baseLabelBold": {
+                        "displayName": "Bold Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "linearLayer": {
+                "displayName": "Linear Layer",
+                "properties": {
+                    "showLinear": {
+                        "displayName": "Show Linear Features",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "linearWidth": {
+                        "displayName": "Line Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "linearOpacity": {
+                        "displayName": "Opacity (0-100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "linearRoundCaps": {
+                        "displayName": "Round Line Caps",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLinearLabels": {
+                        "displayName": "Show Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "linearLabelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "linearLabelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "circleLayer": {
+                "displayName": "Circle Layer",
+                "properties": {
+                    "showCircles": {
+                        "displayName": "Show Circle Features",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "circleRadius": {
+                        "displayName": "Circle Radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "circleStrokeWidth": {
+                        "displayName": "Border Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "circleOpacity": {
+                        "displayName": "Opacity (0-100)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showCircleLabels": {
+                        "displayName": "Show Labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "circleLabelFontSize": {
+                        "displayName": "Label Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "circleLabelColor": {
+                        "displayName": "Label Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "progressColors": {
+                "displayName": "Progress Colors",
+                "properties": {
+                    "color100": {
+                        "displayName": "100%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color90": {
+                        "displayName": "90% - 99%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color80": {
+                        "displayName": "80% - 89%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color60": {
+                        "displayName": "60% - 79%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color40": {
+                        "displayName": "40% - 59%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color20": {
+                        "displayName": "20% - 39%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color1": {
+                        "displayName": "1% - 19%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color0": {
+                        "displayName": "0%",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "textCategoryColors": {
+                "displayName": "Text Category Colors",
+                "properties": {
+                    "fill": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "interactionSettings": {
+                "displayName": "Interaction Settings",
+                "properties": {
+                    "showTooltip": {
+                        "displayName": "Show Tooltip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dimOpacity": {
+                        "displayName": "Dimmed Opacity %",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "selectedStrokeColor": {
+                        "displayName": "Selected Border Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "selectedStrokeWidth": {
+                        "displayName": "Selected Border Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": false,
+        "supportsMultiVisualSelection": true,
+        "supportsSynchronizingFilterState": true,
+        "supportsKeyboardFocus": true,
+        "sorting": {
+            "default": {}
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
