@@ -1,0 +1,276 @@
+{
+    "visual": {
+        "name": "productionPlanVisual",
+        "displayName": "Production Tracker",
+        "guid": "productionPlanVisual04E2E64F925244DD8164EEEB75DB7EA1",
+        "visualClassName": "Visual",
+        "version": "5.3.12.0",
+        "description": "v5.3.12 - License check fix: match Partner Center generated Service ID (publisher.offer.planId) and numeric ServicePlanState enum (Active/Warning).",
+        "supportUrl": "https://productionvisual.com/support.html",
+        "gitHubUrl": "https://productionvisual.com"
+    },
+    "author": {
+        "name": "Production Visual",
+        "email": "info@productionvisual.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Machine",
+                "name": "machine",
+                "kind": "Grouping",
+                "description": "REQUIRED. Machine name (e.g. Dim_Machine[MachineName]). One bar / row per machine."
+            },
+            {
+                "displayName": "Product",
+                "name": "product",
+                "kind": "Grouping",
+                "description": "RECOMMENDED. Product name (e.g. Dim_Product[ProductName]). Shown in the table, tiles and detail popup."
+            },
+            {
+                "displayName": "Produced Qty",
+                "name": "producedQty",
+                "kind": "Measure",
+                "description": "REQUIRED. Produced units (e.g. Fact_Production[ProducedQty], summed). Drives the produced quantity, fill % and targets."
+            },
+            {
+                "displayName": "FTT Loss Qty",
+                "name": "fttLossQty",
+                "kind": "Measure",
+                "description": "RECOMMENDED. First Time Through loss count (summed). Lowers the Quality factor of OEE."
+            },
+            {
+                "displayName": "Scrap Qty",
+                "name": "scrapQty",
+                "kind": "Measure",
+                "description": "RECOMMENDED. Scrap units (summed). Lowers the Quality factor of OEE."
+            },
+            {
+                "displayName": "Downtime Reason",
+                "name": "downtimeCode",
+                "kind": "Grouping",
+                "description": "RECOMMENDED. Readable downtime label (e.g. Dim_DowntimeCode[Description]). Shown in the detail popup."
+            },
+            {
+                "displayName": "Downtime Code",
+                "name": "downtimeCodeKey",
+                "kind": "Grouping",
+                "description": "RECOMMENDED. The downtime CODE (e.g. ST-01, UT-03). Splits downtime into Planned vs Unplanned: a code starting with 'S' (ST-*) is planned, anything else is unplanned. If left blank, the Downtime Reason field is used for the split. Bind the readable text to Downtime Reason and the code here."
+            },
+            {
+                "displayName": "Downtime (min)",
+                "name": "downtimeMin",
+                "kind": "Measure",
+                "description": "RECOMMENDED. Downtime in minutes (summed). The unplanned part lowers Availability; shown in the breakdown."
+            },
+            {
+                "displayName": "Cycle Time (min)",
+                "name": "cycleTime",
+                "kind": "Measure",
+                "description": "RECOMMENDED. Cycle time per unit in minutes (averaged). Drives Daily Target, Performance and Fill % \u2014 these are 0 without it."
+            },
+            {
+                "displayName": "Shift",
+                "name": "shiftName",
+                "kind": "Grouping",
+                "description": "OPTIONAL. Shift name (e.g. Morning, Afternoon). Adds the Shift filter."
+            },
+            {
+                "displayName": "Date",
+                "name": "dateField",
+                "kind": "Grouping",
+                "description": "RECOMMENDED. Production date at day grain. Drives the shift count (distinct days x shifts/day) and therefore open time, target and OEE; also the date filter."
+            },
+            {
+                "name": "productionLine",
+                "displayName": "Production Line",
+                "kind": "Grouping",
+                "description": "OPTIONAL. Adds the Production Line filter."
+            },
+            {
+                "name": "productCategory",
+                "displayName": "Product Category",
+                "kind": "Grouping",
+                "description": "OPTIONAL. Adds the Product Category filter."
+            },
+            {
+                "name": "areaName",
+                "kind": "Grouping",
+                "displayName": "Area Name",
+                "description": "OPTIONAL. Text column naming each machine's area (e.g. Dim_Area[AreaName]). Groups the chart bars by area."
+            },
+            {
+                "name": "areaSort",
+                "kind": "Grouping",
+                "displayName": "Area Sort Key",
+                "description": "OPTIONAL. Sort key (e.g. AreaID like A01..A10 or a Sequence number). Orders the area groups; if blank, areas are sorted alphabetically by Area Name."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "machine"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "product"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "downtimeCode"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "downtimeCodeKey"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "shiftName"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "dateField"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "productionLine"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "productCategory"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "areaName"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "areaSort"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "producedQty"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "fttLossQty"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "scrapQty"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "downtimeMin"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "cycleTime"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "shiftSchedule": {
+                "properties": {
+                    "shiftLengthMinutes": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "shiftsPerDay": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "plannedStopMinutes": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "workingDaysPerWeek": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "shiftConfig": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "display": {
+                "properties": {
+                    "showOee": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "language": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "en",
+                                    "displayName": "English"
+                                },
+                                {
+                                    "value": "hu",
+                                    "displayName": "Magyar"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": [],
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "supportsHighlight": false,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

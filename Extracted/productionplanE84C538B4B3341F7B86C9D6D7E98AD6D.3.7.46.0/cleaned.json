@@ -1,0 +1,323 @@
+{
+    "visual": {
+        "name": "productionplan",
+        "displayName": "Production Plan",
+        "guid": "productionplanE84C538B4B3341F7B86C9D6D7E98AD6D",
+        "visualClassName": "Visual",
+        "version": "3.7.46.0",
+        "description": "v3.7.46 - License check fix: match Partner Center generated Service ID (publisher.offer.planId) and numeric ServicePlanState enum (Active/Warning).",
+        "supportUrl": "https://productionvisual.com/support.html",
+        "gitHubUrl": "https://productionvisual.com"
+    },
+    "author": {
+        "name": "Production Visual",
+        "email": "info@productionvisual.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "productName",
+                "displayName": "Product Name",
+                "kind": "Grouping",
+                "description": "REQUIRED. Product dimension name (e.g. Dim_Product[ProductName]). The products planned and shown."
+            },
+            {
+                "name": "weekNumber",
+                "displayName": "Week Number",
+                "kind": "Grouping",
+                "description": "REQUIRED. Week number (e.g. Dim_Date[WeekNumber] 1..53). Drives current / next / previous week detection and the weekly goal."
+            },
+            {
+                "name": "machineName",
+                "displayName": "Machine Name",
+                "kind": "Grouping",
+                "description": "CONDITIONAL. Bind to Dim_Machine[MachineName] ONLY if your machine dimension is related to every fact you bind (production, goals, deliveries). If not, leave UNBOUND to avoid InvalidUnconstrainedJoin and use a page-level slicer instead."
+            },
+            {
+                "name": "deliveryDate",
+                "displayName": "Delivery Date",
+                "kind": "Grouping",
+                "description": "RECOMMENDED (or manual). RAW day-grain date \u2014 bind the shared Dim_Date[Date]. Do NOT bind WeekStart / MonthStart / aggregated columns (they collapse every delivery to the bucket-start date). Pairs with Delivery Quantity."
+            },
+            {
+                "name": "cycleTime",
+                "displayName": "Cycle Time",
+                "kind": "Measure",
+                "description": "RECOMMENDED. Cycle time per unit (minutes; averaged). Drives machine capacity \u2014 how the schedule sizes each shift. Bind Dim_CycleTime[CycleTime_min] or Fact_Production[CycleTime_min]."
+            },
+            {
+                "name": "pufferQty",
+                "displayName": "Puffer Data",
+                "kind": "Measure",
+                "description": "OPTIONAL. Up to 10 buffer-stock measures (finished-goods, component, raw material, etc.). Each binding adds one buffer chart."
+            },
+            {
+                "name": "producedQty",
+                "displayName": "Produced Quantity",
+                "kind": "Measure",
+                "description": "RECOMMENDED. Produced units (Fact_Production[ProducedQty], summed). Drives completion % and remaining-to-make against Goal."
+            },
+            {
+                "name": "goalQty",
+                "displayName": "Goal Quantity",
+                "kind": "Measure",
+                "description": "RECOMMENDED (or manual). Weekly goal (Fact_WeeklyGoal[GoalQty]). If UNBOUND, enter goals manually in the visual (saved with the report)."
+            },
+            {
+                "name": "deliveryQty",
+                "displayName": "Delivery Quantity",
+                "kind": "Measure",
+                "description": "RECOMMENDED (or manual). Delivery units (Fact_Delivery[DeliveryQty]). Pair with Delivery Date. If UNBOUND, enter deliveries manually in the visual (saved with the report)."
+            },
+            {
+                "name": "productType",
+                "displayName": "Product Type",
+                "description": "OPTIONAL. Dim_Product[ProductType] (Finished/Component) for explicit classification.",
+                "kind": "Grouping"
+            },
+            {
+                "name": "parentProductId",
+                "kind": "Grouping",
+                "displayName": "BOM Parent Name",
+                "description": "OPTIONAL (assemblies only). Parent product NAME \u2014 bind Dim_BOM[ParentProductName]. Explodes finished-goods demand into component demand."
+            },
+            {
+                "name": "componentProductId",
+                "kind": "Grouping",
+                "displayName": "BOM Component Name",
+                "description": "OPTIONAL (assemblies only). Component product NAME \u2014 bind Dim_BOM[ComponentProductName]."
+            },
+            {
+                "name": "qtyPer",
+                "kind": "Measure",
+                "displayName": "Qty Per Parent",
+                "description": "OPTIONAL (assemblies only). Units of this component per one unit of parent (default 1)."
+            },
+            {
+                "name": "typeLevel1",
+                "kind": "Grouping",
+                "displayName": "Type Level 1",
+                "description": "OPTIONAL. Grouping attribute level 1 (e.g. Pinion / Ring / GearSet) \u2014 used by quick-select and parallel-lane grouping."
+            },
+            {
+                "name": "typeLevel2",
+                "kind": "Grouping",
+                "displayName": "Type Level 2",
+                "description": "OPTIONAL. Grouping attribute level 2 \u2014 used by quick-select and parallel-lane grouping."
+            },
+            {
+                "name": "typeLevel3",
+                "kind": "Grouping",
+                "displayName": "Type Level 3",
+                "description": "OPTIONAL. Grouping attribute level 3 \u2014 used by quick-select and parallel-lane grouping."
+            }
+        ],
+        "objects": {
+            "areaStorage": {
+                "properties": {
+                    "theme": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "language": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "areaData": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "selectedAreaId": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "shiftSectionCollapsed": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "productGoals": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "currentWeekNum": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "nextWeekNum": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "productName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "machineName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "weekNumber"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "deliveryDate"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "productType"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "parentProductId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "componentProductId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "typeLevel1"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "typeLevel2"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "typeLevel3"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "bottom": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "cycleTime"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "pufferQty"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "producedQty"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "goalQty"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "deliveryQty"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "qtyPer"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "conditions": [
+                    {
+                        "productName": {
+                            "max": 1
+                        },
+                        "weekNumber": {
+                            "max": 1
+                        },
+                        "machineName": {
+                            "max": 1
+                        },
+                        "deliveryDate": {
+                            "max": 1
+                        },
+                        "cycleTime": {
+                            "max": 1
+                        },
+                        "pufferQty": {
+                            "min": 0,
+                            "max": 10
+                        },
+                        "producedQty": {
+                            "max": 1
+                        },
+                        "goalQty": {
+                            "max": 1
+                        },
+                        "deliveryQty": {
+                            "max": 1
+                        },
+                        "productType": {
+                            "max": 1
+                        },
+                        "parentProductId": {
+                            "max": 1
+                        },
+                        "componentProductId": {
+                            "max": 1
+                        },
+                        "qtyPer": {
+                            "max": 1
+                        }
+                    }
+                ]
+            }
+        ],
+        "privileges": [],
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "supportsHighlight": false,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
