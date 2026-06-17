@@ -1,164 +1,250 @@
-[2026-06-15] 2 new visuals, 13 new versions
+[2026-06-17] 2 new visuals, 5 new versions
 
-Here are the latest updates to the Power BI Visuals on Microsoft Marketplace as of 2026-06-15:
+Here are the latest updates to the Power BI Visuals on Microsoft Marketplace as of 2026-06-17:
 ## 2 New Custom Visuals: ##
 
 <table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/tino_callarisa.kpicard-pro"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/KPI Card Pro.png?raw=true" width="100" alt="KPI Card Pro" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/tino_callarisa.bullet-chart-pro-tcviz"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Bullet Chart Pro - TCViz.png?raw=true" width="100" alt="Bullet Chart Pro - TCViz" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>KPI Card Pro</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Bullet Chart Pro - TCViz</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://tinocallarisa-web.github.io/kpi-card-pro/support.html">Tino Callarisa</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Multi-metric KPI card with variance, target and small multiples for executive dashboards.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/kpiCardProTCViz.pbiviz">kpiCardProTCViz.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.1<br>Release Date: 2026-06-15</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://tinocallarisa-web.github.io/bullet-chart-pro-tcviz/support.html">Tino Callarisa</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Bullet Chart with Actual vs Target variance — no DAX required.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/bulletChartProTCViz20260001.pbiviz">bulletChartProTCViz20260001.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.1<br>Release Date: 2026-06-17</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/tino_callarisa.tile-grid-map-pro"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/TileGridMapPro.png?raw=true" width="100" alt="TileGridMapPro" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/socio-dm.sdm-metric-tile"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/SDM metricTile.png?raw=true" width="100" alt="SDM metricTile" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>TileGridMapPro</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>SDM metricTile</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://tinocallarisa-web.github.io/tile-grid-map-pro/support.html">Tino Callarisa</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Geographic tile grid maps for Power BI. 27 countries. Free & Pro tiers.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/tileGridMapProTCViz1234567890.pbiviz">tileGridMapProTCViz1234567890.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version: 1.0.0.3<br>Release Date: 2026-06-15</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://socio-data-management.github.io/sdmpbigraph-docs/">Socio Data Management</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Next-generation KPI tile for Power BI — customizable shapes, gradients, effects, data-driven style.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/sdmpbimetrictile88204E96DB714AE29319014527D33A84.pbiviz">sdmpbimetrictile88204E96DB714AE29319014527D33A84.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version: 1.1.0.35<br>Release Date: 2026-06-17</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 </table>
 
 
-## 13 New Versions: ##
+## 5 New Versions: ##
 
 <table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/truvizinc1674781244292.funnel-chart-by-powerviz"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Funnel Chart by Powerviz.png?raw=true" width="100" alt="Funnel Chart by Powerviz" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.d365_business_performance_planning_tabledit"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Table edit - Dynamics 365 Finance business performance planning.png?raw=true" width="100" alt="Table edit - Dynamics 365 Finance business performance planning" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Funnel Chart by Powerviz</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Table edit - Dynamics 365 Finance business performance planning</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://learn.microsoft.com/power-platform/admin/get-help-support">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Simplify data management with Table edit visual.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/msdynxPnADimEditor_46a64748937f429fa9793cb689599b11.pbiviz">msdynxPnADimEditor_46a64748937f429fa9793cb689599b11.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.15.3396.5 ➔ 1.16.3453.6<br>Release Date: 2026-06-17<br>Previous Release Date: 2026-04-21</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/pbi-beraterde1699450736408.3d_map"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Maps.png?raw=true" width="100" alt="Maps" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Maps</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.relevantvisuals.com/index.php/en/visuals-en/maps/maps-docu-en">relevantVisuals</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Discover the ultimate interactive map visual that combines point, shape, and flow mapping.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/maps.pbiviz">maps.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.6.8 ➔ 1.0.6.9<br>Release Date: 2026-06-17<br>Previous Release Date: 2026-06-01</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.d365_business_performance_planning_matrix"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Matrix planning - Dynamics 365 Finance business performance planning.png?raw=true" width="100" alt="Matrix planning - Dynamics 365 Finance business performance planning" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Matrix planning - Dynamics 365 Finance business performance planning</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://learn.microsoft.com/power-platform/admin/get-help-support">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Design powerful planning and forecasting scenarios with data editing capabilities.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/msdynxPnAMatrixCloud_0106a54fd1364e47a0afd26102ef77a3.pbiviz">msdynxPnAMatrixCloud_0106a54fd1364e47a0afd26102ef77a3.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.15.3358.2 ➔ 1.16.3453.6<br>Release Date: 2026-06-17<br>Previous Release Date: 2026-03-19</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/datavizboutiquegmbh1631474046585.ultimate_kpi_cards"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Ultimate KPI Card API License.png?raw=true" width="100" alt="Ultimate KPI Card API License" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Ultimate KPI Card API License</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://dataviz.boutique/2017/02/22/kontakt/">DataViz.Boutique GmbH</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Shows a value, its variance to a reference value 1,2 or 3. Shows Trends and Images! Different Arrows</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/kpifreeapi51D0292A0438427096AC459B59FEF2DE.pbiviz">kpifreeapi51D0292A0438427096AC459B59FEF2DE.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 5.1.2.3 ➔ 5.1.2.4<br>Release Date: 2026-06-17<br>Previous Release Date: 2026-06-09</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/truvizinc1674781244292.sunburst-chart-by-powerviz"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Sunburst by Powerviz.png?raw=true" width="100" alt="Sunburst by Powerviz" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Sunburst by Powerviz</b></td>
 </tr>
 <tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://powerviz.ai/contactus">TRUVIZ INC</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">An Advanced Funnel Chart to visualize and track the data movement across different stages</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/FunnelChartA96234ADB8D143D1837FEC426BB34781.pbiviz">FunnelChartA96234ADB8D143D1837FEC426BB34781.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.0.7 ➔ 1.0.0.14<br>Release Date: 2026-06-15<br>Previous Release Date: 2025-12-15</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Visualize hierarchical data through a series of concentric arcs, shows the part-to-whole proportion</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/SunburstVizA96234ADB8D143D1837FEC426BB34781.pbiviz">SunburstVizA96234ADB8D143D1837FEC426BB34781.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.0.10 ➔ 1.0.0.26<br>Release Date: 2026-06-17<br>Previous Release Date: 2025-12-15</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+</table>
+
+
+## 16 Changes in Listings or Terms: ##
+
+<table style="width: 800px; border: none !important; border-collapse: collapse; border-spacing: 0;">
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.d365_business_performance_planning_copy"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Copy - Dynamics 365 Finance business performance planning.png?raw=true" width="100" alt="Copy - Dynamics 365 Finance business performance planning" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Copy - Dynamics 365 Finance business performance planning</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://learn.microsoft.com/power-platform/admin/get-help-support">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Effortlessly copy baseline data for new planning scenarios.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/msdynxPnACopy_e752d978c5334590aacf10aa7e2717d8.pbiviz">msdynxPnACopy_e752d978c5334590aacf10aa7e2717d8.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PrivacyPolicyUrl: https://go.microsoft.com/fwlink/?LinkId=521839 ➔ https://go.microsoft.com/fwlink/?linkid=521839</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/officesolution1640276900203.dot-plot-chart-by-office-solution"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Dot Plot Chart by Office Solution.png?raw=true" width="100" alt="Dot Plot Chart by Office Solution" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104381948"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Legend.png?raw=true" width="100" alt="Enlighten Legend" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Dot Plot Chart by Office Solution</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Legend</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://newwebsite.innovationalofficesolution.com/power-bi-charts/quantile-dot-plot">Office Solution AI Labs</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Dot plot chart by office solution</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/DotPlotChartByOfficeSolution.pbiviz">DotPlotChartByOfficeSolution.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.3.0.0 ➔ 1.4.0.0<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-06-05</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Create independent interactives legends, allowing you creativity and flexibility</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenLegend0ED91DCE508743998CF5A23E37414AD6.pbiviz">enlightenLegend0ED91DCE508743998CF5A23E37414AD6.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA200000767"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Drill Down Waterfall PRO (Filter) by ZoomCharts.png?raw=true" width="100" alt="Drill Down Waterfall PRO (Filter) by ZoomCharts" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.d365_business_performance_planning_graphicalplan"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Graphical planning - Dynamics 365 Finance business performance planning.png?raw=true" width="100" alt="Graphical planning - Dynamics 365 Finance business performance planning" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Drill Down Waterfall PRO (Filter) by ZoomCharts</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Graphical planning - Dynamics 365 Finance business performance planning</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://zoomcharts.com/en/microsoft-power-bi-custom-visuals/help-center/contact-support/?appsource-waterfall&utm_source=waterfall_app_source&utm_medium=Listing&utm_campaign=App_Source_Listing&utm_term=Privacy&utm_content=Link">ZoomCharts</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Control column sequence, add subtotals and drill down into each category.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/ZoomChartsAdvancedWaterfallE77E4ED357DC402ABA005987437CF900.pbiviz">ZoomChartsAdvancedWaterfallE77E4ED357DC402ABA005987437CF900.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.12.95.0 ➔ 1.12.100.0<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-05-05</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://learn.microsoft.com/power-platform/admin/get-help-support">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Plan visually by dragging various bar or line charts.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/msdynxPnAVisualPlanning_0361ca99cfca4abf98f32300584ae294.pbiviz">msdynxPnAVisualPlanning_0361ca99cfca4abf98f32300584ae294.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PrivacyPolicyUrl: https://go.microsoft.com/fwlink/?LinkId=521839 ➔ https://go.microsoft.com/fwlink/?linkid=521839</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/xpandit.writeback4powerbi"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Write-Back for Power BI.png?raw=true" width="100" alt="Write-Back for Power BI" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/enlightendesignsltd1587194661332.enlightenouterspace"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Outer Space.png?raw=true" width="100" alt="Enlighten Outer Space" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Write-Back for Power BI</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Outer Space</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://support.cloud.writeback4analytics.com/servicedesk/customer/portal/34/user/login?">Xpand IT</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">A Custom Visual that enables you to seamlessly submit data directly from your Power BI report.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/writeback4powerbi.pbiviz">writeback4powerbi.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 2.3.1.0 ➔ 2.3.2.0<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-06-03</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Create a report that is out of this world with this space-themed visualization!</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/Outerspace1442671919391.pbiviz">Outerspace1442671919391.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/32204330.drilldownwaterfallpinbyzoomcharts"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Drill Down Waterfall PRO (Pin) by ZoomCharts.png?raw=true" width="100" alt="Drill Down Waterfall PRO (Pin) by ZoomCharts" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380923"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten World Flag Slicer.png?raw=true" width="100" alt="Enlighten World Flag Slicer" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Drill Down Waterfall PRO (Pin) by ZoomCharts</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten World Flag Slicer</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://zoomcharts.com/en/microsoft-power-bi-custom-visuals/documentation/drill-down-waterfall-visual/">ZoomCharts</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Control column sequence, add subtotals and drill down into each category.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/ZoomChartsDrillDownWaterfallPin164F74D0F7D04063A469A1BF10366D3B.pbiviz">ZoomChartsDrillDownWaterfallPin164F74D0F7D04063A469A1BF10366D3B.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.11.96.0 ➔ 1.11.101.0<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-05-05</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Create a visually compelling country slicer to filter your report.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenWorldFlagsE887F52F76244B1C927F80CF9724AEF6.pbiviz">enlightenWorldFlagsE887F52F76244B1C927F80CF9724AEF6.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/truvizinc1674781244292.kpi-by-powerviz"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/KPI by Powerviz.png?raw=true" width="100" alt="KPI by Powerviz" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380950"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Data Story.png?raw=true" width="100" alt="Enlighten Data Story" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>KPI by Powerviz</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Data Story</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://powerviz.ai/contact-us">TRUVIZ INC</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Build KPI cards beyond imagination with 16 chart layers, small multiples, and on-object interaction</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/KPIVizA96234ADB8D143D1837FEC426BB34781.pbiviz">KPIVizA96234ADB8D143D1837FEC426BB34781.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.0.0.4 ➔ 1.0.0.8<br>Release Date: 2026-06-15<br>Previous Release Date: 2025-12-15</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Use beautifully designed text to tell your story.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenDataStoryDDFB78A6143E42CFAFBC50CCF18D978D.pbiviz">enlightenDataStoryDDFB78A6143E42CFAFBC50CCF18D978D.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA200001561"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Radar Chart by MAQ Software.png?raw=true" width="100" alt="Radar Chart by MAQ Software" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.d365_business_performance_planning_variance"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Variance - Dynamics 365 Finance business performance planning.png?raw=true" width="100" alt="Variance - Dynamics 365 Finance business performance planning" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Radar Chart by MAQ Software</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Variance - Dynamics 365 Finance business performance planning</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://maqsoftware.zendesk.com/hc/en-us/community/topics/360002081751-Power-BI-Radar-Chart">MAQ LLC</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Unlock multi-variable insights with a single chart | Power BI Certified</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/radarChart5F59D098BB90499F8C33EBEBCEE4FEBF.pbiviz">radarChart5F59D098BB90499F8C33EBEBCEE4FEBF.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 4.5.0.0 ➔ 4.5.0.1<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-05-12</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://learn.microsoft.com/power-platform/admin/get-help-support">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Visualize and bridge budget-actual gaps with precision.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/msdynxPnAVariance_f9544bd4d1c14210aaba7c7802ae191e.pbiviz">msdynxPnAVariance_f9544bd4d1c14210aaba7c7802ae191e.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PrivacyPolicyUrl: https://go.microsoft.com/fwlink/?LinkId=521839 ➔ https://go.microsoft.com/fwlink/?linkid=521839</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/32204330.drilldownscatterprobyzoomcharts"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Drill Down Scatter PRO (Filter) by ZoomCharts.png?raw=true" width="100" alt="Drill Down Scatter PRO (Filter) by ZoomCharts" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.d365_business_performance_planning_comment"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Comment - Dynamics 365 Finance business performance planning.png?raw=true" width="100" alt="Comment - Dynamics 365 Finance business performance planning" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Drill Down Scatter PRO (Filter) by ZoomCharts</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Comment - Dynamics 365 Finance business performance planning</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://zoomcharts.com/en/microsoft-power-bi-custom-visuals/documentation/drill-down-scatter-visual/">ZoomCharts</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Create stunning Power BI scatter charts, enhanced by ZoomCharts signature Drill Down experience.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/ZoomChartsScatterChartPaidA2C55E4B59078FDD51C4CD1C4D4E6623V9N8.pbiviz">ZoomChartsScatterChartPaidA2C55E4B59078FDD51C4CD1C4D4E6623V9N8.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.8.293.0 ➔ 1.8.296.0<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-05-05</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://learn.microsoft.com/power-platform/admin/get-help-support">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Capture commentary during planning process from within Power BI reports.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/msdynxPnAComment_c1b0431e724a4fb6b34c449ff0431a4f.pbiviz">msdynxPnAComment_c1b0431e724a4fb6b34c449ff0431a4f.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PrivacyPolicyUrl: https://go.microsoft.com/fwlink/?LinkId=521839 ➔ https://go.microsoft.com/fwlink/?linkid=521839</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/chartpad.gantt"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Gantt Chart.png?raw=true" width="100" alt="Gantt Chart" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/enlightendesignsltd1587194661332.enlightenstoryteller"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Storyteller.png?raw=true" width="100" alt="Enlighten Storyteller" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Gantt Chart</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Storyteller</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://chartpad.io/contact">ChartPad</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Modern Gantt Chart for Project Planning and Management</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/ganttB5863C5BD9EE494DBC8BC10C132053AD.pbiviz">ganttB5863C5BD9EE494DBC8BC10C132053AD.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.3.2.1 ➔ 1.3.3.0<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-06-10</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Transform your data into compelling narratives with Enlighten AI Storyteller!</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenstorytellerE5CA73CE1C2C43878E5C0EBB4652BDD5.pbiviz">enlightenstorytellerE5CA73CE1C2C43878E5C0EBB4652BDD5.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/awpbi.awpbi_3d_power_bi"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/AWPBI 3D for Power BI.png?raw=true" width="100" alt="AWPBI 3D for Power BI" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380849"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Stack Shuffle.png?raw=true" width="100" alt="Enlighten Stack Shuffle" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>AWPBI 3D for Power BI</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Stack Shuffle</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://awpbi.com/3d-for-power-bi/">AWPBI</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Connect your business and project data to interactive 3D models and digital twins in Power BI.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/AWPBI_viewer_visual_a4f2990a03324cf79eb44f982719df44.pbiviz">AWPBI_viewer_visual_a4f2990a03324cf79eb44f982719df44.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 2026.5.21.8 ➔ 2026.6.12.3<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-05-22</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Visually communicate data items in a beautiful, dynamic stack.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenStackShuffle33EDB050C2424C618953642FFC0B291A.pbiviz">enlightenStackShuffle33EDB050C2424C618953642FFC0B291A.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/workforcevision.org-chart-drag-and-drop"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Org Chart Drag and Drop.png?raw=true" width="100" alt="Org Chart Drag and Drop" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.powerautomate-processmining-variantdna"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Power Automate Process Mining - Variant DNA Visual.png?raw=true" width="100" alt="Power Automate Process Mining - Variant DNA Visual" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Org Chart Drag and Drop</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Power Automate Process Mining - Variant DNA Visual</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://workforcevision.co.uk/orgchart">WorkforceVision LTD</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Visualise your organization structure through a customisable drag and drop Organization Chart</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/orgChart021B261450284A21B688B59A7342AC52.pbiviz">orgChart021B261450284A21B688B59A7342AC52.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.4.0.2 ➔ 1.4.0.5<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-05-28</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://powerusers.microsoft.com/t5/Process-Mining/bd-p/ProcessAdvisor">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Visualize business processes in a way that displays processes as if they were DNA blocks.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/variantDNAEE4E02B949754395AD0F88751FCB5864.pbiviz">variantDNAEE4E02B949754395AD0F88751FCB5864.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PrivacyPolicyUrl: https://go.microsoft.com/fwlink/?LinkId=521839 ➔ https://go.microsoft.com/fwlink/?linkid=521839</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380847"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Thermometer by MAQ Software.png?raw=true" width="100" alt="Thermometer by MAQ Software" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380960"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Slicer.png?raw=true" width="100" alt="Enlighten Slicer" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Thermometer by MAQ Software</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Slicer</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://maqsoftware.zendesk.com/hc/en-us/community/topics/360002081591-Power-BI-Thermometer">MAQ LLC</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Represent progress toward goals | Power BI certified</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/PBI_CV_309E6B47_39A5_4681_808F_132AFB230872.pbiviz">PBI_CV_309E6B47_39A5_4681_808F_132AFB230872.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 4.3.0.2 ➔ 4.3.0.3<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-06-05</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Provides a simple way to interact with your data.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenSlicerB18DC0CE4A1F4BA79CE49FBE40F3965F.pbiviz">enlightenSlicerB18DC0CE4A1F4BA79CE49FBE40F3965F.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 <tr>
-  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/32204330.drilldownbubbleprobyzoomcharts"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Drill Down Bubble PRO (Filter) by ZoomCharts.png?raw=true" width="100" alt="Drill Down Bubble PRO (Filter) by ZoomCharts" style="max-width: 100%; height: auto;"/>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.powerautomate-processmining-processmap"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Power Automate Process Mining - Process Map Visual.png?raw=true" width="100" alt="Power Automate Process Mining - Process Map Visual" style="max-width: 100%; height: auto;"/>
 </a></td>
-  <td style="width: 680px; border: none !important; padding: 4px;"><b>Drill Down Bubble PRO (Filter) by ZoomCharts</b></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Power Automate Process Mining - Process Map Visual</b></td>
 </tr>
-<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://zoomcharts.com/en/microsoft-power-bi-custom-visuals/documentation/drill-down-bubble-visual/">ZoomCharts</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">User-friendly navigation. Peerless customization. Complete insights.</td></tr>
-<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/ZoomChartsDrillDownBubblePro2B1E93FCC33E4BE6A2BF7A8B1AA7FACA.pbiviz">ZoomChartsDrillDownBubblePro2B1E93FCC33E4BE6A2BF7A8B1AA7FACA.pbiviz</a></td></tr>
-<tr><td style="border: none !important; padding: 4px;">Version Change: 1.9.98.0 ➔ 1.9.101.0<br>Release Date: 2026-06-15<br>Previous Release Date: 2026-05-05</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://powerusers.microsoft.com/t5/Process-Mining/bd-p/ProcessAdvisor">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Visualize a business process using a beautiful and easy to understand process map.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/processMapEE4E02B949754395AD0F88751FCB5864.pbiviz">processMapEE4E02B949754395AD0F88751FCB5864.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PrivacyPolicyUrl: https://go.microsoft.com/fwlink/?LinkId=521839 ➔ https://go.microsoft.com/fwlink/?linkid=521839</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380850"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Waffle Chart.png?raw=true" width="100" alt="Enlighten Waffle Chart" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Waffle Chart</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Show your data effectively with a waffle pop-out number and quote.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenWaffleChartC94C0BDE416B413A8071A92B5E75A718.pbiviz">enlightenWaffleChartC94C0BDE416B413A8071A92B5E75A718.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380868"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Enlighten Bubble Stack.png?raw=true" width="100" alt="Enlighten Bubble Stack" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Enlighten Bubble Stack</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://www.enlighten.co.nz/Contact">ENLIGHTEN DESIGNS</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Fun with bubbles! Visualize each portion of your data as a stacked percentage bubble.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/enlightenBubbleStack13709305C6AD4E59B8F78FFEA36FB62E.pbiviz">enlightenBubbleStack13709305C6AD4E59B8F78FFEA36FB62E.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">SupportLink: https://www.enlighten.co.nz/contact ➔ https://www.enlighten.co.nz/Contact</td></tr>
+<tr><td style="border: none !important; padding: 4px;"></td></tr>
+<tr>
+  <td rowspan="5" style="width: 120px; border: none !important; vertical-align: top; text-align: center;"><a href="https://appsource.microsoft.com/en-us/product/power-bi-visuals/mscrm.d365_business_performance_planning_reporting"><img src="https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/All%20Visuals/Images/Reporting - Dynamics 365 Finance business performance planning.png?raw=true" width="100" alt="Reporting - Dynamics 365 Finance business performance planning" style="max-width: 100%; height: auto;"/>
+</a></td>
+  <td style="width: 680px; border: none !important; padding: 4px;"><b>Reporting - Dynamics 365 Finance business performance planning</b></td>
+</tr>
+<tr><td style="border: none !important; padding: 4px;">Publisher: <a href="https://learn.microsoft.com/power-platform/admin/get-help-support">Microsoft Dynamics 365</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">Design financial reports such as cash flow, income statement, balance sheet and more.</td></tr>
+<tr><td style="border: none !important; padding: 4px;">Direct Download: <a href="https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/msdynxPnAReportingDev_c95947939075419987e99768a4090001.pbiviz">msdynxPnAReportingDev_c95947939075419987e99768a4090001.pbiviz</a></td></tr>
+<tr><td style="border: none !important; padding: 4px;">PrivacyPolicyUrl: https://go.microsoft.com/fwlink/?LinkId=521839 ➔ https://go.microsoft.com/fwlink/?linkid=521839</td></tr>
 <tr><td style="border: none !important; padding: 4px;"></td></tr>
 </table>
 
