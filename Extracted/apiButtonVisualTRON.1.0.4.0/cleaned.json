@@ -1,0 +1,484 @@
+{
+    "visual": {
+        "name": "apiButtonVisual",
+        "displayName": "API Button",
+        "guid": "apiButtonVisualTRON",
+        "visualClassName": "Visual",
+        "version": "1.0.4.00",
+        "description": "API Button is a Power BI custom visual that enables users to trigger API calls directly from their reports. It supports dynamic URL construction, custom headers, and authentication methods including Azure AD OAuth2, making it ideal for integrating external services and workflows into Power BI dashboards.",
+        "supportUrl": "https://ldc.com",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "LDC",
+        "email": "Jerome.Andreux@ldc.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "measures",
+                "kind": "Measure",
+                "displayName": "Query Parameters Measures",
+                "description": "Required: Add measures to send as URL query parameters (e.g., ?MeasureName=value)"
+            },
+            {
+                "name": "urlMeasure",
+                "kind": "Measure",
+                "displayName": "Dynamic URL",
+                "description": "Optional: Use a measure value as the complete API endpoint URL (overrides static URL setting)"
+            },
+            {
+                "name": "headersMeasures",
+                "kind": "Measure",
+                "displayName": "Custom Headers",
+                "description": "Optional: Add measures as HTTP headers (measure name becomes header name, measure value becomes header value)"
+            },
+            {
+                "name": "tooltips",
+                "kind": "Measure",
+                "displayName": "Tooltips",
+                "description": "Optional: extra measures to show in the visual's hover tooltip"
+            },
+            {
+                "name": "category",
+                "kind": "Grouping",
+                "displayName": "Query Parameters Columns",
+                "description": "Optional: Add columns to send as URL query parameters. The column name becomes the parameter name and the visible (slicer-filtered) values are comma-joined (e.g., ?ProductCategories=Shoes,Phones)"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 100
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "measures"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "urlMeasure"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "headersMeasures"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": true,
+                "parameters": [
+                    "https://*"
+                ]
+            },
+            {
+                "name": "AADAuthentication",
+                "parameters": {
+                    "COM": "https://ldc.com/CDM1-G-ATR-PBI-CV-SSO"
+                }
+            },
+            {
+                "name": "ExportContent",
+                "essential": false
+            }
+        ],
+        "objects": {
+            "general": {
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    }
+                }
+            },
+            "buttonSettings": {
+                "properties": {
+                    "buttonText": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "buttonColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "buttonAlignment": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "flex-start",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "flex-end",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "buttonIcon": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "send",
+                                    "displayName": "Send"
+                                },
+                                {
+                                    "value": "download",
+                                    "displayName": "Download"
+                                },
+                                {
+                                    "value": "search",
+                                    "displayName": "Search"
+                                },
+                                {
+                                    "value": "globe",
+                                    "displayName": "Globe"
+                                },
+                                {
+                                    "value": "externalLink",
+                                    "displayName": "External Link"
+                                },
+                                {
+                                    "value": "shield",
+                                    "displayName": "Shield"
+                                },
+                                {
+                                    "value": "key",
+                                    "displayName": "Key"
+                                },
+                                {
+                                    "value": "info",
+                                    "displayName": "Info"
+                                },
+                                {
+                                    "value": "refresh",
+                                    "displayName": "Refresh"
+                                },
+                                {
+                                    "value": "calculate",
+                                    "displayName": "Calculate"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "responseDisplaySettings": {
+                "properties": {
+                    "responseType": {
+                        "displayName": "Response Handling",
+                        "description": "How to handle API response",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "autoDetect",
+                                    "displayName": "Auto-Detect"
+                                },
+                                {
+                                    "value": "dataResponse",
+                                    "displayName": "Data Response (JSON/Text)"
+                                },
+                                {
+                                    "value": "fileDownload",
+                                    "displayName": "File Download"
+                                },
+                                {
+                                    "value": "urlResponse",
+                                    "displayName": "URL Response (Toolbar Download Button)"
+                                },
+                                {
+                                    "value": "noResponse",
+                                    "displayName": "No Response Expected"
+                                }
+                            ]
+                        }
+                    },
+                    "showResponseOutput": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableClipboardCopy": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableOpenInBrowser": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCancelButton": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableCrossFilter": {
+                        "displayName": "Show Cross-Filter Chips",
+                        "description": "Show selectable chips for the first Query Parameters Columns field. Selecting chips cross-filters other visuals and narrows that column's query parameter to the selected value(s).",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "apiSettings": {
+                "properties": {
+                    "apiUrl": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "apiMethod": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "GET",
+                                    "displayName": "GET"
+                                },
+                                {
+                                    "value": "POST",
+                                    "displayName": "POST"
+                                },
+                                {
+                                    "value": "PUT",
+                                    "displayName": "PUT"
+                                },
+                                {
+                                    "value": "DELETE",
+                                    "displayName": "DELETE"
+                                }
+                            ]
+                        }
+                    },
+                    "useUrlMeasure": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bodySource": {
+                        "displayName": "POST/PUT Body",
+                        "description": "Where to send measure data for POST/PUT requests",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "queryParams",
+                                    "displayName": "Query Parameters Only"
+                                },
+                                {
+                                    "value": "jsonBody",
+                                    "displayName": "JSON Body"
+                                },
+                                {
+                                    "value": "both",
+                                    "displayName": "Both (Query Params + Body)"
+                                }
+                            ]
+                        }
+                    },
+                    "multiValueStyle": {
+                        "displayName": "Multiple Values Format",
+                        "description": "How a Query Parameters Column with several values is sent. Comma-delimited puts them in one parameter (?Region=North,South); Repeated Key sends one parameter per value (?Region=North&Region=South).",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "comma",
+                                    "displayName": "Comma-Delimited (?key=a,b)"
+                                },
+                                {
+                                    "value": "repeated",
+                                    "displayName": "Repeated Key (?key=a&key=b)"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "headerSettings": {
+                "properties": {
+                    "includeHeaders": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "useHeadersMeasures": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "headersJson": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "azureAuthSettings": {
+                "displayName": "Authentication",
+                "properties": {
+                    "authenticationMode": {
+                        "displayName": "Authentication Mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "azureAd",
+                                    "displayName": "Microsoft Entra ID (SSO)"
+                                },
+                                {
+                                    "value": "manualToken",
+                                    "displayName": "Bearer Token"
+                                },
+                                {
+                                    "value": "noAuth",
+                                    "displayName": "None (Public API)"
+                                }
+                            ]
+                        }
+                    },
+                    "bearerToken": {
+                        "displayName": "Token Value",
+                        "description": "Tokens entered here are stored in the report file (PBIX) in plaintext. Use Microsoft Entra ID (SSO) for production.",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "troubleshootingSettings": {
+                "properties": {
+                    "errorVerbosity": {
+                        "displayName": "Error Verbosity",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "userFriendly",
+                                    "displayName": "User-Friendly"
+                                },
+                                {
+                                    "value": "technical",
+                                    "displayName": "Technical"
+                                },
+                                {
+                                    "value": "debug",
+                                    "displayName": "Debug (Full Details)"
+                                }
+                            ]
+                        }
+                    },
+                    "enableDebugMode": {
+                        "displayName": "Show Diagnostics Panel",
+                        "description": "Show detailed request/response information for troubleshooting",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "loadingBehavior": {
+                        "displayName": "Request Timeout",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "waitForResponse",
+                                    "displayName": "Wait for Response"
+                                },
+                                {
+                                    "value": "fixedDuration",
+                                    "displayName": "Fixed Duration"
+                                },
+                                {
+                                    "value": "customTimeout",
+                                    "displayName": "Custom Timeout"
+                                }
+                            ]
+                        }
+                    },
+                    "loadingDurationSeconds": {
+                        "displayName": "Timeout (seconds)",
+                        "description": "Duration for fixed or timeout loading (1-600 seconds)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxRetries": {
+                        "displayName": "Max Retries",
+                        "description": "Number of retry attempts on transient network failures (0-10)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "retryDelayMs": {
+                        "displayName": "Retry Delay (ms)",
+                        "description": "Base delay between retries in milliseconds. Doubles on each subsequent retry (100-30000)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsKeyboardFocus": true,
+        "supportsHighlight": false,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": false
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
