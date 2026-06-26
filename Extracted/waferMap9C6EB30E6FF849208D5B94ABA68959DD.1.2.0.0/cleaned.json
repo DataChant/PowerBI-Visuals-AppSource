@@ -1,0 +1,553 @@
+{
+    "visual": {
+        "name": "Wafer Map",
+        "displayName": "Wafer Map",
+        "guid": "waferMap9C6EB30E6FF849208D5B94ABA68959DD",
+        "visualClassName": "Visual",
+        "version": "1.2.0.0",
+        "description": "Power BI wafer map visual for semiconductor die-level bin, status, metric, and yield-loss review.",
+        "supportUrl": "https://nk225op.com/pbi/pbi-wafermap/support.php",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Oplab",
+        "email": "support@nk225op.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "suppressDefaultTitle": true,
+        "dataRoles": [
+            {
+                "displayName": "Wafer hierarchy",
+                "name": "waferId",
+                "kind": "Grouping",
+                "description": "Optional wafer, lot, product, or other hierarchy level used to split maps and enable Power BI drilldown."
+            },
+            {
+                "displayName": "Die X",
+                "name": "dieX",
+                "kind": "Grouping",
+                "description": "Required die X coordinate for XY maps, or the sequence label when Die Y is not bound."
+            },
+            {
+                "displayName": "Die Y",
+                "name": "dieY",
+                "kind": "Grouping",
+                "description": "Optional whole-number die Y coordinate. Leave empty to render X-only sequence data.",
+                "requiredTypes": [
+                    {
+                        "integer": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Die Value",
+                "name": "dieValue",
+                "kind": "Measure",
+                "description": "Optional measure values used for numeric gradient or binned die coloring."
+            },
+            {
+                "displayName": "Die Classification",
+                "name": "dieClassification",
+                "kind": "Measure",
+                "description": "Optional measure labels used for classification coloring and pass/fail/excluded yield metrics."
+            },
+            {
+                "displayName": "Count",
+                "name": "dieCount",
+                "kind": "Measure",
+                "description": "Optional measure for total die count. For distinguishing aggregated data from raw data."
+            }
+        ],
+        "objects": {
+            "view": {
+                "displayName": "View",
+                "properties": {
+                    "invertX": {
+                        "displayName": "Invert X",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "invertY": {
+                        "displayName": "Invert Y",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dieShape": {
+                        "displayName": "Die shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "roundedSquare",
+                                    "displayName": "Rounded square"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                }
+                            ]
+                        }
+                    },
+                    "waferShape": {
+                        "displayName": "Wafer shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circular",
+                                    "displayName": "Circular"
+                                },
+                                {
+                                    "value": "rectangular",
+                                    "displayName": "Rectangular"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                }
+                            ]
+                        }
+                    },
+                    "manualGeometry": {
+                        "displayName": "Manual wafer geometry",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "manualDiameter": {
+                        "displayName": "Wafer diameter",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dieOriginX": {
+                        "displayName": "Die origin X",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dieOriginY": {
+                        "displayName": "Die origin Y",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dieSpacing": {
+                        "displayName": "Die spacing",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "black",
+                                    "displayName": "Black"
+                                },
+                                {
+                                    "value": "white",
+                                    "displayName": "White"
+                                }
+                            ]
+                        }
+                    },
+                    "minimumWaferSize": {
+                        "displayName": "Minimum wafer size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showToolbar": {
+                        "displayName": "Show status bar",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dieValueSettings": {
+                "displayName": "Die Value",
+                "properties": {
+                    "processCapability": {
+                        "displayName": "Process Capability",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "defaultEncodingType": {
+                        "displayName": "Default encoding type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "gradient",
+                                    "displayName": "Gradient"
+                                },
+                                {
+                                    "value": "binned",
+                                    "displayName": "Binned"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultColorPalette": {
+                        "displayName": "Default color palette",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "blueRed",
+                                    "displayName": "Blue Red"
+                                },
+                                {
+                                    "value": "yellowOrangeRed",
+                                    "displayName": "Yellow Orange Red"
+                                },
+                                {
+                                    "value": "redYellowGreen",
+                                    "displayName": "Red Yellow Green"
+                                },
+                                {
+                                    "value": "viridis",
+                                    "displayName": "Viridis"
+                                },
+                                {
+                                    "value": "greys",
+                                    "displayName": "Greys"
+                                },
+                                {
+                                    "value": "rainbow",
+                                    "displayName": "Rainbow"
+                                },
+                                {
+                                    "value": "inferno",
+                                    "displayName": "Inferno"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultInvertColors": {
+                        "displayName": "Default invert colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "defaultBinScale": {
+                        "displayName": "Bin scale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "logarithmic",
+                                    "displayName": "Logarithmic"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultMetricDomainMode": {
+                        "displayName": "Default metric domain",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "manual",
+                                    "displayName": "Manual"
+                                },
+                                {
+                                    "value": "percentile",
+                                    "displayName": "5th to 95th percentile"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultMetricMin": {
+                        "displayName": "Default metric min",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "defaultMetricMax": {
+                        "displayName": "Default metric max",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fieldOverrideEnabled": {
+                        "displayName": "Use individual settings",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fieldEncodingType": {
+                        "displayName": "Field encoding type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "gradient",
+                                    "displayName": "Gradient"
+                                },
+                                {
+                                    "value": "binned",
+                                    "displayName": "Binned"
+                                }
+                            ]
+                        }
+                    },
+                    "fieldColorPalette": {
+                        "displayName": "Field color palette",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "blueRed",
+                                    "displayName": "Blue Red"
+                                },
+                                {
+                                    "value": "yellowOrangeRed",
+                                    "displayName": "Yellow Orange Red"
+                                },
+                                {
+                                    "value": "redYellowGreen",
+                                    "displayName": "Red Yellow Green"
+                                },
+                                {
+                                    "value": "viridis",
+                                    "displayName": "Viridis"
+                                },
+                                {
+                                    "value": "greys",
+                                    "displayName": "Greys"
+                                },
+                                {
+                                    "value": "rainbow",
+                                    "displayName": "Rainbow"
+                                },
+                                {
+                                    "value": "inferno",
+                                    "displayName": "Inferno"
+                                }
+                            ]
+                        }
+                    },
+                    "fieldInvertColors": {
+                        "displayName": "Field invert colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fieldBinScale": {
+                        "displayName": "Bin scale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "logarithmic",
+                                    "displayName": "Logarithmic"
+                                }
+                            ]
+                        }
+                    },
+                    "fieldMetricDomainMode": {
+                        "displayName": "Field metric domain",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "manual",
+                                    "displayName": "Manual"
+                                },
+                                {
+                                    "value": "percentile",
+                                    "displayName": "5th to 95th percentile"
+                                }
+                            ]
+                        }
+                    },
+                    "fieldMetricMin": {
+                        "displayName": "Field metric min",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fieldMetricMax": {
+                        "displayName": "Field metric max",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dieClassificationSettings": {
+                "displayName": "Die Classification",
+                "properties": {
+                    "statsFieldIndex": {
+                        "displayName": "Stats classification field",
+                        "type": {
+                            "enumeration": []
+                        }
+                    },
+                    "classificationType": {
+                        "displayName": "Classification type",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "pass",
+                                    "displayName": "Pass"
+                                },
+                                {
+                                    "value": "fail",
+                                    "displayName": "Fail"
+                                }
+                            ]
+                        }
+                    },
+                    "keywordValues": {
+                        "displayName": "Pass/Fail Keyword",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "excludedKeywordValues": {
+                        "displayName": "Excluded Keyword",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "yieldDenominator": {
+                        "displayName": "Yield denominator",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "tested",
+                                    "displayName": "Tested die"
+                                },
+                                {
+                                    "value": "gross",
+                                    "displayName": "Gross die"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "viewState": {
+                "displayName": "View State",
+                "properties": {
+                    "stateJson": {
+                        "displayName": "State",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "waferId": {
+                            "max": 1
+                        },
+                        "dieX": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "dieY": {
+                            "max": 1
+                        },
+                        "dieValue": {
+                            "max": 5
+                        },
+                        "dieCount": {
+                            "max": 1
+                        },
+                        "dieClassification": {
+                            "max": 5
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "waferId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dieX"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dieY"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "dieValue"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dieCount"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "dieClassification"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "drilldown": {
+            "roles": [
+                "waferId"
+            ]
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
