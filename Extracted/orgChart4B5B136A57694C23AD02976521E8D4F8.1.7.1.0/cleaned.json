@@ -1,0 +1,336 @@
+{
+    "visual": {
+        "name": "orgChart",
+        "displayName": "orgChart",
+        "guid": "orgChart4B5B136A57694C23AD02976521E8D4F8",
+        "visualClassName": "Visual",
+        "version": "1.7.1.0",
+        "description": "Organisation chart that builds a hierarchy from Employee ID and Manager ID, showing name, job title and grade, with colour coding on the node header/outline.",
+        "supportUrl": "https://www.lotuslotus.co.uk/support.html",
+        "gitHubUrl": "https://github.com/lotuslotus-al/powerbi-orgchart"
+    },
+    "author": {
+        "name": "Alex Lines",
+        "email": "alex.lines@lotuslotus.co.uk"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Role_EmployeeName": "Employee Name",
+            "Role_EmployeeId": "Employee ID",
+            "Role_ManagerId": "Manager ID",
+            "Role_JobTitle": "Job Title",
+            "Role_Grade": "Grade",
+            "Role_ColorBy": "Colour By",
+            "Role_Value": "Value",
+            "Role_Value_Desc": "Optional numeric value shown on each node. Required for cross-highlighting from other visuals.",
+            "Node_Card": "Node",
+            "Node_Width": "Node width",
+            "Node_Height": "Node height",
+            "Node_HSpacing": "Horizontal spacing",
+            "Node_VSpacing": "Vertical spacing",
+            "Node_FontSize": "Text size",
+            "Node_BorderWidth": "Outline width",
+            "Node_StackThreshold": "Stack when leaves \u2265",
+            "Color_Card": "Colour coding",
+            "Color_Mode": "Colour applies to",
+            "Color_Mode_Header": "Header",
+            "Color_Mode_Outline": "Outline",
+            "Color_Mode_Both": "Header & outline",
+            "Color_Default": "Default colour",
+            "Legend_Card": "Legend",
+            "Legend_Show": "Show legend",
+            "Legend_Position": "Position",
+            "Legend_TopLeft": "Top left",
+            "Legend_TopRight": "Top right",
+            "Legend_BottomLeft": "Bottom left",
+            "Legend_BottomRight": "Bottom right",
+            "UI_SearchPlaceholder": "Search name / title / grade\u2026",
+            "UI_ZoomIn": "Zoom in",
+            "UI_ZoomOut": "Zoom out",
+            "UI_FitToView": "Fit to view",
+            "UI_ResetZoom": "Reset zoom",
+            "UI_Legend": "Legend",
+            "UI_HideLegend": "Hide legend",
+            "UI_ShowLegend": "Show legend",
+            "UI_ChangeColour": "Click to change colour",
+            "UI_AutoColour": "Auto",
+            "UI_ResetAutoColour": "Reset to automatic colour",
+            "UI_NoName": "(no name)",
+            "UI_Blank": "(blank)",
+            "UI_GradeLabel": "Grade",
+            "UI_IdLabel": "ID",
+            "Msg_AddFields": "Add Employee ID, Manager ID and Employee Name fields.",
+            "Msg_NoRows": "No employee rows found.",
+            "Msg_NoRoot": "Could not find a top-level employee (no matching Manager ID).",
+            "Msg_Error": "Error rendering org chart: ",
+            "Landing_Title": "Org Chart",
+            "Landing_Subtitle": "Visualise your organisation's reporting structure as a fully expanded hierarchy.",
+            "Landing_Required": "Required fields: Employee Name, Employee ID, Manager ID.",
+            "Landing_Optional": "Optional fields: Job Title, Grade, Colour By, Value (enables cross-highlighting).",
+            "Aria_Tree": "Organisation chart",
+            "Aria_Toolbar": "Org chart tools"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Employee Name",
+                "displayNameKey": "Role_EmployeeName",
+                "name": "name",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Employee ID",
+                "displayNameKey": "Role_EmployeeId",
+                "name": "employeeId",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Manager ID",
+                "displayNameKey": "Role_ManagerId",
+                "name": "managerId",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Job Title",
+                "displayNameKey": "Role_JobTitle",
+                "name": "jobTitle",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Grade",
+                "displayNameKey": "Role_Grade",
+                "name": "grade",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Colour By",
+                "displayNameKey": "Role_ColorBy",
+                "name": "colorBy",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Value",
+                "displayNameKey": "Role_Value",
+                "name": "measure",
+                "kind": "Measure",
+                "description": "Optional numeric value shown on each node. Required for cross-highlighting from other visuals.",
+                "descriptionKey": "Role_Value_Desc"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "name": {
+                            "max": 1
+                        },
+                        "employeeId": {
+                            "max": 1
+                        },
+                        "managerId": {
+                            "max": 1
+                        },
+                        "jobTitle": {
+                            "max": 1
+                        },
+                        "grade": {
+                            "max": 1
+                        },
+                        "colorBy": {
+                            "max": 1
+                        },
+                        "measure": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "name"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "employeeId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "managerId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "jobTitle"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "grade"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "colorBy"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "nodeSettings": {
+                "properties": {
+                    "nodeWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodeHeight": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "horizontalSpacing": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "verticalSpacing": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stackThreshold": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "colorSettings": {
+                "properties": {
+                    "colorMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "header",
+                                    "displayName": "Header",
+                                    "displayNameKey": "Color_Mode_Header"
+                                },
+                                {
+                                    "value": "outline",
+                                    "displayName": "Outline",
+                                    "displayNameKey": "Color_Mode_Outline"
+                                },
+                                {
+                                    "value": "both",
+                                    "displayName": "Header & outline",
+                                    "displayNameKey": "Color_Mode_Both"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryColorMap": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "legendSettings": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "topLeft",
+                                    "displayName": "Top left",
+                                    "displayNameKey": "Legend_TopLeft"
+                                },
+                                {
+                                    "value": "topRight",
+                                    "displayName": "Top right",
+                                    "displayNameKey": "Legend_TopRight"
+                                },
+                                {
+                                    "value": "bottomLeft",
+                                    "displayName": "Bottom left",
+                                    "displayNameKey": "Legend_BottomLeft"
+                                },
+                                {
+                                    "value": "bottomRight",
+                                    "displayName": "Bottom right",
+                                    "displayNameKey": "Legend_BottomRight"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        },
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
