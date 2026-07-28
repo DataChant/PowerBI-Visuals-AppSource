@@ -1,0 +1,519 @@
+{
+    "visual": {
+        "name": "atlynWordCloud",
+        "displayName": "Atlyn Word Cloud",
+        "guid": "wordCloudATLYN3C9F1A7E5B2D4068",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Free Word Cloud for Power BI. Turns a text column into a packed, weighted word cloud with frequency or measure-based sizing, stop words, selection, highlights and tooltips.",
+        "supportUrl": "https://www.atlynco.com/docs/faq",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Atlyn",
+        "email": "atlyn.help@gmail.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Role_Words": "Words",
+            "Role_Words_Desc": "Text field to build the cloud from (e.g., Comment, Tag, Keyword)",
+            "Role_Values": "Values",
+            "Role_Values_Desc": "Optional measure that weights each word. Omit to weight by frequency.",
+            "Role_Sentiment": "Sentiment",
+            "Role_Sentiment_Desc": "Optional per-row sentiment score used only to colour words, never to size them.",
+            "Role_Excludes": "Excludes",
+            "Role_Excludes_Desc": "Optional field listing words to drop from the cloud",
+            "Role_Tooltips": "Tooltips",
+            "Role_Tooltips_Desc": "Additional measures to show in tooltips",
+            "Card_General": "General",
+            "Card_StopWords": "Stop Words",
+            "Card_Design": "Design",
+            "Card_Title": "Title",
+            "Card_Interaction": "Interaction",
+            "General_MaxWords": "Max Words",
+            "General_MaxWords_Desc": "Upper bound on how many distinct words are laid out",
+            "General_WeightMode": "Weight By",
+            "General_WeightMode_Desc": "How font size is derived. Measure sizing falls back to word frequency when no Values measure is supplied. Distinctiveness (TF-IDF) surfaces terms unique to few rows.",
+            "General_MinFontSize": "Min Font Size",
+            "General_MaxFontSize": "Max Font Size",
+            "General_ScaleMode": "Size Scale",
+            "General_ScaleMode_Desc": "How weights map to font size. Sqrt and Log compress large ranges.",
+            "General_Rotation": "Rotation",
+            "General_BreakWords": "Split Into Words",
+            "General_BreakWords_Desc": "Off treats each cell as a single phrase",
+            "General_StripPunctuation": "Remove Punctuation",
+            "General_CaseInsensitive": "Ignore Case",
+            "General_MinWordLength": "Min Word Length",
+            "General_MinRepetitions": "Min Occurrences",
+            "General_ShowOverflowNote": "Show Hidden Word Count",
+            "General_ShowOverflowNote_Desc": "Report words that did not fit instead of dropping them silently",
+            "General_LayoutSeed": "Layout Seed",
+            "General_LayoutSeed_Desc": "0 derives a stable seed from the data. Change it to reshuffle.",
+            "StopWords_Show": "Apply Stop Words",
+            "StopWords_UseDefaults": "Use Default List",
+            "StopWords_UseDefaults_Desc": "Common English words such as the, and, of",
+            "StopWords_Words": "Custom Stop Words",
+            "Design_FontFamily": "Font Family",
+            "Design_UseUniformColor": "Single Colour",
+            "Design_UniformColor": "Word Colour",
+            "Design_Padding": "Word Spacing",
+            "Title_Show": "Show Title",
+            "Title_TitleText": "Title Text",
+            "Title_FontSize": "Font Size",
+            "Title_FontColor": "Font Color",
+            "Title_Alignment": "Alignment",
+            "Card_Sentiment": "Sentiment",
+            "Sentiment_Source": "Sentiment Source",
+            "Sentiment_Source_Desc": "Colour words by sentiment. Measure uses the Sentiment field; Built-in scores the text with an offline English VADER lexicon.",
+            "Sentiment_Negative": "Negative",
+            "Sentiment_Neutral": "Neutral",
+            "Sentiment_Positive": "Positive",
+            "Sentiment_RangeMode": "Score Range",
+            "Sentiment_RangeMode_Desc": "Auto derives the range from the data. Custom pins explicit negative/neutral/positive anchor scores.",
+            "Sentiment_RangeMin": "Min (Negative)",
+            "Sentiment_RangeNeutral": "Midpoint (Neutral)",
+            "Sentiment_RangeMax": "Max (Positive)",
+            "Sentiment_NoCoverage": "words without sentiment coverage",
+            "Sentiment_NoCoverageAll": "No words could be scored for sentiment",
+            "Interaction_EnableSelection": "Enable Selection",
+            "Interaction_EnableTooltips": "Enable Tooltips",
+            "Visual_Title": "Atlyn Word Cloud",
+            "Landing_AddField": "Add a text field to the Words bucket",
+            "Landing_NoWords": "No words remain after filtering",
+            "Landing_NoCanvas": "Word cloud layout is unavailable in this host",
+            "Tooltip_Word": "Word",
+            "Tooltip_Count": "Count",
+            "Tooltip_Occurrences": "Occurrences"
+        }
+    },
+    "capabilities": {
+        "supportsKeyboardFocus": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsHighlight": true,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "dataRoles": [
+            {
+                "displayName": "Words",
+                "displayNameKey": "Role_Words",
+                "name": "Category",
+                "kind": "Grouping",
+                "description": "Text field to build the cloud from (e.g., Comment, Tag, Keyword)",
+                "descriptionKey": "Role_Words_Desc"
+            },
+            {
+                "displayName": "Values",
+                "displayNameKey": "Role_Values",
+                "name": "Values",
+                "kind": "Measure",
+                "description": "Optional measure that weights each word. Omit to weight by frequency.",
+                "descriptionKey": "Role_Values_Desc"
+            },
+            {
+                "displayName": "Sentiment",
+                "displayNameKey": "Role_Sentiment",
+                "name": "Sentiment",
+                "kind": "Measure",
+                "description": "Optional per-row sentiment score used only to colour words, never to size them.",
+                "descriptionKey": "Role_Sentiment_Desc"
+            },
+            {
+                "displayName": "Excludes",
+                "displayNameKey": "Role_Excludes",
+                "name": "Excludes",
+                "kind": "Grouping",
+                "description": "Optional field listing words to drop from the cloud",
+                "descriptionKey": "Role_Excludes_Desc"
+            },
+            {
+                "displayName": "Tooltips",
+                "displayNameKey": "Role_Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": "Additional measures to show in tooltips",
+                "descriptionKey": "Role_Tooltips_Desc"
+            }
+        ],
+        "objects": {
+            "general": {
+                "properties": {
+                    "maxWords": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "weightMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "measure",
+                                    "displayName": "Frequency or Measure"
+                                },
+                                {
+                                    "value": "frequency",
+                                    "displayName": "Frequency"
+                                },
+                                {
+                                    "value": "tfidf",
+                                    "displayName": "Distinctiveness (TF-IDF)"
+                                }
+                            ]
+                        }
+                    },
+                    "minFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "scaleMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "linear",
+                                    "displayName": "Linear"
+                                },
+                                {
+                                    "value": "sqrt",
+                                    "displayName": "Square Root"
+                                },
+                                {
+                                    "value": "log",
+                                    "displayName": "Logarithmic"
+                                }
+                            ]
+                        }
+                    },
+                    "rotation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "orthogonal",
+                                    "displayName": "Horizontal & Vertical"
+                                },
+                                {
+                                    "value": "angled",
+                                    "displayName": "Angled"
+                                }
+                            ]
+                        }
+                    },
+                    "breakWords": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "stripPunctuation": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "caseInsensitive": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "minWordLength": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "minRepetitions": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "showOverflowNote": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "layoutSeed": {
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "stopWords": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "useDefaults": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "words": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "design": {
+                "properties": {
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "useUniformColor": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "uniformColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "padding": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "sentiment": {
+                "properties": {
+                    "source": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "measure",
+                                    "displayName": "Sentiment Measure"
+                                },
+                                {
+                                    "value": "builtin",
+                                    "displayName": "Built-in (English)"
+                                }
+                            ]
+                        }
+                    },
+                    "negativeColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "neutralColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "positiveColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "rangeMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Automatic"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom"
+                                }
+                            ]
+                        }
+                    },
+                    "rangeMin": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rangeNeutral": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rangeMax": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "title": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "alignment": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "interaction": {
+                "properties": {
+                    "enableSelection": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableTooltips": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Category": {
+                            "min": 1,
+                            "max": 1
+                        },
+                        "Values": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "Sentiment": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "Excludes": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "tooltips": {
+                            "min": 0
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Excludes"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Values"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Sentiment"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
