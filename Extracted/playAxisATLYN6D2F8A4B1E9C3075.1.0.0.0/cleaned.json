@@ -1,0 +1,342 @@
+{
+    "visual": {
+        "name": "atlynPlayAxis",
+        "displayName": "Atlyn Play Axis",
+        "guid": "playAxisATLYN6D2F8A4B1E9C3075",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Free Play Axis (dynamic slicer) for Power BI. Bind one date or category field and the visual walks through its values on a timer, applying a page filter at each step so every other visual on the page animates. Step, cumulative and rolling-window modes, loop and bounce, speed control, keyboard and high-contrast support.",
+        "supportUrl": "https://www.atlynco.com/docs/faq",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "Atlyn",
+        "email": "atlyn.help@gmail.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Role_Axis": "Axis",
+            "Role_Axis_Desc": "The field to cycle through \u2014 a date, period, or category",
+            "Card_Playback": "Playback",
+            "Card_Controls": "Controls",
+            "Card_Caption": "Caption",
+            "Playback_FilterMode": "Filter Mode",
+            "Playback_FilterMode_Desc": "Step filters one value at a time. Cumulative keeps every value up to the current one, which is what a growing running-total animation needs. Rolling Window keeps the last N values.",
+            "Playback_WindowSize": "Window Size",
+            "Playback_WindowSize_Desc": "How many steps the rolling window keeps, including the current one",
+            "Playback_SpeedMs": "Step Duration (ms)",
+            "Playback_SpeedMs_Desc": "Minimum time each step is held. Playback waits for the report to finish rendering before advancing, so slow models simply step more slowly. The 500 ms floor keeps the page below the WCAG three-flashes threshold.",
+            "Playback_LoopMode": "At The End",
+            "Playback_AutoStart": "Start Automatically",
+            "Playback_AutoStart_Desc": "Begin playing as soon as the report opens \u2014 the setting for a wall-mounted dashboard. Suppressed when the reader has asked for reduced motion, and during report export.",
+            "Playback_StartIndex": "Start At Step",
+            "Playback_StartIndex_Desc": "1 is the first value on the axis. Values beyond the end start at the last step.",
+            "Playback_SortOrder": "Play Order",
+            "Playback_SortOrder_Desc": "Data Order follows the sort of the underlying field",
+            "Playback_ClearOnStop": "Clear Filter On Stop",
+            "Playback_ClearOnStop_Desc": "Off leaves the last played value filtered after Stop",
+            "Controls_Show": "Show Controls",
+            "Controls_HideInViewMode": "Dim Until Hovered",
+            "Controls_HideInViewMode_Desc": "Fades the transport strip for a clean presentation. The controls still reappear on hover and on keyboard focus, so a reader can always pause.",
+            "Controls_ShowStepButtons": "Show Step Buttons",
+            "Controls_ShowLoopButton": "Show Loop Button",
+            "Controls_ShowSpeedControl": "Show Speed Control",
+            "Controls_ShowSpeedControl_Desc": "Cycles the step duration through 0.5x, 1x, 2x and 4x of the configured speed",
+            "Controls_ShowProgress": "Show Progress Bar",
+            "Controls_ButtonSize": "Button Size",
+            "Controls_ButtonColor": "Button Colour",
+            "Controls_AccentColor": "Accent Colour",
+            "Caption_Show": "Show Caption",
+            "Caption_FontFamily": "Font Family",
+            "Caption_FontSize": "Font Size",
+            "Caption_FontColor": "Font Colour",
+            "Caption_Alignment": "Alignment",
+            "Caption_AutoFit": "Shrink To Fit",
+            "Caption_AutoFit_Desc": "Reduce the font size when a value is too long for the visual",
+            "Caption_DateFormat": "Date Format",
+            "Caption_DateFormat_Desc": "Format string for date axes, for example MMMM yyyy. Blank uses the field's own format.",
+            "Visual_Title": "Atlyn Play Axis",
+            "Landing_AddField": "Add a date or category field to the Axis bucket",
+            "Landing_NoValues": "The Axis field has no values to play",
+            "Landing_NoTarget": "This field cannot be filtered. Bind a column from the data model rather than a calculated field well entry.",
+            "Landing_TooManyValues": "{0} has {1} distinct values, more than the {2} this visual can animate. Use a coarser grain (Month instead of Date) or filter the field down.",
+            "Progress_StepOfTotal": "Step {0} of {1}",
+            "Aria_Caption": "Current value",
+            "Aria_First": "Go to first value",
+            "Aria_StepBack": "Previous value",
+            "Aria_Play": "Play",
+            "Aria_Pause": "Pause",
+            "Aria_StepForward": "Next value",
+            "Aria_Last": "Go to last value",
+            "Aria_Stop": "Stop",
+            "Aria_Loop": "Change repeat mode",
+            "Aria_Speed": "Change playback speed",
+            "Aria_Seek": "Jump to a step"
+        }
+    },
+    "capabilities": {
+        "supportsKeyboardFocus": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsSynchronizingFilterState": true,
+        "suppressDefaultTitle": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        },
+        "dataRoles": [
+            {
+                "displayName": "Axis",
+                "displayNameKey": "Role_Axis",
+                "name": "Axis",
+                "kind": "Grouping",
+                "description": "The field to cycle through \u2014 a date, period, or category",
+                "descriptionKey": "Role_Axis_Desc"
+            }
+        ],
+        "objects": {
+            "general": {
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    }
+                }
+            },
+            "playback": {
+                "properties": {
+                    "filterMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "step",
+                                    "displayName": "Step"
+                                },
+                                {
+                                    "value": "cumulative",
+                                    "displayName": "Cumulative"
+                                },
+                                {
+                                    "value": "window",
+                                    "displayName": "Rolling Window"
+                                }
+                            ]
+                        }
+                    },
+                    "windowSize": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "speedMs": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "loopMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "once",
+                                    "displayName": "Play Once"
+                                },
+                                {
+                                    "value": "loop",
+                                    "displayName": "Loop"
+                                },
+                                {
+                                    "value": "bounce",
+                                    "displayName": "Bounce"
+                                }
+                            ]
+                        }
+                    },
+                    "autoStart": {
+                        "type": {
+                            "bool": true
+                        },
+                        "filterState": true
+                    },
+                    "startIndex": {
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "sortOrder": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dataOrder",
+                                    "displayName": "Data Order"
+                                },
+                                {
+                                    "value": "asc",
+                                    "displayName": "Ascending"
+                                },
+                                {
+                                    "value": "desc",
+                                    "displayName": "Descending"
+                                }
+                            ]
+                        }
+                    },
+                    "clearOnStop": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "controls": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideInViewMode": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showStepButtons": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLoopButton": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSpeedControl": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showProgress": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "buttonSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "buttonColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "accentColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "caption": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "alignment": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Center"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "autoFit": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dateFormat": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Axis": {
+                            "min": 1,
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "Axis"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
