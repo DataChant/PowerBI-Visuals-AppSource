@@ -1,0 +1,429 @@
+{
+    "visual": {
+        "name": "dynamicMatrixHeatmap",
+        "displayName": "Dynamic Matrix Heatmap",
+        "guid": "dynamicMatrixHeatmap790912782D2A48CE80E680D64C793458",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "A configurable matrix/pivot visual: pick any dimension for X and Y and a measure for the cells, with a global heatmap color scale.",
+        "supportUrl": "https://tinocallarisa-web.github.io/dynamic-matrix-heatmap/support.html",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "TCViz",
+        "email": "support@example.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Dimensions",
+                "displayNameKey": "Visual_Dimensions",
+                "name": "dimensions",
+                "kind": "Grouping",
+                "description": "Fields available in the X and Y dropdowns. Up to 10."
+            },
+            {
+                "displayName": "Measures",
+                "displayNameKey": "Visual_Measures",
+                "name": "measures",
+                "kind": "Measure",
+                "description": "Pre-aggregated DAX measures. Re-aggregated with the mode selected in the Values card."
+            },
+            {
+                "displayName": "Distinct count of",
+                "displayNameKey": "Visual_DistinctFields",
+                "name": "distinctFields",
+                "kind": "Grouping",
+                "description": "Raw ID columns (e.g. customer_id). The visual counts unique values itself, so the result is always correct for any X/Y combination \u2014 unlike summing a DAX measure."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "dimensions": {
+                            "min": 0,
+                            "max": 10
+                        },
+                        "measures": {
+                            "min": 0,
+                            "max": 5
+                        },
+                        "distinctFields": {
+                            "min": 0,
+                            "max": 3
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "dimensions"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "distinctFields"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "measures"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "general": {
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": true
+                        }
+                    }
+                }
+            },
+            "values": {
+                "displayName": "Values",
+                "displayNameKey": "Visual_Values",
+                "properties": {
+                    "displayMode": {
+                        "displayName": "Show value as",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "absolute",
+                                    "displayName": "Absolute"
+                                },
+                                {
+                                    "value": "pctRow",
+                                    "displayName": "% of row"
+                                },
+                                {
+                                    "value": "pctCol",
+                                    "displayName": "% of column"
+                                },
+                                {
+                                    "value": "pctTotal",
+                                    "displayName": "% of grand total"
+                                }
+                            ]
+                        }
+                    },
+                    "aggregation": {
+                        "displayName": "Aggregation",
+                        "description": "Auto reads the aggregation Power BI applied to the field. Override it when the field is a DAX measure, where the aggregation is not readable.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (detect)"
+                                },
+                                {
+                                    "value": "sum",
+                                    "displayName": "Sum"
+                                },
+                                {
+                                    "value": "average",
+                                    "displayName": "Average"
+                                },
+                                {
+                                    "value": "min",
+                                    "displayName": "Minimum"
+                                },
+                                {
+                                    "value": "max",
+                                    "displayName": "Maximum"
+                                },
+                                {
+                                    "value": "count",
+                                    "displayName": "Count of rows"
+                                }
+                            ]
+                        }
+                    },
+                    "numberFormat": {
+                        "displayName": "Number format",
+                        "description": "Auto uses the field's format from the model. Override it when the model format is wrong for what the visual shows.",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (from model)"
+                                },
+                                {
+                                    "value": "number",
+                                    "displayName": "Number"
+                                },
+                                {
+                                    "value": "integer",
+                                    "displayName": "Whole number"
+                                },
+                                {
+                                    "value": "percent",
+                                    "displayName": "Percentage"
+                                }
+                            ]
+                        }
+                    },
+                    "showTotals": {
+                        "displayName": "Show totals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showDiagnostics": {
+                        "displayName": "Show diagnostics",
+                        "description": "Dumps the metadata Power BI hands the visual for each field. For troubleshooting.",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "heatmap": {
+                "displayName": "Heatmap colors",
+                "displayNameKey": "Visual_Heatmap",
+                "properties": {
+                    "minColor": {
+                        "displayName": "Minimum value color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "midColor": {
+                        "displayName": "Middle value color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "maxColor": {
+                        "displayName": "Maximum value color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "emptyCells": {
+                "displayName": "Empty cells",
+                "displayNameKey": "Visual_EmptyCells",
+                "properties": {
+                    "mode": {
+                        "displayName": "Display as",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "blank",
+                                    "displayName": "Blank"
+                                },
+                                {
+                                    "value": "dash",
+                                    "displayName": "Dash (-)"
+                                },
+                                {
+                                    "value": "zero",
+                                    "displayName": "Zero (0)"
+                                },
+                                {
+                                    "value": "gray",
+                                    "displayName": "Gray fill"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "text": {
+                "displayName": "Text",
+                "displayNameKey": "Visual_Text",
+                "properties": {
+                    "labelFontFamily": {
+                        "displayName": "Axis label font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Axis label size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "labelColor": {
+                        "displayName": "Axis label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "valueFontFamily": {
+                        "displayName": "Value font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "valueFontSize": {
+                        "displayName": "Value size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "valueColor": {
+                        "displayName": "Value color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "controlsBackground": {
+                        "displayName": "Controls bar background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "controlsFontFamily": {
+                        "displayName": "Controls label font",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "controlsFontSize": {
+                        "displayName": "Controls label size",
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "controlsFontColor": {
+                        "displayName": "Controls label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "layout": {
+                "displayName": "Layout",
+                "displayNameKey": "Visual_Layout",
+                "properties": {
+                    "rowHeight": {
+                        "displayName": "Row height (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "columnWidth": {
+                        "displayName": "Column width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "columnHeaderOrientation": {
+                        "displayName": "Column header orientation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "horizontal",
+                                    "displayName": "Horizontal"
+                                },
+                                {
+                                    "value": "vertical",
+                                    "displayName": "Vertical (90\u00b0)"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal (45\u00b0)"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "selectionState": {
+                "properties": {
+                    "xDimension": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "yDimension": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "valueKey": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsSynchronizingFilterState": true,
+        "supportsLandingPage": true,
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true,
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
