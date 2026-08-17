@@ -1,0 +1,571 @@
+{
+    "visual": {
+        "name": "TableEditor",
+        "displayName": "BI Book Table Writeback",
+        "guid": "BIBookTableEditor",
+        "visualClassName": "Visual",
+        "version": "1.0.0.19",
+        "description": "The BI Book Table Writeback visual for creating and editing database tables and their records directly from the Power BI report.",
+        "supportUrl": "https://help.bibook.com/collections/1573581-custom-visuals",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "BI Book",
+        "email": "support@bibook.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "userID",
+                "displayName": "User Email",
+                "kind": "Measure"
+            },
+            {
+                "name": "Dropdown",
+                "displayName": "Dropdown",
+                "kind": "Grouping"
+            },
+            {
+                "name": "RLS",
+                "displayName": "RLS",
+                "kind": "Grouping"
+            },
+            {
+                "name": "ApiKey",
+                "displayName": "API Key",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "Dropdown"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "RLS"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 20000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "userID"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "ApiKey"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "objects": {
+            "saveState": {
+                "displayName": "Save State",
+                "properties": {
+                    "visualState": {
+                        "displayName": "Visual State",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "landingPage",
+                                    "displayName": "Landing Page"
+                                },
+                                {
+                                    "value": "createTableForm",
+                                    "displayName": "Create Table Form"
+                                },
+                                {
+                                    "value": "getTableForm",
+                                    "displayName": "Get Table Form"
+                                },
+                                {
+                                    "value": "editTable",
+                                    "displayName": "Edit Table"
+                                },
+                                {
+                                    "value": "editTemplate",
+                                    "displayName": "Edit Template"
+                                }
+                            ]
+                        }
+                    },
+                    "editTableSchema": {
+                        "displayName": "",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "editTemplateSchema": {
+                        "displayName": "",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "columnMetadata": {
+                        "displayName": "",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showAllColumns": {
+                        "displayName": "",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableFiltering": {
+                        "displayName": "",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableEditing": {
+                        "displayName": "",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideInVisualColumns": {
+                        "displayName": "",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "apiSetting": {
+                "displayName": "API Setting",
+                "properties": {
+                    "companyID": {
+                        "displayName": "Default Company ID",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "bibookDomain": {
+                        "displayName": "Bibook Domain",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "api_version": {
+                        "displayName": "API Version",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Default",
+                                    "value": ""
+                                },
+                                {
+                                    "displayName": "V2",
+                                    "value": "v2"
+                                }
+                            ]
+                        }
+                    },
+                    "apikey": {
+                        "displayName": "API Key",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "apikeyfromMeasure": {
+                        "displayName": "API Key From Measure",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "tableSetting": {
+                "displayName": "Table Setting",
+                "properties": {
+                    "disableCreateTable": {
+                        "displayName": "Disable Create Table",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "disableExit": {
+                        "displayName": "Disable Exit",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "disableActionPanel": {
+                        "displayName": "Disable Action Panel",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoSave": {
+                        "displayName": "Auto Save",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideTableHeader": {
+                        "displayName": "Hide Table Header",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "disableAddRowIcon": {
+                        "displayName": "Disable Add Row Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "disableDeleteRow": {
+                        "displayName": "Disable Delete Row",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "persistedCalculatedColumns": {
+                        "displayName": "persistedCalculatedColumns",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "addIcon": {
+                        "displayName": "Show Add Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "saveIcon": {
+                        "displayName": "Show Save Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "saveTemplateIcon": {
+                        "displayName": "Show Save Template Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "refreshIcon": {
+                        "displayName": "Show Refresh Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "filterIcon": {
+                        "displayName": "Show Filter Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "visibleIcon": {
+                        "displayName": "Show Visible Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "writebackIcon": {
+                        "displayName": "Show Writeback Icon",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "undoIcon": {
+                        "displayName": "Show undo button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "addColumn": {
+                        "displayName": "Show Add Column button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "manageCalculatedColumn": {
+                        "displayName": "Show Manage Calculated Column button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "addRow": {
+                        "displayName": "Show Add Row button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "addRowFromDropdown": {
+                        "displayName": "Show Add Row From Dropdown button",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "addRowFromTemplate": {
+                        "displayName": "Show Add Row From Template button",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "cell": {
+                "displayName": "Cell",
+                "properties": {
+                    "cellWidth": {
+                        "displayName": "Cell Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "paddingLeft": {
+                        "displayName": "Padding Left",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "paddingRight": {
+                        "displayName": "Padding Right",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "paddingTop": {
+                        "displayName": "Padding Top",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "paddingBottom": {
+                        "displayName": "Padding Bottom",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textWrap": {
+                        "displayName": "textWrap",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cellHeight": {
+                        "displayName": "Cell Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "underline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Font color",
+                        "description": "Set the reference line data label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backColor": {
+                        "displayName": "Background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lockedBackColor": {
+                        "displayName": "Locked cells background",
+                        "description": "Background color for cells of locked columns",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "unit": {
+                        "displayName": "Display Units",
+                        "type": {
+                            "formatting": {
+                                "labelDisplayUnits": true
+                            }
+                        }
+                    },
+                    "dataPrecision": {
+                        "displayName": "Decimals",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "column": {
+                "displayName": "Column",
+                "properties": {
+                    "fontFamily": {
+                        "displayName": "Font family",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font size",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "displayName": "Italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "underline": {
+                        "displayName": "Underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Font color",
+                        "description": "Set the reference line data label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backColor": {
+                        "displayName": "Background color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textAlignment": {
+                        "displayName": "Text Alignment",
+                        "type": {
+                            "formatting": {
+                                "alignment": true
+                            }
+                        }
+                    },
+                    "isManualDropdown": {
+                        "displayName": "Disable Manual Input",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "disableAction": {
+                        "displayName": "Disable Action",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsLandingPage": true,
+        "supportsHighlight": true,
+        "suppressDefaultTitle": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": false,
+                "canvas": true
+            }
+        },
+        "privileges": [
+            {
+                "name": "WebAccess",
+                "essential": true,
+                "parameters": [
+                    "*"
+                ]
+            }
+        ]
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}

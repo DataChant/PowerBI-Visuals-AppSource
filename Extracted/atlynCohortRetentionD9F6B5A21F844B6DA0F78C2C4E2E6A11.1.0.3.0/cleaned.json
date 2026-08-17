@@ -1,0 +1,538 @@
+{
+    "visual": {
+        "name": "atlynCohortRetention",
+        "displayName": "Atlyn Cohort Retention",
+        "guid": "atlynCohortRetentionD9F6B5A21F844B6DA0F78C2C4E2E6A11",
+        "visualClassName": "Visual",
+        "version": "1.0.3.0",
+        "description": "Measure cohort retention you can defend. Atlyn Cohort Retention builds a denominator-transparent retention triangle that keeps the cohort grain, the original period-0 denominator, and the latest observable period visible in every cell, tooltip, and status line. Future periods, missing historical intersections, explicit BLANK values, observed zeroes, and invalid values stay distinct instead of collapsing into a misleading zero. Choose an explicit metric mode - entity retention, retained entity count, supplied rate, revenue retention, ARPU, or net revenue retention - so the visual never guesses a metric from a measure name. Fully accessible, localized, high-contrast aware, and free of any network or external asset dependency.",
+        "supportUrl": "https://atlyn.io/contact",
+        "gitHubUrl": "https://github.com/garrett-hamers/powerbi-cohort-retention"
+    },
+    "author": {
+        "name": "Atlyn",
+        "email": "atlyn.help@gmail.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Role_Cohort": "Cohort",
+            "Role_Period": "Period",
+            "Role_Retained": "Retained entities N(c,k)",
+            "Role_CohortSize": "Original cohort size N(c,0)",
+            "Role_EntityCount": "Entity count",
+            "Role_Numerator": "Supplied numerator",
+            "Role_Denominator": "Supplied denominator",
+            "Role_RevenueNumerator": "Revenue numerator",
+            "Role_RevenueDenominator": "Revenue denominator",
+            "Role_ARPU": "ARPU",
+            "Role_NRR": "NRR",
+            "Role_NRRExpansion": "NRR expansion",
+            "Role_NRRContraction": "NRR contraction",
+            "Role_NRRReactivation": "NRR reactivation",
+            "Role_Values": "Values (explicit mode required)",
+            "Role_Tooltip": "Tooltip",
+            "Visual_Caption": "Atlyn Cohort Retention",
+            "Label_Grain": "Grain",
+            "Label_Denominator": "Denominator",
+            "Label_Value": "Value",
+            "Label_Numerator": "Numerator",
+            "Label_MetricMode": "Metric mode",
+            "Label_ShowStatus": "Show status",
+            "Label_CellPadding": "Cell padding",
+            "Metric_EntityRetention": "Entity retention",
+            "Metric_EntityCount": "Retained entities (count)",
+            "Metric_SuppliedRate": "Supplied rate",
+            "Metric_RevenueRetention": "Revenue retention",
+            "Metric_ARPU": "ARPU",
+            "Metric_NRR": "Net revenue retention",
+            "Metric_Unsupported": "Unsupported metric",
+            "Observation_Observed": "Observed",
+            "Observation_ObservedZero": "Observed zero",
+            "Observation_Blank": "Blank",
+            "Observation_Missing": "Missing",
+            "Observation_Future": "Future",
+            "Observation_Invalid": "Invalid"
+        },
+        "es-ES": {
+            "Role_Cohort": "Cohorte",
+            "Role_Period": "Periodo",
+            "Role_Retained": "Entidades retenidas N(c,k)",
+            "Role_CohortSize": "Tamano de cohorte original N(c,0)",
+            "Role_EntityCount": "Recuento de entidades",
+            "Role_Numerator": "Numerador suministrado",
+            "Role_Denominator": "Denominador suministrado",
+            "Role_RevenueNumerator": "Numerador de ingresos",
+            "Role_RevenueDenominator": "Denominador de ingresos",
+            "Role_ARPU": "ARPU",
+            "Role_NRR": "NRR",
+            "Role_NRRExpansion": "Expansion de NRR",
+            "Role_NRRContraction": "Contraccion de NRR",
+            "Role_NRRReactivation": "Reactivacion de NRR",
+            "Role_Values": "Valores (requiere modo explicito)",
+            "Role_Tooltip": "Informacion sobre herramientas",
+            "Visual_Caption": "Retencion de cohortes de Atlyn",
+            "Label_Grain": "Granularidad",
+            "Label_Denominator": "Denominador",
+            "Label_Value": "Valor",
+            "Label_Numerator": "Numerador",
+            "Label_MetricMode": "Modo de metrica",
+            "Label_ShowStatus": "Mostrar estado",
+            "Label_CellPadding": "Relleno de celda",
+            "Metric_EntityRetention": "Retencion de entidades",
+            "Metric_EntityCount": "Entidades retenidas (recuento)",
+            "Metric_SuppliedRate": "Tasa suministrada",
+            "Metric_RevenueRetention": "Retencion de ingresos",
+            "Metric_ARPU": "ARPU",
+            "Metric_NRR": "Retencion neta de ingresos",
+            "Metric_Unsupported": "Metrica no compatible",
+            "Observation_Observed": "Observado",
+            "Observation_ObservedZero": "Cero observado",
+            "Observation_Blank": "En blanco",
+            "Observation_Missing": "Faltante",
+            "Observation_Future": "Futuro",
+            "Observation_Invalid": "No valido"
+        }
+    },
+    "capabilities": {
+        "privileges": [],
+        "dataRoles": [
+            {
+                "displayName": "Cohort",
+                "displayNameKey": "Role_Cohort",
+                "name": "Cohort",
+                "kind": "Grouping",
+                "preferredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "dateTime": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Period",
+                "displayNameKey": "Role_Period",
+                "name": "Period",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "integer": true
+                    },
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Retained entities N(c,k)",
+                "displayNameKey": "Role_Retained",
+                "name": "Retained",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Original cohort size N(c,0)",
+                "displayNameKey": "Role_CohortSize",
+                "name": "CohortSize",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Entity count",
+                "displayNameKey": "Role_EntityCount",
+                "name": "EntityCount",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Supplied numerator",
+                "displayNameKey": "Role_Numerator",
+                "name": "Numerator",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Supplied denominator",
+                "displayNameKey": "Role_Denominator",
+                "name": "Denominator",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Revenue numerator",
+                "displayNameKey": "Role_RevenueNumerator",
+                "name": "RevenueNumerator",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Revenue denominator",
+                "displayNameKey": "Role_RevenueDenominator",
+                "name": "RevenueDenominator",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "ARPU",
+                "displayNameKey": "Role_ARPU",
+                "name": "ARPU",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "NRR",
+                "displayNameKey": "Role_NRR",
+                "name": "NRR",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "NRR expansion",
+                "displayNameKey": "Role_NRRExpansion",
+                "name": "NRRExpansion",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "NRR contraction",
+                "displayNameKey": "Role_NRRContraction",
+                "name": "NRRContraction",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "NRR reactivation",
+                "displayNameKey": "Role_NRRReactivation",
+                "name": "NRRReactivation",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Values (explicit mode required)",
+                "displayNameKey": "Role_Values",
+                "name": "Values",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Tooltip",
+                "displayNameKey": "Role_Tooltip",
+                "name": "Tooltip",
+                "kind": "GroupingOrMeasure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "Cohort": {
+                            "max": 1
+                        },
+                        "Period": {
+                            "max": 1
+                        },
+                        "Retained": {
+                            "max": 1
+                        },
+                        "CohortSize": {
+                            "max": 1
+                        },
+                        "EntityCount": {
+                            "max": 1
+                        },
+                        "Numerator": {
+                            "max": 1
+                        },
+                        "Denominator": {
+                            "max": 1
+                        },
+                        "RevenueNumerator": {
+                            "max": 1
+                        },
+                        "RevenueDenominator": {
+                            "max": 1
+                        },
+                        "ARPU": {
+                            "max": 1
+                        },
+                        "NRR": {
+                            "max": 1
+                        },
+                        "NRRExpansion": {
+                            "max": 1
+                        },
+                        "NRRContraction": {
+                            "max": 1
+                        },
+                        "NRRReactivation": {
+                            "max": 1
+                        },
+                        "Values": {
+                            "max": 1
+                        },
+                        "Tooltip": {
+                            "max": 5
+                        }
+                    }
+                ],
+                "matrix": {
+                    "rows": {
+                        "for": {
+                            "in": "Cohort"
+                        },
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 500
+                            }
+                        }
+                    },
+                    "columns": {
+                        "for": {
+                            "in": "Period"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 500
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "Retained"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "CohortSize"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "EntityCount"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Numerator"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Denominator"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "RevenueNumerator"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "RevenueDenominator"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "ARPU"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "NRR"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "NRRExpansion"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "NRRContraction"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "NRRReactivation"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "Values"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Tooltip"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "implicit": {
+                "clauses": [
+                    {
+                        "role": "Period",
+                        "direction": 1
+                    }
+                ]
+            }
+        },
+        "subtotals": {
+            "matrix": {
+                "rowSubtotals": {
+                    "defaultValue": true
+                },
+                "columnSubtotals": {
+                    "defaultValue": true
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsLandingPage": false,
+        "supportsEmptyDataView": true,
+        "supportsKeyboardFocus": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "Tooltip"
+            ],
+            "supportEnhancedTooltips": true
+        },
+        "objects": {
+            "matrix": {
+                "displayName": "Cohort retention",
+                "displayNameKey": "Visual_Caption",
+                "properties": {
+                    "metricMode": {
+                        "displayName": "Metric mode",
+                        "displayNameKey": "Label_MetricMode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "entity-retention",
+                                    "displayName": "Entity retention",
+                                    "displayNameKey": "Metric_EntityRetention"
+                                },
+                                {
+                                    "value": "entity-count",
+                                    "displayName": "Retained entities (count)",
+                                    "displayNameKey": "Metric_EntityCount"
+                                },
+                                {
+                                    "value": "supplied-rate",
+                                    "displayName": "Supplied rate",
+                                    "displayNameKey": "Metric_SuppliedRate"
+                                },
+                                {
+                                    "value": "revenue-retention",
+                                    "displayName": "Revenue retention",
+                                    "displayNameKey": "Metric_RevenueRetention"
+                                },
+                                {
+                                    "value": "arpu",
+                                    "displayName": "ARPU",
+                                    "displayNameKey": "Metric_ARPU"
+                                },
+                                {
+                                    "value": "nrr",
+                                    "displayName": "Net revenue retention",
+                                    "displayNameKey": "Metric_NRR"
+                                }
+                            ]
+                        }
+                    },
+                    "grain": {
+                        "displayName": "Grain label",
+                        "displayNameKey": "Label_Grain",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showStatus": {
+                        "displayName": "Show status",
+                        "displayNameKey": "Label_ShowStatus",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cellPadding": {
+                        "displayName": "Cell padding",
+                        "displayNameKey": "Label_CellPadding",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
