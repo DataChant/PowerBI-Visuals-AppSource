@@ -1,0 +1,528 @@
+{
+    "visual": {
+        "name": "AtlynHierarchyExplorer",
+        "displayName": "Atlyn Hierarchy Explorer",
+        "guid": "atlynHierarchyExplorer",
+        "visualClassName": "Visual",
+        "version": "1.0.5.0",
+        "description": "Explore parent-child hierarchies with an accessible tree, search, expand and collapse, breadcrumbs, and diagnostics that surface orphans, cycles, and duplicate IDs instead of hiding them.",
+        "supportUrl": "https://atlyn.io/contact",
+        "gitHubUrl": "https://github.com/garrett-hamers/powerbi-hierarchy-explorer"
+    },
+    "author": {
+        "name": "Atlyn",
+        "email": "atlyn.help@gmail.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "Visual_Name": "Atlyn Hierarchy Explorer",
+            "Role_NodeId": "Node ID",
+            "Role_ParentId": "Parent ID",
+            "Role_Label": "Label",
+            "Role_Subtitle": "Subtitle",
+            "Role_Category": "Category",
+            "Role_Value": "Value",
+            "Role_Tooltips": "Tooltips",
+            "Format_Layout_Card": "Layout",
+            "Format_Layout_Geometry": "Geometry",
+            "Format_Direction": "Layout direction",
+            "Format_Direction_Auto": "Automatic",
+            "Format_Direction_Ltr": "Left to right",
+            "Format_Direction_Rtl": "Right to left",
+            "Format_NodeWidth": "Node width",
+            "Format_NodeHeight": "Node height",
+            "Format_HorizontalGap": "Horizontal spacing",
+            "Format_VerticalGap": "Vertical spacing",
+            "Format_Padding": "Canvas padding",
+            "Format_Zoom": "Zoom",
+            "Format_FitContent": "Fit labels to content",
+            "Format_Colors_Card": "Colors",
+            "Format_Colors_Nodes": "Nodes",
+            "Format_Background": "Background",
+            "Format_NodeFill": "Node fill",
+            "Format_Selected": "Selected outline",
+            "Format_Typography_Card": "Typography",
+            "Format_Typography_Text": "Text",
+            "Format_FontFamily": "Font family",
+            "Format_FontSize": "Label size",
+            "Format_SubtitleSize": "Subtitle size",
+            "Format_LabelColor": "Label color",
+            "Format_SubtitleColor": "Subtitle color",
+            "Format_Edges_Card": "Edges",
+            "Format_Edges_Style": "Edge style",
+            "Format_EdgeColor": "Edge color",
+            "Format_EdgeWidth": "Edge width",
+            "Format_Interaction_Card": "Interaction",
+            "Format_Interaction_Behavior": "Behavior",
+            "Format_EnableSearch": "Enable search",
+            "Format_EnableCollapse": "Enable collapse and expand",
+            "Format_EnableDescendants": "Enable descendant selection",
+            "Format_ReducedMotion": "Reduce motion",
+            "Format_Diagnostics_Card": "Diagnostics",
+            "Format_Diagnostics_Display": "Display",
+            "Format_ShowDiagnostics": "Show data diagnostics",
+            "UI_Search": "Search",
+            "UI_SearchPlaceholder": "Find a node",
+            "UI_SelectDescendants": "Select descendants",
+            "UI_ClearSelection": "Clear selection",
+            "UI_Received": "received",
+            "UI_Visible": "visible",
+            "UI_Excluded": "excluded",
+            "UI_NoData": "Add NodeId, ParentId, and Label fields to explore a hierarchy.",
+            "UI_Unnamed": "Unnamed node",
+            "UI_Expand": "Expand",
+            "UI_Collapse": "Collapse",
+            "UI_Breadcrumb": "Path",
+            "UI_Diagnostics": "Data quality",
+            "UI_Selected": "selected",
+            "UI_Descendants": "descendants",
+            "UI_Child": "child",
+            "UI_Children": "children",
+            "UI_Graph": "Graphical hierarchy",
+            "UI_Tree": "Hierarchy tree",
+            "UI_Label": "Label",
+            "UI_NodeId": "Node ID",
+            "UI_ParentId": "Parent ID",
+            "UI_Depth": "Depth",
+            "UI_ChildCount": "Children",
+            "UI_Category": "Category",
+            "UI_Value": "Value",
+            "UI_DataQuality": "Data quality",
+            "UI_SourceRow": "Retained table row",
+            "UI_EmptySpace": "Empty visual space",
+            "UI_MatrixUnsupported": "Matrix mode is not enabled. Use the table NodeId, ParentId, and Label roles.",
+            "UI_BoundedContract": "bounded table contract active",
+            "UI_TableMode": "Table mode",
+            "UI_MatrixMode": "Matrix mode",
+            "UI_Loading": "loading more data",
+            "UI_Partial": "partial data",
+            "UI_Rendered": "rendered",
+            "UI_RenderCap": "The visible hierarchy is capped for responsiveness; collapse or search to reach additional nodes.",
+            "Diagnostic_missing-required-fields": "Required hierarchy fields are missing.",
+            "Diagnostic_invalid-cardinality": "The field mapping exceeds the supported cardinality.",
+            "Diagnostic_invalid-data-shape": "The table contains an unsupported or malformed data shape.",
+            "Diagnostic_empty-id": "Rows with an empty NodeId were excluded.",
+            "Diagnostic_empty-label": "Nodes with an empty Label use an accessible fallback label.",
+            "Diagnostic_duplicate-id": "Duplicate NodeId values were received; the first table row is retained.",
+            "Diagnostic_conflicting-duplicate": "Conflicting duplicate NodeId rows are never selectable; the first table row is retained.",
+            "Diagnostic_orphan": "Nodes whose ParentId is missing are rendered as disconnected roots.",
+            "Diagnostic_self-cycle": "Self-referencing parent links were broken and rendered as roots.",
+            "Diagnostic_cycle": "Long parent cycles were broken at a deterministic node and retained.",
+            "Diagnostic_multiple-roots": "Multiple roots form a valid forest and are rendered side-by-side.",
+            "Diagnostic_data-reduction": "The table is rendered under the bounded contract.",
+            "Diagnostic_node-cap": "The node cap excluded additional nodes.",
+            "Diagnostic_depth-cap": "The depth cap excluded descendants.",
+            "Diagnostic_partial-data": "Only the currently received table segment is rendered; additional rows may still be loading."
+        }
+    },
+    "capabilities": {
+        "privileges": [],
+        "supportsKeyboardFocus": true,
+        "supportsEmptyDataView": true,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "roles": [
+                "Tooltips"
+            ],
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "supportEnhancedTooltips": true
+        },
+        "dataReductionCustomization": {
+            "table": {
+                "rowCount": {
+                    "defaultValue": 30000
+                }
+            }
+        },
+        "dataRoles": [
+            {
+                "displayName": "Node ID",
+                "displayNameKey": "Role_NodeId",
+                "name": "NodeId",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Parent ID",
+                "displayNameKey": "Role_ParentId",
+                "name": "ParentId",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Label",
+                "displayNameKey": "Role_Label",
+                "name": "Label",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Subtitle",
+                "displayNameKey": "Role_Subtitle",
+                "name": "Subtitle",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Category",
+                "displayNameKey": "Role_Category",
+                "name": "Category",
+                "kind": "Grouping",
+                "requiredTypes": [
+                    {
+                        "text": true
+                    },
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Value",
+                "displayNameKey": "Role_Value",
+                "name": "Value",
+                "kind": "Measure",
+                "requiredTypes": [
+                    {
+                        "numeric": true
+                    }
+                ]
+            },
+            {
+                "displayName": "Tooltips",
+                "displayNameKey": "Role_Tooltips",
+                "name": "Tooltips",
+                "kind": "GroupingOrMeasure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "NodeId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "ParentId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Label"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Subtitle"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Value"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "Tooltips"
+                                }
+                            }
+                        ]
+                    },
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 30000
+                        }
+                    }
+                },
+                "conditions": [
+                    {
+                        "NodeId": {
+                            "max": 1
+                        },
+                        "ParentId": {
+                            "max": 1
+                        },
+                        "Label": {
+                            "max": 1
+                        },
+                        "Subtitle": {
+                            "max": 1
+                        },
+                        "Category": {
+                            "max": 1
+                        },
+                        "Value": {
+                            "max": 1
+                        },
+                        "Tooltips": {
+                            "max": 10
+                        }
+                    }
+                ]
+            }
+        ],
+        "objects": {
+            "layout": {
+                "displayNameKey": "Format_Layout_Card",
+                "properties": {
+                    "direction": {
+                        "displayNameKey": "Format_Direction",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "displayName": "Automatic",
+                                    "displayNameKey": "Format_Direction_Auto",
+                                    "value": "auto"
+                                },
+                                {
+                                    "displayName": "Left to right",
+                                    "displayNameKey": "Format_Direction_Ltr",
+                                    "value": "ltr"
+                                },
+                                {
+                                    "displayName": "Right to left",
+                                    "displayNameKey": "Format_Direction_Rtl",
+                                    "value": "rtl"
+                                }
+                            ]
+                        }
+                    },
+                    "nodeWidth": {
+                        "displayNameKey": "Format_NodeWidth",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodeHeight": {
+                        "displayNameKey": "Format_NodeHeight",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "horizontalGap": {
+                        "displayNameKey": "Format_HorizontalGap",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "verticalGap": {
+                        "displayNameKey": "Format_VerticalGap",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "padding": {
+                        "displayNameKey": "Format_Padding",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "zoom": {
+                        "displayNameKey": "Format_Zoom",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fitContent": {
+                        "displayNameKey": "Format_FitContent",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "colors": {
+                "displayNameKey": "Format_Colors_Card",
+                "properties": {
+                    "backgroundColor": {
+                        "displayNameKey": "Format_Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "nodeColor": {
+                        "displayNameKey": "Format_NodeFill",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "selectedColor": {
+                        "displayNameKey": "Format_Selected",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "typography": {
+                "displayNameKey": "Format_Typography_Card",
+                "properties": {
+                    "labelColor": {
+                        "displayNameKey": "Format_LabelColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "subtitleColor": {
+                        "displayNameKey": "Format_SubtitleColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "displayNameKey": "Format_FontFamily",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "displayNameKey": "Format_FontSize",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "subtitleFontSize": {
+                        "displayNameKey": "Format_SubtitleSize",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "edges": {
+                "displayNameKey": "Format_Edges_Card",
+                "properties": {
+                    "edgeColor": {
+                        "displayNameKey": "Format_EdgeColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "edgeWidth": {
+                        "displayNameKey": "Format_EdgeWidth",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "interaction": {
+                "displayNameKey": "Format_Interaction_Card",
+                "properties": {
+                    "enableSearch": {
+                        "displayNameKey": "Format_EnableSearch",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableCollapse": {
+                        "displayNameKey": "Format_EnableCollapse",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "enableDescendantSelection": {
+                        "displayNameKey": "Format_EnableDescendants",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "reducedMotion": {
+                        "displayNameKey": "Format_ReducedMotion",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "diagnostics": {
+                "displayNameKey": "Format_Diagnostics_Card",
+                "properties": {
+                    "showDiagnostics": {
+                        "displayNameKey": "Format_ShowDiagnostics",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "dependencies": {
+        "version": "1.0.0",
+        "dependencies": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
