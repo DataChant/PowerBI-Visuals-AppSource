@@ -1,0 +1,765 @@
+{
+    "visual": {
+        "name": "smartVisualsGanttChart",
+        "displayName": "SmartVisuals Gantt Chart",
+        "guid": "ganttChart4E14FBC6E508455AA6A89A17DD336BB8",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Professional Gantt chart with progress, dependencies and critical-path analysis. Part of the SmartVisuals visual family for Power BI.",
+        "supportUrl": "https://smartvisuals.io/support",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "SmartVisuals",
+        "email": "hello@smartvisuals.io"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "task",
+                "kind": "Grouping",
+                "displayName": "Task",
+                "description": "Task or activity name"
+            },
+            {
+                "name": "category",
+                "kind": "Grouping",
+                "displayName": "Category / Group",
+                "description": "Optional grouping category for color coding"
+            },
+            {
+                "name": "parent",
+                "kind": "Grouping",
+                "displayName": "Parent Task",
+                "description": "Optional parent task name \u2014 builds a collapsible work-breakdown hierarchy with rollup summary bars"
+            },
+            {
+                "name": "extraColumns",
+                "kind": "Grouping",
+                "displayName": "Grid Columns",
+                "description": "Optional extra columns (up to 3) shown as a sortable data grid next to task names \u2014 e.g. Owner, Status, Cost. Premium feature."
+            },
+            {
+                "name": "startDate",
+                "kind": "Measure",
+                "displayName": "Start Date",
+                "description": "Task start date"
+            },
+            {
+                "name": "endDate",
+                "kind": "Measure",
+                "displayName": "End Date",
+                "description": "Task end date"
+            },
+            {
+                "name": "progress",
+                "kind": "Measure",
+                "displayName": "Progress %",
+                "description": "Task completion percentage (0\u2013100)"
+            },
+            {
+                "name": "dependencies",
+                "kind": "Grouping",
+                "displayName": "Dependencies",
+                "description": "Predecessor task name(s), comma-separated \u2014 powers dependency arrows and critical-path analysis. Premium feature."
+            },
+            {
+                "name": "baselineStart",
+                "kind": "Measure",
+                "displayName": "Baseline Start",
+                "description": "Planned start date \u2014 renders a baseline ghost bar for plan-vs-actual comparison. Premium feature."
+            },
+            {
+                "name": "baselineEnd",
+                "kind": "Measure",
+                "displayName": "Baseline End",
+                "description": "Planned end date \u2014 renders a baseline ghost bar for plan-vs-actual comparison. Premium feature."
+            },
+            {
+                "name": "tooltips",
+                "kind": "Measure",
+                "displayName": "Tooltips",
+                "description": "Extra fields shown in the task tooltip"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "task": {
+                            "max": 1
+                        },
+                        "category": {
+                            "max": 1
+                        },
+                        "parent": {
+                            "max": 1
+                        },
+                        "extraColumns": {
+                            "max": 3
+                        },
+                        "dependencies": {
+                            "max": 1
+                        },
+                        "startDate": {
+                            "max": 1
+                        },
+                        "endDate": {
+                            "max": 1
+                        },
+                        "progress": {
+                            "max": 1
+                        },
+                        "baselineStart": {
+                            "max": 1
+                        },
+                        "baselineEnd": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "task"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "category"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "parent"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "extraColumns"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "dependencies"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 1000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "startDate"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "endDate"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "progress"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "baselineStart"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "baselineEnd"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "theme": {
+                "displayName": "Theme",
+                "properties": {
+                    "selectedTheme": {
+                        "displayName": "Theme",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "clean",
+                                    "displayName": "Clean (White)"
+                                },
+                                {
+                                    "value": "smartvisuals",
+                                    "displayName": "SmartVisuals (turquoise)"
+                                },
+                                {
+                                    "value": "dark",
+                                    "displayName": "Dark"
+                                },
+                                {
+                                    "value": "slate",
+                                    "displayName": "Slate (corporate)"
+                                }
+                            ]
+                        }
+                    },
+                    "useReportTheme": {
+                        "displayName": "Use Report Theme Colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "transparentBg": {
+                        "displayName": "Transparent Background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bgColor": {
+                        "displayName": "Background Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "chartSettings": {
+                "displayName": "Chart",
+                "properties": {
+                    "barHeight": {
+                        "displayName": "Bar Height",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "rowPadding": {
+                        "displayName": "Row Padding",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "taskLabelWidth": {
+                        "displayName": "Label Column Width",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cornerTitle": {
+                        "displayName": "Header Title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "barColor": {
+                        "displayName": "Bar Color",
+                        "description": "Used when no Category field is provided",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showTodayLine": {
+                        "displayName": "Show Today Line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "todayLineColor": {
+                        "displayName": "Today Line Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "highlightOverdue": {
+                        "displayName": "Highlight Overdue Tasks",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "overdueColor": {
+                        "displayName": "Overdue Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "timeZoom": {
+                        "displayName": "Time Zoom",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "fit",
+                                    "displayName": "Fit to Width"
+                                },
+                                {
+                                    "value": "day",
+                                    "displayName": "Day (scroll)"
+                                },
+                                {
+                                    "value": "week",
+                                    "displayName": "Week (scroll)"
+                                },
+                                {
+                                    "value": "month",
+                                    "displayName": "Month (scroll)"
+                                }
+                            ]
+                        }
+                    },
+                    "barStyle": {
+                        "displayName": "Bar Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (by theme)"
+                                },
+                                {
+                                    "value": "rounded",
+                                    "displayName": "Rounded"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "pill",
+                                    "displayName": "Pill"
+                                }
+                            ]
+                        }
+                    },
+                    "progressStyle": {
+                        "displayName": "Progress Style",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "fill",
+                                    "displayName": "Fill"
+                                },
+                                {
+                                    "value": "slim",
+                                    "displayName": "Slim Bar"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                }
+                            ]
+                        }
+                    },
+                    "progressFormat": {
+                        "displayName": "Progress Format",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto-detect"
+                                },
+                                {
+                                    "value": "fraction",
+                                    "displayName": "Fraction (0-1)"
+                                },
+                                {
+                                    "value": "percent",
+                                    "displayName": "Percent (0-100)"
+                                }
+                            ]
+                        }
+                    },
+                    "milestoneShape": {
+                        "displayName": "Milestone Shape",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (by theme)"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "star",
+                                    "displayName": "Star"
+                                },
+                                {
+                                    "value": "flag",
+                                    "displayName": "Flag"
+                                },
+                                {
+                                    "value": "drop",
+                                    "displayName": "Water Drop"
+                                }
+                            ]
+                        }
+                    },
+                    "milestoneColor": {
+                        "displayName": "Milestone Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "legendSettings": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "timeAxis": {
+                "displayName": "Time Axis",
+                "properties": {
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "background": {
+                        "displayName": "Header Background",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "topBandFormat": {
+                        "displayName": "Top Band",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (Month + Year / Year)"
+                                },
+                                {
+                                    "value": "month",
+                                    "displayName": "Month only"
+                                },
+                                {
+                                    "value": "month-year",
+                                    "displayName": "Month + Year"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "Hidden"
+                                }
+                            ]
+                        }
+                    },
+                    "tickFormat": {
+                        "displayName": "Date Labels",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "day-number",
+                                    "displayName": "Day number (5)"
+                                },
+                                {
+                                    "value": "day-month",
+                                    "displayName": "Day + Month (5 Mar)"
+                                }
+                            ]
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold Dates",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "labelSettings": {
+                "displayName": "Labels",
+                "properties": {
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontColor": {
+                        "displayName": "Font Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showTaskLabels": {
+                        "displayName": "Show Task Labels on Bars",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bold": {
+                        "displayName": "Bold Task Names",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "categorySettings": {
+                "displayName": "Categories",
+                "properties": {
+                    "color1": {
+                        "displayName": "Category 1 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color2": {
+                        "displayName": "Category 2 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color3": {
+                        "displayName": "Category 3 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color4": {
+                        "displayName": "Category 4 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color5": {
+                        "displayName": "Category 5 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color6": {
+                        "displayName": "Category 6 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color7": {
+                        "displayName": "Category 7 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "color8": {
+                        "displayName": "Category 8 Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "gridSettings": {
+                "displayName": "Grid",
+                "properties": {
+                    "showGrid": {
+                        "displayName": "Show Vertical Grid",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gridColor": {
+                        "displayName": "Grid Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "shadeWeekends": {
+                        "displayName": "Shade Weekends",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "sumNumericColumns": {
+                        "displayName": "Summary Row Totals",
+                        "description": "Sum numeric grid columns on group and parent rows instead of showing their own data value",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dependencySettings": {
+                "displayName": "Dependencies & Critical Path",
+                "properties": {
+                    "showDependencies": {
+                        "displayName": "Show Dependency Arrows",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCriticalPath": {
+                        "displayName": "Highlight Critical Path",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "criticalColor": {
+                        "displayName": "Critical Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "depLineColor": {
+                        "displayName": "Arrow Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        },
+        "supportsEmptyDataView": true,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "suppressDefaultTitle": true,
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
