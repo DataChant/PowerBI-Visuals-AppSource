@@ -1,0 +1,2009 @@
+{
+    "visual": {
+        "name": "zentrixSankeyPro",
+        "displayName": "Zentrix Sankey Pro",
+        "guid": "zentrixSankeyPro9B2E4C7A1F6D40E8B3A5C9D2E7F10486",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Flow, journey and variance analysis for Power BI. A Sankey that analyses connections \u2014 automatic journey building, path analysis, clutter control and comparison \u2014 not just draws them.",
+        "supportUrl": "https://zentrixstudio.in/support",
+        "gitHubUrl": "https://github.com/Zentrix-Studio/Sankey-Pro"
+    },
+    "author": {
+        "name": "Zentrix Studio",
+        "email": "support@zentrixstudio.in"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [
+            {
+                "name": "ExportContent",
+                "essential": false
+            }
+        ],
+        "dataRoles": [
+            {
+                "displayName": "Source",
+                "description": "Mode A. The 'from' end of each flow \u2014 a category column of node names. One row = one link. Bind Source + Destination for classic source\u2192destination Sankey data.",
+                "name": "source",
+                "displayNameKey": "Role_Source",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Destination",
+                "description": "Mode A. The 'to' end of each flow. Self-links (source = destination) and repeated pairs are aggregated, never errors.",
+                "name": "destination",
+                "displayNameKey": "Role_Destination",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Stages (journey)",
+                "description": "Mode B \u2014 Automatic Journey Builder. Drop 2+ stage columns (Stage 1, Stage 2, \u2026) in order and the visual converts consecutive stages into links automatically \u2014 no calculated source/destination table needed. Takes priority over Source/Destination when bound.",
+                "name": "stages",
+                "displayNameKey": "Role_Stages",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Value",
+                "description": "Optional. Numeric weight per row; drives link thickness. Defaults to a count of 1 per row when unbound.",
+                "name": "value",
+                "displayNameKey": "Role_Value",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Link category",
+                "description": "Optional. A category per link; drives link colour + legend in category colour mode.",
+                "name": "linkCategory",
+                "displayNameKey": "Role_LinkCategory",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Node category",
+                "description": "Optional. A category for the Source node of each row; drives node colour in category mode.",
+                "name": "nodeCategory",
+                "displayNameKey": "Role_NodeCategory",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Node order",
+                "description": "Optional. A numeric sort key per node; when Node ordering = Custom order field, nodes within each stage sort by it ascending. Wrap a plain sort column in a measure (e.g. MIN(Table[SortOrder])) to use it here.",
+                "name": "nodeOrder",
+                "displayNameKey": "Role_NodeOrder",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Node icon",
+                "description": "Optional. A semantic icon token per Source node (e.g. 'zx:person', or a plain type word like 'customer'). Drawn on the node in 'By field' icon mode.",
+                "name": "nodeIcon",
+                "displayNameKey": "Role_NodeIcon",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Node image",
+                "description": "Optional. A base64 data: URI per Source node (a logo / photo column). Only data: URIs render \u2014 external URLs are ignored to keep the visual certified.",
+                "name": "nodeImage",
+                "displayNameKey": "Role_NodeImage",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Comparison value",
+                "description": "Optional. A prior-period / budget / scenario value per row \u2014 unlocks Compare mode: variance labels, colour-by-variance, and new/changed-flow insights.",
+                "name": "comparison",
+                "displayNameKey": "Role_Comparison",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltips",
+                "description": "Optional. Extra measures shown in link/node hover cards, alongside the built-in flow metrics.",
+                "name": "tooltips",
+                "displayNameKey": "Role_Tooltips",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "source": {
+                            "max": 1
+                        },
+                        "destination": {
+                            "max": 1
+                        },
+                        "stages": {
+                            "max": 12
+                        },
+                        "value": {
+                            "max": 1
+                        },
+                        "linkCategory": {
+                            "max": 1
+                        },
+                        "nodeCategory": {
+                            "max": 1
+                        },
+                        "nodeOrder": {
+                            "max": 1
+                        },
+                        "nodeIcon": {
+                            "max": 1
+                        },
+                        "nodeImage": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "source"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "destination"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "stages"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "linkCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "nodeCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "nodeIcon"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "nodeImage"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "window": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "value"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "nodeOrder"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "comparison"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "layout": {
+                "properties": {
+                    "stageMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "multi",
+                                    "displayName": "Multi-stage"
+                                },
+                                {
+                                    "value": "direct",
+                                    "displayName": "Two columns (direct)"
+                                }
+                            ]
+                        }
+                    },
+                    "orientation": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lr",
+                                    "displayName": "Left to right"
+                                },
+                                {
+                                    "value": "rl",
+                                    "displayName": "Right to left"
+                                },
+                                {
+                                    "value": "tb",
+                                    "displayName": "Top to bottom"
+                                },
+                                {
+                                    "value": "bt",
+                                    "displayName": "Bottom to top"
+                                }
+                            ]
+                        }
+                    },
+                    "nodeAlign": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "justify",
+                                    "displayName": "Justified"
+                                },
+                                {
+                                    "value": "start",
+                                    "displayName": "Start"
+                                },
+                                {
+                                    "value": "end",
+                                    "displayName": "End"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Centre"
+                                },
+                                {
+                                    "value": "categorical",
+                                    "displayName": "Categorical"
+                                }
+                            ]
+                        }
+                    },
+                    "nodeWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodePadding": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodePositions": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fillSpace": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "hideZeroValue": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "linkSort": {
+                        "displayName": "Flow order",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Automatic (fewest crossings)"
+                                },
+                                {
+                                    "value": "valueDesc",
+                                    "displayName": "Largest flow first"
+                                },
+                                {
+                                    "value": "valueAsc",
+                                    "displayName": "Smallest flow first"
+                                },
+                                {
+                                    "value": "name",
+                                    "displayName": "By connected node name"
+                                }
+                            ]
+                        }
+                    },
+                    "minNodeHeight": {
+                        "displayName": "Minimum node size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "nodes": {
+                "properties": {
+                    "sortBy": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Automatic"
+                                },
+                                {
+                                    "value": "valueDesc",
+                                    "displayName": "Value (high \u2192 low)"
+                                },
+                                {
+                                    "value": "valueAsc",
+                                    "displayName": "Value (low \u2192 high)"
+                                },
+                                {
+                                    "value": "name",
+                                    "displayName": "Alphabetical"
+                                },
+                                {
+                                    "value": "firstSeen",
+                                    "displayName": "Data order"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom order field"
+                                }
+                            ]
+                        }
+                    },
+                    "colorMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "single",
+                                    "displayName": "Single colour"
+                                },
+                                {
+                                    "value": "category",
+                                    "displayName": "By node category"
+                                },
+                                {
+                                    "value": "palette",
+                                    "displayName": "By palette (per node)"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "palette": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "theme",
+                                    "displayName": "Report theme"
+                                },
+                                {
+                                    "value": "brand",
+                                    "displayName": "Zentrix brand"
+                                },
+                                {
+                                    "value": "colorblind",
+                                    "displayName": "Colour-blind safe"
+                                },
+                                {
+                                    "value": "highviz",
+                                    "displayName": "High-visibility (CVD)"
+                                },
+                                {
+                                    "value": "cool",
+                                    "displayName": "Cool"
+                                },
+                                {
+                                    "value": "warm",
+                                    "displayName": "Warm"
+                                },
+                                {
+                                    "value": "vibrant",
+                                    "displayName": "Vibrant"
+                                },
+                                {
+                                    "value": "pastel",
+                                    "displayName": "Pastel"
+                                },
+                                {
+                                    "value": "earth",
+                                    "displayName": "Earth"
+                                },
+                                {
+                                    "value": "classic10",
+                                    "displayName": "Classic 10"
+                                },
+                                {
+                                    "value": "tableau",
+                                    "displayName": "Tableau"
+                                },
+                                {
+                                    "value": "category",
+                                    "displayName": "Category"
+                                },
+                                {
+                                    "value": "dark",
+                                    "displayName": "Dark"
+                                },
+                                {
+                                    "value": "set2",
+                                    "displayName": "Set 2"
+                                },
+                                {
+                                    "value": "set3",
+                                    "displayName": "Set 3"
+                                },
+                                {
+                                    "value": "paired",
+                                    "displayName": "Paired"
+                                },
+                                {
+                                    "value": "accent",
+                                    "displayName": "Accent"
+                                },
+                                {
+                                    "value": "ocean",
+                                    "displayName": "Ocean"
+                                },
+                                {
+                                    "value": "sunset",
+                                    "displayName": "Sunset"
+                                },
+                                {
+                                    "value": "forest",
+                                    "displayName": "Forest"
+                                },
+                                {
+                                    "value": "berry",
+                                    "displayName": "Berry"
+                                },
+                                {
+                                    "value": "teal",
+                                    "displayName": "Teal"
+                                },
+                                {
+                                    "value": "coral",
+                                    "displayName": "Coral"
+                                },
+                                {
+                                    "value": "mint",
+                                    "displayName": "Mint"
+                                },
+                                {
+                                    "value": "violet",
+                                    "displayName": "Violet"
+                                },
+                                {
+                                    "value": "slate",
+                                    "displayName": "Slate"
+                                },
+                                {
+                                    "value": "autumn",
+                                    "displayName": "Autumn"
+                                },
+                                {
+                                    "value": "spring",
+                                    "displayName": "Spring"
+                                },
+                                {
+                                    "value": "neon",
+                                    "displayName": "Neon"
+                                },
+                                {
+                                    "value": "muted",
+                                    "displayName": "Muted"
+                                },
+                                {
+                                    "value": "jewel",
+                                    "displayName": "Jewel"
+                                },
+                                {
+                                    "value": "candy",
+                                    "displayName": "Candy"
+                                },
+                                {
+                                    "value": "steel",
+                                    "displayName": "Steel"
+                                },
+                                {
+                                    "value": "tropical",
+                                    "displayName": "Tropical"
+                                },
+                                {
+                                    "value": "grayscale",
+                                    "displayName": "Grayscale"
+                                },
+                                {
+                                    "value": "contrast",
+                                    "displayName": "High contrast"
+                                }
+                            ]
+                        }
+                    },
+                    "reversePalette": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cvdOnly": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "pattern": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "patternMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "off",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (per colour)"
+                                },
+                                {
+                                    "value": "stage",
+                                    "displayName": "By stage"
+                                },
+                                {
+                                    "value": "single",
+                                    "displayName": "Single pattern"
+                                },
+                                {
+                                    "value": "category",
+                                    "displayName": "By node category"
+                                },
+                                {
+                                    "value": "node",
+                                    "displayName": "Per node"
+                                }
+                            ]
+                        }
+                    },
+                    "patternType": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "dots",
+                                    "displayName": "Dots"
+                                },
+                                {
+                                    "value": "rings",
+                                    "displayName": "Circles"
+                                },
+                                {
+                                    "value": "diagonal",
+                                    "displayName": "Diagonal"
+                                },
+                                {
+                                    "value": "crosshatch",
+                                    "displayName": "Hatch"
+                                },
+                                {
+                                    "value": "grid",
+                                    "displayName": "Grid"
+                                },
+                                {
+                                    "value": "horizontal",
+                                    "displayName": "Horizontal"
+                                },
+                                {
+                                    "value": "vertical",
+                                    "displayName": "Vertical"
+                                },
+                                {
+                                    "value": "checker",
+                                    "displayName": "Checker"
+                                },
+                                {
+                                    "value": "diamonds",
+                                    "displayName": "Diamonds"
+                                },
+                                {
+                                    "value": "zigzag",
+                                    "displayName": "Zigzag"
+                                },
+                                {
+                                    "value": "waves",
+                                    "displayName": "Waves"
+                                },
+                                {
+                                    "value": "antidiagonal",
+                                    "displayName": "Anti-diagonal"
+                                },
+                                {
+                                    "value": "triangles",
+                                    "displayName": "Triangles"
+                                },
+                                {
+                                    "value": "bricks",
+                                    "displayName": "Bricks"
+                                },
+                                {
+                                    "value": "scales",
+                                    "displayName": "Scales"
+                                },
+                                {
+                                    "value": "plus",
+                                    "displayName": "Plus"
+                                },
+                                {
+                                    "value": "stars",
+                                    "displayName": "Stars"
+                                },
+                                {
+                                    "value": "hexagons",
+                                    "displayName": "Hexagons"
+                                },
+                                {
+                                    "value": "dashes",
+                                    "displayName": "Dashes"
+                                },
+                                {
+                                    "value": "weave",
+                                    "displayName": "Weave"
+                                }
+                            ]
+                        }
+                    },
+                    "fillNode": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderMatchNode": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "borderStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    },
+                    "categoryColors": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "off",
+                                    "displayName": "No icons"
+                                },
+                                {
+                                    "value": "field",
+                                    "displayName": "By field (Node icon)"
+                                },
+                                {
+                                    "value": "category",
+                                    "displayName": "By node category"
+                                },
+                                {
+                                    "value": "stage",
+                                    "displayName": "By stage"
+                                },
+                                {
+                                    "value": "node",
+                                    "displayName": "Per node"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Same icon on every node"
+                                }
+                            ]
+                        }
+                    },
+                    "icon": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "single",
+                                    "displayName": "Single"
+                                },
+                                {
+                                    "value": "filled",
+                                    "displayName": "Filled"
+                                }
+                            ]
+                        }
+                    },
+                    "iconSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "iconMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconStageMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "off",
+                                    "displayName": "No images"
+                                },
+                                {
+                                    "value": "field",
+                                    "displayName": "By field (Node image)"
+                                },
+                                {
+                                    "value": "category",
+                                    "displayName": "By node category"
+                                },
+                                {
+                                    "value": "stage",
+                                    "displayName": "By stage"
+                                },
+                                {
+                                    "value": "node",
+                                    "displayName": "Per node"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Same image on every node"
+                                }
+                            ]
+                        }
+                    },
+                    "imageAll": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageCategoryMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "imageStageMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "patternStageMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconCategoryMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "patternCategoryMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "patternNodeMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "patternColor": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "patternColorStageMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "patternColorCategoryMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "patternColorNodeMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconColor": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconColorStageMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconColorCategoryMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "iconColorNodeMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "cornerRadius": {
+                        "displayName": "Corner radius",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "links": {
+                "properties": {
+                    "colorMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "gradient",
+                                    "displayName": "Source \u2192 destination gradient"
+                                },
+                                {
+                                    "value": "source",
+                                    "displayName": "Source colour"
+                                },
+                                {
+                                    "value": "destination",
+                                    "displayName": "Destination colour"
+                                },
+                                {
+                                    "value": "single",
+                                    "displayName": "Single colour"
+                                },
+                                {
+                                    "value": "category",
+                                    "displayName": "By link category"
+                                },
+                                {
+                                    "value": "variance",
+                                    "displayName": "By variance (compare)"
+                                }
+                            ]
+                        }
+                    },
+                    "widthMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "absolute",
+                                    "displayName": "Absolute (proportional)"
+                                },
+                                {
+                                    "value": "log",
+                                    "displayName": "Log (compressed)"
+                                }
+                            ]
+                        }
+                    },
+                    "negativeMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "abs",
+                                    "displayName": "Magnitude"
+                                },
+                                {
+                                    "value": "separate",
+                                    "displayName": "Separate lane"
+                                },
+                                {
+                                    "value": "reject",
+                                    "displayName": "Reject with warning"
+                                }
+                            ]
+                        }
+                    },
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "curvature": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "animate": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "flowSpeed": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "slow",
+                                    "displayName": "Slow"
+                                },
+                                {
+                                    "value": "medium",
+                                    "displayName": "Medium"
+                                },
+                                {
+                                    "value": "fast",
+                                    "displayName": "Fast"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "compare": {
+                "properties": {
+                    "showVariance": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "asPercent": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "finance": {
+                "properties": {
+                    "accounting": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "integrityCheck": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "integrityTol": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "residual": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "residualLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "linkLabels": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "content": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "value",
+                                    "displayName": "Value"
+                                },
+                                {
+                                    "value": "pctSource",
+                                    "displayName": "% of source"
+                                },
+                                {
+                                    "value": "pctDest",
+                                    "displayName": "% of destination"
+                                },
+                                {
+                                    "value": "pctTotal",
+                                    "displayName": "% of total"
+                                },
+                                {
+                                    "value": "variance",
+                                    "displayName": "Variance (compare)"
+                                },
+                                {
+                                    "value": "category",
+                                    "displayName": "Link category"
+                                }
+                            ]
+                        }
+                    },
+                    "position": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "start",
+                                    "displayName": "Start"
+                                },
+                                {
+                                    "value": "center",
+                                    "displayName": "Centre"
+                                },
+                                {
+                                    "value": "end",
+                                    "displayName": "End"
+                                }
+                            ]
+                        }
+                    },
+                    "placement": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "flat",
+                                    "displayName": "Default"
+                                },
+                                {
+                                    "value": "alongFlow",
+                                    "displayName": "Along the flow"
+                                }
+                            ]
+                        }
+                    },
+                    "collision": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "autoHide",
+                                    "displayName": "Auto-hide overlaps"
+                                },
+                                {
+                                    "value": "always",
+                                    "displayName": "Always show"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bgShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "interactions": {
+                "properties": {
+                    "hoverMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "connected",
+                                    "displayName": "Connected only"
+                                },
+                                {
+                                    "value": "incoming",
+                                    "displayName": "Incoming path"
+                                },
+                                {
+                                    "value": "outgoing",
+                                    "displayName": "Outgoing path"
+                                },
+                                {
+                                    "value": "path",
+                                    "displayName": "Full path"
+                                },
+                                {
+                                    "value": "trace",
+                                    "displayName": "Trace flow"
+                                }
+                            ]
+                        }
+                    },
+                    "dim": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "dimStrength": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "allowDrag": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showNodeDetails": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "traceEstimate": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "view": {
+                "properties": {
+                    "mode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "full",
+                                    "displayName": "Full Sankey"
+                                },
+                                {
+                                    "value": "dropoff",
+                                    "displayName": "Drop-off (funnel)"
+                                }
+                            ]
+                        }
+                    },
+                    "dropLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "underline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bgShow": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bgType": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "card",
+                                    "displayName": "Card"
+                                },
+                                {
+                                    "value": "highlight",
+                                    "displayName": "Highlight"
+                                },
+                                {
+                                    "value": "pill",
+                                    "displayName": "Pill"
+                                }
+                            ]
+                        }
+                    },
+                    "bgColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bgOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "overflow": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "ellipsis",
+                                    "displayName": "Truncate (\u2026)"
+                                },
+                                {
+                                    "value": "wrap",
+                                    "displayName": "Wrap"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "Off (relocate)"
+                                }
+                            ]
+                        }
+                    },
+                    "showValue": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "parts": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "placement": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (best fit)"
+                                },
+                                {
+                                    "value": "inner",
+                                    "displayName": "Inside node"
+                                },
+                                {
+                                    "value": "outer",
+                                    "displayName": "Outside node"
+                                }
+                            ]
+                        }
+                    },
+                    "displayUnits": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "thousands",
+                                    "displayName": "Thousands (K)"
+                                },
+                                {
+                                    "value": "millions",
+                                    "displayName": "Millions (M)"
+                                },
+                                {
+                                    "value": "billions",
+                                    "displayName": "Billions (B)"
+                                },
+                                {
+                                    "value": "lakhs",
+                                    "displayName": "Lakhs (L)"
+                                },
+                                {
+                                    "value": "crores",
+                                    "displayName": "Crores (Cr)"
+                                }
+                            ]
+                        }
+                    },
+                    "decimals": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showOn": {
+                        "displayName": "Show labels",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "always",
+                                    "displayName": "Always"
+                                },
+                                {
+                                    "value": "hover",
+                                    "displayName": "On hover only"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "clutter": {
+                "properties": {
+                    "topN": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "groupOther": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "otherLabel": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "minLinkValue": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "filter": {
+                "properties": {
+                    "mode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "off",
+                                    "displayName": "All nodes"
+                                },
+                                {
+                                    "value": "top",
+                                    "displayName": "Top N"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom N"
+                                }
+                            ]
+                        }
+                    },
+                    "by": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "value",
+                                    "displayName": "Node value"
+                                },
+                                {
+                                    "value": "inflow",
+                                    "displayName": "Inflow"
+                                },
+                                {
+                                    "value": "outflow",
+                                    "displayName": "Outflow"
+                                }
+                            ]
+                        }
+                    },
+                    "scope": {
+                        "displayName": "Apply N",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "global",
+                                    "displayName": "Across all stages"
+                                },
+                                {
+                                    "value": "stage",
+                                    "displayName": "Within each stage"
+                                }
+                            ]
+                        }
+                    },
+                    "count": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "keepConnectors": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "nodeMinValue": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodeMinPct": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "nodeRules": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "linkMinPct": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "linkTopNPerNode": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "linkTopNBy": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "out",
+                                    "displayName": "Outgoing"
+                                },
+                                {
+                                    "value": "in",
+                                    "displayName": "Incoming"
+                                },
+                                {
+                                    "value": "both",
+                                    "displayName": "Both directions"
+                                }
+                            ]
+                        }
+                    },
+                    "pctBase": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "shown",
+                                    "displayName": "Shown data"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "All data"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "stages": {
+                "properties": {
+                    "showTitles": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showBands": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleMap": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Stage title size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "italic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fill": {
+                        "displayName": "Stage title colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "tooltip": {
+                "properties": {
+                    "type": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "card",
+                                    "displayName": "Zentrix card"
+                                },
+                                {
+                                    "value": "report",
+                                    "displayName": "Native"
+                                },
+                                {
+                                    "value": "off",
+                                    "displayName": "Off"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "cformat": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "rules": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "summaryTable": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "tl",
+                                    "displayName": "Top-left"
+                                },
+                                {
+                                    "value": "tr",
+                                    "displayName": "Top-right"
+                                },
+                                {
+                                    "value": "bl",
+                                    "displayName": "Bottom-left"
+                                },
+                                {
+                                    "value": "br",
+                                    "displayName": "Bottom-right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "insights": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "canvas": {
+                "properties": {
+                    "title": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontFamily": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "titleFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "titleBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleItalic": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleUnderline": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleFill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "surfaceMode": {
+                        "displayName": "Canvas colours",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "theme",
+                                    "displayName": "Follow report theme"
+                                },
+                                {
+                                    "value": "light",
+                                    "displayName": "Zentrix light"
+                                },
+                                {
+                                    "value": "dark",
+                                    "displayName": "Zentrix dark"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom"
+                                }
+                            ]
+                        }
+                    },
+                    "bgFill": {
+                        "displayName": "Canvas colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fgFill": {
+                        "displayName": "Canvas text colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showLegend": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendPosition": {
+                        "displayName": "Legend position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "left",
+                                    "displayName": "Left"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "showNote": {
+                        "displayName": "Diagnostics strip",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTable": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "maxLinks": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendTitle": {
+                        "displayName": "Legend title",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "legendFontFamily": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "legendFontSize": {
+                        "displayName": "Legend text size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "legendFill": {
+                        "displayName": "Legend text colour",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "branding": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "toolbar": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "closeOnClickAway": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "actions": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "zoom": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "bl",
+                                    "displayName": "Bottom-left"
+                                },
+                                {
+                                    "value": "br",
+                                    "displayName": "Bottom-right"
+                                },
+                                {
+                                    "value": "tl",
+                                    "displayName": "Top-left"
+                                },
+                                {
+                                    "value": "tr",
+                                    "displayName": "Top-right"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "annotations": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "defaultMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "marker",
+                                    "displayName": "Marker only"
+                                },
+                                {
+                                    "value": "text",
+                                    "displayName": "Text"
+                                },
+                                {
+                                    "value": "arrow",
+                                    "displayName": "Text + arrow"
+                                },
+                                {
+                                    "value": "all",
+                                    "displayName": "Marker + text + arrow"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "notesStore": {
+                "properties": {
+                    "data": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "colorStore": {
+                "properties": {
+                    "data": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "tableState": {
+                "properties": {
+                    "data": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "toolbarState": {
+                "properties": {
+                    "data": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsHighlight": true,
+        "supportsKeyboardFocus": true,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "sorting": {
+            "default": {}
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
