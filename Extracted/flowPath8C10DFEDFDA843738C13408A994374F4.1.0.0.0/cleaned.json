@@ -1,0 +1,1100 @@
+{
+    "visual": {
+        "name": "flowPath",
+        "displayName": "FlowPath by Friven",
+        "guid": "flowPath8C10DFEDFDA843738C13408A994374F4",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Draws curved, weighted arrows between origins and destinations to visualize flows such as trade, migration, or shipments. Takes latitude and longitude, or place names resolved against a bundled list of cities - no geocoding service is called and no data leaves the report.",
+        "supportUrl": "https://frivensolutions.github.io/flowpath-visual-docs/support.html",
+        "gitHubUrl": "https://github.com/FrivenSolutions/flowpath-visual"
+    },
+    "author": {
+        "name": "Justin Fritts",
+        "email": "justin@friven.dev"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Origin",
+                "name": "origin",
+                "kind": "Grouping",
+                "description": "Text label identifying the origin point, used for data labels and tooltips"
+            },
+            {
+                "displayName": "Origin Latitude",
+                "name": "originLatitude",
+                "kind": "Grouping",
+                "description": "Latitude of the flow's starting point"
+            },
+            {
+                "displayName": "Origin Longitude",
+                "name": "originLongitude",
+                "kind": "Grouping",
+                "description": "Longitude of the flow's starting point"
+            },
+            {
+                "displayName": "Origin Location",
+                "name": "originLocation",
+                "kind": "Grouping",
+                "description": "Origin as City|State|Country, e.g. Denver|CO|USA - used only when Origin Latitude and Longitude are empty"
+            },
+            {
+                "displayName": "Origin Size",
+                "name": "originSize",
+                "kind": "Measure",
+                "description": "Optional measure sizing origin bubbles; without it they use a fixed size"
+            },
+            {
+                "displayName": "Destination",
+                "name": "destination",
+                "kind": "Grouping",
+                "description": "Text label identifying the destination point, used for data labels and tooltips"
+            },
+            {
+                "displayName": "Destination Latitude",
+                "name": "destLatitude",
+                "kind": "Grouping",
+                "description": "Latitude of the flow's ending point"
+            },
+            {
+                "displayName": "Destination Longitude",
+                "name": "destLongitude",
+                "kind": "Grouping",
+                "description": "Longitude of the flow's ending point"
+            },
+            {
+                "displayName": "Destination Location",
+                "name": "destLocation",
+                "kind": "Grouping",
+                "description": "Destination as City|State|Country, e.g. Rotterdam||NLD - used only when Destination Latitude and Longitude are empty"
+            },
+            {
+                "displayName": "Destination Size",
+                "name": "destinationSize",
+                "kind": "Measure",
+                "description": "Optional measure sizing destination bubbles; without it they use a fixed size"
+            },
+            {
+                "displayName": "Origin Thickness",
+                "name": "value",
+                "kind": "Measure",
+                "description": "Drives how thick each flow is drawn at its origin"
+            },
+            {
+                "displayName": "Destination Thickness",
+                "name": "destinationThickness",
+                "kind": "Measure",
+                "description": "Optional measure for the width at the destination; without it the flow keeps a constant width"
+            },
+            {
+                "displayName": "Legend",
+                "name": "legend",
+                "kind": "Grouping",
+                "description": "Categorical field used to color arrows and bubbles"
+            },
+            {
+                "displayName": "Route ID",
+                "name": "routeId",
+                "kind": "Grouping",
+                "description": "Optional. Rows sharing a value chain into one multi-leg route"
+            },
+            {
+                "displayName": "Leg Order",
+                "name": "legOrder",
+                "kind": "Grouping",
+                "description": "Optional. Position of this leg within its route (1, 2, 3...)"
+            },
+            {
+                "displayName": "Start Time",
+                "name": "time",
+                "kind": "Grouping",
+                "description": "Optional. Distinct values become playback steps on the timeline. Bind the date field itself rather than its date hierarchy"
+            },
+            {
+                "displayName": "End Time",
+                "name": "endTime",
+                "kind": "Grouping",
+                "description": "Optional. Keeps a flow on screen from its Start Time through to this value, instead of only at one step"
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": "Additional fields shown in the tooltip"
+            }
+        ],
+        "objects": {
+            "arrows": {
+                "displayName": "Arrows",
+                "properties": {
+                    "baseColor": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "minWidth": {
+                        "displayName": "Minimum thickness (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "maxWidth": {
+                        "displayName": "Maximum thickness (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "taperMinWidth": {
+                        "displayName": "Minimum taper width (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "style": {
+                        "displayName": "Style",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "pathMode": {
+                        "displayName": "Path",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "curveIntensity": {
+                        "displayName": "Curve intensity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "directionalHighlight": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "colorMode": {
+                        "displayName": "Color by",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "decayScale": {
+                        "displayName": "Scale",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "decayHealthyColor": {
+                        "displayName": "No loss",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "decayLossColor": {
+                        "displayName": "Full loss",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "decayFloor": {
+                        "displayName": "Full loss color at (% retained)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "decayGainColor": {
+                        "displayName": "Full gain",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "bubbles": {
+                "displayName": "Bubbles",
+                "properties": {
+                    "show": {
+                        "displayName": "Show bubbles",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "combineShared": {
+                        "displayName": "Combine shared locations",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "originShape": {
+                        "displayName": "Origin shape",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "destShape": {
+                        "displayName": "Destination shape",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "originColor": {
+                        "displayName": "Origin color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "destColor": {
+                        "displayName": "Destination color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "bubbleRadius": {
+                        "displayName": "Bubble size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "originRadius": {
+                        "displayName": "Origin size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "destRadius": {
+                        "displayName": "Destination size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minBubbleRadius": {
+                        "displayName": "Min bubble size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minOriginRadius": {
+                        "displayName": "Min origin size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "minDestRadius": {
+                        "displayName": "Min destination size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "dataColors": {
+                "displayName": "Legend colors",
+                "properties": {
+                    "fill0": {
+                        "displayName": "Color 1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill1": {
+                        "displayName": "Color 2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill2": {
+                        "displayName": "Color 3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill3": {
+                        "displayName": "Color 4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill4": {
+                        "displayName": "Color 5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill5": {
+                        "displayName": "Color 6",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill6": {
+                        "displayName": "Color 7",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill7": {
+                        "displayName": "Color 8",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill8": {
+                        "displayName": "Color 9",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill9": {
+                        "displayName": "Color 10",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill10": {
+                        "displayName": "Color 11",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill11": {
+                        "displayName": "Color 12",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill12": {
+                        "displayName": "Color 13",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill13": {
+                        "displayName": "Color 14",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill14": {
+                        "displayName": "Color 15",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill15": {
+                        "displayName": "Color 16",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill16": {
+                        "displayName": "Color 17",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill17": {
+                        "displayName": "Color 18",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill18": {
+                        "displayName": "Color 19",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill19": {
+                        "displayName": "Color 20",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill20": {
+                        "displayName": "Color 21",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill21": {
+                        "displayName": "Color 22",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill22": {
+                        "displayName": "Color 23",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill23": {
+                        "displayName": "Color 24",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill24": {
+                        "displayName": "Color 25",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill25": {
+                        "displayName": "Color 26",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill26": {
+                        "displayName": "Color 27",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill27": {
+                        "displayName": "Color 28",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill28": {
+                        "displayName": "Color 29",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fill29": {
+                        "displayName": "Color 30",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "basemap": {
+                "displayName": "Basemap",
+                "properties": {
+                    "show": {
+                        "displayName": "Show basemap",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fillColor": {
+                        "displayName": "Land color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderColor": {
+                        "displayName": "Border color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showStateBorders": {
+                        "displayName": "Show US state borders",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCountyBorders": {
+                        "displayName": "Show US county borders",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "countyBorderColor": {
+                        "displayName": "County border color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showWater": {
+                        "displayName": "Show water",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "centerLongitude": {
+                        "displayName": "Center longitude",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "waterColor": {
+                        "displayName": "Water color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "mapLabels": {
+                "displayName": "Map labels",
+                "properties": {
+                    "showCountries": {
+                        "displayName": "Country labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showStates": {
+                        "displayName": "US state labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showCities": {
+                        "displayName": "City labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "density": {
+                        "displayName": "Density",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "countryFontSize": {
+                        "displayName": "Country text size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "countryBold": {
+                        "displayName": "Country bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "countryItalic": {
+                        "displayName": "Country italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "countryUnderline": {
+                        "displayName": "Country underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "stateFontSize": {
+                        "displayName": "State text size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "stateBold": {
+                        "displayName": "State bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "stateItalic": {
+                        "displayName": "State italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "stateUnderline": {
+                        "displayName": "State underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cityFontSize": {
+                        "displayName": "City text size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cityBold": {
+                        "displayName": "City bold",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cityItalic": {
+                        "displayName": "City italic",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cityUnderline": {
+                        "displayName": "City underline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "animation": {
+                "displayName": "Animation",
+                "properties": {
+                    "show": {
+                        "displayName": "Animate flows",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "speed": {
+                        "displayName": "Speed (screen px/sec)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "density": {
+                        "displayName": "Density",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "size": {
+                        "displayName": "Dot size (px)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "color": {
+                        "displayName": "Dot color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "opacity": {
+                        "displayName": "Opacity (%)",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "timeline": {
+                "displayName": "Timeline",
+                "properties": {
+                    "show": {
+                        "displayName": "Show timeline",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "mode": {
+                        "displayName": "Show",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "granularity": {
+                        "displayName": "Step by",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "stepDuration": {
+                        "displayName": "Step duration (ms)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "loop": {
+                        "displayName": "Loop playback",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "autoPlay": {
+                        "displayName": "Play on load",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "crossFilter": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "displayName": "Legend",
+                "properties": {
+                    "show": {
+                        "displayName": "Show legend",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "showTitle": {
+                        "displayName": "Show title",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "titleText": {
+                        "displayName": "Title text",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "locations": {
+                "displayName": "Locations",
+                "properties": {
+                    "approximateToArea": {
+                        "displayName": "Approximate unknown cities",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "general": {
+                "properties": {
+                    "filter": {
+                        "type": {
+                            "filter": {}
+                        }
+                    }
+                }
+            },
+            "licensing": {
+                "displayName": "Licensing",
+                "properties": {
+                    "showSovereignNotice": {
+                        "displayName": "Show licensing notice",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "origin"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "originLatitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "originLongitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "originLocation"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "originSize"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "destination"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "destLatitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "destLongitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "destLocation"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "destinationSize"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "value"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "destinationThickness"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "legend"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "routeId"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "legOrder"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "time"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "endTime"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "tooltips"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 10000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "supportsHighlight": false,
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true,
+        "supportsLandingPage": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
