@@ -1,0 +1,722 @@
+{
+    "visual": {
+        "name": "WaterfallAdvanced",
+        "displayName": "Waterfall Advanced",
+        "guid": "WaterfallAdvanced285e2ced869b4cbaaff42317a24068cc",
+        "visualClassName": "Visual",
+        "version": "1.1.1.0",
+        "description": "Financial bridge chart with subtotals, target lines, anomaly detection and a data table. Free and Pro tiers available.",
+        "supportUrl": "https://tinocallarisa-web.github.io/waterfall-advanced-powerbi/support.html",
+        "gitHubUrl": "https://github.com/tinocallarisa-web/waterfall-advanced-powerbi"
+    },
+    "author": {
+        "name": "TCViz",
+        "email": "support@tcviz.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "de-DE": {
+            "initialTotal": "Anfangswert",
+            "finalTotal": "Endwert",
+            "variance": "Abweichung %",
+            "biggestGain": "Gr\u00f6\u00dfter Gewinn",
+            "biggestLoss": "Gr\u00f6\u00dfter Verlust",
+            "base": "Basis",
+            "vsBase": "vs Basis",
+            "varianceVal": "Abweichung",
+            "pctVsBase": "% vs Basis",
+            "target": "Ziel",
+            "targetGap": "Zielabweichung",
+            "type": "Typ",
+            "landingTitle": "Waterfall Advanced",
+            "landingHint": "Verbinden Sie Kategorie und Wert f\u00fcr das Wasserfall-Diagramm"
+        },
+        "en-US": {
+            "initialTotal": "Initial total",
+            "finalTotal": "Final total",
+            "variance": "Variance %",
+            "biggestGain": "Biggest gain",
+            "biggestLoss": "Biggest loss",
+            "base": "base",
+            "vsBase": "vs base",
+            "varianceVal": "Variance",
+            "pctVsBase": "% vs base",
+            "target": "Target",
+            "targetGap": "Target gap",
+            "type": "Type",
+            "landingTitle": "Waterfall Advanced",
+            "landingHint": "Connect Category and Value to render the waterfall"
+        },
+        "es-ES": {
+            "initialTotal": "Total inicial",
+            "finalTotal": "Total final",
+            "variance": "Variaci\u00f3n %",
+            "biggestGain": "Mayor ganancia",
+            "biggestLoss": "Mayor p\u00e9rdida",
+            "base": "base",
+            "vsBase": "vs base",
+            "varianceVal": "Variaci\u00f3n",
+            "pctVsBase": "% vs base",
+            "target": "Target",
+            "targetGap": "Gap target",
+            "type": "Tipo",
+            "landingTitle": "Waterfall Advanced",
+            "landingHint": "Conecta Categor\u00eda y Valor para visualizar el waterfall"
+        },
+        "fr-FR": {
+            "initialTotal": "Total initial",
+            "finalTotal": "Total final",
+            "variance": "Variation %",
+            "biggestGain": "Plus grande hausse",
+            "biggestLoss": "Plus grande baisse",
+            "base": "base",
+            "vsBase": "vs base",
+            "varianceVal": "Variation",
+            "pctVsBase": "% vs base",
+            "target": "Cible",
+            "targetGap": "\u00c9cart cible",
+            "type": "Type",
+            "landingTitle": "Waterfall Advanced",
+            "landingHint": "Connectez Cat\u00e9gorie et Valeur pour afficher le waterfall"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Category",
+                "name": "category",
+                "kind": "Grouping",
+                "description": "The P&L line, driver or step. The field order, or the Order well, defines the bridge."
+            },
+            {
+                "displayName": "Value",
+                "name": "measure",
+                "kind": "Measure",
+                "description": "The amount for each step. Negative values fall, positive values rise."
+            },
+            {
+                "displayName": "Target (optional)",
+                "name": "target",
+                "kind": "Measure",
+                "description": "Goal or budget. Drawn as a dashed line on the anchor bars."
+            },
+            {
+                "displayName": "Bar type",
+                "name": "barType",
+                "kind": "Measure",
+                "description": "Per row: total, subtotal or delta. Anything else is read as delta. The first and last rows are always totals. Aggregate as First, not Sum."
+            },
+            {
+                "displayName": "Order",
+                "name": "sortOrder",
+                "kind": "Grouping",
+                "description": "Numeric field that fixes the sequence of the bridge. Without it the bars follow the category sort."
+            },
+            {
+                "displayName": "Tooltips",
+                "name": "tooltips",
+                "kind": "Measure",
+                "description": "Extra measures shown on hover."
+            },
+            {
+                "displayName": "Colour (DAX, optional)",
+                "name": "colorBy",
+                "kind": "Measure",
+                "description": "A hex colour per row, calculated in the model. Overrides the increase/decrease colours and the fx rule."
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "sortOrder"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {}
+                        }
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "measure"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "target"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "barType"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltips"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "colorBy"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "colorSettings": {
+                "displayName": "Colors",
+                "properties": {
+                    "colorBlindSafe": {
+                        "displayName": "Colour-blind safe palette",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "patternOnDecrease": {
+                        "displayName": "Hatch decreases",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "positiveColor": {
+                        "displayName": "Increase color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "description": "Fill color for increase bars. Supports rule-based conditional formatting (fx): the rule is resolved per category and overrides the increase/decrease colours for that bar.",
+                        "rule": {
+                            "inputRole": "value",
+                            "output": {
+                                "property": "positiveColor",
+                                "selector": [
+                                    "category"
+                                ]
+                            }
+                        }
+                    },
+                    "negativeColor": {
+                        "displayName": "Decrease color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "totalColor": {
+                        "displayName": "Total / subtotal color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "targetColor": {
+                        "displayName": "Target line color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legendTextColor": {
+                        "displayName": "Legend text color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "legendFontSize": {
+                        "displayName": "Legend font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "labelSettings": {
+                "displayName": "Labels",
+                "properties": {
+                    "showLabels": {
+                        "displayName": "Show labels",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelMode": {
+                        "displayName": "Label mode",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "abs",
+                                    "displayName": "Absolute"
+                                },
+                                {
+                                    "value": "rel",
+                                    "displayName": "Relative %"
+                                },
+                                {
+                                    "value": "both",
+                                    "displayName": "Both"
+                                }
+                            ]
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "autoValueLabelColor": {
+                        "displayName": "Value label color: match bar",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "valueLabelColor": {
+                        "displayName": "Value label color (when not matching bar)",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryLabelColor": {
+                        "displayName": "Category / axis label color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "categoryFontSize": {
+                        "displayName": "Category label font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelRotation": {
+                        "displayName": "Category label angle (Pro)",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Horizontal"
+                                },
+                                {
+                                    "value": "-30",
+                                    "displayName": "Tilted (-30\u00b0)"
+                                },
+                                {
+                                    "value": "-45",
+                                    "displayName": "Tilted (-45\u00b0)"
+                                },
+                                {
+                                    "value": "-90",
+                                    "displayName": "Vertical (-90\u00b0)"
+                                }
+                            ]
+                        }
+                    },
+                    "labelMaxChars": {
+                        "displayName": "Truncate category labels at (Pro)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "hideOverlapping": {
+                        "displayName": "Hide labels that do not fit (Pro)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "anchorLabelsMatchBar": {
+                        "displayName": "Total / subtotal labels: match bar colour",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "numberFormat": {
+                "displayName": "Number format",
+                "properties": {
+                    "currencySymbol": {
+                        "displayName": "Currency symbol",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "\u20ac",
+                                    "displayName": "\u20ac Euro"
+                                },
+                                {
+                                    "value": "$",
+                                    "displayName": "$ Dollar"
+                                },
+                                {
+                                    "value": "\u00a3",
+                                    "displayName": "\u00a3 Pound"
+                                },
+                                {
+                                    "value": "\u00a5",
+                                    "displayName": "\u00a5 Yen"
+                                }
+                            ]
+                        }
+                    },
+                    "symbolPosition": {
+                        "displayName": "Symbol position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "prefix",
+                                    "displayName": "Prefix"
+                                },
+                                {
+                                    "value": "suffix",
+                                    "displayName": "Suffix"
+                                }
+                            ]
+                        }
+                    },
+                    "scaleMode": {
+                        "displayName": "Scale",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "none",
+                                    "displayName": "None"
+                                },
+                                {
+                                    "value": "k",
+                                    "displayName": "Thousands (k)"
+                                },
+                                {
+                                    "value": "M",
+                                    "displayName": "Millions (M)"
+                                }
+                            ]
+                        }
+                    },
+                    "decimals": {
+                        "displayName": "Decimals",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "thousandsSep": {
+                        "displayName": "Thousands separator",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "chartSettings": {
+                "displayName": "Chart",
+                "properties": {
+                    "showConnectors": {
+                        "displayName": "Connector lines",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showSubtotals": {
+                        "displayName": "Show subtotals",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showTarget": {
+                        "displayName": "Show target",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showVarianceCards": {
+                        "displayName": "Summary cards",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "sortBars": {
+                        "displayName": "Sort by impact",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "invertColorSemantics": {
+                        "displayName": "Invert increase/decrease colors",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "maxCategories": {
+                        "displayName": "Max drivers shown (0 = no limit)",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "otherLabel": {
+                        "displayName": "\"Others\" bar label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "orientation": {
+                        "displayName": "Orientation",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "vertical",
+                                    "displayName": "Vertical"
+                                },
+                                {
+                                    "value": "horizontal",
+                                    "displayName": "Horizontal"
+                                }
+                            ]
+                        }
+                    },
+                    "targetLabel": {
+                        "displayName": "Target label",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "targetShowValue": {
+                        "displayName": "Show target value",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "cardSettings": {
+                "displayName": "Summary Cards",
+                "properties": {
+                    "show": {
+                        "displayName": "Show summary cards",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelFontSize": {
+                        "displayName": "Caption font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "valueFontSize": {
+                        "displayName": "Value font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "textColorAuto": {
+                        "displayName": "Use the report theme text colour",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Custom text colour \u2014 turn the switch above off",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "backgroundAuto": {
+                        "displayName": "Use the report theme background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Custom background \u2014 turn the switch above off",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ibcs": {
+                "displayName": "IBCS",
+                "properties": {
+                    "mode": {
+                        "displayName": "IBCS mode (Pro)",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "tableSettings": {
+                "displayName": "Data Table",
+                "properties": {
+                    "show": {
+                        "displayName": "Show data table (Pro)",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "displayName": "Position",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                }
+                            ]
+                        }
+                    },
+                    "showRunning": {
+                        "displayName": "Running total column",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showShare": {
+                        "displayName": "% of opening column",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundAuto": {
+                        "displayName": "Use the report theme background",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "backgroundColor": {
+                        "displayName": "Custom background \u2014 turn the switch above off",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "showBorder": {
+                        "displayName": "Separator line",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontSize": {
+                        "displayName": "Font size",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "widthPct": {
+                        "displayName": "Width / height %",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            }
+        },
+        "privileges": [],
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        },
+        "drilldown": {
+            "roles": [
+                "category"
+            ]
+        },
+        "supportsHighlight": true,
+        "supportsSynchronizingFilterState": true,
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true,
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true
+    },
+    "dependencies": {
+        "name": "powerbi-waterfall-advanced",
+        "version": "1.1.1",
+        "description": "Advanced Waterfall Chart for Power BI \u2014 subtotals, drill-through, targets, AI narratives",
+        "scripts": {
+            "start": "pbiviz start",
+            "build": "pbiviz package",
+            "build-test": "node scripts/build-test.js",
+            "lint": "eslint src --ext .ts"
+        },
+        "dependencies": {
+            "powerbi-visuals-api": "~5.11.0",
+            "powerbi-visuals-utils-formattingmodel": "~6.2.2",
+            "powerbi-visuals-utils-tooltiputils": "~6.0.4"
+        },
+        "devDependencies": {
+            "@typescript-eslint/eslint-plugin": "^5.0.0",
+            "@typescript-eslint/parser": "^5.0.0",
+            "eslint": "^8.0.0",
+            "powerbi-visuals-tools": "~5.6.0",
+            "typescript": "^4.9.0"
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
