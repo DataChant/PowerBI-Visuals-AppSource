@@ -1,0 +1,655 @@
+{
+    "visual": {
+        "name": "tileGridMapPro",
+        "displayName": "Tile Grid Map Pro",
+        "guid": "tileGridMapProTCViz1234567890",
+        "visualClassName": "Visual",
+        "version": "1.1.0.0",
+        "description": "Visualize geographic data as interactive tile grids. Supports 27 countries and regions with precise boundaries. Free uses up to 500 rows; Pro uses up to 30,000 rows and adds circle and hexagon tiles, sizing by a second measure, quantile, diverging and categorical scales, custom colours and your own TopoJSON regions.",
+        "supportUrl": "https://tinocallarisa-web.github.io/tile-grid-map-pro/support.html",
+        "gitHubUrl": "https://github.com/tinocallarisa-web/tile-grid-map-pro"
+    },
+    "author": {
+        "name": "TCViz",
+        "email": "support@tcviz.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "visual_displayName": "Tile Grid Map Pro",
+            "visual_description": "Point data aggregated onto square tile grids for 27 countries and regions, plus your own TopoJSON regions (Pro). No map service, no network calls.",
+            "mapSettings_displayName": "Map Settings",
+            "mapSettings_country_displayName": "Country / Region",
+            "mapSettings_aggregationType_displayName": "Value Aggregation",
+            "mapSettings_showEmptyCells_displayName": "Show Empty Cells",
+            "mapSettings_showLabels_displayName": "Show Cell Labels",
+            "mapSettings_labelFontSize_displayName": "Label Font Size",
+            "mapSettings_labelMinTileSize_displayName": "Label Min Tile Size (px)",
+            "mapSettings_tooltipDecimals_displayName": "Decimal Places",
+            "colorScale_displayName": "Color Scale",
+            "colorScale_scaleType_displayName": "Scale Type",
+            "colorScale_colorMin_displayName": "Color Min (Pro)",
+            "colorScale_colorMid_displayName": "Color Mid (Pro, Diverging)",
+            "colorScale_colorMax_displayName": "Color Max (Pro)",
+            "colorScale_noDataColor_displayName": "No Data Color",
+            "legend_displayName": "Legend",
+            "legend_showLegend_displayName": "Show Legend",
+            "legend_legendPosition_displayName": "Position",
+            "mapSettings_tileShape_displayName": "Tile Shape",
+            "mapSettings_latitudeCorrection_displayName": "Correct Latitude Distortion",
+            "legend_fontFamily_displayName": "Font",
+            "legend_fontSize_displayName": "Text Size",
+            "legend_fontColor_displayName": "Text Color"
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "latitude",
+                "kind": "Grouping",
+                "displayName": "Latitude",
+                "description": "Latitude column (decimal degrees, e.g. 40.4168)"
+            },
+            {
+                "name": "longitude",
+                "kind": "Grouping",
+                "displayName": "Longitude",
+                "description": "Longitude column (decimal degrees, e.g. -3.7038)"
+            },
+            {
+                "name": "value",
+                "kind": "Measure",
+                "displayName": "Value",
+                "description": "Numeric value to color each tile"
+            },
+            {
+                "name": "size",
+                "kind": "Measure",
+                "displayName": "Size (Pro)",
+                "description": "Optional second measure that sizes each tile"
+            },
+            {
+                "name": "tooltips",
+                "kind": "Measure",
+                "displayName": "Tooltips",
+                "description": "Additional fields shown in tooltip"
+            },
+            {
+                "name": "label",
+                "kind": "Grouping",
+                "displayName": "Label",
+                "description": "Optional display name (city, region...)"
+            },
+            {
+                "name": "category",
+                "kind": "Grouping",
+                "displayName": "Category",
+                "description": "Group used by the Categorical colour scale (Pro): each tile takes the category with most rows"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "latitude": {
+                            "max": 1
+                        },
+                        "longitude": {
+                            "max": 1
+                        },
+                        "value": {
+                            "max": 1
+                        },
+                        "tooltips": {
+                            "max": 10
+                        },
+                        "label": {
+                            "max": 1
+                        },
+                        "size": {
+                            "max": 1
+                        },
+                        "category": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "latitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "longitude"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "label"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "category"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "value"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "tooltips"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "size"
+                                }
+                            }
+                        ],
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "mapSettings": {
+                "properties": {
+                    "country": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "es",
+                                    "displayName": "Spain"
+                                },
+                                {
+                                    "value": "ic",
+                                    "displayName": "Canarias (Spain)"
+                                },
+                                {
+                                    "value": "pt",
+                                    "displayName": "Portugal"
+                                },
+                                {
+                                    "value": "fr",
+                                    "displayName": "France"
+                                },
+                                {
+                                    "value": "de",
+                                    "displayName": "Germany"
+                                },
+                                {
+                                    "value": "it",
+                                    "displayName": "Italy"
+                                },
+                                {
+                                    "value": "it_islands",
+                                    "displayName": "Sicily (Italy)"
+                                },
+                                {
+                                    "value": "it_sardinia",
+                                    "displayName": "Sardinia (Italy)"
+                                },
+                                {
+                                    "value": "gb",
+                                    "displayName": "United Kingdom"
+                                },
+                                {
+                                    "value": "nl",
+                                    "displayName": "Netherlands"
+                                },
+                                {
+                                    "value": "be",
+                                    "displayName": "Belgium"
+                                },
+                                {
+                                    "value": "pl",
+                                    "displayName": "Poland"
+                                },
+                                {
+                                    "value": "se",
+                                    "displayName": "Sweden"
+                                },
+                                {
+                                    "value": "no",
+                                    "displayName": "Norway"
+                                },
+                                {
+                                    "value": "ch",
+                                    "displayName": "Switzerland"
+                                },
+                                {
+                                    "value": "at",
+                                    "displayName": "Austria"
+                                },
+                                {
+                                    "value": "us",
+                                    "displayName": "United States"
+                                },
+                                {
+                                    "value": "ak",
+                                    "displayName": "Alaska (USA)"
+                                },
+                                {
+                                    "value": "hi",
+                                    "displayName": "Hawaii (USA)"
+                                },
+                                {
+                                    "value": "ca",
+                                    "displayName": "Canada"
+                                },
+                                {
+                                    "value": "mx",
+                                    "displayName": "Mexico"
+                                },
+                                {
+                                    "value": "br",
+                                    "displayName": "Brazil"
+                                },
+                                {
+                                    "value": "ar",
+                                    "displayName": "Argentina"
+                                },
+                                {
+                                    "value": "co",
+                                    "displayName": "Colombia"
+                                },
+                                {
+                                    "value": "au",
+                                    "displayName": "Australia"
+                                },
+                                {
+                                    "value": "in",
+                                    "displayName": "India"
+                                },
+                                {
+                                    "value": "jp",
+                                    "displayName": "Japan"
+                                },
+                                {
+                                    "value": "custom",
+                                    "displayName": "Custom TopoJSON (Pro)"
+                                }
+                            ]
+                        }
+                    },
+                    "aggregationType": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "auto",
+                                    "displayName": "Auto (from field)"
+                                },
+                                {
+                                    "value": "sum",
+                                    "displayName": "Sum"
+                                },
+                                {
+                                    "value": "average",
+                                    "displayName": "Average"
+                                },
+                                {
+                                    "value": "count",
+                                    "displayName": "Count"
+                                },
+                                {
+                                    "value": "min",
+                                    "displayName": "Min"
+                                },
+                                {
+                                    "value": "max",
+                                    "displayName": "Max"
+                                }
+                            ]
+                        }
+                    },
+                    "showEmptyCells": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelFontSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "labelMinTileSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tooltipDecimals": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "tileShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle (Pro)"
+                                },
+                                {
+                                    "value": "hexagon",
+                                    "displayName": "Hexagon (Pro)"
+                                }
+                            ]
+                        }
+                    },
+                    "latitudeCorrection": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "colorScale": {
+                "properties": {
+                    "scaleType": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "sequential",
+                                    "displayName": "Sequential"
+                                },
+                                {
+                                    "value": "quantile",
+                                    "displayName": "Quantile (Pro)"
+                                },
+                                {
+                                    "value": "diverging",
+                                    "displayName": "Diverging (Pro)"
+                                },
+                                {
+                                    "value": "categorical",
+                                    "displayName": "Categorical (Pro)"
+                                }
+                            ]
+                        }
+                    },
+                    "colorMin": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorMid": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorMax": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "noDataColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "properties": {
+                    "showLegend": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "legendPosition": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "top",
+                                    "displayName": "Top"
+                                }
+                            ]
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    }
+                }
+            },
+            "accessibility": {
+                "properties": {
+                    "showBorders": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "borderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "borderWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "selectedRingColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "selectedRingWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "conditionalFormatting": {
+                "properties": {
+                    "cfEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "cfRule1Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "< Less than"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "\u2264 Less than or equal"
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": "> Greater than"
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": "\u2265 Greater than or equal"
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "= Equal to"
+                                }
+                            ]
+                        }
+                    },
+                    "cfRule1Value": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cfRule1Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cfRule2MinValue": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cfRule2MaxValue": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cfRule2Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "cfRule3Operator": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "lt",
+                                    "displayName": "< Less than"
+                                },
+                                {
+                                    "value": "lte",
+                                    "displayName": "\u2264 Less than or equal"
+                                },
+                                {
+                                    "value": "gt",
+                                    "displayName": "> Greater than"
+                                },
+                                {
+                                    "value": "gte",
+                                    "displayName": "\u2265 Greater than or equal"
+                                },
+                                {
+                                    "value": "eq",
+                                    "displayName": "= Equal to"
+                                }
+                            ]
+                        }
+                    },
+                    "cfRule3Value": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "cfRule3Color": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "proSettings": {
+                "properties": {
+                    "topoJsonContent": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "topoJsonFileName": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            }
+        },
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true,
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "privileges": [],
+        "supportsLandingPage": true,
+        "supportsEmptyDataView": true
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
