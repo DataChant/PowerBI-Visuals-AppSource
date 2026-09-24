@@ -1,0 +1,583 @@
+{
+    "visual": {
+        "name": "calendarTCViz",
+        "displayName": "Calendar Events Heatmap",
+        "guid": "calendarTCViz022303184F264C8B9ACE6A13E838FFEB",
+        "visualClassName": "CalendarVisual",
+        "version": "1.1.2.0",
+        "description": "A Power BI calendar that combines a KPI heatmap with event overlays in one surface. See promotions, campaigns and holidays alongside your sales or any measure \u2014 month and week views, cross-page filtering, per-category event colors.",
+        "supportUrl": "https://tinocallarisa-web.github.io/calendar/support.html",
+        "gitHubUrl": "https://github.com/tinocallarisa-web/calendar"
+    },
+    "author": {
+        "name": "TCViz",
+        "email": "support@tcviz.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {
+        "en-US": {
+            "displayName": "Calendar Events Heatmap",
+            "description": "A Power BI calendar that combines a KPI heatmap with event overlays in one surface. See promotions, campaigns and holidays alongside your sales or any measure \u2014 month and week views, cross-page filtering, per-category event colors.",
+            "Visual_Date": "Date",
+            "Visual_MainMeasure": "Main Measure",
+            "Visual_SecondaryMeasures": "Tooltip Measures",
+            "Visual_EventName": "Event Name",
+            "Visual_EventCategory": "Event Category",
+            "Visual_HolidayName": "Holiday Name",
+            "Visual_Calendar": "Calendar",
+            "Visual_Calendar_View": "Default View",
+            "Visual_Calendar_MonthsToShow": "Months to Display [Pro]",
+            "Visual_Calendar_FiscalEnabled": "Fiscal Calendar",
+            "Visual_Calendar_FiscalStartMonth": "Fiscal Year Start Month",
+            "Visual_Calendar_WeekStart": "Week Starts On",
+            "Visual_Heatmap": "Heatmap Colors",
+            "Visual_Heatmap_ColorMin": "Min Color",
+            "Visual_Heatmap_ColorMax": "Max Color",
+            "Visual_Heatmap_ColorNull": "No Data Color",
+            "Visual_Heatmap_DayColor": "Day Color",
+            "Visual_DayNumber": "Day Number",
+            "Visual_DayNumber_FontSize": "Font Size",
+            "Visual_DayNumber_FontFamily": "Font Family",
+            "Visual_DayNumber_Color": "Color",
+            "Visual_DayNumber_WeekendColor": "Weekend Color",
+            "Visual_DayNumber_HolidayColor": "Holiday Color",
+            "Visual_Labels": "Measure Labels [Pro]",
+            "Visual_Labels_FontSize": "Font Size",
+            "Visual_Labels_FontFamily": "Font Family",
+            "Visual_Labels_Color": "Color",
+            "Visual_Navigation": "View Buttons [Pro]",
+            "Visual_Navigation_ActiveColor": "Active Button Color",
+            "Visual_Navigation_TextColor": "Button Text Color",
+            "Visual_Events": "Events",
+            "Visual_Events_ShowEvents": "Show Events",
+            "Visual_Events_MaxEventsVisible": "Max Events per Day (month view) [Pro]",
+            "Visual_Events_UseGlobalColor": "Single color for all events [Pro]",
+            "Visual_Events_EventBgColor": "Event Color [Pro]",
+            "Visual_Events_EventFontColor": "Event Text Color [Pro]",
+            "Visual_Events_EventFontSize": "Event Font Size [Pro]",
+            "Visual_EventCategoryColors": "Event Category Colors [Pro]",
+            "Visual_EventCategoryColors_C0": "Category 1",
+            "Visual_EventCategoryColors_C1": "Category 2",
+            "Visual_EventCategoryColors_C2": "Category 3",
+            "Visual_EventCategoryColors_C3": "Category 4",
+            "Visual_EventCategoryColors_C4": "Category 5",
+            "Visual_EventCategoryColors_C5": "Category 6",
+            "Visual_EventCategoryColors_C6": "Category 7",
+            "Visual_EventCategoryColors_C7": "Category 8",
+            "LicenceNotice_One": "Calendar Events Heatmap: {0} is part of the Pro plan, shown as a watermarked preview.",
+            "LicenceNotice_Many": "Calendar Events Heatmap: {0} are part of the Pro plan, shown as a watermarked preview."
+        }
+    },
+    "capabilities": {
+        "dataRoles": [
+            {
+                "name": "date",
+                "kind": "Grouping",
+                "displayName": "Date",
+                "displayNameKey": "Visual_Date",
+                "description": "Date field for the calendar days"
+            },
+            {
+                "name": "mainMeasure",
+                "kind": "Measure",
+                "displayName": "Main Measure",
+                "displayNameKey": "Visual_MainMeasure",
+                "description": "The primary measure that colors the heatmap"
+            },
+            {
+                "name": "secondaryMeasures",
+                "kind": "Measure",
+                "displayName": "Tooltip Measures",
+                "displayNameKey": "Visual_SecondaryMeasures",
+                "description": "Additional measures shown in the tooltip only"
+            },
+            {
+                "name": "eventName",
+                "kind": "Grouping",
+                "displayName": "Event Name",
+                "displayNameKey": "Visual_EventName",
+                "description": "Name of the event"
+            },
+            {
+                "name": "eventCategory",
+                "kind": "Grouping",
+                "displayName": "Event Category",
+                "displayNameKey": "Visual_EventCategory",
+                "description": "Category or type of the event (for color coding)"
+            },
+            {
+                "name": "holidayName",
+                "kind": "Grouping",
+                "displayName": "Holiday Name",
+                "displayNameKey": "Visual_HolidayName",
+                "description": "Name of the holiday (date comes from the Date field)"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "table": {
+                    "rows": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "date"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "mainMeasure"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "secondaryMeasures"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "eventName"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "eventCategory"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "holidayName"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "calendar": {
+                "displayName": "Calendar",
+                "displayNameKey": "Visual_Calendar",
+                "properties": {
+                    "view": {
+                        "displayName": "Default View",
+                        "displayNameKey": "Visual_Calendar_View",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "month",
+                                    "displayName": "Month"
+                                },
+                                {
+                                    "value": "week",
+                                    "displayName": "Week [Pro]"
+                                }
+                            ]
+                        }
+                    },
+                    "monthsToShow": {
+                        "displayName": "Months to Display [Pro]",
+                        "displayNameKey": "Visual_Calendar_MonthsToShow",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "1",
+                                    "displayName": "1 month"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2 months"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "3 months"
+                                },
+                                {
+                                    "value": "6",
+                                    "displayName": "6 months"
+                                },
+                                {
+                                    "value": "12",
+                                    "displayName": "12 months"
+                                }
+                            ]
+                        }
+                    },
+                    "fiscalEnabled": {
+                        "displayName": "Fiscal Calendar",
+                        "displayNameKey": "Visual_Calendar_FiscalEnabled",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fiscalStartMonth": {
+                        "displayName": "Fiscal Year Start Month",
+                        "displayNameKey": "Visual_Calendar_FiscalStartMonth",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "weekStart": {
+                        "displayName": "Week Starts On",
+                        "displayNameKey": "Visual_Calendar_WeekStart",
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "0",
+                                    "displayName": "Sunday"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "Monday"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "heatmap": {
+                "displayName": "Heatmap Colors",
+                "displayNameKey": "Visual_Heatmap",
+                "properties": {
+                    "colorMin": {
+                        "displayName": "Min Color",
+                        "displayNameKey": "Visual_Heatmap_ColorMin",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorMax": {
+                        "displayName": "Max Color",
+                        "displayNameKey": "Visual_Heatmap_ColorMax",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorNull": {
+                        "displayName": "No Data Color",
+                        "displayNameKey": "Visual_Heatmap_ColorNull",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "dayColor": {
+                        "displayName": "Day Color",
+                        "displayNameKey": "Visual_Heatmap_DayColor",
+                        "description": "Overrides the heatmap gradient for individual days. Use the fx button to color days by a rule.",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        },
+                        "rule": {
+                            "inputRole": "mainMeasure",
+                            "output": {
+                                "property": "dayColor",
+                                "selector": [
+                                    "date"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "dayNumber": {
+                "displayName": "Day Number",
+                "displayNameKey": "Visual_DayNumber",
+                "properties": {
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "displayNameKey": "Visual_DayNumber_FontSize",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "displayNameKey": "Visual_DayNumber_FontFamily",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "displayNameKey": "Visual_DayNumber_Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "weekendColor": {
+                        "displayName": "Weekend Color",
+                        "displayNameKey": "Visual_DayNumber_WeekendColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "holidayColor": {
+                        "displayName": "Holiday Color",
+                        "displayNameKey": "Visual_DayNumber_HolidayColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "displayName": "Measure Labels [Pro]",
+                "displayNameKey": "Visual_Labels",
+                "properties": {
+                    "fontSize": {
+                        "displayName": "Font Size",
+                        "displayNameKey": "Visual_Labels_FontSize",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fontFamily": {
+                        "displayName": "Font Family",
+                        "displayNameKey": "Visual_Labels_FontFamily",
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "color": {
+                        "displayName": "Color",
+                        "displayNameKey": "Visual_Labels_Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "navigation": {
+                "displayName": "View Buttons [Pro]",
+                "displayNameKey": "Visual_Navigation",
+                "properties": {
+                    "activeColor": {
+                        "displayName": "Active Button Color",
+                        "displayNameKey": "Visual_Navigation_ActiveColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "textColor": {
+                        "displayName": "Button Text Color",
+                        "displayNameKey": "Visual_Navigation_TextColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "events": {
+                "displayName": "Events",
+                "displayNameKey": "Visual_Events",
+                "properties": {
+                    "showEvents": {
+                        "displayName": "Show Events",
+                        "displayNameKey": "Visual_Events_ShowEvents",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "maxEventsVisible": {
+                        "displayName": "Max Events per Day (month view) [Pro]",
+                        "displayNameKey": "Visual_Events_MaxEventsVisible",
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "useGlobalColor": {
+                        "displayName": "Single color for all events [Pro]",
+                        "displayNameKey": "Visual_Events_UseGlobalColor",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "eventBgColor": {
+                        "displayName": "Event Color [Pro]",
+                        "displayNameKey": "Visual_Events_EventBgColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "eventFontColor": {
+                        "displayName": "Event Text Color [Pro]",
+                        "displayNameKey": "Visual_Events_EventFontColor",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "eventFontSize": {
+                        "displayName": "Event Font Size [Pro]",
+                        "displayNameKey": "Visual_Events_EventFontSize",
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "eventCategoryColors": {
+                "displayName": "Event Category Colors [Pro]",
+                "displayNameKey": "Visual_EventCategoryColors",
+                "properties": {
+                    "c0": {
+                        "displayName": "Category 1",
+                        "displayNameKey": "Visual_EventCategoryColors_C0",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "c1": {
+                        "displayName": "Category 2",
+                        "displayNameKey": "Visual_EventCategoryColors_C1",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "c2": {
+                        "displayName": "Category 3",
+                        "displayNameKey": "Visual_EventCategoryColors_C2",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "c3": {
+                        "displayName": "Category 4",
+                        "displayNameKey": "Visual_EventCategoryColors_C3",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "c4": {
+                        "displayName": "Category 5",
+                        "displayNameKey": "Visual_EventCategoryColors_C4",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "c5": {
+                        "displayName": "Category 6",
+                        "displayNameKey": "Visual_EventCategoryColors_C5",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "c6": {
+                        "displayName": "Category 7",
+                        "displayNameKey": "Visual_EventCategoryColors_C6",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "c7": {
+                        "displayName": "Category 8",
+                        "displayNameKey": "Visual_EventCategoryColors_C7",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            }
+        },
+        "supportsHighlight": true,
+        "supportsSynchronizingFilterState": true,
+        "supportsLandingPage": true,
+        "supportsKeyboardFocus": true,
+        "supportsMultiVisualSelection": true,
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
