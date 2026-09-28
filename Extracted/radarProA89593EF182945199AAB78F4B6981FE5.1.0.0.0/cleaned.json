@@ -1,0 +1,879 @@
+{
+    "visual": {
+        "name": "radarPro",
+        "displayName": "Radar & Polar Pro by PBIStack",
+        "guid": "radarProA89593EF182945199AAB78F4B6981FE5",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Radar and spider charts that start at zero, label every ring, and let each axis carry its own scale. Targets with gap emphasis, honest handling of missing values, measures-as-axes for KPI scorecards, pinned spoke order, and a readability warning when a web gets too crowded.",
+        "supportUrl": "https://pbistack.com/support/",
+        "gitHubUrl": ""
+    },
+    "author": {
+        "name": "PBIStack",
+        "email": "admin@pbistack.com"
+    },
+    "apiVersion": "5.11.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "privileges": [],
+        "supportsHighlight": false,
+        "supportsLandingPage": true,
+        "supportsMultiVisualSelection": true,
+        "supportsKeyboardFocus": true,
+        "sorting": {
+            "default": {}
+        },
+        "tooltips": {
+            "supportedTypes": {
+                "default": true,
+                "canvas": true
+            },
+            "roles": [
+                "tooltips"
+            ]
+        },
+        "drilldown": {
+            "roles": [
+                "category"
+            ]
+        },
+        "dataRoles": [
+            {
+                "displayName": "Axis (one spoke per value)",
+                "description": "A category field: each distinct value becomes one spoke of the web. Leave this empty and put several measures in Values instead \u2014 then each MEASURE becomes a spoke.",
+                "name": "category",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Legend (one shape per value)",
+                "description": "Optional. Each distinct value becomes one polygon on the web.",
+                "name": "series",
+                "kind": "Grouping"
+            },
+            {
+                "displayName": "Values",
+                "description": "The measure plotted along each spoke. Add SEVERAL measures with the Axis well empty and each measure becomes its own spoke.",
+                "name": "values",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Target",
+                "description": "Optional. Draws a target ring or polygon, enables percent-of-target scaling and the gap emphasis.",
+                "name": "target",
+                "kind": "Measure"
+            },
+            {
+                "displayName": "Tooltips",
+                "description": "Extra fields to show on hover.",
+                "name": "tooltips",
+                "kind": "Measure"
+            }
+        ],
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "category": {
+                            "max": 1
+                        },
+                        "series": {
+                            "max": 1
+                        },
+                        "values": {
+                            "min": 0
+                        },
+                        "target": {
+                            "max": 1
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "for": {
+                            "in": "category"
+                        },
+                        "dataReductionAlgorithm": {
+                            "top": {
+                                "count": 30000
+                            }
+                        }
+                    },
+                    "values": {
+                        "group": {
+                            "by": "series",
+                            "select": [
+                                {
+                                    "bind": {
+                                        "to": "values"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "target"
+                                    }
+                                },
+                                {
+                                    "bind": {
+                                        "to": "tooltips"
+                                    }
+                                }
+                            ],
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 100
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "objects": {
+            "radialAxis": {
+                "properties": {
+                    "scaleMode": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "shared",
+                                    "displayName": "One scale for all spokes"
+                                },
+                                {
+                                    "value": "perSpokeMinMax",
+                                    "displayName": "Each spoke its own range"
+                                },
+                                {
+                                    "value": "percentOfTarget",
+                                    "displayName": "Percent of each spoke's target"
+                                }
+                            ]
+                        }
+                    },
+                    "startAtZero": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisMinEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisMin": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "axisMaxEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "axisMax": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "logScale": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tickCount": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "3",
+                                    "displayName": "3"
+                                },
+                                {
+                                    "value": "4",
+                                    "displayName": "4"
+                                },
+                                {
+                                    "value": "5",
+                                    "displayName": "5"
+                                },
+                                {
+                                    "value": "6",
+                                    "displayName": "6"
+                                },
+                                {
+                                    "value": "8",
+                                    "displayName": "8"
+                                },
+                                {
+                                    "value": "10",
+                                    "displayName": "10"
+                                },
+                                {
+                                    "value": "12",
+                                    "displayName": "12"
+                                }
+                            ]
+                        }
+                    },
+                    "showTickLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tickLabelDecimals": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "-1",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "0",
+                                    "displayName": "0"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2"
+                                }
+                            ]
+                        }
+                    },
+                    "tickLabelColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "tickLabelFontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "tickLabelFontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "tickLabelBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "tickLabelHalo": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "grid": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "shape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "polygon",
+                                    "displayName": "Web (polygons)"
+                                },
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circles"
+                                }
+                            ]
+                        }
+                    },
+                    "gridColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gridWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showSpokes": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "spokeColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "spokeWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "bandFill": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "bandColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "webFill": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "webFillColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "webFillOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "startAngle": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "series": {
+                "properties": {
+                    "lineWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "curved": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaFill": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "areaOpacity": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showMarkers": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "markerShape": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "circle",
+                                    "displayName": "Circle"
+                                },
+                                {
+                                    "value": "square",
+                                    "displayName": "Square"
+                                },
+                                {
+                                    "value": "diamond",
+                                    "displayName": "Diamond"
+                                },
+                                {
+                                    "value": "triangle",
+                                    "displayName": "Triangle"
+                                }
+                            ]
+                        }
+                    },
+                    "markerSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "markerBorder": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "markerBorderColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "seriesColors": {
+                "properties": {
+                    "fill": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "lineStyle": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "solid",
+                                    "displayName": "Solid"
+                                },
+                                {
+                                    "value": "dashed",
+                                    "displayName": "Dashed"
+                                },
+                                {
+                                    "value": "dotted",
+                                    "displayName": "Dotted"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "target": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "style": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "polygon",
+                                    "displayName": "Target outline"
+                                },
+                                {
+                                    "value": "band",
+                                    "displayName": "Shaded band to target"
+                                },
+                                {
+                                    "value": "markers",
+                                    "displayName": "Markers only"
+                                }
+                            ]
+                        }
+                    },
+                    "targetColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "targetWidth": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "dashed": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "showGap": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gapLabels": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "gapLabelSize": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "gapAboveColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "gapBelowColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "colorByTarget": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "passColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "failColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "spokeScales": {
+                "properties": {
+                    "fixedEnabled": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fixedMin": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "fixedMax": {
+                        "type": {
+                            "numeric": true
+                        }
+                    }
+                }
+            },
+            "spokeLabels": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "lockOrder": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "pinnedOrder": {
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "sortBy": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "fieldOrder",
+                                    "displayName": "Field order"
+                                },
+                                {
+                                    "value": "labelAsc",
+                                    "displayName": "Name, A to Z"
+                                },
+                                {
+                                    "value": "labelDesc",
+                                    "displayName": "Name, Z to A"
+                                },
+                                {
+                                    "value": "valueDesc",
+                                    "displayName": "Value, high to low"
+                                },
+                                {
+                                    "value": "valueAsc",
+                                    "displayName": "Value, low to high"
+                                }
+                            ]
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "labelGap": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "wrapLines": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "1",
+                                    "displayName": "One line"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "Two lines"
+                                },
+                                {
+                                    "value": "3",
+                                    "displayName": "Three lines"
+                                }
+                            ]
+                        }
+                    },
+                    "charsPerLine": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showValue": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataLabels": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "decimals": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "-1",
+                                    "displayName": "Auto"
+                                },
+                                {
+                                    "value": "0",
+                                    "displayName": "0"
+                                },
+                                {
+                                    "value": "1",
+                                    "displayName": "1"
+                                },
+                                {
+                                    "value": "2",
+                                    "displayName": "2"
+                                }
+                            ]
+                        }
+                    },
+                    "background": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "dataHandling": {
+                "properties": {
+                    "blanks": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "gap",
+                                    "displayName": "Leave a gap (honest)"
+                                },
+                                {
+                                    "value": "asMinimum",
+                                    "displayName": "Draw at the axis minimum"
+                                },
+                                {
+                                    "value": "dropSeries",
+                                    "displayName": "Hide the whole shape"
+                                }
+                            ]
+                        }
+                    },
+                    "readableSpokeLimit": {
+                        "type": {
+                            "numeric": true
+                        }
+                    },
+                    "showNotes": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "closedNotes": {
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "legend": {
+                "properties": {
+                    "show": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "position": {
+                        "type": {
+                            "enumeration": [
+                                {
+                                    "value": "top",
+                                    "displayName": "Top"
+                                },
+                                {
+                                    "value": "bottom",
+                                    "displayName": "Bottom"
+                                },
+                                {
+                                    "value": "right",
+                                    "displayName": "Right"
+                                }
+                            ]
+                        }
+                    },
+                    "showTitle": {
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "fontColor": {
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "fontSize": {
+                        "type": {
+                            "formatting": {
+                                "fontSize": true
+                            }
+                        }
+                    },
+                    "fontFamily": {
+                        "type": {
+                            "formatting": {
+                                "fontFamily": true
+                            }
+                        }
+                    },
+                    "fontBold": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            },
+            "about": {
+                "properties": {
+                    "showVersion": {
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
