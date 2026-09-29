@@ -1,0 +1,264 @@
+{
+    "visual": {
+        "name": "HierarchicalDecompositionFlow",
+        "displayName": "Hierarchical Decomposition Flow with Contribution Waterfall Nodes",
+        "guid": "HierarchicalDecompositionFlowByOfficeSolution",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Hybrid Decomposition Tree and Waterfall chart with hierarchical contribution nodes, variance coloring, and Top-N residual grouping.",
+        "supportUrl": "https://innovationalofficesolution.com/power-bi-custom-charts",
+        "gitHubUrl": "https://github.com"
+    },
+    "author": {
+        "name": "Innovational Office Solution",
+        "email": "support@innovationalofficesolution.com"
+    },
+    "apiVersion": "5.10.0",
+    "style": "style/visual.less",
+    "stringResources": {},
+    "capabilities": {
+        "dataRoles": [
+            {
+                "displayName": "Hierarchy Levels",
+                "name": "levels",
+                "kind": "Grouping",
+                "description": "Hierarchical dimensions (Category \u2192 Sub-category \u2192 Product...)"
+            },
+            {
+                "displayName": "Value / Contribution",
+                "name": "value",
+                "kind": "Measure",
+                "description": "Absolute contribution measure (Revenue, Cost, Margin...)"
+            },
+            {
+                "displayName": "Variance / Delta",
+                "name": "variance",
+                "kind": "Measure",
+                "description": "Optional variance vs prior period or target (for coloring)"
+            },
+            {
+                "displayName": "Period / Scenario",
+                "name": "period",
+                "kind": "Grouping",
+                "description": "For side-by-side comparison of two periods or scenarios"
+            },
+            {
+                "displayName": "Parent Path (alt.)",
+                "name": "parentPath",
+                "kind": "Grouping",
+                "description": "Optional pre-computed path string if levels are not separate columns"
+            }
+        ],
+        "objects": {
+            "treeSettings": {
+                "displayName": "Tree Layout",
+                "properties": {
+                    "orientation": {
+                        "displayName": "Orientation",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "connectorStyle": {
+                        "displayName": "Connector Style",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "nodeStyle": {
+                        "displayName": "Node Style",
+                        "type": {
+                            "text": true
+                        }
+                    },
+                    "defaultExpandDepth": {
+                        "displayName": "Initial Expand Depth",
+                        "type": {
+                            "integer": true
+                        }
+                    }
+                }
+            },
+            "topNSettings": {
+                "displayName": "Top N & Residual Other",
+                "properties": {
+                    "enableTopN": {
+                        "displayName": "Enable Top-N",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "topNCount": {
+                        "displayName": "Top Contributors Count",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "enableOtherNode": {
+                        "displayName": "Group Residual as Other",
+                        "type": {
+                            "bool": true
+                        }
+                    },
+                    "otherNodeLabel": {
+                        "displayName": "Other Node Label",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "varianceSettings": {
+                "displayName": "Variance Colors",
+                "properties": {
+                    "positiveColor": {
+                        "displayName": "Positive Variance",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "negativeColor": {
+                        "displayName": "Negative Variance",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "accentColor": {
+                        "displayName": "Primary Accent",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    },
+                    "neutralColor": {
+                        "displayName": "Neutral Color",
+                        "type": {
+                            "fill": {
+                                "solid": {
+                                    "color": true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "displaySettings": {
+                "displayName": "Display & Units",
+                "properties": {
+                    "displayUnits": {
+                        "displayName": "Display Units",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "decimalPlaces": {
+                        "displayName": "Decimal Places",
+                        "type": {
+                            "integer": true
+                        }
+                    },
+                    "currencySymbol": {
+                        "displayName": "Currency / Prefix",
+                        "type": {
+                            "text": true
+                        }
+                    }
+                }
+            },
+            "compareSettings": {
+                "displayName": "Compare Mode",
+                "properties": {
+                    "enableCompare": {
+                        "displayName": "Compare Periods Side-by-Side",
+                        "type": {
+                            "bool": true
+                        }
+                    }
+                }
+            }
+        },
+        "dataViewMappings": [
+            {
+                "conditions": [
+                    {
+                        "levels": {
+                            "min": 0,
+                            "max": 10
+                        },
+                        "value": {
+                            "min": 0,
+                            "max": 10
+                        },
+                        "variance": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "period": {
+                            "min": 0,
+                            "max": 1
+                        },
+                        "parentPath": {
+                            "min": 0,
+                            "max": 10
+                        }
+                    }
+                ],
+                "categorical": {
+                    "categories": {
+                        "select": [
+                            {
+                                "for": {
+                                    "in": "levels"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "period"
+                                }
+                            },
+                            {
+                                "for": {
+                                    "in": "parentPath"
+                                }
+                            }
+                        ]
+                    },
+                    "values": {
+                        "select": [
+                            {
+                                "bind": {
+                                    "to": "value"
+                                }
+                            },
+                            {
+                                "bind": {
+                                    "to": "variance"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "sorting": {
+            "default": {}
+        },
+        "privileges": []
+    },
+    "visualEntryPoint": "",
+    "externalJS": [],
+    "assets": {
+        "icon": "assets/icon.png"
+    }
+}
