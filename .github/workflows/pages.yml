@@ -1,0 +1,90 @@
+name: "Website: Custom Visuals Marketplace"
+
+# Builds the app in app/ and publishes it to GitHub Pages.
+#
+# The site reads data files that are built here from the public catalog and from
+# leaderboard_data.csv, so it is rebuilt after every daily refresh. The refresh
+# pushes with the default token, and such a push starts no other workflow, which
+# is why this one follows the refresh run instead of its push.
+
+on:
+  workflow_run:
+    workflows: ["Refresh All: Metadata + Visuals"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/pages.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    # A failed refresh leaves the data as it was, so there is nothing new to publish.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      # The repository holds every visual package, so only the app is checked out.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: app
+          filter: blob:none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx -w @rayfin-app/frontend tsc -b
+
+      - name: Lint
+        run: npx -w @rayfin-app/frontend eslint src
+
+      - name: Test
+        run: npm test
+
+      - name: Build the data files
+        run: npm run snapshot
+
+      - name: Build the site
+        run: npm run build:pages -- --base=/${{ github.event.repository.name }}/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/packages/frontend/dist
+
+  deploy:
+    name: Publish
+    needs: build
+    # A pull request builds and tests the site but never publishes it.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
