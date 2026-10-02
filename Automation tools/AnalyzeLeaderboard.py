@@ -35,7 +35,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-REPO_NAME = 'PowerBI-Visuals-AppSource'
+REPO_NAME = 'PowerBI-Visuals-Marketplace'
 FILENAME_TO_ANALYZE = "Custom Visuals.csv"  # Summary file
 
 _leaderboard_data = dict()

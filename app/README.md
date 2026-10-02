@@ -2,7 +2,7 @@
 
 Custom Visuals Marketplace is a web app that ranks and explores the Power BI visuals on Microsoft Marketplace. It shows a leaderboard, a replay of how the ranking changed over time, ratings, popularity, and the words publishers use to describe their visuals. Each visual opens a profile with its screenshots, its history and a link to download its pbiviz file.
 
-The app is published at <https://datachant.github.io/PowerBI-Visuals-AppSource/> and is rebuilt after every daily refresh of this repository. Nobody needs to sign in to use it.
+The app is published at <https://datachant.github.io/PowerBI-Visuals-Marketplace/> and is rebuilt after every daily refresh of this repository. Nobody needs to sign in to use it.
 
 The app is sponsored by [BI Pixie](https://bipixie.com), AI Readiness for Power BI.
 
@@ -20,8 +20,8 @@ The files are written to `packages/frontend/public/snapshot`. They are built on 
 This repository also holds every visual package, and a full clone downloads several gigabytes. The app needs none of those files, so the commands below download only the `app` folder and the few files at the top of the repository. They need Git 2.25 or later and finish in seconds.
 
 ```bash
-git clone --depth 1 --filter=blob:none --sparse https://github.com/DataChant/PowerBI-Visuals-AppSource.git
-cd PowerBI-Visuals-AppSource
+git clone --depth 1 --filter=blob:none --sparse https://github.com/DataChant/PowerBI-Visuals-Marketplace.git
+cd PowerBI-Visuals-Marketplace
 git sparse-checkout set app
 ```
 
@@ -46,7 +46,7 @@ The app then opens at <http://localhost:5173>.
 | `npm run dev:frontend` | Starts the app on your computer. |
 | `npm test` | Runs the tests. |
 | `npm run lint` | Lints the app. |
-| `npm run build:pages -- --base=/PowerBI-Visuals-AppSource/` | Builds the site the way the GitHub Pages workflow does. The result is in `packages/frontend/dist`. |
+| `npm run build:pages -- --base=/PowerBI-Visuals-Marketplace/` | Builds the site the way the GitHub Pages workflow does. The result is in `packages/frontend/dist`. |
 
 ## How the website is published
 

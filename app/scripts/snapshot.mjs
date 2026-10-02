@@ -1,7 +1,7 @@
 // Builds the data files the app reads, from two public sources:
 //
 //   - the AppSource catalog API, for the visuals listed today;
-//   - leaderboard_data.csv in DataChant/PowerBI-Visuals-AppSource, for their
+//   - leaderboard_data.csv in DataChant/PowerBI-Visuals-Marketplace, for their
 //     history. It is a change log: a snapshot holds only the visuals whose
 //     figures changed, and each change column is the difference from that
 //     visual's previous row.
@@ -16,8 +16,10 @@ import { fileURLToPath } from 'node:url';
 
 const CATALOG_URL =
   "https://catalogapi.azure.com/offers?api-version=2018-08-01-beta&storefront=appsource&$filter=offerType eq 'PowerBIVisuals'";
-const LEADERBOARD_URL =
-  'https://raw.githubusercontent.com/DataChant/PowerBI-Visuals-AppSource/refs/heads/main/leaderboard_data.csv';
+// A GitHub Actions run reads the file from the repository it runs in, so the
+// site keeps building if the repository is renamed or forked.
+const REPOSITORY = process.env.GITHUB_REPOSITORY || 'DataChant/PowerBI-Visuals-Marketplace';
+const LEADERBOARD_URL = `https://raw.githubusercontent.com/${REPOSITORY}/refs/heads/main/leaderboard_data.csv`;
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'packages/frontend/public/snapshot');
