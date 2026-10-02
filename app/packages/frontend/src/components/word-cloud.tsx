@@ -9,6 +9,7 @@ import {
   popularityTier,
   type CloudWord,
 } from '@/lib/word-cloud';
+import { cn } from '@/lib/utils';
 
 /** Each word's place among the shown words by the popularity of the visuals using it, 0 to 1. */
 function popularityRanks(words: CloudWord[]): Map<string, number> {
@@ -22,13 +23,17 @@ export function WordCloud({
   words,
   selected,
   onSelect,
+  fill = false,
 }: {
   words: CloudWord[];
   selected: string | null;
   onSelect: (word: string | null) => void;
+  /** Takes whatever height its container gives it, instead of a height worked out from its width. */
+  fill?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
+  const [measured, setMeasured] = useState(0);
   const [fontsReady, setFontsReady] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
@@ -36,7 +41,10 @@ export function WordCloud({
   useLayoutEffect(() => {
     const el = host.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setWidth(Math.round(entry.contentRect.width)));
+    const ro = new ResizeObserver(([entry]) => {
+      setWidth(Math.round(entry.contentRect.width));
+      setMeasured(Math.floor(entry.contentRect.height));
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -58,10 +66,11 @@ export function WordCloud({
     [fontsReady]
   );
   const phone = width > 0 && width < 560;
-  const height = phone ? Math.round(width * 1.15) : Math.round(Math.min(560, Math.max(360, width * 0.56)));
+  const flowHeight = phone ? Math.round(width * 1.15) : Math.round(Math.min(560, Math.max(360, width * 0.56)));
+  const height = fill ? (measured > 0 ? Math.max(160, measured) : 0) : flowHeight;
   const shown = useMemo(() => (phone ? words.slice(0, 45) : words), [words, phone]);
   const placed = useMemo(
-    () => (width > 0 ? layoutCloud(shown, width, height, measure) : []),
+    () => (width > 0 && height > 0 ? layoutCloud(shown, width, height, measure) : []),
     [shown, width, height, measure]
   );
   const byWord = useMemo(() => new Map(words.map((w) => [w.word, w])), [words]);
@@ -77,16 +86,20 @@ export function WordCloud({
   };
 
   return (
-    <div className="flex flex-col gap-300">
-      <div ref={host} className="relative w-full select-none" style={{ height: height || 360 }}>
-        {width > 0 && (
+    <div className={cn('flex flex-col gap-300', fill && 'min-h-0 flex-1 gap-200')}>
+      <div
+        ref={host}
+        className={cn('relative w-full select-none', fill && 'min-h-0 flex-1')}
+        style={fill ? undefined : { height: height || 360 }}
+      >
+        {width > 0 && height > 0 && (
           <svg
             width={width}
             height={height}
             viewBox={`0 0 ${width} ${height}`}
             role="group"
             aria-label="Word cloud of the visual descriptions"
-            className="overflow-visible"
+            className="block overflow-visible"
             onClick={(e) => {
               if (e.target === e.currentTarget) onSelect(null);
             }}

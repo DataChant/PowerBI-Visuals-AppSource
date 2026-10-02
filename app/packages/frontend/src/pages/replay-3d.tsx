@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-import { Thumb } from '@/components/ui';
+import { CertifiedBadge, Thumb } from '@/components/ui';
 import type { VisualRef } from '@/components/visual-drawer';
 import { formatInt, formatScore } from '@/lib/format';
 import type { Standing } from '@/lib/leaderboard';
@@ -59,6 +59,9 @@ function cssColor(name: string, fallback: string) {
   return new THREE.Color(value || fallback);
 }
 
+/** How much smaller a listed visual is drawn while no popularity is recorded for it. */
+const UNSCORED_SCALE = 0.55;
+
 interface Palette {
   up: THREE.Color;
   down: THREE.Color;
@@ -77,7 +80,7 @@ function readPalette(): Palette {
   };
 }
 
-/** Where a visual sits in a frame. NaN on x when it has never been listed. */
+/** Where a visual sits in a frame. NaN on x when no popularity was ever recorded for it. */
 function place(replay: Replay, at: number, v: number, out: THREE.Vector3) {
   const f = replay.frames[at];
   const score = f.positions[v];
@@ -93,6 +96,8 @@ export interface Replay3DProps {
   picks: number[];
   /** Whether visuals nobody has rated yet are drawn. Followed visuals are always drawn. */
   showUnrated: boolean;
+  /** Whether only certified visuals are drawn. Followed visuals are always drawn. */
+  certifiedOnly: boolean;
   /** Changes whenever the camera should return to its starting angle. */
   resetSignal: number;
   reducedMotion: boolean;
@@ -107,6 +112,7 @@ export default function Replay3D({
   standings,
   picks,
   showUnrated,
+  certifiedOnly,
   resetSignal,
   reducedMotion,
   onOpen,
@@ -428,7 +434,9 @@ export default function Replay3D({
       s.fromScale[v] = s.fromScale[v] + (s.toScale[v] - s.fromScale[v]) * ease;
 
       place(replay, at, v, target);
-      const listed = !Number.isNaN(f.scores[v]);
+      const listed = f.present[v] === 1;
+      // Listed with no score recorded yet: a smaller dot, where its first score later puts it.
+      const scoredNow = listed && !Number.isNaN(f.scores[v]);
       const known = !Number.isNaN(target.x);
       if (known) {
         s.to[i] = target.x;
@@ -440,11 +448,18 @@ export default function Replay3D({
         if (Number.isNaN(s.from[i + a])) s.from[i + a] = s.to[i + a];
       }
       const rated = f.raters[v] > 0;
-      const shown = listed && (following ? picked.has(v) : showUnrated || rated);
-      s.toScale[v] = shown ? (following ? 1.9 : arrived.has(v) ? 1.6 : 1) : 0;
+      const shown =
+        listed &&
+        known &&
+        (following
+          ? picked.has(v)
+          : (showUnrated || rated) && (!certifiedOnly || standings[v]?.certified === true));
+      s.toScale[v] = shown
+        ? (following ? 1.9 : arrived.has(v) ? 1.6 : 1) * (scoredNow ? 1 : UNSCORED_SCALE)
+        : 0;
 
       const before = prev ? prev.scores[v] : NaN;
-      const delta = listed && !Number.isNaN(before) ? f.scores[v] - before : 0;
+      const delta = scoredNow && !Number.isNaN(before) ? f.scores[v] - before : 0;
       s.dots.setColorAt(
         v,
         arrived.has(v)
@@ -482,7 +497,7 @@ export default function Replay3D({
       );
       s.trails.add(line);
     }
-  }, [replay, at, picks, showUnrated, reducedMotion]);
+  }, [replay, at, picks, showUnrated, certifiedOnly, standings, reducedMotion]);
 
   useEffect(() => {
     const s = scene.current;
@@ -495,6 +510,14 @@ export default function Replay3D({
   const frame = replay.frames[at];
   const hovered = hover === null ? undefined : standings[hover];
   const hoveredScore = hover === null ? NaN : frame.scores[hover];
+  const hoveredPopularity =
+    hover === null || frame.present[hover] !== 1
+      ? 'Not listed this week'
+      : Number.isNaN(hoveredScore)
+        ? 'Popularity not recorded yet'
+        : frame.unscored
+          ? `Last recorded popularity ${formatScore(hoveredScore)}`
+          : `Popularity ${formatScore(hoveredScore)}`;
   const hoveredRaters = hover === null ? NaN : frame.raters[hover];
   const hoveredStars = hover === null ? NaN : frame.stars[hover];
 
@@ -524,7 +547,7 @@ export default function Replay3D({
   return (
     <div
       ref={hostRef}
-      className="relative h-[340px] cursor-grab select-none overflow-hidden rounded-2xl border border-border bg-muted/40 sm:h-[480px]"
+      className="relative h-full cursor-grab select-none overflow-hidden rounded-2xl border border-border bg-muted/40"
     >
       <div ref={labelsRef} aria-hidden className="pointer-events-none absolute inset-0">
         {labels.map((l) => (
@@ -574,9 +597,8 @@ export default function Replay3D({
           <Thumb src={hovered.thumbnail} name={hovered.name} size={44} />
           <span className="min-w-0">
             <span className="block truncate text-300 font-bold">{hovered.name}</span>
-            <span className="block text-200 text-muted-foreground">
-              Popularity {Number.isNaN(hoveredScore) ? 'not listed' : formatScore(hoveredScore)}
-            </span>
+            {hovered.certified && <CertifiedBadge label />}
+            <span className="block text-200 text-muted-foreground">{hoveredPopularity}</span>
             <span className="block text-200 text-muted-foreground">
               {hoveredRaters > 0
                 ? `${formatInt(hoveredRaters)} rating${hoveredRaters === 1 ? '' : 's'}, ${formatStars(hoveredStars)}`

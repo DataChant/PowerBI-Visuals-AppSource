@@ -84,7 +84,18 @@ function StarBars({ counts }: { counts: number[] }) {
 /** The library's crosshair tooltip lists only the axes, so the chart keeps the tooltip its spec declares. */
 const OWN_TOOLTIP = { disableLineChartCrosshairTooltip: true };
 
-function History({ guid, name, thumbnail }: { guid: string; name: string; thumbnail: string }) {
+function History({
+  guid,
+  name,
+  thumbnail,
+  early,
+}: {
+  guid: string;
+  name: string;
+  thumbnail: string;
+  /** The visual left before the leaderboard began, so it has no daily record. */
+  early: boolean;
+}) {
   const theme = useCssTheme();
   const source = SAFE.test(guid) ? popularityHistory(guid) : null;
   // The history rows carry no name or logo, so the tooltip takes them from the open visual.
@@ -126,7 +137,12 @@ function History({ guid, name, thumbnail }: { guid: string; name: string; thumbn
     );
   if (!table) return <LoadingBlock label="Loading popularity history" className="h-[220px]" />;
   if (table.rows.length < 2)
-    return (
+    return early ? (
+      <EmptyState title="No popularity history">
+        This visual left Microsoft Marketplace before July 2025, when popularity began to
+        be recorded every day.
+      </EmptyState>
+    ) : (
       <EmptyState title="Not enough history yet">
         The leaderboard needs at least two snapshots to draw a trend.
       </EmptyState>
@@ -331,7 +347,7 @@ export function VisualDrawer({
                 <h2 className="text-500 font-extrabold leading-500">{name}</h2>
                 <p className="text-300 text-muted-foreground">{publisher}</p>
                 <div className="mt-200 flex flex-wrap items-center gap-200">
-                  {certified && <CertifiedBadge />}
+                  {certified && <CertifiedBadge label />}
                   {standing?.removed && (
                     <span className="rounded-full bg-muted px-200 py-[1px] text-100 font-bold uppercase tracking-wide text-muted-foreground">
                       Removed from Microsoft Marketplace
@@ -395,7 +411,12 @@ export function VisualDrawer({
 
               <section>
                 <h3 className="mb-200 text-300 font-bold">Popularity over time</h3>
-                <History guid={guid} name={name} thumbnail={thumbnail ?? ''} />
+                <History
+                  guid={guid}
+                  name={name}
+                  thumbnail={thumbnail ?? ''}
+                  early={Boolean(standing?.removed && standing.firstSeen == null)}
+                />
                 <p className="mt-100 text-200 text-muted-foreground">
                   Snapshots where Microsoft Marketplace briefly reported a score of zero are
                   left out, because they were crawl glitches rather than real drops.

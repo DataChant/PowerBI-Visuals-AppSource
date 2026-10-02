@@ -3,7 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FilterBar } from '@/components/filter-bar';
 import { Header } from '@/components/header';
 import { ErrorState, LoadingBlock } from '@/components/states';
+import { CertifiedBadge, Segmented } from '@/components/ui';
 import { VisualDrawer, type VisualRef } from '@/components/visual-drawer';
+import { useFit } from '@/hooks/use-fit';
 import { useQueryTable } from '@/hooks/use-query-table';
 import {
   applyFilters,
@@ -15,11 +17,13 @@ import {
 import { parseStandings } from '@/lib/leaderboard';
 import { buildReplay } from '@/lib/replay';
 import { TABS, type Tab } from '@/lib/tabs';
+import { cn } from '@/lib/utils';
 import {
   OverviewPage,
   PopularityPage,
   RatingsPage,
   WordsPage,
+  type CatalogView,
 } from '@/pages/catalog-pages';
 import { LeaderboardPage } from '@/pages/leaderboard-page';
 import { ReplayPage } from '@/pages/replay-page';
@@ -45,6 +49,10 @@ function App() {
   const [tab, setTab] = useState<Tab>(tabFromHash);
   const [filters, setFilters] = useState<CatalogFilters>(NO_FILTERS);
   const [open, setOpen] = useState<VisualRef | null>(null);
+  // Where a page fits the window, Overview and Ratings show their charts or
+  // their list, one at a time. On a smaller window both are stacked.
+  const [view, setView] = useState<CatalogView>('charts');
+  const fit = useFit();
 
   const standingsState = useQueryTable(STANDINGS);
   const catalogState = useQueryTable(CATALOG);
@@ -96,6 +104,14 @@ function App() {
     window.scrollTo({ top: 0 });
   };
   const close = useCallback(() => setOpen(null), []);
+  // One choice for the whole app: the Leaderboard and Replay toggles and the
+  // Certification filter on the catalog tabs all read and write the same value.
+  const certifiedOnly = filters.certified === 'certified';
+  const setCertifiedOnly = useCallback(
+    (only: boolean) =>
+      setFilters((f) => ({ ...f, certified: only ? 'certified' : 'all' })),
+    []
+  );
 
   const isLeaderboard = tab === 'leaderboard';
   const isReplay = tab === 'replay';
@@ -127,24 +143,60 @@ function App() {
     content = (
       <LoadingBlock
         label="Loading"
-        className="h-[480px] rounded-3xl border border-border bg-card"
+        className="h-[480px] rounded-3xl border border-border bg-card fit:h-auto fit:flex-1"
       />
     );
   } else if (isLeaderboard) {
-    content = <LeaderboardPage standings={standings} onOpen={setOpen} />;
+    content = (
+      <LeaderboardPage
+        standings={standings}
+        certifiedOnly={certifiedOnly}
+        onCertifiedOnly={setCertifiedOnly}
+        onOpen={setOpen}
+      />
+    );
   } else if (isReplay) {
     content = replay && (
-      <ReplayPage replay={replay} standings={standings} onOpen={setOpen} />
+      <ReplayPage
+        replay={replay}
+        standings={standings}
+        certifiedOnly={certifiedOnly}
+        onCertifiedOnly={setCertifiedOnly}
+        onOpen={setOpen}
+      />
     );
   } else {
-    const props = { visuals: filtered, stars, filters, onFilters: setFilters, onOpen: setOpen };
+    const props = {
+      visuals: filtered,
+      stars,
+      filters,
+      onFilters: setFilters,
+      onOpen: setOpen,
+      view,
+    };
     content = (
-      <div className="flex flex-col gap-400">
+      <div className="flex flex-col gap-300 fit:min-h-0 fit:flex-1">
         <FilterBar
           visuals={catalog}
           shown={filtered.length}
           filters={filters}
           onChange={setFilters}
+          actions={
+            fit && (tab === 'overview' || tab === 'ratings') ? (
+              <Segmented<CatalogView>
+                label="View"
+                value={view}
+                onChange={setView}
+                options={[
+                  { value: 'charts', label: 'Charts' },
+                  {
+                    value: 'list',
+                    label: tab === 'overview' ? 'Every visual' : 'Rated visuals',
+                  },
+                ]}
+              />
+            ) : undefined
+          }
         />
         {tab === 'ratings' && starsState.status === 'error' && (
           <ErrorState
@@ -162,13 +214,41 @@ function App() {
   }
 
   return (
-    <div className="min-h-full bg-background">
+    <div
+      className={cn(
+        'min-h-full bg-background',
+        // On a window that is wide and tall enough, a page is exactly one
+        // screen: the header and footer keep their height and the page takes
+        // the rest. The replay is left alone, because it sizes itself.
+        !isReplay && 'fit:flex fit:h-dvh fit:flex-col fit:overflow-hidden'
+      )}
+    >
       <Header tab={tab} onTab={goTo} />
-      <main className="mx-auto max-w-[1280px] px-400 py-600">{content}</main>
-      <footer className="mx-auto max-w-[1280px] px-400 pb-800 text-200 text-muted-foreground">
-        Data from Microsoft Marketplace, collected daily. Popularity is Microsoft Marketplace's
-        own usage percentile. Made with love for the Power BI community.
-      </footer>
+      <main
+        className={cn(
+          'mx-auto w-full max-w-[1280px] px-400',
+          // The replay is a player that fits one screen, so it keeps its margins tight.
+          isReplay
+            ? 'py-300'
+            : 'py-400 fit:flex fit:min-h-0 fit:flex-1 fit:flex-col fit:overflow-y-auto fit:py-200'
+        )}
+      >
+        {content}
+      </main>
+      {/* The replay ends at the bottom of the window, and repeats these sentences in its own help. */}
+      {!isReplay && (
+        <footer className="mx-auto flex w-full max-w-[1280px] flex-col gap-100 px-400 pb-400 text-200 leading-200 text-muted-foreground fit:shrink-0 fit:gap-0 fit:pb-200">
+          <p>
+            <CertifiedBadge className="mr-100 align-[-3px]" />
+            Certified visuals passed Microsoft's code review and can export to PowerPoint and
+            PDF.
+          </p>
+          <p>
+            Data from Microsoft Marketplace, collected daily. Popularity is Microsoft
+            Marketplace's own usage percentile. Made with love for the Power BI community.
+          </p>
+        </footer>
+      )}
       <VisualDrawer
         visual={open}
         catalog={catalog}

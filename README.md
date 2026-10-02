@@ -3,6 +3,8 @@ Welcome to the PowerBI-Visuals-AppSource wiki! This is a repository of Power BI 
 
 (Starting from Mar 3rd, 2026 this repository is refreshed daily and not weekly).
 
+**Explore the visuals in your browser:** the [Custom Visuals Marketplace](https://datachant.github.io/PowerBI-Visuals-Marketplace/) website ranks every Power BI custom visual in this repository by popularity, and replays how the rankings changed week by week. The website is rebuilt after every daily refresh, and nobody needs to sign in to use it. Its source is in the [app](app) folder, which also explains how to publish a copy as a Fabric app.
+
 Learn more in our Wiki [here](https://github.com/DataChant/PowerBI-Visuals-AppSource/wiki).
 
 Have questions regarding this repository? Contact DataChant [here](https://forms.office.com/r/xZMuiaSdYh?origin=lprLink).
