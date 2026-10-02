@@ -19,18 +19,9 @@ import type {
 // line above; the CLI will then print the required wiring instead of
 // rewriting it.
 
-import { fabricSemanticModel } from '@microsoft/rayfin-connector-fabric-semanticmodel';
 
-import { connectorConfig as visualsConfig, type VisualsSchema as visualsSchema } from '../../../../rayfin/connectors/visuals/schema';
+export type AppConnectorsSchema = Record<string, never>;
 
-export type AppConnectorsSchema = {
-  'visuals': visualsSchema;
-};
+export const connectorConfigs: Record<string, ConnectorConfig> = {};
 
-export const connectorConfigs: Record<string, ConnectorConfig> = {
-  'visuals': visualsConfig,
-};
-
-export const connectorRuntimes: ConnectorsRuntime = {
-  'visuals': fabricSemanticModel(),
-};
+export const connectorRuntimes: ConnectorsRuntime = {};

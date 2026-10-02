@@ -15,6 +15,18 @@ The app reads static data files. `npm run snapshot` builds them from two public 
 
 The files are written to `packages/frontend/public/snapshot`. They are built on every publish and are not committed.
 
+## Getting the app without the visual files
+
+This repository also holds every visual package, and a full clone downloads several gigabytes. The app needs none of those files, so the commands below download only the `app` folder and the few files at the top of the repository. They need Git 2.25 or later and finish in seconds.
+
+```bash
+git clone --depth 1 --filter=blob:none --sparse https://github.com/DataChant/PowerBI-Visuals-AppSource.git
+cd PowerBI-Visuals-AppSource
+git sparse-checkout set app
+```
+
+`git pull` later brings only the changes to those same files.
+
 ## Running the app on your computer
 
 You need Node.js 22 or 24.
@@ -42,19 +54,46 @@ The app then opens at <http://localhost:5173>.
 
 ## Publishing your own copy as a Fabric app
 
-The app is built with [Rayfin](https://www.npmjs.com/package/@microsoft/rayfin-cli), so you can also publish your own copy as an app in Microsoft Fabric. You need a Fabric workspace that you can create items in.
+The app is built with [Rayfin](https://www.npmjs.com/package/@microsoft/rayfin-cli), so you can also publish your own copy as an app in Microsoft Fabric.
 
-```bash
-cd app
-npm ci
-npm run snapshot
-npx rayfin login
-npx rayfin up
-```
+The repository holds no workspace ID, item ID or key, and there is nothing to fill in before you publish. The app reads only the data files that `npm run snapshot` builds, so it needs no semantic model and no connection of any kind. You choose the workspace when you publish.
 
-`rayfin up` asks which workspace to use, publishes the app there, and prints its address. The data files are part of what is published, so running `npm run snapshot` and `npx rayfin up` again brings your copy up to date.
+### What you need
 
-`rayfin/rayfin.yml` still declares a semantic model connector named `visuals`, with its workspace and item IDs set to zeros. The app does not query a semantic model, so the connector is not needed. Before you publish, you can remove it with `npx rayfin connector remove visuals`, or point it at a semantic model of your own.
+- Node.js 22 or 24.
+- A Fabric workspace on a Fabric capacity, in which you can create items.
+
+### Steps
+
+1. Install the dependencies and build the data files.
+
+   ```bash
+   cd app
+   npm ci
+   npm run snapshot
+   ```
+
+2. Sign in to Fabric.
+
+   ```bash
+   npx rayfin login
+   ```
+
+3. Publish to your workspace. Replace the name with the name of your own workspace.
+
+   ```bash
+   npx rayfin up --workspace "My Fabric Workspace"
+   ```
+
+   `--workspace-id <id>` takes the workspace ID in place of the name. The ID is the part after `/groups/` in the address of the workspace in the Fabric portal. When neither option is given, Rayfin publishes to My Workspace.
+
+`rayfin up` creates the app in that workspace and prints its address. It also writes `rayfin/.project.json`, `rayfin/.deployments.json` and `rayfin/.env`, which record where your copy lives. These files are yours and Git ignores them, so the next `npx rayfin up` updates the same app without the workspace option.
+
+`npx rayfin up --workspace "My Fabric Workspace" --dry-run` checks the project and the workspace without publishing anything.
+
+### Keeping your copy up to date
+
+The data files are part of what is published. Running `npm run snapshot` and `npx rayfin up` again brings your copy up to date.
 
 ## Layout
 
