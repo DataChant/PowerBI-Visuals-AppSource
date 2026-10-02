@@ -8,9 +8,13 @@
 //
 // Neither needs a sign-in, so this runs anywhere: `npm run snapshot`.
 //
+// The leaderboard begins on 24 July 2025. What the repository recorded before
+// that is read from scripts/listing-history.json, which listing-history.mjs
+// built once from the older commits of "Visuals Summary.csv".
+//
 // Whole-catalog files are written as they are. Per-visual files are split into
 // buckets, so opening one visual downloads a small file rather than everything.
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -201,6 +205,7 @@ for (const row of leaderboard) {
 const catalogByGuid = new Map(visuals.filter((v) => v.guid).map((v) => [v.guid, v]));
 const asOf = Math.max(...leaderboard.map((r) => r.ms));
 const asOfStamp = leaderboard.find((r) => r.ms === asOf).stamp;
+const listingHistory = JSON.parse(readFileSync(join(root, 'scripts/listing-history.json'), 'utf8'));
 
 /** The movement inside a window: the sum of the changes logged in it, or nothing when none was logged. */
 function change(rows, field, days) {
@@ -234,69 +239,161 @@ const standings = table(
     column('[Ratings Change 30d]', 'Int64'),
     column('[Ratings Change 90d]', 'Int64'),
   ],
-  [...byGuid].map(([guid, rows]) => {
-    const last = Math.max(...rows.map((r) => r.ms));
-    // The latest row is the visual's current state.
-    const latest = rows
-      .filter((r) => r.ms === last)
-      .reduce((a, b) => ((b.popularity ?? -1) > (a.popularity ?? -1) ? b : a));
-    const first = rows.reduce((a, b) => (b.ms < a.ms ? b : a));
-    const listed = catalogByGuid.get(guid);
-    return [
-      guid,
-      latest.name,
-      latest.publisher,
-      latest.version,
-      latest.popularity,
-      latest.ratings,
-      latest.average,
-      latest.certified,
-      latest.removed,
-      listed?.id ?? null,
-      listed?.thumbnail ?? null,
-      listed?.releaseDate ?? null,
-      latest.stamp,
-      first.stamp,
-      asOfStamp,
-      change(rows, 'popularityChange', 7),
-      change(rows, 'popularityChange', 30),
-      change(rows, 'popularityChange', 90),
-      change(rows, 'ratingsChange', 7),
-      change(rows, 'ratingsChange', 30),
-      change(rows, 'ratingsChange', 90),
-    ];
-  })
+  [
+    ...[...byGuid].map(([guid, rows]) => {
+      const last = Math.max(...rows.map((r) => r.ms));
+      // The latest row is the visual's current state.
+      const latest = rows
+        .filter((r) => r.ms === last)
+        .reduce((a, b) => ((b.popularity ?? -1) > (a.popularity ?? -1) ? b : a));
+      const first = rows.reduce((a, b) => (b.ms < a.ms ? b : a));
+      const listed = catalogByGuid.get(guid);
+      return [
+        guid,
+        latest.name,
+        latest.publisher,
+        latest.version,
+        latest.popularity,
+        latest.ratings,
+        latest.average,
+        latest.certified,
+        latest.removed,
+        listed?.id ?? null,
+        listed?.thumbnail ?? null,
+        listed?.releaseDate ?? null,
+        latest.stamp,
+        first.stamp,
+        asOfStamp,
+        change(rows, 'popularityChange', 7),
+        change(rows, 'popularityChange', 30),
+        change(rows, 'popularityChange', 90),
+        change(rows, 'ratingsChange', 7),
+        change(rows, 'ratingsChange', 30),
+        change(rows, 'ratingsChange', 90),
+      ];
+    }),
+    // A visual that left before the leaderboard began has no row in it. It is
+    // named here so the Replay page can show who it was. Its first-seen date is
+    // left empty, so the leaderboard still dates its own start correctly.
+    ...Object.entries(listingHistory.visuals)
+      .filter(([guid]) => !byGuid.has(guid))
+      .map(([guid, v]) => {
+        const gone = v.listed[v.listed.length - 1][1];
+        const listed = catalogByGuid.get(guid);
+        return [
+          guid,
+          v.name,
+          v.publisher,
+          v.last[0] || null,
+          null,
+          null,
+          null,
+          v.last[1] ? 'Certified' : 'Not Certified',
+          true,
+          listed?.id ?? null,
+          listed?.thumbnail ?? null,
+          listed?.releaseDate ?? null,
+          `${listingHistory.snapshots[gone ?? listingHistory.snapshots.length - 1].slice(0, 19)}.000`,
+          null,
+          asOfStamp,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ];
+      }),
+  ]
 );
 
 // ── Replay ─────────────────────────────────────────────────────────────────
-// One row per visual and week, holding the figures of the latest day in that
-// week. The day is packed in front of each value so one number carries both,
-// and every packed number stays below 2^53:
-//   Latest = day * 10000  + popularity in thousandths * 2 + removed
-//   Raters = day * 100000 + number of ratings
-//   Stars  = day * 1000   + average stars in hundredths
-// A popularity of 0 is a failed crawl, so those rows are left out unless they
-// mark the visual's removal. Raters and Stars are empty on a removal row, so a
-// visual keeps its last real figures for the dot that fades out.
+// One row per visual and week in which something was recorded about it. The
+// figures are those of the latest day in that week. The day is packed in front
+// of each value so one number carries both, and every packed number stays
+// below 2^53:
+//   Latest  = day * 10000  + popularity in thousandths * 2 + removed
+//   Raters  = day * 100000 + number of ratings
+//   Stars   = day * 1000   + average stars in hundredths
+//   Listing = listed at the end of the week (1) + a new version that week (2)
+//             + newly certified that week (4)
+// A popularity of 0 is a failed crawl, so it is never written as a score, but
+// its row still shows that the visual was listed. Raters and Stars are empty on
+// a removal row, so a visual keeps its last real figures for the dot that fades
+// out. Latest is empty on a row that records a listing, a version or a
+// certification without a score, which is every row before the leaderboard
+// began except those of 22 January 2024.
 const asOfDay = dayNumber(asOf);
 const weeks = new Map();
-for (const r of leaderboard) {
-  if (!(r.popularity > 0 || r.removed)) continue;
-  const day = dayNumber(r.ms);
-  const week = Math.floor((asOfDay - day) / 7);
-  const key = `${r.guid}\u0000${week}`;
-  const packed = [
-    day * 10000 + Math.round((r.popularity ?? 0) * 1000) * 2 + (r.removed ? 1 : 0),
-    r.removed || r.ratings == null ? null : day * 100000 + r.ratings,
-    r.removed || r.average == null ? null : day * 1000 + Math.round(r.average * 100),
-  ];
-  const held = weeks.get(key);
-  if (!held) weeks.set(key, [r.guid, week, ...packed]);
-  else
-    packed.forEach((value, i) => {
-      if (value != null && (held[i + 2] == null || value > held[i + 2])) held[i + 2] = value;
-    });
+function weekOf(guid, ms) {
+  const week = Math.floor((asOfDay - dayNumber(ms)) / 7);
+  const key = `${guid}\u0000${week}`;
+  let held = weeks.get(key);
+  if (!held) weeks.set(key, (held = { guid, week, packed: [null, null, null], at: -Infinity, listed: false, flags: 0 }));
+  return held;
 }
+/** The latest record in a week decides whether the visual ends that week listed. */
+function setListed(held, ms, listed) {
+  if (ms < held.at) return;
+  held.at = ms;
+  held.listed = listed;
+}
+function setScore(held, ms, popularity, ratings, average, removed) {
+  const day = dayNumber(ms);
+  [
+    day * 10000 + Math.round((popularity ?? 0) * 1000) * 2 + (removed ? 1 : 0),
+    removed || ratings == null ? null : day * 100000 + ratings,
+    removed || average == null ? null : day * 1000 + Math.round(average * 100),
+  ].forEach((value, i) => {
+    if (value != null && (held.packed[i] == null || value > held.packed[i])) held.packed[i] = value;
+  });
+}
+
+// Before the leaderboard: arrivals, departures, versions and certifications
+// from every commit, and the scores of the one commit that carried them.
+const historyTimes = listingHistory.snapshots.map((stamp) => Date.parse(stamp));
+const leaderboardStart = Math.min(...leaderboard.map((r) => r.ms));
+for (const [guid, v] of Object.entries(listingHistory.visuals)) {
+  for (const [from, to] of v.listed) {
+    setListed(weekOf(guid, historyTimes[from]), historyTimes[from], true);
+    if (to != null) setListed(weekOf(guid, historyTimes[to]), historyTimes[to], false);
+    // Listed in the last of those commits and never seen by the leaderboard:
+    // it left in the week between the two.
+    else if (!byGuid.has(guid)) setListed(weekOf(guid, leaderboardStart), leaderboardStart, false);
+  }
+  // A version, a certification or a score was read from a commit that listed the visual.
+  const seen = (i) => {
+    const held = weekOf(guid, historyTimes[i]);
+    setListed(held, historyTimes[i], true);
+    return held;
+  };
+  for (const i of v.versions) seen(i).flags |= 2;
+  for (const i of v.certified) seen(i).flags |= 4;
+  for (const [i, popularity, ratings, average] of v.scores)
+    setScore(seen(i), historyTimes[i], popularity, ratings, average, false);
+}
+
+// From the leaderboard: every row shows the visual listed or removed that day.
+for (const [guid, rows] of byGuid) {
+  const before = listingHistory.visuals[guid]?.last;
+  let version = before?.[0] || null;
+  let certified = before ? before[1] === 1 : null;
+  for (const r of [...rows].sort((a, b) => a.ms - b.ms)) {
+    const held = weekOf(guid, r.ms);
+    setListed(held, r.ms, !r.removed);
+    if (r.version) {
+      if (version && r.version !== version) held.flags |= 2;
+      version = r.version;
+    }
+    if (r.certified) {
+      if (r.certified === 'Certified' && certified === false) held.flags |= 4;
+      certified = r.certified === 'Certified';
+    }
+    if (r.popularity > 0 || r.removed)
+      setScore(held, r.ms, r.popularity, r.ratings, r.average, r.removed);
+  }
+}
+
 const replay = table(
   [
     column('[Visual]', 'String'),
@@ -304,8 +401,11 @@ const replay = table(
     column('[Latest]', 'Double'),
     column('[Raters]', 'Int64'),
     column('[Stars]', 'Double'),
+    column('[Listing]', 'Int64'),
   ],
-  [...weeks.values()].sort((a, b) => b[1] - a[1])
+  [...weeks.values()]
+    .sort((a, b) => b.week - a.week)
+    .map((w) => [w.guid, w.week, ...w.packed, (w.listed ? 1 : 0) + w.flags])
 );
 
 // ── Per-visual files ───────────────────────────────────────────────────────

@@ -1,13 +1,12 @@
 import { DataGrid, type GridColumnDef, type Row } from '@microsoft/fabric-datagrid';
 import { useCssTheme } from '@microsoft/fabric-visuals';
-import { BadgeCheck } from 'lucide-react';
 import { useMemo } from 'react';
 
 import type { CatalogVisual, StarCount } from '@/lib/catalog';
 import { formatInt, formatPercent, formatRating, formatScore } from '@/lib/format';
 
 import { EmptyState } from './states';
-import { Thumb } from './ui';
+import { CertifiedBadge, Thumb } from './ui';
 import type { VisualRef } from './visual-drawer';
 
 const num = (value: unknown) => (typeof value === 'number' ? value : null);
@@ -103,9 +102,17 @@ export function VisualsGrid({
         cellRenderer: (v) => formatRating(num(v)),
       },
     ];
+    const certified: GridColumnDef = {
+      id: 'certified',
+      header: 'Certified',
+      width: 120,
+      cellRenderer: (v) =>
+        v === 'Yes' ? <CertifiedBadge /> : <span className="text-muted-foreground">No</span>,
+    };
     if (mode === 'ratings')
       return [
         ...shared,
+        certified,
         {
           id: 'five',
           header: 'Five stars',
@@ -124,20 +131,7 @@ export function VisualsGrid({
     return [
       ...shared,
       { id: 'released', header: 'Released', width: 120 },
-      {
-        id: 'certified',
-        header: 'Certified',
-        width: 110,
-        cellRenderer: (v) =>
-          v === 'Yes' ? (
-            <span className="inline-flex items-center gap-100 font-semibold text-brand-foreground">
-              <BadgeCheck className="icon-size-200" aria-hidden />
-              Yes
-            </span>
-          ) : (
-            <span className="text-muted-foreground">No</span>
-          ),
-      },
+      certified,
     ];
   }, [mode, onOpen]);
 
