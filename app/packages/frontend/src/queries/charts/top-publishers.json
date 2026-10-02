@@ -1,0 +1,87 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "The publishers with the most visuals, or the most combined popularity.",
+  "width": "container",
+  "height": "container",
+  "encoding": {
+    "x": {
+      "field": "Value",
+      "type": "quantitative",
+      "title": null,
+      "axis": null
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar"
+      },
+      "encoding": {
+        "y": {
+          "field": "Publisher",
+          "type": "nominal",
+          "sort": "-x",
+          "title": null
+        },
+        "tooltip": [
+          {
+            "field": "Publisher",
+            "type": "nominal"
+          },
+          {
+            "field": "Value",
+            "type": "quantitative",
+            "title": "Total"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 4
+      },
+      "encoding": {
+        "y": {
+          "field": "Publisher",
+          "type": "nominal",
+          "sort": "-x",
+          "title": null
+        },
+        "text": {
+          "field": "Value",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "description": "An invisible point at 115% of the longest bar, so the scale leaves room for that bar's label instead of clipping it.",
+      "transform": [
+        {
+          "joinaggregate": [
+            {
+              "op": "max",
+              "field": "Value",
+              "as": "MaxValue"
+            }
+          ]
+        },
+        {
+          "calculate": "datum.MaxValue * 1.15",
+          "as": "Headroom"
+        }
+      ],
+      "mark": {
+        "type": "point",
+        "opacity": 0
+      },
+      "encoding": {
+        "x": {
+          "field": "Headroom",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

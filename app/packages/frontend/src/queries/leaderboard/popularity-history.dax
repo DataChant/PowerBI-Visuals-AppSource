@@ -1,0 +1,18 @@
+// Every recorded change for one visual. The leaderboard logs a row only when a
+// figure changes, so a value holds until the next row: draw it as a step line.
+// A popularity of 0 between two real values is a failed crawl, not a visual
+// nobody uses, so those rows are left out and the line holds its last value.
+// __GUID__ is replaced by the factory with a validated visual GUID.
+EVALUATE
+CALCULATETABLE (
+    SELECTCOLUMNS (
+        Leaderboard,
+        "Snapshot Date", Leaderboard[Snapshot Date],
+        "Popularity", Leaderboard[Popularity],
+        "Ratings", Leaderboard[# of Ratings]
+    ),
+    Leaderboard[Visual GUID] = "__GUID__",
+    Leaderboard[Is Removed] = FALSE (),
+    Leaderboard[Popularity] > 0
+)
+ORDER BY [Snapshot Date]

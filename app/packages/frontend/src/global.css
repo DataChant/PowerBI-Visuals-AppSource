@@ -1,0 +1,254 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Bridged tokens — kept in `@theme static` so the CSS vars are always
+   emitted, not tree-shaken when no Tailwind utility consumes them.
+   Required because <VegaVisual> and <DataGrid> read these at runtime via
+   `useCssTheme()` and project them into a JS theme object (Vega's SVG output
+   cannot resolve `var()` references). */
+@theme static {
+  --color-brand: #f2c811; /* Power BI yellow: bar/area fills */
+  --color-brand-foreground: #b38f00; /* line/point marks, branded text & emphasis */
+  --color-hover: #fbf3d2; /* row/cell hover surface in DataGrid + visuals */
+}
+
+@theme {
+  /* Color tokens — light theme
+     Usage: bg-*, text-*, border-* (e.g. bg-primary text-primary-foreground)
+     Each token has a -foreground pair for text on that surface. */
+  --color-background: #fbf8ef; /* page background */
+  --color-foreground: #1b1a19; /* default text */
+
+  --color-card: #ffffff; /* card surfaces */
+  --color-card-foreground: #1b1a19;
+
+  --color-popover: #ffffff; /* popover/dropdown surfaces */
+  --color-popover-foreground: #1b1a19;
+
+  --color-primary: #1b1a19; /* primary actions & buttons */
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #f4efdf; /* secondary actions */
+  --color-secondary-foreground: #1b1a19;
+
+  --color-muted: #f4efdf; /* subtle backgrounds */
+  --color-muted-foreground: #6b6458; /* subdued text */
+
+  --color-accent: #fff3c4; /* accent highlights */
+  --color-accent-foreground: #1b1a19;
+
+  --color-destructive: #c50f1f; /* errors & destructive actions */
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #e8e0c8; /* default border */
+  --color-input: #ddd3b6; /* input field borders */
+  --color-ring: #b38f00; /* focus rings */
+
+  /* Celebration tokens: the Power BI yellow, podium medals and movement. */
+  --color-pbi: #f2c811;
+  --color-pbi-foreground: #1b1a19;
+  --color-gold: #e3b505;
+  --color-silver: #a7acb4;
+  --color-bronze: #c47a3a;
+  --color-up: #107c10;
+  --color-down: #c50f1f;
+
+
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 24px;
+  --radius-5xl: 32px;
+  --radius-6xl: 40px;
+  --radius-full: 9999px;
+  --radius: 12px;
+
+  /* Spacing — 4px grid; use only these tokens, no interpolation. *-nudge = base − 2px.
+     Usage: p-*, m-*, gap-* (e.g. p-400 gap-300) */
+  --spacing-none: 0;
+  --spacing-100-nudge: 2px;
+  --spacing-100: 4px;
+  --spacing-200-nudge: 6px;
+  --spacing-200: 8px;
+  --spacing-300-nudge: 10px;
+  --spacing-300: 12px;
+  --spacing-400: 16px;
+  --spacing-500: 20px;
+  --spacing-600: 24px;
+  --spacing-700: 28px;
+  --spacing-800: 32px;
+
+  /* Font Sizes — 100-based scale 
+     Usage: text-* (e.g. text-300, text-hero-900) */
+  --text-100: 10px;
+  --text-200: 12px;
+  --text-300: 14px;
+  --text-400: 16px;
+  --text-500: 20px;
+  --text-600: 24px;
+  --text-hero-700: 28px;
+  --text-hero-800: 32px;
+  --text-hero-900: 40px;
+  --text-hero-1000: 68px;
+
+  /* Line Heights — paired with font sizes
+     Usage: leading-* (e.g. leading-300) */
+  --leading-100: 14px;
+  --leading-200: 16px;
+  --leading-300: 20px;
+  --leading-400: 22px;
+  --leading-500: 28px;
+  --leading-600: 32px;
+  --leading-hero-700: 36px;
+  --leading-hero-800: 40px;
+  --leading-hero-900: 52px;
+  --leading-hero-1000: 92px;
+
+  /* Font Weights
+     Usage: font-* (e.g. font-semibold) */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font Families
+     Usage: font-* (e.g. font-heading, font-base) */
+  --font-heading: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif; /* headings, titles, display text */
+  --font-base: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif; /* body text, labels, UI controls */
+  --font-monospace: 'JetBrains Mono', Consolas, monospace; /* code, pre-formatted text */
+  --font-numeric: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif; /* KPI values, numeric displays */
+
+  /* Icon Sizes — 100-based scale
+     Usage: icon-size-* custom utility (e.g. icon-size-200) */
+  --icon-size-100: 12px;
+  --icon-size-200: 16px;
+  --icon-size-300: 20px;
+  --icon-size-400: 24px;
+  --icon-size-500: 28px;
+  --icon-size-600: 32px;
+  --icon-size-700: 48px;
+}
+
+@utility icon-size-* {
+  width: --value(--icon-size-*);
+  height: --value(--icon-size-*);
+}
+
+@layer base {
+  .dark {
+    /* Color tokens — dark theme */
+    --color-background: #15140f;
+    --color-foreground: #f7f3e6;
+
+    --color-card: #1f1d16;
+    --color-card-foreground: #f7f3e6;
+
+    --color-popover: #1f1d16;
+    --color-popover-foreground: #f7f3e6;
+
+    --color-primary: #f2c811;
+    --color-primary-foreground: #1b1a19;
+
+    --color-secondary: #29261c;
+    --color-secondary-foreground: #f7f3e6;
+
+    --color-muted: #29261c;
+    --color-muted-foreground: #b4ac98;
+
+    --color-accent: #3a3320;
+    --color-accent-foreground: #f7f3e6;
+
+    --color-destructive: #e5484d;
+    --color-destructive-foreground: #ffffff;
+
+    --color-border: #3a3628;
+    --color-input: #4a4532;
+    --color-ring: #f2c811;
+
+    --color-brand: #f2c811;
+    --color-brand-foreground: #f2c811;
+    --color-hover: #2b281e;
+
+    --color-pbi: #f2c811;
+    --color-pbi-foreground: #1b1a19;
+    --color-gold: #f2c811;
+    --color-silver: #c9ced6;
+    --color-bronze: #e09a5c;
+    --color-up: #6ccb5f;
+    --color-down: #ff8a8a;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-base);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Confetti-adjacent backdrop for the hero: soft yellow light, no animation. */
+.hero-glow {
+  background:
+    radial-gradient(60% 120% at 0% 0%, color-mix(in oklab, var(--color-pbi) 35%, transparent), transparent 70%),
+    radial-gradient(40% 90% at 100% 100%, color-mix(in oklab, var(--color-pbi) 18%, transparent), transparent 70%),
+    var(--color-card);
+}
+
+/* Chart tooltips: the visual's name as a heading with its logo beside the figures. */
+#vg-tooltip-element {
+  max-width: min(260px, calc(100vw - 24px));
+}
+
+#vg-tooltip-element h2 {
+  white-space: normal;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#vg-tooltip-element img {
+  float: left;
+  width: 44px;
+  height: 44px;
+  margin: 0 10px 4px 0;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

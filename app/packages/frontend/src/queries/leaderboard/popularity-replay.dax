@@ -1,0 +1,55 @@
+// Each visual's popularity, ratings count and average stars at the end of
+// every week they changed, for the replay.
+// The Leaderboard table is a change log, so a visual that is missing from a
+// week simply held its figures; the client carries values forward.
+// Weeks are counted back from the latest snapshot: week 0 ends on that day.
+// A popularity of 0 is a failed crawl rather than a real reading, so those
+// rows are left out unless they mark the visual's removal.
+// GROUPBY can only aggregate CURRENTGROUP(), so the latest row of each week is
+// found by packing the day in front of each value, which makes MAX pick the
+// value from the latest day. Every packed number stays below 2^53, so it
+// survives the trip into a JavaScript number intact:
+//   Latest  = day * 10000  + popularity in thousandths * 2 + removed
+//   Raters  = day * 100000 + number of ratings
+//   Stars   = day * 1000   + average stars in hundredths
+// Raters and Stars are blank on a removal row, so a visual's last real
+// figures are kept for the dot that fades out.
+DEFINE
+    VAR _asOf = CALCULATE ( MAX ( Leaderboard[Snapshot Date] ), REMOVEFILTERS () )
+    VAR _rows =
+        SELECTCOLUMNS (
+            FILTER (
+                Leaderboard,
+                Leaderboard[Popularity] > 0 || Leaderboard[Is Removed]
+            ),
+            "Visual", Leaderboard[Visual GUID],
+            "Week", INT ( DATEDIFF ( Leaderboard[Snapshot Date], _asOf, DAY ) / 7 ),
+            "Packed",
+                INT ( Leaderboard[Snapshot Date] ) * 10000
+                    + ROUND ( COALESCE ( Leaderboard[Popularity], 0 ) * 1000, 0 ) * 2
+                    + IF ( Leaderboard[Is Removed], 1, 0 ),
+            "RatersPacked",
+                IF (
+                    Leaderboard[Is Removed] || ISBLANK ( Leaderboard[# of Ratings] ),
+                    BLANK (),
+                    INT ( Leaderboard[Snapshot Date] ) * 100000 + Leaderboard[# of Ratings]
+                ),
+            "StarsPacked",
+                IF (
+                    Leaderboard[Is Removed] || ISBLANK ( Leaderboard[Average Rating] ),
+                    BLANK (),
+                    INT ( Leaderboard[Snapshot Date] ) * 1000
+                        + ROUND ( Leaderboard[Average Rating] * 100, 0 )
+                )
+        )
+
+EVALUATE
+GROUPBY (
+    _rows,
+    [Visual],
+    [Week],
+    "Latest", MAXX ( CURRENTGROUP (), [Packed] ),
+    "Raters", MAXX ( CURRENTGROUP (), [RatersPacked] ),
+    "Stars", MAXX ( CURRENTGROUP (), [StarsPacked] )
+)
+ORDER BY [Week] DESC

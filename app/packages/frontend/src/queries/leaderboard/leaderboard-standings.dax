@@ -1,0 +1,51 @@
+// One row per visual ever seen by the AppSource leaderboard crawl.
+// The Leaderboard table is a change log: each snapshot holds only the visuals
+// whose figures changed, and each change column is the difference from that
+// visual's previous row. So the latest row is a visual's current state, and a
+// sum of changes over a date window is exactly its movement in that window.
+DEFINE
+    VAR _asOf = CALCULATE ( MAX ( Leaderboard[Snapshot Date] ), REMOVEFILTERS () )
+
+EVALUATE
+GENERATE (
+    VALUES ( Leaderboard[Visual GUID] ),
+    VAR _last = CALCULATE ( MAX ( Leaderboard[Snapshot Date] ) )
+    VAR _first = CALCULATE ( MIN ( Leaderboard[Snapshot Date] ) )
+    VAR _pop7 = CALCULATE ( SUM ( Leaderboard[Popularity Change] ), Leaderboard[Snapshot Date] > _asOf - 7 )
+    VAR _pop30 = CALCULATE ( SUM ( Leaderboard[Popularity Change] ), Leaderboard[Snapshot Date] > _asOf - 30 )
+    VAR _pop90 = CALCULATE ( SUM ( Leaderboard[Popularity Change] ), Leaderboard[Snapshot Date] > _asOf - 90 )
+    VAR _rat7 = CALCULATE ( SUM ( Leaderboard[# of Ratings Change] ), Leaderboard[Snapshot Date] > _asOf - 7 )
+    VAR _rat30 = CALCULATE ( SUM ( Leaderboard[# of Ratings Change] ), Leaderboard[Snapshot Date] > _asOf - 30 )
+    VAR _rat90 = CALCULATE ( SUM ( Leaderboard[# of Ratings Change] ), Leaderboard[Snapshot Date] > _asOf - 90 )
+    RETURN
+        TOPN (
+            1,
+            CALCULATETABLE (
+                SELECTCOLUMNS (
+                    Leaderboard,
+                    "Name", Leaderboard[Name],
+                    "Publisher", Leaderboard[Publisher],
+                    "Version", Leaderboard[Version],
+                    "Popularity", Leaderboard[Popularity],
+                    "Ratings", Leaderboard[# of Ratings],
+                    "Average Rating", Leaderboard[Average Rating],
+                    "Certified", Leaderboard[Is Certified],
+                    "Removed", Leaderboard[Is Removed],
+                    "Catalog ID", RELATED ( 'Custom Visuals'[ID] ),
+                    "Thumbnail", RELATED ( 'Custom Visuals'[Thumbnail] ),
+                    "Release Date", RELATED ( 'Custom Visuals'[Release Date] ),
+                    "Last Change", Leaderboard[Snapshot Date],
+                    "First Seen", _first,
+                    "As Of", _asOf,
+                    "Popularity Change 7d", _pop7,
+                    "Popularity Change 30d", _pop30,
+                    "Popularity Change 90d", _pop90,
+                    "Ratings Change 7d", _rat7,
+                    "Ratings Change 30d", _rat30,
+                    "Ratings Change 90d", _rat90
+                ),
+                Leaderboard[Snapshot Date] = _last
+            ),
+            [Popularity], DESC
+        )
+)

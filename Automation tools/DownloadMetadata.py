@@ -58,7 +58,7 @@ if sys.platform.startswith('win'):
 # --------------------------------------------------------------------------
 
 GITHUB_PBIVIZ_VERSIONS_URL = (
-    "https://github.com/DataChant/PowerBI-Visuals-AppSource/blob/main/"
+    "https://github.com/DataChant/PowerBI-Visuals-Marketplace/blob/main/"
     "All%20Visuals/PBIVIZ%20with%20versions/"
 )
 

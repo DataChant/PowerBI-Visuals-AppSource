@@ -49,7 +49,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-REPO_NAME = 'PowerBI-Visuals-AppSource'
+REPO_NAME = 'PowerBI-Visuals-Marketplace'
 
 FILENAME_TO_ANALYZE = "Custom Visuals.csv"  # Summary file
 LATEST_DATA_FILE = "Custom Visuals.csv" # Detailed snapshot of all visuals on AppSource including more fields
@@ -260,7 +260,7 @@ def writeDiff(file, title, set_of_changes, data_dict):
             pass
         
         thumbnail_url = f"../blob/main/All%20Visuals/Images/{thumbnail_filename}.png?raw=true"
-        #thumbnail_url = f"https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/Images/{thumbnail_filename}.png"
+        #thumbnail_url = f"https://github.com/DataChant/PowerBI-Visuals-Marketplace/raw/refs/heads/main/All%20Visuals/Images/{thumbnail_filename}.png"
         
         if title == "Removed Custom Visuals":
             app_source_url = None
@@ -271,7 +271,7 @@ def writeDiff(file, title, set_of_changes, data_dict):
         publisher_line  = f"Publisher: {create_github_link(publisher_link, publisher)}"     
         description = visual.get("Description", "")
         github_link = create_github_link(
-            f'https://github.com/DataChant/PowerBI-Visuals-AppSource/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/{guid}.pbiviz',
+            f'https://github.com/DataChant/PowerBI-Visuals-Marketplace/raw/refs/heads/main/All%20Visuals/PBIVIZ%20with%20guid/{guid}.pbiviz',
             f'{guid}.pbiviz'
         )
         guid_line = f"Direct Download: {github_link}"
