@@ -28,6 +28,14 @@ const LEADERBOARD_URL = `https://raw.githubusercontent.com/${REPOSITORY}/refs/he
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'packages/frontend/public/snapshot');
 
+/**
+ * What the data files hold, as a number, written to built.json. A copy of the
+ * app published elsewhere reads the website's files only when this matches its
+ * own `DATA_FORMAT` in packages/frontend/src/lib/snapshot.ts, so raise both
+ * whenever a file changes shape.
+ */
+const DATA_FORMAT = 1;
+
 /** Keep in step with `bucketOf` in packages/frontend/src/lib/snapshot.ts. */
 const BUCKETS = 64;
 function bucketOf(key) {
@@ -483,5 +491,8 @@ for (const [name, { columns, rows }] of Object.entries({ profile, screenshots, h
   );
   console.log(`${name}: ${rows.length} rows`);
 }
-writeFileSync(join(out, 'built.json'), JSON.stringify({ asOf: asOfStamp }));
+writeFileSync(
+  join(out, 'built.json'),
+  JSON.stringify({ asOf: asOfStamp, builtAt: new Date().toISOString(), format: DATA_FORMAT })
+);
 console.log(`Data written to ${out}`);

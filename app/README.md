@@ -13,7 +13,7 @@ The app reads static data files. `npm run snapshot` builds them from two public 
 - The Microsoft Marketplace catalog, for the visuals that are listed today.
 - [`leaderboard_data.csv`](../leaderboard_data.csv) in this repository, for the history of each visual.
 
-The files are written to `packages/frontend/public/snapshot`. They are built on every publish and are not committed.
+The files are written to `packages/frontend/public/snapshot`. They are built on every publish and are not committed. One of them, `built.json`, records the date of the newest leaderboard data, when the files were built, and the format they are in.
 
 ## Getting the app without the visual files
 
@@ -56,7 +56,7 @@ The app then opens at <http://localhost:5173>.
 
 The app is built with [Rayfin](https://www.npmjs.com/package/@microsoft/rayfin-cli), so you can also publish your own copy as an app in Microsoft Fabric.
 
-The repository holds no workspace ID, item ID or key, and there is nothing to fill in before you publish. The app reads only the data files that `npm run snapshot` builds, so it needs no semantic model and no connection of any kind. You choose the workspace when you publish.
+The repository holds no workspace ID, item ID or key, and there is nothing to fill in before you publish. The app reads only static data files, so it needs no semantic model and no Fabric connection. You choose the workspace when you publish.
 
 ### What you need
 
@@ -93,7 +93,9 @@ The repository holds no workspace ID, item ID or key, and there is nothing to fi
 
 ### Keeping your copy up to date
 
-The data files are part of what is published. Running `npm run snapshot` and `npx rayfin up` again brings your copy up to date.
+Your copy is published with the data files that `npm run snapshot` built, and the website rebuilds its own files after every daily refresh. Each time your copy opens, it compares the two `built.json` files and reads the website's data files when they are newer and in the same format, so its data stays current without being published again. When the website does not answer within a few seconds, for example because the host allows no requests to other sites, your copy reads the files it was published with.
+
+Running `npm run snapshot` and `npx rayfin up` again brings in changes to the app itself and refreshes the files your copy falls back on.
 
 ## Layout
 

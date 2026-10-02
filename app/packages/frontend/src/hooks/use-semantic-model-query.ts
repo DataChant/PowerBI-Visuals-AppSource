@@ -34,8 +34,10 @@ interface QueryState {
 
 /**
  * React hook that answers one of the app's queries from the published data
- * files under `public/snapshot/`, which `scripts/snapshot.mjs` builds from the
- * public AppSource catalog and the public leaderboard history.
+ * files, which `scripts/snapshot.mjs` builds from the public Microsoft
+ * Marketplace catalog and the public leaderboard history. The files come from
+ * `public/snapshot/`, or from the website when its copy is newer, as
+ * `lib/snapshot.ts` decides.
  *
  * Nothing here signs in or calls Fabric, so the same build runs as a Fabric App
  * and on any static host. The query text is the lookup key: `lib/snapshot.ts`
