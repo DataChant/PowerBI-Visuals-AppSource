@@ -1,65 +1,84 @@
 import type { QueryTableLike } from '@/lib/to-data-table';
 import { asNumber, asString, daysBefore, readRows } from '@/lib/table';
 
-/** One week of the replay: where every visual stood when the week ended. */
+/**
+ * The replay, one frame per day.
+ *
+ * Two records feed it, and they are dated differently. Listings, new versions
+ * and certifications are dated to the day for the whole replay. Popularity,
+ * ratings and stars are known only on the days the leaderboard was read, which
+ * was about weekly until spring 2026 and daily since June 2026. So every day
+ * has a frame of listings, and the days in between two readings take their
+ * figures from a straight line between those readings.
+ */
+
+/** Bits of `ReplayFrame.state`. */
+export const LISTED = 1;
+export const CERTIFIED = 4;
+/** Bit of the query's `Listing` column: a new version that day. Never kept in `state`. */
+const NEW_VERSION = 2;
+
+/** One day of the replay: who was listed and certified when the day ended. */
 export interface ReplayFrame {
-  /** The last day of the week. */
-  end: Date;
-  /** 1 while a visual is listed, 0 while it is not. Indexed like `Replay.guids`. */
-  present: Uint8Array;
+  day: Date;
   /**
-   * Popularity per visual (0 to 1). NaN while a visual is not listed, and while
-   * it is listed with no score recorded for it yet.
+   * `LISTED` and `CERTIFIED` bits per visual, indexed like `Replay.guids`. The
+   * same array as the previous frame's when nothing changed that day, so treat
+   * it as read only.
    */
-  scores: Float32Array;
+  state: Uint8Array;
   /**
-   * Where each visual's dot sits, listed or not: its score, its last score once
-   * it has left, or its first score before one was recorded. Lets a dot appear
-   * and disappear in place instead of flying in from the axis. NaN for a visual
-   * that never had a score.
+   * New versions each visual published from the second frame up to and
+   * including this one. Shared with the previous frame like `state`.
    */
-  positions: Float32Array;
-  /**
-   * Number of ratings and average stars (1 to 5, 0 while unrated), carried the
-   * same way as `positions`, so a dot that is not listed still has a place.
-   */
-  raters: Float32Array;
-  stars: Float32Array;
-  listed: number;
+  versions: Uint16Array;
+  /** The latest reading made on or before this day, as an index into `Replay.readings`. -1 before the first. */
+  reading: number;
+  /** Visuals listed this day that were not listed the day before. Empty on the first frame. */
   arrived: number[];
   left: number[];
-  /** Listed visuals that published a new version this week. */
-  versions: number[];
-  /** Listed visuals that became certified this week. */
+  /** Listed visuals that published a new version this day. */
+  versioned: number[];
+  /** Visuals listed on both days that became certified this day. */
   certified: number[];
-  /** Listed visuals whose score changed since the previous week. */
-  changed: number;
-  /** Listed visuals whose score moved by 5 points or more since the previous week. */
-  bigMoves: number;
-  /** A popularity score was recorded for at least one visual this week. */
-  scored: boolean;
+  uncertified: number[];
+}
+
+/** One day the leaderboard was read. */
+export interface Reading {
+  /** The frame of the day it was read. */
+  frame: number;
   /**
-   * The week sits in a stretch when no popularity was recorded at all: the
-   * weeks before the first score, and any run of eight weeks or more without
-   * one. Listings, versions and certifications are still known in it.
+   * Each visual's popularity (0 to 1), number of ratings and average stars as
+   * known that day. The leaderboard records a visual only when its figures
+   * change, so a visual absent from this reading keeps its previous figures.
+   * NaN while a visual has never been read.
    */
-  unscored: boolean;
-  /** The latest frame up to this one in which a score was recorded, or -1 when there is none yet. */
-  scoredAt: number;
-  /** The first week with scores after an unscored stretch, when every score moves at once. */
-  resumed: boolean;
-  /**
-   * Almost nothing happened this week: under 2% of listed visuals moved or, in
-   * an unscored stretch, nothing was recorded at all.
-   */
-  quiet: boolean;
-  /** The first busy week after a long quiet stretch, when the record caught up at once. */
-  catchUp: boolean;
+  scores: Float32Array;
+  raters: Float32Array;
+  stars: Float32Array;
+  /** The frame of each visual's latest reading up to this one, -1 while it has never been read. */
+  readOn: Int32Array;
 }
 
 export interface Replay {
   guids: string[];
   frames: ReplayFrame[];
+  readings: Reading[];
+  /** The frame of the first reading, -1 when the leaderboard was never read. */
+  firstReading: number;
+  /**
+   * Each visual's first known figures, which place it before its first reading.
+   * NaN for a visual that was never read.
+   */
+  first: { score: Float32Array; raters: Float32Array; stars: Float32Array };
+}
+
+/** Figures for every visual on one day. NaN for a visual that was never read. */
+export interface Values {
+  score: Float32Array;
+  raters: Float32Array;
+  stars: Float32Array;
 }
 
 export interface Move {
@@ -69,258 +88,272 @@ export interface Move {
   score: number;
 }
 
-/** A week counts as quiet when fewer than this share of listed visuals changed. */
-const QUIET_SHARE = 0.02;
-/** A busy week after at least this many quiet weeks is a catch-up week. */
-const QUIET_RUN = 4;
 const BIG_MOVE = 0.05;
-/** This many weeks in a row without a score is a stretch when popularity was not recorded. */
-const UNSCORED_RUN = 8;
+const MOVE = 0.0005;
 
-/**
- * Unpacks the replay query's `Latest` column: day * 10000 + score in
- * thousandths * 2 + removed. See popularity-replay.dax.
- */
-export function unpack(packed: number): { score: number; removed: boolean } {
-  const rest = packed % 10000;
-  return { score: Math.floor(rest / 2) / 1000, removed: rest % 2 === 1 };
-}
+const EMPTY: Replay = {
+  guids: [],
+  frames: [],
+  readings: [],
+  firstReading: -1,
+  first: { score: new Float32Array(0), raters: new Float32Array(0), stars: new Float32Array(0) },
+};
 
-/** Unpacks the `Raters` column: day * 100000 + number of ratings. NaN when blank. */
-export function unpackRaters(packed: number | null): number {
-  return packed == null ? NaN : packed % 100000;
-}
-
-/** Unpacks the `Stars` column: day * 1000 + average stars in hundredths. NaN when blank. */
-export function unpackStars(packed: number | null): number {
-  return packed == null ? NaN : (packed % 1000) / 100;
-}
-
-/** Fills each visual's gaps with its previous value, then the gaps before its first value with that first value. */
-function carry(series: Float32Array[], n: number) {
-  for (let i = 1; i < series.length; i++) {
-    for (let v = 0; v < n; v++) {
-      if (Number.isNaN(series[i][v])) series[i][v] = series[i - 1][v];
-    }
-  }
-  for (let i = series.length - 2; i >= 0; i--) {
-    for (let v = 0; v < n; v++) {
-      if (Number.isNaN(series[i][v])) series[i][v] = series[i + 1][v];
-    }
-  }
+interface Row {
+  index: number;
+  popularity: number | null;
+  raters: number | null;
+  stars: number | null;
+  listing: number | null;
 }
 
 /**
- * Builds weekly frames from the replay query. `asOf` is the latest snapshot
- * date, the end of week 0.
- *
- * A row's `Listing` says whether the visual ends the week listed (1), published
- * a new version (2) or became certified (4). A row may carry that alone, with no
- * score: the record before the daily leaderboard knows who was listed, but not
- * how popular they were.
+ * Builds daily frames from the replay query. `asOf` is the day of the latest
+ * snapshot, day 0. A row's `Listing` says whether the visual ended the day
+ * listed (1) and certified (4), and whether it published a new version that day
+ * (2). The state a row records holds until that visual's next row. A row with
+ * no popularity was not a reading: it records only a change of listing.
  */
 export function buildReplay(table: QueryTableLike, asOf: Date): Replay {
-  const rows = readRows(table, (get) => ({
+  const raw = readRows(table, (get) => ({
     guid: asString(get('[Visual]')),
-    week: asNumber(get('[Week]')),
-    packed: asNumber(get('[Latest]')),
-    raters: unpackRaters(asNumber(get('[Raters]'))),
-    stars: unpackStars(asNumber(get('[Stars]'))),
+    day: asNumber(get('[Day]')),
+    popularity: asNumber(get('[Popularity]')),
+    raters: asNumber(get('[Raters]')),
+    stars: asNumber(get('[Stars]')),
     listing: asNumber(get('[Listing]')),
-  })).filter(
-    (
-      r
-    ): r is {
-      guid: string;
-      week: number;
-      packed: number | null;
-      raters: number;
-      stars: number;
-      listing: number | null;
-    } => r.guid !== '' && r.week != null && (r.packed != null || r.listing != null)
-  );
-  if (rows.length === 0) return { guids: [], frames: [] };
+  }));
 
   const indexOf = new Map<string, number>();
   const guids: string[] = [];
-  const byWeek = new Map<
-    number,
-    {
-      index: number;
-      /** NaN when the row carries no score. */
-      score: number;
-      present: boolean;
-      raters: number;
-      stars: number;
-      version: boolean;
-      certified: boolean;
-    }[]
-  >();
-  let oldest = 0;
-  for (const r of rows) {
+  const byDay = new Map<number, Row[]>();
+  let oldest = -1;
+  for (const r of raw) {
+    if (r.guid === '' || r.day == null || r.day < 0) continue;
+    if (r.popularity == null && r.listing == null) continue;
     let index = indexOf.get(r.guid);
     if (index === undefined) {
       index = guids.length;
       indexOf.set(r.guid, index);
       guids.push(r.guid);
     }
-    oldest = Math.max(oldest, r.week);
-    const latest = r.packed == null ? null : unpack(r.packed);
-    const bucket = byWeek.get(r.week) ?? [];
-    bucket.push({
-      index,
-      score: latest && !latest.removed ? latest.score : NaN,
-      // Without a Listing, a visual is listed unless the row records its removal.
-      present: r.listing != null ? (r.listing & 1) === 1 : !latest?.removed,
-      raters: r.raters,
-      stars: r.stars,
-      version: r.listing != null && (r.listing & 2) !== 0,
-      certified: r.listing != null && (r.listing & 4) !== 0,
-    });
-    byWeek.set(r.week, bucket);
+    oldest = Math.max(oldest, r.day);
+    const bucket = byDay.get(r.day) ?? [];
+    bucket.push({ index, popularity: r.popularity, raters: r.raters, stars: r.stars, listing: r.listing });
+    byDay.set(r.day, bucket);
   }
+  if (oldest < 0) return EMPTY;
 
   const n = guids.length;
-  const present = new Uint8Array(n);
-  // A listed visual's last recorded score. It is forgotten when the visual leaves.
-  const held = new Float32Array(n).fill(NaN);
+  let state = new Uint8Array(n);
+  let versions = new Uint16Array(n);
+  const scores = new Float32Array(n).fill(NaN);
   const raters = new Float32Array(n).fill(NaN);
   const stars = new Float32Array(n).fill(NaN);
-  const raw: {
-    end: Date;
-    present: Uint8Array;
-    scores: Float32Array;
-    raters: Float32Array;
-    stars: Float32Array;
-    versions: number[];
-    certified: number[];
-    scored: boolean;
-  }[] = [];
-  for (let week = oldest; week >= 0; week--) {
-    const versions: number[] = [];
-    const certified: number[] = [];
-    let scored = false;
-    for (const c of byWeek.get(week) ?? []) {
-      present[c.index] = c.present ? 1 : 0;
-      if (!c.present) held[c.index] = NaN;
-      else if (!Number.isNaN(c.score)) {
-        held[c.index] = c.score;
-        scored = true;
-      }
-      if (!Number.isNaN(c.raters)) raters[c.index] = c.raters;
-      if (!Number.isNaN(c.stars)) stars[c.index] = c.stars;
-      if (c.present && c.version) versions.push(c.index);
-      if (c.present && c.certified) certified.push(c.index);
-    }
-    raw.push({
-      end: daysBefore(asOf, week * 7),
-      present: present.slice(),
-      scores: held.slice(),
-      raters: raters.slice(),
-      stars: stars.slice(),
-      versions,
-      certified,
-      scored,
-    });
-  }
-
-  // Popularity was not recorded in the weeks before the first score, nor in any
-  // long run of weeks without one. A short run is only a quiet spell.
-  const unscored = raw.map(() => false);
-  for (let i = 0; i < raw.length; ) {
-    if (raw[i].scored) {
-      i++;
-      continue;
-    }
-    let end = i;
-    while (end < raw.length && !raw[end].scored) end++;
-    if (i === 0 || end - i >= UNSCORED_RUN) unscored.fill(true, i, end);
-    i = end;
-  }
-
-  // Positions: forward-fill each visual's last score, then back-fill its first.
-  const positions = raw.map((f) => f.scores.slice());
-  carry(positions, n);
-  const allRaters = raw.map((f) => f.raters);
-  const allStars = raw.map((f) => f.stars);
-  carry(allRaters, n);
-  carry(allStars, n);
-
+  const readOn = new Int32Array(n).fill(-1);
   const frames: ReplayFrame[] = [];
-  let quietRun = 0;
-  let scoredAt = -1;
-  raw.forEach((f, i) => {
-    const prev = i > 0 ? raw[i - 1] : null;
+  const readings: Reading[] = [];
+
+  for (let day = oldest; day >= 0; day--) {
+    const i = frames.length;
+    const prev = state;
+    const rows = byDay.get(day) ?? [];
+    let next: Uint8Array | null = null;
+    let counted: Uint16Array | null = null;
+    let read = false;
+    const versioned: number[] = [];
+    for (const row of rows) {
+      const v = row.index;
+      const isReading = row.popularity != null;
+      // A row without a Listing still shows that a visual with a reading is listed.
+      const listing =
+        row.listing ?? (isReading ? (prev[v] & CERTIFIED) | LISTED : prev[v]);
+      const bits = listing & (LISTED | CERTIFIED);
+      if (bits !== (next ?? prev)[v]) {
+        next ??= prev.slice();
+        next[v] = bits;
+      }
+      if (i > 0 && (listing & NEW_VERSION) !== 0 && (bits & LISTED) !== 0) {
+        counted ??= versions.slice();
+        counted[v] = Math.min(65535, counted[v] + 1);
+        versioned.push(v);
+      }
+      if (isReading) {
+        read = true;
+        scores[v] = row.popularity!;
+        // A reading with no ratings count is a visual nobody has rated yet.
+        if (row.raters != null) raters[v] = row.raters;
+        else if (Number.isNaN(raters[v])) raters[v] = 0;
+        if (row.stars != null) stars[v] = row.stars;
+        else if (Number.isNaN(stars[v])) stars[v] = 0;
+        readOn[v] = i;
+      }
+    }
+    if (next) state = next;
+    if (counted) versions = counted;
+
     const arrived: number[] = [];
     const left: number[] = [];
-    let listed = 0;
-    let changed = 0;
-    let bigMoves = 0;
-    for (let v = 0; v < n; v++) {
-      const isListed = f.present[v] === 1;
-      if (isListed) listed++;
-      if (!prev) continue;
-      const wasListed = prev.present[v] === 1;
-      if (isListed && !wasListed) arrived.push(v);
-      else if (!isListed && wasListed) left.push(v);
-      else if (isListed && wasListed) {
-        // A first score has nothing to be compared with, so it is not a move.
-        const delta = Math.abs(f.scores[v] - prev.scores[v]);
-        if (delta > 0.0005) changed++;
-        if (delta >= BIG_MOVE - 0.0005) bigMoves++;
+    const certified: number[] = [];
+    const uncertified: number[] = [];
+    if (i > 0 && state !== prev) {
+      for (let v = 0; v < n; v++) {
+        const was = prev[v];
+        const is = state[v];
+        if (was === is) continue;
+        const listedNow = (is & LISTED) !== 0;
+        const listedBefore = (was & LISTED) !== 0;
+        if (listedNow && !listedBefore) arrived.push(v);
+        else if (!listedNow && listedBefore) left.push(v);
+        else if (listedNow && listedBefore) {
+          if ((is & CERTIFIED) !== 0 && (was & CERTIFIED) === 0) certified.push(v);
+          else if ((is & CERTIFIED) === 0 && (was & CERTIFIED) !== 0) uncertified.push(v);
+        }
       }
     }
-    if (f.scored) scoredAt = i;
-    const resumed = f.scored && i > 0 && unscored[i - 1];
-    const quiet = unscored[i]
-      ? prev != null &&
-        arrived.length + left.length + f.versions.length + f.certified.length === 0
-      : !resumed && prev != null && changed < QUIET_SHARE * listed;
-    // Only the weeks with scores have a pace to catch up with.
-    const paced = !unscored[i] && !resumed;
+
+    if (read) {
+      readings.push({
+        frame: i,
+        scores: scores.slice(),
+        raters: raters.slice(),
+        stars: stars.slice(),
+        readOn: readOn.slice(),
+      });
+    }
     frames.push({
-      end: f.end,
-      present: f.present,
-      scores: f.scores,
-      positions: positions[i],
-      raters: allRaters[i],
-      stars: allStars[i],
-      listed,
+      day: daysBefore(asOf, day),
+      state,
+      versions,
+      reading: readings.length - 1,
       arrived,
       left,
-      versions: f.versions,
-      certified: f.certified,
-      changed,
-      bigMoves,
-      scored: f.scored,
-      unscored: unscored[i],
-      scoredAt,
-      resumed,
-      quiet,
-      catchUp: paced && !quiet && quietRun >= QUIET_RUN,
+      versioned,
+      certified,
+      uncertified,
     });
-    quietRun = paced && quiet ? quietRun + 1 : 0;
-  });
+  }
 
-  return { guids, frames };
+  // The figures of each visual's first reading, so a visual can be placed before it.
+  const first = {
+    score: new Float32Array(n).fill(NaN),
+    raters: new Float32Array(n).fill(NaN),
+    stars: new Float32Array(n).fill(NaN),
+  };
+  for (let k = readings.length - 1; k >= 0; k--) {
+    const r = readings[k];
+    for (let v = 0; v < n; v++) {
+      if (r.readOn[v] === r.frame) {
+        first.score[v] = r.scores[v];
+        first.raters[v] = r.raters[v];
+        first.stars[v] = r.stars[v];
+      }
+    }
+  }
+
+  return {
+    guids,
+    frames,
+    readings,
+    firstReading: readings.length > 0 ? readings[0].frame : -1,
+    first,
+  };
+}
+
+function known(values: Float32Array, first: Float32Array, v: number): number {
+  const value = values[v];
+  return Number.isNaN(value) ? first[v] : value;
 }
 
 /**
- * The day popularity was last recorded before frame `at`, or null when it never
- * was. In the week scores come back after an unscored stretch, every change is
- * measured from that day, not from the week before.
+ * The two readings day `at` lies between, and how far along from the first to
+ * the second it is (0 to 1). Both are the same reading, at 0, before the first
+ * reading and from the last one on. -1 when the leaderboard was never read.
  */
-export function lastScoredBefore(replay: Replay, at: number): Date | null {
-  const before = replay.frames[at - 1];
-  return before && before.scoredAt >= 0 ? replay.frames[before.scoredAt].end : null;
+export function spanAt(replay: Replay, at: number): { from: number; to: number; f: number } {
+  const last = replay.readings.length - 1;
+  if (last < 0) return { from: -1, to: -1, f: 0 };
+  const k = replay.frames[at]?.reading ?? -1;
+  if (k < 0) return { from: 0, to: 0, f: 0 };
+  if (k >= last) return { from: last, to: last, f: 0 };
+  const a = replay.readings[k].frame;
+  const b = replay.readings[k + 1].frame;
+  return { from: k, to: k + 1, f: (at - a) / (b - a) };
 }
 
 /**
- * The visuals that moved most between `lookback` weeks before frame `at` and
- * frame `at`. Only visuals with a score at both ends count, so an arrival or a
- * farewell is never mistaken for a climb or a slide. `from` is the day the
- * earlier scores were recorded, which is before the earlier frame when that
- * frame sits in an unscored stretch.
+ * Every visual's figures as of reading `k`, with a visual not read by then
+ * placed at its first reading. NaN for a visual that was never read.
+ */
+export function readingValues(replay: Replay, k: number, out?: Values): Values {
+  const n = replay.guids.length;
+  const values = out ?? {
+    score: new Float32Array(n),
+    raters: new Float32Array(n),
+    stars: new Float32Array(n),
+  };
+  const reading = replay.readings[k];
+  const { first } = replay;
+  for (let v = 0; v < n; v++) {
+    values.score[v] = reading ? known(reading.scores, first.score, v) : NaN;
+    values.raters[v] = reading ? known(reading.raters, first.raters, v) : NaN;
+    values.stars[v] = reading ? known(reading.stars, first.stars, v) : NaN;
+  }
+  return values;
+}
+
+/**
+ * Every visual's figures on day `at`. On a day between two readings they lie
+ * on a straight line between the two, so a visual glides from one reading to
+ * the next instead of jumping on the day it was read. Before the first reading
+ * and after the last they hold.
+ */
+export function valuesAt(replay: Replay, at: number, out?: Values): Values {
+  const { from, to, f } = spanAt(replay, at);
+  const values = readingValues(replay, from, out);
+  if (to === from) return values;
+  const next = readingValues(replay, to);
+  for (let v = 0; v < replay.guids.length; v++) {
+    values.score[v] += (next.score[v] - values.score[v]) * f;
+    values.raters[v] += (next.raters[v] - values.raters[v]) * f;
+    values.stars[v] += (next.stars[v] - values.stars[v]) * f;
+  }
+  return values;
+}
+
+/**
+ * A visual's latest reading on or before day `at`: its figures and the frame of
+ * the day they were read. Null while it has not been read.
+ */
+export function lastReading(
+  replay: Replay,
+  at: number,
+  v: number
+): { frame: number; score: number; raters: number; stars: number } | null {
+  const reading = replay.readings[replay.frames[at]?.reading ?? -1];
+  if (!reading || reading.readOn[v] < 0) return null;
+  return {
+    frame: reading.readOn[v],
+    score: reading.scores[v],
+    raters: reading.raters[v],
+    stars: reading.stars[v],
+  };
+}
+
+/** Each visual's popularity as last read on or before day `at`, NaN when it has not been read. */
+function readScores(replay: Replay, at: number): Float32Array | undefined {
+  return replay.readings[replay.frames[at]?.reading ?? -1]?.scores;
+}
+
+function isListed(frame: ReplayFrame, v: number): boolean {
+  return (frame.state[v] & LISTED) !== 0;
+}
+
+/**
+ * The visuals whose popularity moved most between `lookback` days before day
+ * `at` and day `at`, each as last read by that day. Only visuals listed and
+ * read at both ends count, so an arrival or a farewell is never mistaken for a
+ * climb or a slide.
  */
 export function movers(
   replay: Replay,
@@ -332,15 +365,18 @@ export function movers(
 ): { from: Date | null; climbers: Move[]; sliders: Move[] } {
   const frame = replay.frames[at];
   const base = replay.frames[Math.max(0, at - lookback)];
-  if (!frame || !base || base === frame) return { from: null, climbers: [], sliders: [] };
+  const now = readScores(replay, at);
+  const then = readScores(replay, Math.max(0, at - lookback));
+  if (!frame || !base || base === frame || !now || !then) {
+    return { from: null, climbers: [], sliders: [] };
+  }
   const moves: Move[] = [];
   for (let v = 0; v < replay.guids.length; v++) {
     if (include && !include(v)) continue;
-    const now = frame.scores[v];
-    const before = base.scores[v];
-    if (Number.isNaN(now) || Number.isNaN(before)) continue;
-    const delta = now - before;
-    if (Math.abs(delta) > 0.0005) moves.push({ index: v, guid: replay.guids[v], delta, score: now });
+    if (!isListed(frame, v) || !isListed(base, v)) continue;
+    if (Number.isNaN(now[v]) || Number.isNaN(then[v])) continue;
+    const delta = now[v] - then[v];
+    if (Math.abs(delta) > MOVE) moves.push({ index: v, guid: replay.guids[v], delta, score: now[v] });
   }
   const climbers = moves
     .filter((m) => m.delta > 0)
@@ -350,15 +386,12 @@ export function movers(
     .filter((m) => m.delta < 0)
     .sort((a, b) => a.delta - b.delta || b.score - a.score || a.guid.localeCompare(b.guid))
     .slice(0, limit);
-  const from =
-    base.unscored && base.scoredAt >= 0 ? replay.frames[base.scoredAt].end : base.end;
-  return { from, climbers, sliders };
+  return { from: base.day, climbers, sliders };
 }
 
 /**
- * The visuals that joined and left between `lookback` weeks before frame `at`
- * and frame `at`, the most popular first. It is what the record can still tell
- * about a stretch in which popularity was not recorded.
+ * The visuals that joined and left between `lookback` days before day `at` and
+ * day `at`, the most popular first.
  */
 export function comings(
   replay: Replay,
@@ -374,33 +407,67 @@ export function comings(
   const left: number[] = [];
   for (let v = 0; v < replay.guids.length; v++) {
     if (include && !include(v)) continue;
-    if (frame.present[v] === base.present[v]) continue;
-    (frame.present[v] === 1 ? joined : left).push(v);
+    const now = isListed(frame, v);
+    if (now === isListed(base, v)) continue;
+    (now ? joined : left).push(v);
   }
-  // A visual with no score at all sorts last.
-  const place = (v: number) => (Number.isNaN(frame.positions[v]) ? -1 : frame.positions[v]);
-  const byPlace = (a: number, b: number) =>
-    place(b) - place(a) || replay.guids[a].localeCompare(replay.guids[b]);
-  return { from: base.end, joined: joined.sort(byPlace), left: left.sort(byPlace) };
+  const byPlace = placeOrder(replay, at);
+  return { from: base.day, joined: joined.sort(byPlace), left: left.sort(byPlace) };
+}
+
+/** Sorts visuals the most popular first as of day `at`, with a visual never read last. */
+function placeOrder(replay: Replay, at: number): (a: number, b: number) => number {
+  const scores = readScores(replay, at);
+  const place = (v: number) => {
+    const score = scores ? known(scores, replay.first.score, v) : replay.first.score[v];
+    return Number.isNaN(score) ? -1 : score;
+  };
+  return (a, b) => place(b) - place(a) || replay.guids[a].localeCompare(replay.guids[b]);
+}
+
+/**
+ * The visuals certified on day `at` that were listed but not certified
+ * `lookback` days before, the most popular first. A visual that joined already
+ * certified is counted as joining, not here.
+ */
+export function certifiedSince(
+  replay: Replay,
+  at: number,
+  lookback: number,
+  /** When given, only the visuals it accepts are listed. */
+  include?: (index: number) => boolean
+): { from: Date | null; certified: number[] } {
+  const frame = replay.frames[at];
+  const base = replay.frames[Math.max(0, at - lookback)];
+  if (!frame || !base || base === frame) return { from: null, certified: [] };
+  const certified: number[] = [];
+  for (let v = 0; v < replay.guids.length; v++) {
+    if (include && !include(v)) continue;
+    if (!isListed(frame, v) || !isListed(base, v)) continue;
+    if ((frame.state[v] & CERTIFIED) !== 0 && (base.state[v] & CERTIFIED) === 0) certified.push(v);
+  }
+  return { from: base.day, certified: certified.sort(placeOrder(replay, at)) };
 }
 
 export interface FrameCounts {
   listed: number;
   /** Listed visuals nobody has rated yet. */
   unrated: number;
+  /** Listed visuals the leaderboard had not read by this day. */
+  unread: number;
+  /** Of those, the visuals it never read at all, which have no place on the popularity axis. */
+  unplaced: number;
   arrived: number;
   left: number;
+  /** Listed visuals whose popularity moved by 5 points or more in a reading made this day. */
   bigMoves: number;
-  /** Listed visuals that published a new version this week. */
+  /** Listed visuals that published a new version this day. */
   versions: number;
-  /** Listed visuals that became certified this week. */
+  /** Listed visuals that became certified this day. */
   certified: number;
 }
 
-/**
- * A week's counts for a subset of the visuals, such as the certified ones.
- * With no `include` it returns the same numbers the frame itself carries.
- */
+/** A day's counts, for all visuals or for the subset `include` accepts, such as the certified ones. */
 export function frameCounts(
   replay: Replay,
   at: number,
@@ -409,6 +476,8 @@ export function frameCounts(
   const counts: FrameCounts = {
     listed: 0,
     unrated: 0,
+    unread: 0,
+    unplaced: 0,
     arrived: 0,
     left: 0,
     bigMoves: 0,
@@ -417,20 +486,37 @@ export function frameCounts(
   };
   const frame = replay.frames[at];
   if (!frame) return counts;
-  const prev = at > 0 ? replay.frames[at - 1].scores : null;
+  const reading = replay.readings[frame.reading];
+  // Only a reading made this day moves anything.
+  const readToday = reading && reading.frame === at;
+  const before = readToday ? replay.readings[frame.reading - 1] : undefined;
   const ok = (v: number) => !include || include(v);
   for (let v = 0; v < replay.guids.length; v++) {
-    if (!ok(v) || frame.present[v] !== 1) continue;
+    if (!ok(v) || !isListed(frame, v)) continue;
     counts.listed++;
-    if (!(frame.raters[v] > 0)) counts.unrated++;
-    // NaN on either side, a visual with no score to compare, is never a move.
-    if (prev && Math.abs(frame.scores[v] - prev[v]) >= BIG_MOVE - 0.0005) counts.bigMoves++;
+    const ratedBy = reading ? known(reading.raters, replay.first.raters, v) : replay.first.raters[v];
+    if (!(ratedBy > 0)) counts.unrated++;
+    if (!reading || reading.readOn[v] < 0) counts.unread++;
+    if (Number.isNaN(replay.first.score[v])) counts.unplaced++;
+    // NaN on either side, a visual with nothing to compare, is never a move.
+    if (before && Math.abs(reading.scores[v] - before.scores[v]) >= BIG_MOVE - MOVE) counts.bigMoves++;
   }
   counts.arrived = frame.arrived.filter(ok).length;
   counts.left = frame.left.filter(ok).length;
-  counts.versions = frame.versions.filter(ok).length;
+  counts.versions = frame.versioned.filter(ok).length;
   counts.certified = frame.certified.filter(ok).length;
   return counts;
+}
+
+/**
+ * How much bigger a visual is drawn for the versions it published since frame
+ * `since`: the square root of the count, so the first versions show and a
+ * visual that publishes every week does not fill the view.
+ */
+export function growth(replay: Replay, at: number, since: number, v: number): number {
+  const now = replay.frames[at]?.versions[v] ?? 0;
+  const then = replay.frames[Math.max(0, since)]?.versions[v] ?? 0;
+  return Math.min(2.2, 1 + 0.22 * Math.sqrt(Math.max(0, now - then)));
 }
 
 /**
@@ -443,11 +529,25 @@ export function sentiment(stars: number, raters: number): number | null {
   return stars - 3;
 }
 
-/** A stable pseudo-random number in [0, 1) for a visual, so its dot keeps its height between weeks. */
-export function jitter(guid: string): number {
+/**
+ * The two ways to play the replay. `scores` places each visual by its
+ * popularity, ratings and stars, so it can start only once the leaderboard was
+ * first read. `listings` follows arrivals, new versions and certifications,
+ * which are dated for the whole replay.
+ */
+export type ReplayMode = 'scores' | 'listings';
+
+/** The first frame a mode can show. */
+export function modeStart(replay: Replay, mode: ReplayMode): number {
+  return mode === 'scores' ? Math.max(0, replay.firstReading) : 0;
+}
+
+/** A stable pseudo-random number in [0, 1) for a visual, so its place holds from day to day. */
+export function jitter(guid: string, salt = ''): number {
   let h = 2166136261;
-  for (let i = 0; i < guid.length; i++) {
-    h ^= guid.charCodeAt(i);
+  const text = salt + guid;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   return ((h >>> 0) % 10000) / 10000;

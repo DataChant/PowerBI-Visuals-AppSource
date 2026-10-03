@@ -1,29 +1,27 @@
-// Each visual's popularity, ratings count and average stars at the end of
-// every week they changed, for the replay.
+// Each visual's popularity, ratings count and average stars on every day they
+// were read, and whether it was listed and certified at the end of that day,
+// for the replay. Days are counted back from the latest snapshot, so day 0 is
+// its day:
+//   Listing = listed at the end of the day (1) + a new version that day (2)
+//             + certified at the end of the day (4)
 // The Leaderboard table is a change log, so a visual that is missing from a
-// week simply held its figures; the client carries values forward.
-// Weeks are counted back from the latest snapshot: week 0 ends on that day.
+// day simply held its figures; the client carries values forward.
+// When a visual was read more than once in a day, the latest reading counts.
 // A popularity of 0 is a failed crawl rather than a real reading, so those
 // rows are left out unless they mark the visual's removal.
-// GROUPBY can only aggregate CURRENTGROUP(), so the latest row of each week is
-// found by packing the day in front of each value, which makes MAX pick the
-// value from the latest day. Every packed number stays below 2^53, so it
-// survives the trip into a JavaScript number intact:
-//   Latest  = day * 10000  + popularity in thousandths * 2 + removed
-//   Raters  = day * 100000 + number of ratings
-//   Stars   = day * 1000   + average stars in hundredths
-// Raters and Stars are blank on a removal row, so a visual's last real
-// figures are kept for the dot that fades out.
+// GROUPBY can only aggregate CURRENTGROUP(), so the latest row of each day is
+// found by packing the second of the day in front of each value, which makes
+// MAX pick the value from the latest row, and the result unpacks it. Every
+// packed number stays below 2^53.
 //
 // The published site and the app read the saved result of this query, which
 // scripts/snapshot.mjs builds. That file reaches back to January 2024, before
-// the Leaderboard table began, and it carries one more column the semantic
-// model does not hold:
-//   Listing = listed at the end of the week (1) + a new version that week (2)
-//             + newly certified that week (4)
-// In the weeks when no popularity was recorded, Latest, Raters and Stars are
-// blank and Listing alone says what happened. A result without the column is
-// read as before: a row means the visual was listed unless it marks a removal.
+// the Leaderboard table began, and dates each arrival, new version and
+// certification from the commits of "Visuals Summary.csv", which list every
+// visual on each day they were made. This table records a visual only when its
+// figures change, so it sees many of those changes weeks late and cannot date
+// them. Here Listing says only whether the visual was listed and certified,
+// and never marks a new version.
 DEFINE
     VAR _asOf = CALCULATE ( MAX ( Leaderboard[Snapshot Date] ), REMOVEFILTERS () )
     VAR _rows =
@@ -33,33 +31,58 @@ DEFINE
                 Leaderboard[Popularity] > 0 || Leaderboard[Is Removed]
             ),
             "Visual", Leaderboard[Visual GUID],
-            "Week", INT ( DATEDIFF ( Leaderboard[Snapshot Date], _asOf, DAY ) / 7 ),
-            "Packed",
-                INT ( Leaderboard[Snapshot Date] ) * 10000
-                    + ROUND ( COALESCE ( Leaderboard[Popularity], 0 ) * 1000, 0 ) * 2
-                    + IF ( Leaderboard[Is Removed], 1, 0 ),
+            "Day", DATEDIFF ( Leaderboard[Snapshot Date], _asOf, DAY ),
+            "Second",
+                ROUND (
+                    ( Leaderboard[Snapshot Date] - INT ( Leaderboard[Snapshot Date] ) ) * 86400,
+                    0
+                ),
+            "Reading", NOT Leaderboard[Is Removed],
+            "State",
+                IF ( Leaderboard[Is Removed], 0, 1 )
+                    + IF ( Leaderboard[Is Certified] = "Certified", 4, 0 ),
+            "Popularity", Leaderboard[Popularity],
+            "Raters", Leaderboard[# of Ratings],
+            "Stars", Leaderboard[Average Rating]
+        )
+    VAR _packed =
+        SELECTCOLUMNS (
+            _rows,
+            "Visual", [Visual],
+            "Day", [Day],
+            "StatePacked", [Second] * 10 + [State],
+            "PopularityPacked",
+                IF ( [Reading], [Second] * 1000000 + ROUND ( [Popularity] * 1000, 0 ) ),
             "RatersPacked",
                 IF (
-                    Leaderboard[Is Removed] || ISBLANK ( Leaderboard[# of Ratings] ),
-                    BLANK (),
-                    INT ( Leaderboard[Snapshot Date] ) * 100000 + Leaderboard[# of Ratings]
+                    [Reading] && NOT ISBLANK ( [Raters] ),
+                    [Second] * 1000000000 + [Raters]
                 ),
             "StarsPacked",
                 IF (
-                    Leaderboard[Is Removed] || ISBLANK ( Leaderboard[Average Rating] ),
-                    BLANK (),
-                    INT ( Leaderboard[Snapshot Date] ) * 1000
-                        + ROUND ( Leaderboard[Average Rating] * 100, 0 )
+                    [Reading] && NOT ISBLANK ( [Stars] ),
+                    [Second] * 1000 + ROUND ( [Stars] * 100, 0 )
                 )
+        )
+    VAR _days =
+        GROUPBY (
+            _packed,
+            [Visual],
+            [Day],
+            "State", MAXX ( CURRENTGROUP (), [StatePacked] ),
+            "Popularity", MAXX ( CURRENTGROUP (), [PopularityPacked] ),
+            "Raters", MAXX ( CURRENTGROUP (), [RatersPacked] ),
+            "Stars", MAXX ( CURRENTGROUP (), [StarsPacked] )
         )
 
 EVALUATE
-GROUPBY (
-    _rows,
-    [Visual],
-    [Week],
-    "Latest", MAXX ( CURRENTGROUP (), [Packed] ),
-    "Raters", MAXX ( CURRENTGROUP (), [RatersPacked] ),
-    "Stars", MAXX ( CURRENTGROUP (), [StarsPacked] )
+SELECTCOLUMNS (
+    _days,
+    "Visual", [Visual],
+    "Day", [Day],
+    "Popularity", IF ( NOT ISBLANK ( [Popularity] ), MOD ( [Popularity], 1000000 ) / 1000 ),
+    "Raters", IF ( NOT ISBLANK ( [Raters] ), MOD ( [Raters], 1000000000 ) ),
+    "Stars", IF ( NOT ISBLANK ( [Stars] ), MOD ( [Stars], 1000 ) / 100 ),
+    "Listing", MOD ( [State], 10 )
 )
-ORDER BY [Week] DESC
+ORDER BY [Visual], [Day] DESC

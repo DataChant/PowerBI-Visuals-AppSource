@@ -57,7 +57,7 @@ function App() {
   const standingsState = useQueryTable(STANDINGS);
   const catalogState = useQueryTable(CATALOG);
   const starsState = useQueryTable(STARS);
-  // The weekly history is large, so it is fetched the first time the Replay
+  // The daily history is large, so it is fetched the first time the Replay
   // tab opens and then kept, rather than on every visit to the app.
   const [replayWanted, setReplayWanted] = useState(tab === 'replay');
   if (tab === 'replay' && !replayWanted) setReplayWanted(true);
@@ -86,7 +86,7 @@ function App() {
   );
   const replay = useMemo(() => {
     if (!replayTable || !asOf) return null;
-    // Weeks are counted in whole days back from the latest snapshot date.
+    // The replay runs one day at a time, up to the latest snapshot date.
     const day = new Date(Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth(), asOf.getUTCDate()));
     return buildReplay(replayTable, day);
   }, [replayTable, asOf]);
@@ -116,6 +116,7 @@ function App() {
   const isLeaderboard = tab === 'leaderboard';
   const isReplay = tab === 'replay';
   // The replay needs the standings for names and icons as well as its own history.
+  // The catalog names the newest visuals, and fills in once it loads.
   const primary = isLeaderboard
     ? standingsState
     : isReplay
@@ -132,7 +133,7 @@ function App() {
           isLeaderboard
             ? 'The leaderboard could not load.'
             : isReplay
-              ? 'The weekly history could not load.'
+              ? 'The replay history could not load.'
               : 'The Microsoft Marketplace catalog could not load.'
         }
         message={primary.message}
@@ -160,6 +161,7 @@ function App() {
       <ReplayPage
         replay={replay}
         standings={standings}
+        catalog={catalog}
         certifiedOnly={certifiedOnly}
         onCertifiedOnly={setCertifiedOnly}
         onOpen={setOpen}

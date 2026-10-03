@@ -33,7 +33,7 @@ export const WEBSITE_DATA =
  * scripts/snapshot.mjs, and raise both whenever a file changes shape, so that a
  * copy published before the change never reads files it cannot understand.
  */
-export const DATA_FORMAT = 1;
+export const DATA_FORMAT = 2;
 
 /** How long the app waits for the website before it reads its own copy. */
 const WEBSITE_WAIT_MS = 3000;
