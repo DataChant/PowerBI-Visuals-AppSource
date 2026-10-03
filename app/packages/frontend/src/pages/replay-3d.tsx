@@ -36,6 +36,8 @@ import { refOf, type Who } from '@/lib/replay-who';
  * A visual that joins, becomes certified or publishes a new version shows its
  * logo for a moment, in both modes. In the popularity mode a visual that is
  * moving shows its logo too, which turns back into a dot once the move ends.
+ * There, a visual gaining popularity is a cone pointing up and one losing it a
+ * cone pointing down, so the direction does not rest on colour alone.
  */
 
 /** Half the cube's width; the scene runs from -SIZE to +SIZE on every axis. */
@@ -116,6 +118,16 @@ const DRIFT = 0.14;
 const RECENT_DAYS = 7;
 /** A rise or fall smaller than this, in scene units, leaves a visual in the neutral colour. */
 const STILL = 0.005;
+/**
+ * A visual that gains or loses popularity is drawn as a cone pointing up or
+ * down rather than a sphere, so the shape says which way it moved as well as
+ * the colour. The three shapes are drawn by three meshes, indexed by these.
+ */
+const SPHERE = 0;
+const RISING = 1;
+const FALLING = 2;
+const CONE_RADIUS = DOT_RADIUS * 1.2;
+const CONE_HEIGHT = DOT_RADIUS * 2.6;
 
 const LINEAR = 0;
 const EASE_OUT = 1;
@@ -259,7 +271,12 @@ interface Scene {
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
   controls: OrbitControls;
-  dots: THREE.InstancedMesh;
+  /** The spheres, the rising cones and the falling cones, indexed by shape. */
+  dots: THREE.InstancedMesh[];
+  /** Which shape each visual is drawn as. */
+  shape: Uint8Array;
+  /** A visual changed shape, so the next frame redraws the field. */
+  reshaped: boolean;
   trails: THREE.Group;
   /** The objects only one mode draws. */
   scoreParts: THREE.Object3D[];
@@ -480,22 +497,34 @@ export default function Replay3D({
     divider.visible = false;
     three.add(divider);
 
-    const dots = new THREE.InstancedMesh(
+    const falling = new THREE.ConeGeometry(CONE_RADIUS, CONE_HEIGHT, 16);
+    falling.rotateX(Math.PI);
+    const dots = [
       new THREE.SphereGeometry(DOT_RADIUS, 14, 10),
-      new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.05 }),
-      n
-    );
-    dots.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    // Every visual stays inside the cube, so one fixed sphere bounds them all
-    // and nothing is measured again on each move.
-    dots.boundingSphere = new THREE.Sphere(new THREE.Vector3(), SIZE * 2.1);
-    dots.frustumCulled = false;
+      new THREE.ConeGeometry(CONE_RADIUS, CONE_HEIGHT, 16),
+      falling,
+    ].map((geometry) => {
+      const mesh = new THREE.InstancedMesh(
+        geometry,
+        new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.05 }),
+        n
+      );
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      // Every visual stays inside the cube, so one fixed sphere bounds them all
+      // and nothing is measured again on each move.
+      mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(), SIZE * 2.1);
+      mesh.frustumCulled = false;
+      three.add(mesh);
+      return mesh;
+    });
     const hidden = new THREE.Matrix4().makeScale(0.0001, 0.0001, 0.0001);
     for (let v = 0; v < n; v++) {
-      dots.setColorAt(v, palette.still);
-      dots.setMatrixAt(v, hidden);
+      dots[SPHERE].setColorAt(v, palette.still);
+      for (const mesh of dots) mesh.setMatrixAt(v, hidden);
     }
-    three.add(dots);
+    // The cones take one colour each, so they need no colour per visual.
+    (dots[RISING].material as THREE.MeshStandardMaterial).color.copy(palette.up);
+    (dots[FALLING].material as THREE.MeshStandardMaterial).color.copy(palette.down);
 
     const trails = new THREE.Group();
     three.add(trails);
@@ -505,6 +534,8 @@ export default function Replay3D({
       camera,
       controls,
       dots,
+      shape: new Uint8Array(n),
+      reshaped: false,
       trails,
       scoreParts: [grid, neutral],
       listingParts: [divider],
@@ -556,8 +587,9 @@ export default function Replay3D({
         -((event.clientY - rect.top) / rect.height) * 2 + 1
       );
       raycaster.setFromCamera(pointer, camera);
-      const found = raycaster.intersectObject(dots, false)[0];
+      const found = raycaster.intersectObjects(dots, false)[0];
       // A hidden dot, or one showing its logo, has almost no size, so it is never hit.
+      // Each visual is drawn by one mesh only, so the others never hit it either.
       return found?.instanceId ?? null;
     };
     let hovered = -1;
@@ -662,16 +694,18 @@ export default function Replay3D({
       }
 
       const moving =
-        now < s.busyUntil + 50 || now < s.pulseUntil + 50 || mixing || drifting;
+        now < s.busyUntil + 50 || now < s.pulseUntil + 50 || mixing || drifting || s.reshaped;
       if (moving) {
+        s.reshaped = false;
         for (let v = 0; v < n; v++) {
           sample(s, v, now);
           const k = s.curScale[v] * pulseOf(s, v, now) * (1 - s.mix[v]);
           scaleVector.setScalar(Math.max(k, 0.0001));
           matrix.compose(drawn(s, v, place), quaternion, scaleVector);
-          dots.setMatrixAt(v, matrix);
+          const shape = s.shape[v];
+          for (let m = 0; m < dots.length; m++) dots[m].setMatrixAt(v, m === shape ? matrix : hidden);
         }
-        dots.instanceMatrix.needsUpdate = true;
+        for (const mesh of dots) mesh.instanceMatrix.needsUpdate = true;
         // Each trail ends where its visual is drawn now.
         for (const child of s.trails.children) {
           const line = child as THREE.Line;
@@ -867,13 +901,18 @@ export default function Replay3D({
 
       const joined = at > 0 && listed && (recent.state[v] & LISTED) === 0;
       let colour = palette.still;
+      let shape = SPHERE;
       if (joined) colour = palette.fresh;
       else if (dayA && dayB) {
         const rise = dayB[i + 1] - dayA[i + 1];
-        if (rise > STILL) colour = palette.up;
-        else if (rise < -STILL) colour = palette.down;
+        if (rise > STILL) shape = RISING;
+        else if (rise < -STILL) shape = FALLING;
       } else if (!scores && certified && (recent.state[v] & CERTIFIED) === 0) colour = palette.gold;
-      s.dots.setColorAt(v, colour);
+      s.dots[SPHERE].setColorAt(v, colour);
+      if (s.shape[v] !== shape) {
+        s.shape[v] = shape;
+        s.reshaped = true;
+      }
 
       // A new version makes a visual swell for a moment, in both modes.
       if (step && !reducedMotion && shown && versioned.has(v)) {
@@ -904,7 +943,10 @@ export default function Replay3D({
       s.duration[v] = duration;
       s.ease[v] = kind;
     }
-    if (s.dots.instanceColor) s.dots.instanceColor.needsUpdate = true;
+    const sphere = s.dots[SPHERE];
+    if (sphere.instanceColor) sphere.instanceColor.needsUpdate = true;
+    (s.dots[RISING].material as THREE.MeshStandardMaterial).color.copy(palette.up);
+    (s.dots[FALLING].material as THREE.MeshStandardMaterial).color.copy(palette.down);
     s.busyUntil = Math.max(s.busyUntil, now + duration);
 
     // Which visuals show their logo.

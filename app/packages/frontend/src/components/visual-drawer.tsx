@@ -399,7 +399,7 @@ export function VisualDrawer({
                 type="button"
                 onClick={onClose}
                 aria-label="Close the visual details"
-                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full bg-card hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
+                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full bg-card hover:bg-accent max-sm:size-[44px] focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <X className="icon-size-200" aria-hidden />
               </button>

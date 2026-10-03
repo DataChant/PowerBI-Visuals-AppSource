@@ -432,7 +432,7 @@ export function WordsPage({ visuals, onOpen }: CatalogPageProps) {
             <button
               type="button"
               onClick={() => setPicked(null)}
-              className="min-h-[32px] rounded-full border border-border px-300 text-200 font-semibold hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+              className="min-h-[32px] rounded-full border border-border px-300 text-200 font-semibold hover:bg-hover max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring"
             >
               Show the top words
             </button>
@@ -474,7 +474,7 @@ export function WordsPage({ visuals, onOpen }: CatalogPageProps) {
               <button
                 type="button"
                 onClick={() => setAllWords((all) => !all)}
-                className="min-h-[32px] rounded-full border border-border px-300 text-200 font-semibold hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+                className="min-h-[32px] rounded-full border border-border px-300 text-200 font-semibold hover:bg-hover max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring"
               >
                 {allWords ? 'Show the top 10 words' : `Show all ${formatInt(words.length)} words`}
               </button>

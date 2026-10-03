@@ -99,6 +99,17 @@ const MIN_FIELD = 240;
 const MIN_LANE = 0.25;
 const MAX_LANE = 0.6;
 const DOT = 8;
+/**
+ * A visual that gains or loses popularity is drawn as a triangle pointing up
+ * or down, so the shape says which way it moved as well as the colour. The
+ * triangle is a little larger than a dot, because it fills half of its box.
+ */
+const TRIANGLE = DOT + 2;
+const POINTING = {
+  up: 'polygon(50% 0, 100% 100%, 0 100%)',
+  down: 'polygon(0 0, 100% 0, 50% 100%)',
+} as const;
+type Pointing = keyof typeof POINTING;
 const PAD = 12;
 /** How many visuals can be followed at once. */
 const MAX_PICKS = 10;
@@ -448,6 +459,14 @@ function DotField({
                       : delta < -STILL
                         ? 'border-transparent bg-down'
                         : 'border-transparent bg-muted-foreground/45';
+            const pointing: Pointing | null =
+              !listed || hollow || joined || newlyCertified
+                ? null
+                : delta > STILL
+                  ? 'up'
+                  : delta < -STILL
+                    ? 'down'
+                    : null;
             const lively = joined || newlyCertified || Math.abs(delta) > STILL;
             const grow = growth(replay, at, since, v);
             const logo = listed && logos.has(v) ? who[v] : undefined;
@@ -470,15 +489,19 @@ function DotField({
                 <span
                   data-index={v}
                   className={cn(
-                    'block rounded-full border-[1.5px] transition-[transform,opacity,background-color,border-color] duration-500 ease-out',
+                    'block border-[1.5px] transition-[transform,opacity,background-color,border-color] duration-500 ease-out',
+                    !pointing && 'rounded-full',
                     // A visual that is not listed on the day shown stays drawn, unseen, so it
                     // can fade in and out, but it has nothing to show on hover.
                     listed ? 'cursor-pointer' : 'pointer-events-none',
                     tone
                   )}
                   style={{
-                    width: DOT,
-                    height: DOT,
+                    width: pointing ? TRIANGLE : DOT,
+                    height: pointing ? TRIANGLE : DOT,
+                    // The larger triangle keeps the dot's centre.
+                    margin: pointing ? (DOT - TRIANGLE) / 2 : undefined,
+                    clipPath: pointing ? POINTING[pointing] : undefined,
                     opacity: !listed || logo ? 0 : lively ? 0.95 : hollow ? 0.75 : 0.6,
                     transform: `scale(${listed ? grow * (hollow ? 0.75 : 1) : 0.3})`,
                   }}
@@ -570,11 +593,12 @@ function Legend({
   className?: string;
 }) {
   const grown = { swatch: 'size-[14px] bg-muted-foreground/45', label: 'Larger after new versions' };
-  const items =
+  const items: { swatch: string; label: string; pointing?: Pointing }[] =
     mode === 'scores'
       ? [
-          { swatch: 'size-[10px] bg-up', label: 'Gaining popularity' },
-          { swatch: 'size-[10px] bg-down', label: 'Losing popularity' },
+          // The flat field draws these as triangles, and the 3D view as cones.
+          { swatch: 'size-[12px] bg-up', pointing: 'up', label: 'Gaining popularity' },
+          { swatch: 'size-[12px] bg-down', pointing: 'down', label: 'Losing popularity' },
           { swatch: 'size-[10px] bg-new', label: 'Joined in the last 7 days' },
           { swatch: 'size-[10px] bg-muted-foreground/45', label: 'No change' },
           {
@@ -596,7 +620,10 @@ function Legend({
     <ul className={cn('text-200 text-muted-foreground', className)} aria-hidden>
       {items.map((i) => (
         <li key={i.label} className="flex items-center gap-100">
-          <span className={cn('inline-block shrink-0 rounded-full', i.swatch)} />
+          <span
+            className={cn('inline-block shrink-0', !i.pointing && 'rounded-full', i.swatch)}
+            style={i.pointing ? { clipPath: POINTING[i.pointing] } : undefined}
+          />
           {i.label}
         </li>
       ))}
@@ -635,7 +662,7 @@ function ToolButton({
       title={label ?? description}
       onClick={onClick}
       className={cn(
-        'inline-flex min-h-[40px] shrink-0 items-center gap-100 rounded-full border px-300 text-200 font-semibold focus-visible:outline-2 focus-visible:outline-ring',
+        'inline-flex min-h-[40px] shrink-0 items-center justify-center gap-100 rounded-full border px-300 text-200 font-semibold max-sm:min-h-[44px] max-sm:min-w-[44px] focus-visible:outline-2 focus-visible:outline-ring',
         pressed
           ? 'border-primary bg-primary text-primary-foreground'
           : 'border-border bg-card hover:bg-hover',
@@ -923,7 +950,7 @@ function MoversPanel({
           type="button"
           onClick={onClose}
           aria-label={hide}
-          className="inline-flex size-[32px] shrink-0 items-center justify-center rounded-full hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring lg:hidden"
+          className="inline-flex size-[32px] shrink-0 items-center justify-center rounded-full hover:bg-hover max-sm:size-[44px] focus-visible:outline-2 focus-visible:outline-ring lg:hidden"
         >
           <X className="icon-size-200" aria-hidden />
         </button>
@@ -1086,7 +1113,7 @@ function Picker({
               : 'Find a visual by name or publisher'
           }
           aria-controls={listId}
-          className="min-h-[40px] w-full rounded-full border border-border bg-card pl-[40px] pr-300 text-300 focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-60"
+          className="min-h-[40px] w-full rounded-full border border-input bg-card pl-[40px] pr-300 text-300 max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-60"
         />
       </label>
       <p role="status" className="sr-only">
@@ -1096,7 +1123,7 @@ function Picker({
         <button
           type="button"
           onClick={topTen}
-          className="min-h-[40px] rounded-full border border-border px-300 text-200 font-semibold hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+          className="min-h-[40px] rounded-full border border-border px-300 text-200 font-semibold hover:bg-hover max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring"
         >
           {certifiedOnly
             ? `Follow the ${MAX_PICKS} most popular certified visuals`
@@ -1106,7 +1133,7 @@ function Picker({
           <button
             type="button"
             onClick={() => onPicks([])}
-            className="min-h-[40px] rounded-full px-300 text-200 font-semibold text-muted-foreground hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+            className="min-h-[40px] rounded-full px-300 text-200 font-semibold text-muted-foreground hover:bg-hover max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring"
           >
             Show every visual
           </button>
@@ -1120,7 +1147,7 @@ function Picker({
               <button
                 type="button"
                 onClick={() => add(v)}
-                className="flex min-h-[40px] w-full items-center gap-200 rounded-xl px-100 text-left hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+                className="flex min-h-[40px] w-full items-center gap-200 rounded-xl px-100 text-left hover:bg-hover max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <Thumb src={w.thumbnail} name={w.name} size={28} />
                 <span className="min-w-0 flex-1">
@@ -1149,7 +1176,7 @@ function Picker({
                   type="button"
                   onClick={() => onPicks(picks.filter((p) => p !== v))}
                   aria-label={`Stop following ${w.name}`}
-                  className="inline-flex min-h-[40px] items-center gap-200 rounded-full border border-border bg-card py-100 pl-100 pr-300 text-200 font-semibold hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+                  className="inline-flex min-h-[40px] items-center gap-200 rounded-full border border-border bg-card py-100 pl-100 pr-300 text-200 font-semibold hover:bg-hover max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   <Thumb src={w.thumbnail} name={w.name} size={28} className="rounded-full" />
                   <span className="max-w-[140px] truncate">{w.name}</span>
@@ -1370,7 +1397,7 @@ export function ReplayPage({
                   type="button"
                   onClick={toggle}
                   aria-label={running ? 'Pause the replay' : at >= last ? 'Play again from the first day' : 'Play the replay'}
-                  className="inline-flex min-h-[40px] shrink-0 items-center gap-200 rounded-full bg-primary px-300 text-300 font-bold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:px-400"
+                  className="inline-flex min-h-[40px] shrink-0 items-center justify-center gap-200 rounded-full bg-primary px-300 text-300 font-bold text-primary-foreground max-sm:min-h-[44px] max-sm:min-w-[44px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:px-400"
                 >
                   {running ? (
                     <Pause className="icon-size-200" aria-hidden />
@@ -1391,7 +1418,7 @@ export function ReplayPage({
                   }
                   title="Fast forward"
                   className={cn(
-                    'inline-flex min-h-[40px] w-[60px] shrink-0 items-center justify-center gap-100 rounded-full border text-200 font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                    'inline-flex min-h-[40px] w-[60px] shrink-0 items-center justify-center gap-100 rounded-full border text-200 font-bold max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
                     speedUp > 1
                       ? 'border-primary bg-primary text-primary-foreground'
                       : 'border-border bg-card hover:bg-hover'
@@ -1424,7 +1451,7 @@ export function ReplayPage({
                     setPlaying(false);
                     setCursor(Number(e.target.value));
                   }}
-                  className="h-[36px] w-full cursor-pointer accent-[var(--color-pbi)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring xl:h-[22px]"
+                  className="h-[36px] w-full cursor-pointer accent-[var(--color-pbi-mark)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring max-sm:h-[44px] xl:h-[22px]"
                 />
                 {/* A wide screen has room for the day's note under the timeline, clear of the field. */}
                 <p className="hidden h-[16px] truncate text-200 leading-200 text-muted-foreground xl:block">
@@ -1499,13 +1526,13 @@ export function ReplayPage({
                 Counts
               </ToolButton>
               {scores && !following && (
-                <label className="inline-flex min-h-[40px] shrink-0 cursor-pointer items-center gap-200 rounded-full border border-border bg-card px-300 text-200 font-semibold hover:bg-hover has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring">
+                <label className="inline-flex min-h-[40px] shrink-0 cursor-pointer items-center gap-200 rounded-full border border-border bg-card px-300 text-200 font-semibold hover:bg-hover max-sm:min-h-[44px] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring">
                   <input
                     type="checkbox"
                     role="switch"
                     checked={showUnrated}
                     onChange={(e) => setShowUnrated(e.target.checked)}
-                    className="size-[16px] accent-[var(--color-pbi)]"
+                    className="size-[16px] accent-[var(--color-pbi-mark)]"
                   />
                   Include visuals with no ratings ({formatInt(counts.unrated)})
                 </label>
@@ -1641,7 +1668,7 @@ export function ReplayPage({
                         ? 'Close the Follow visuals panel'
                         : 'Close the How to read this view panel'
                     }
-                    className="inline-flex size-[32px] shrink-0 items-center justify-center rounded-full hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+                    className="inline-flex size-[32px] shrink-0 items-center justify-center rounded-full hover:bg-hover max-sm:size-[44px] focus-visible:outline-2 focus-visible:outline-ring"
                   >
                     <X className="icon-size-200" aria-hidden />
                   </button>
@@ -1665,10 +1692,11 @@ export function ReplayPage({
                 ) : (
                   <div className="flex flex-col gap-200 text-200 leading-200">
                     <p>
-                      Every dot is a custom visual on Microsoft Marketplace.{' '}
                       {scores
-                        ? 'Pointing at a dot shows the visual with its popularity, ratings, stars and new versions, and selecting the dot opens its details.'
-                        : 'Pointing at a dot shows the visual with its publisher, the day it was listed and its new versions, and selecting the dot opens its details.'}
+                        ? flat
+                          ? 'Every dot and every triangle is a custom visual on Microsoft Marketplace. Pointing at a visual shows its popularity, ratings, stars and new versions, and selecting the visual opens its details. A triangle pointing up is a visual gaining popularity, and a triangle pointing down is a visual losing popularity.'
+                          : 'Every dot and every cone is a custom visual on Microsoft Marketplace. Pointing at a visual shows its popularity, ratings, stars and new versions, and selecting the visual opens its details. A cone pointing up is a visual gaining popularity, and a cone pointing down is a visual losing popularity.'
+                        : 'Every dot is a custom visual on Microsoft Marketplace. Pointing at a visual shows its publisher, the day it was listed and its new versions, and selecting the visual opens its details.'}
                     </p>
                     {scores ? (
                       <p>
@@ -1697,7 +1725,7 @@ export function ReplayPage({
                     )}
                     <p>
                       {scores
-                        ? 'A visual that moves shows its logo until it comes to rest. A visual that joins, becomes certified or publishes a new version shows its logo for a moment. Each logo then turns back into a dot.'
+                        ? `A visual that moves shows its logo until it comes to rest. A visual that joins, becomes certified or publishes a new version shows its logo for a moment. Each logo then turns back into a dot or a ${flat ? 'triangle' : 'cone'}.`
                         : 'A visual that joins, becomes certified or publishes a new version shows its logo for a moment, and then turns back into a dot.'}{' '}
                       Each new version makes a visual a little larger.
                     </p>
