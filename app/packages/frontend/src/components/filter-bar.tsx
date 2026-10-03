@@ -17,7 +17,7 @@ import { Segmented } from './ui';
 // A control carries its own name: its first option or its placeholder says
 // what it filters, so no row of labels sits above the controls.
 const CONTROL =
-  'min-h-[36px] w-full min-w-0 rounded-xl border border-input bg-card px-300 text-300 fit:min-h-[32px] focus-visible:outline-2 focus-visible:outline-ring';
+  'min-h-[36px] w-full min-w-0 rounded-xl border border-input bg-card px-300 text-300 fit:min-h-[32px] max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring';
 
 export function FilterBar({
   visuals,
@@ -157,7 +157,7 @@ export function FilterBar({
             <button
               type="button"
               onClick={() => onChange(NO_FILTERS)}
-              className="inline-flex min-h-[32px] items-center gap-100 rounded-full border border-border px-300 text-200 font-semibold fit:min-h-[28px] hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
+              className="inline-flex min-h-[32px] items-center gap-100 rounded-full border border-border px-300 text-200 font-semibold fit:min-h-[28px] max-sm:min-h-[44px] hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
             >
               <RotateCcw className="icon-size-100" aria-hidden />
               Clear filters

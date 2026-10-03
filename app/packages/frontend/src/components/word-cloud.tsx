@@ -36,6 +36,9 @@ export function WordCloud({
   const [measured, setMeasured] = useState(0);
   const [fontsReady, setFontsReady] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
+  // Kept apart from hovering: a pointer fades the other words to pick one out,
+  // but a keyboard user stepping through them needs to keep reading the rest.
+  const [focused, setFocused] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
 
   useLayoutEffect(() => {
@@ -76,7 +79,8 @@ export function WordCloud({
   const byWord = useMemo(() => new Map(words.map((w) => [w.word, w])), [words]);
   const ranks = useMemo(() => popularityRanks(shown), [shown]);
   const focus = hovered ?? selected;
-  const caption = focus ? byWord.get(focus) : undefined;
+  const named = hovered ?? focused ?? selected;
+  const caption = named ? byWord.get(named) : undefined;
 
   const onKey = (e: KeyboardEvent, word: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -113,7 +117,7 @@ export function WordCloud({
                   key={p.word}
                   data-word={p.word}
                   initial={reduceMotion ? false : { opacity: 0, scale: 0.3, x: p.x, y: p.y }}
-                  animate={{ opacity: dim ? 0.22 : 1, scale: focus === p.word ? 1.08 : 1, x: p.x, y: p.y }}
+                  animate={{ opacity: dim ? 0.22 : 1, scale: focus === p.word || focused === p.word ? 1.08 : 1, x: p.x, y: p.y }}
                   transition={
                     reduceMotion
                       ? { duration: 0 }
@@ -131,12 +135,22 @@ export function WordCloud({
                   className="cursor-pointer outline-none"
                   onPointerEnter={() => setHovered(p.word)}
                   onPointerLeave={() => setHovered((h) => (h === p.word ? null : h))}
-                  onFocus={() => setHovered(p.word)}
-                  onBlur={() => setHovered((h) => (h === p.word ? null : h))}
+                  onFocus={() => setFocused(p.word)}
+                  onBlur={() => setFocused((f) => (f === p.word ? null : f))}
                   onClick={() => onSelect(isSelected ? null : p.word)}
                   onKeyDown={(e) => onKey(e, p.word)}
                 >
                   <g transform={p.vertical ? 'rotate(-90)' : undefined}>
+                    {/* The keyboard focus ring, drawn round the word because an SVG group has no outline of its own. */}
+                    <rect
+                      x={-p.width / 2 - 6}
+                      y={-p.size / 2 - 4}
+                      width={p.width + 12}
+                      height={p.size + 8}
+                      rx={6}
+                      className="hidden in-focus-visible:block"
+                      style={{ fill: 'none', stroke: 'var(--color-ring)', strokeWidth: 2 }}
+                    />
                     <text
                       y={p.baseline}
                       textAnchor="middle"

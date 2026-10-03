@@ -6,9 +6,10 @@ import { TABS, type Tab } from '@/lib/tabs';
 import { cn } from '@/lib/utils';
 
 const PIXIE_LINKS = [
-  { label: 'Website', href: 'https://bipixie.com' },
+  { label: 'Website', name: 'BI Pixie website', href: 'https://bipixie.com' },
   {
     label: 'Fabric workload',
+    name: 'BI Pixie Fabric workload',
     href: 'https://app.fabric.microsoft.com/workloadhub/detail/DataChant.BIPixie.Product?experience=fabric-developer',
   },
 ];
@@ -67,7 +68,7 @@ function PixieRibbon() {
                 href={link.href}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={`BI Pixie ${link.label.toLowerCase()}, opens in a new tab`}
+                aria-label={`${link.name}, opens in a new tab`}
                 className="inline-flex min-h-[44px] items-center gap-100 font-semibold text-white underline fit:min-h-[28px] underline-offset-2 hover:text-[#F8CF70] focus-visible:outline-2 focus-visible:outline-[#F8CF70]"
               >
                 {link.label}
@@ -113,7 +114,7 @@ export function Header({
           type="button"
           onClick={toggleTheme}
           aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-          className="absolute right-400 inline-flex size-[40px] items-center fit:size-[32px] justify-center rounded-full border border-border bg-card hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
+          className="absolute right-400 inline-flex size-[40px] items-center fit:size-[32px] max-sm:size-[44px] justify-center rounded-full border border-border bg-card hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
         >
           {isDark ? (
             <Sun className="icon-size-200" aria-hidden />
@@ -136,7 +137,7 @@ export function Header({
               aria-current={active ? 'page' : undefined}
               onClick={() => onTab(t.id)}
               className={cn(
-                'relative min-h-[44px] shrink-0 px-300 text-300 font-semibold transition-colors fit:min-h-[36px] focus-visible:outline-2 focus-visible:outline-ring',
+                'relative min-h-[44px] shrink-0 px-300 text-300 font-semibold transition-colors fit:min-h-[36px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
                 active
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -146,7 +147,7 @@ export function Header({
               {active && (
                 <span
                   aria-hidden
-                  className="absolute inset-x-200 bottom-0 h-[3px] rounded-full bg-pbi"
+                  className="absolute inset-x-200 bottom-0 h-[3px] rounded-full bg-pbi-mark"
                 />
               )}
             </button>

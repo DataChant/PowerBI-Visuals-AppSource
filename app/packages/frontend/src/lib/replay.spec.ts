@@ -2,348 +2,371 @@ import { describe, it, expect } from 'vitest';
 
 import {
   buildReplay,
+  CERTIFIED,
+  certifiedSince,
   comings,
   frameCounts,
+  growth,
   jitter,
-  lastScoredBefore,
+  lastReading,
+  LISTED,
+  modeStart,
   movers,
+  readingValues,
   sentiment,
-  unpack,
-  unpackRaters,
-  unpackStars,
+  spanAt,
+  valuesAt,
 } from '@/lib/replay';
 
 const asOf = new Date('2026-09-30T00:00:00Z');
-const DAY = 46000; // any whole day number; only the low digits carry data
-
-function pack(score: number, removed = false) {
-  return DAY * 10000 + Math.round(score * 1000) * 2 + (removed ? 1 : 0);
-}
-
-function table(rows: [string, number, number][]) {
-  return {
-    columns: [{ name: '[Visual]' }, { name: '[Week]' }, { name: '[Latest]' }],
-    rows,
-  };
-}
-
-/** Rows as the snapshot writes them: a score, or only what the Listing column records. */
-function listingTable(rows: [string, number, number | null, number][]) {
-  return {
-    columns: [{ name: '[Visual]' }, { name: '[Week]' }, { name: '[Latest]' }, { name: '[Listing]' }],
-    rows,
-  };
-}
-const LISTED = 1;
 const VERSION = 2;
-const CERTIFIED = 4;
 
-describe('unpack', () => {
-  it('reads the score and the removal flag back out of the packed number', () => {
-    expect(unpack(pack(0.734))).toEqual({ score: 0.734, removed: false });
-    expect(unpack(pack(0.5, true))).toEqual({ score: 0.5, removed: true });
-  });
-});
+type Row = [
+  visual: string,
+  day: number,
+  popularity: number | null,
+  raters: number | null,
+  stars: number | null,
+  listing: number | null,
+];
+
+function table(rows: Row[]) {
+  return {
+    columns: ['[Visual]', '[Day]', '[Popularity]', '[Raters]', '[Stars]', '[Listing]'].map(
+      (name) => ({ name })
+    ),
+    rows,
+  };
+}
+
+/** A reading of a listed visual. */
+function read(visual: string, day: number, popularity: number, raters = 0, stars = 0, listing = LISTED): Row {
+  return [visual, day, popularity, raters, stars, listing];
+}
+
+/** A listing change with no reading. */
+function list(visual: string, day: number, listing: number): Row {
+  return [visual, day, null, null, null, listing];
+}
 
 describe('buildReplay', () => {
   it('returns no frames for an empty result', () => {
-    expect(buildReplay(table([]), asOf).frames).toEqual([]);
+    const r = buildReplay(table([]), asOf);
+    expect(r.frames).toEqual([]);
+    expect(r.readings).toEqual([]);
+    expect(r.firstReading).toBe(-1);
   });
 
-  it('carries a score forward through weeks with no change, and dates frames back from asOf', () => {
-    const r = buildReplay(
-      table([
-        ['a', 2, pack(0.4)],
-        ['b', 2, pack(0.6)],
-        ['a', 0, pack(0.5)],
-      ]),
-      asOf
-    );
-    expect(r.frames).toHaveLength(3);
-    expect(r.frames[0].end.toISOString()).toBe('2026-09-16T00:00:00.000Z');
-    expect(r.frames[2].end.toISOString()).toBe('2026-09-30T00:00:00.000Z');
-    const a = r.guids.indexOf('a');
-    expect(r.frames[1].scores[a]).toBeCloseTo(0.4);
-    expect(r.frames[2].scores[a]).toBeCloseTo(0.5);
-  });
-
-  it('counts arrivals and departures, and keeps a departed dot at its last score', () => {
-    const r = buildReplay(
-      table([
-        ['a', 2, pack(0.4)],
-        ['b', 2, pack(0.6)],
-        ...(['d', 'e', 'f', 'g', 'h', 'i', 'j', 'k'].map((g) => [g, 2, pack(0.5)]) as [string, number, number][]),
-        ['c', 1, pack(0.2)],
-        ['b', 0, pack(0.6, true)],
-      ]),
-      asOf
-    );
-    const [b, c] = [r.guids.indexOf('b'), r.guids.indexOf('c')];
-    expect(r.frames[1].arrived).toEqual([c]);
-    expect(r.frames[2].left).toEqual([b]);
-    expect(Number.isNaN(r.frames[2].scores[b])).toBe(true);
-    expect(r.frames[2].positions[b]).toBeCloseTo(0.6);
-    // Before it arrives, a dot waits at its first score.
-    expect(r.frames[0].positions[c]).toBeCloseTo(0.2);
-    expect(r.frames.map((f) => f.listed)).toEqual([10, 11, 10]);
-  });
-
-  it('keeps the first week even when only some visuals have a score in it', () => {
-    const rows: [string, number, number | null, number][] = [['a', 3, pack(0.1), LISTED]];
-    for (const g of ['b', 'c', 'd', 'e']) rows.push([g, 3, null, LISTED]);
-    for (const g of ['a', 'b', 'c', 'd', 'e']) rows.push([g, 2, pack(0.3), LISTED]);
-    const r = buildReplay(listingTable(rows), asOf);
+  it('makes one frame per day, dated back from asOf, with no day skipped', () => {
+    const r = buildReplay(table([list('a', 3, LISTED), read('a', 0, 0.5)]), asOf);
     expect(r.frames).toHaveLength(4);
-    expect(r.frames[0].listed).toBe(5);
-    // A first score is not an arrival, and it is not a move either.
-    expect(r.frames[1].arrived).toEqual([]);
-    expect(r.frames[1].changed).toBe(1);
-    const b = r.guids.indexOf('b');
-    expect(r.frames[0].present[b]).toBe(1);
-    expect(Number.isNaN(r.frames[0].scores[b])).toBe(true);
-    expect(r.frames[0].positions[b]).toBeCloseTo(0.3);
+    expect(r.frames[0].day.toISOString()).toBe('2026-09-27T00:00:00.000Z');
+    expect(r.frames[3].day.toISOString()).toBe('2026-09-30T00:00:00.000Z');
   });
 
-  it('marks quiet weeks and the busy week that follows a long quiet run', () => {
-    const guids = Array.from({ length: 10 }, (_, i) => `v${i}`);
-    const rows: [string, number, number][] = guids.map((g) => [g, 6, pack(0.3)]);
-    // Weeks 5 to 1 change nothing; week 0 moves every visual by 10 points.
-    for (const g of guids) rows.push([g, 0, pack(0.4)]);
-    const r = buildReplay(table(rows), asOf);
-    expect(r.frames.map((f) => f.quiet)).toEqual([false, true, true, true, true, true, false]);
-    expect(r.frames[6].catchUp).toBe(true);
-    expect(r.frames[6].bigMoves).toBe(10);
-    expect(r.frames[6].changed).toBe(10);
+  it('holds a visual state until its next row, and shares the array on a day nothing changed', () => {
+    const r = buildReplay(
+      table([list('a', 3, LISTED), list('a', 1, LISTED | CERTIFIED), list('b', 0, LISTED)]),
+      asOf
+    );
+    const a = r.guids.indexOf('a');
+    expect(r.frames[1].state[a]).toBe(LISTED);
+    expect(r.frames[1].state).toBe(r.frames[0].state);
+    expect(r.frames[2].state[a]).toBe(LISTED | CERTIFIED);
+    expect(r.frames[3].state[a]).toBe(LISTED | CERTIFIED);
+    // A later change copies the array, so the earlier day keeps its own state.
+    expect(r.frames[0].state[a]).toBe(LISTED);
+  });
+
+  it('counts arrivals and departures, but never the visuals already listed on the first day', () => {
+    const r = buildReplay(
+      table([list('a', 3, LISTED), list('b', 1, LISTED), list('a', 0, 0)]),
+      asOf
+    );
+    const a = r.guids.indexOf('a');
+    const b = r.guids.indexOf('b');
+    expect(r.frames[0].arrived).toEqual([]);
+    expect(r.frames[2].arrived).toEqual([b]);
+    expect(r.frames[3].left).toEqual([a]);
+  });
+
+  it('marks a new version on its own day only, and keeps the running count', () => {
+    const r = buildReplay(
+      table([
+        list('a', 4, LISTED | VERSION),
+        list('a', 2, LISTED | VERSION),
+        list('a', 1, LISTED | VERSION),
+        list('b', 0, LISTED),
+      ]),
+      asOf
+    );
+    const a = r.guids.indexOf('a');
+    // The first day is where the replay starts, so its version is not an event.
+    expect(r.frames[0].versioned).toEqual([]);
+    expect(r.frames[0].versions[a]).toBe(0);
+    expect(r.frames[2].versioned).toEqual([a]);
+    expect(r.frames[3].versioned).toEqual([a]);
+    expect(r.frames[4].versioned).toEqual([]);
+    expect(Array.from(r.frames.map((f) => f.versions[a]))).toEqual([0, 0, 1, 2, 2]);
+    // The version bit is never kept as state.
+    expect(r.frames[4].state[a]).toBe(LISTED);
+  });
+
+  it('records certification and its loss for listed visuals, not an arrival that comes certified', () => {
+    const r = buildReplay(
+      table([
+        list('a', 3, LISTED),
+        list('a', 2, LISTED | CERTIFIED),
+        list('a', 0, LISTED),
+        list('b', 1, LISTED | CERTIFIED),
+      ]),
+      asOf
+    );
+    const a = r.guids.indexOf('a');
+    const b = r.guids.indexOf('b');
+    expect(r.frames[1].certified).toEqual([a]);
+    expect(r.frames[2].arrived).toEqual([b]);
+    expect(r.frames[2].certified).toEqual([]);
+    expect(r.frames[3].uncertified).toEqual([a]);
+  });
+
+  it('keeps a reading only on the days the leaderboard was read, and carries absent visuals forward', () => {
+    const r = buildReplay(
+      table([
+        read('a', 3, 0.4, 2, 4),
+        read('a', 1, 0.5, 3, 4.5),
+        read('b', 3, 0.6, 10, 3),
+        list('c', 2, LISTED),
+      ]),
+      asOf
+    );
+    const b = r.guids.indexOf('b');
+    expect(r.readings.map((k) => k.frame)).toEqual([0, 2]);
+    expect(r.firstReading).toBe(0);
+    expect(r.frames.map((f) => f.reading)).toEqual([0, 0, 1, 1]);
+    // b was not in the second reading, so it held its figures.
+    expect(r.readings[1].scores[b]).toBeCloseTo(0.6);
+    expect(r.readings[1].raters[b]).toBe(10);
+    expect(r.readings[1].readOn[b]).toBe(0);
+  });
+
+  it('reads a reading with no ratings count as no ratings, not as the next count', () => {
+    const r = buildReplay(table([['a', 2, 0.3, null, null, LISTED], read('a', 0, 0.4, 5, 4)]), asOf);
+    const a = r.guids.indexOf('a');
+    expect(r.readings[0].raters[a]).toBe(0);
+    expect(r.first.raters[a]).toBe(0);
+  });
+
+  it('places a visual before its first reading where it was first read', () => {
+    const r = buildReplay(table([read('a', 2, 0.2), read('b', 0, 0.8, 7, 5)]), asOf);
+    const b = r.guids.indexOf('b');
+    expect(r.first.score[b]).toBeCloseTo(0.8);
+    expect(readingValues(r, 0).score[b]).toBeCloseTo(0.8);
+    expect(lastReading(r, 1, b)).toBeNull();
+    expect(lastReading(r, 2, b)).toEqual({ frame: 2, score: expect.closeTo(0.8), raters: 7, stars: 5 });
   });
 });
 
-describe('a record that knows who was listed before it knows the scores', () => {
-  // Week 14 lists two visuals with no score. Week 13 scores them. Weeks 12 to 4
-  // record no score, and week 8 records an arrival, a version and a
-  // certification. Week 3 scores everything again.
+describe('spanAt and valuesAt', () => {
   const r = buildReplay(
-    listingTable([
-      ['a', 14, null, LISTED],
-      ['b', 14, null, LISTED],
-      ['a', 13, pack(0.4), LISTED],
-      ['b', 13, pack(0.6), LISTED],
-      ['a', 8, null, LISTED + VERSION],
-      ['b', 8, null, LISTED + CERTIFIED],
-      ['c', 8, null, LISTED],
-      ['b', 6, null, 0],
-      ['a', 3, pack(0.7), LISTED],
-      ['c', 3, pack(0.2), LISTED],
-      ['b', 1, null, LISTED],
+    table([
+      list('a', 6, LISTED),
+      read('a', 4, 0.2, 0, 0),
+      read('a', 0, 0.6, 100, 4),
     ]),
     asOf
   );
-  const [a, b, c] = ['a', 'b', 'c'].map((g) => r.guids.indexOf(g));
-  const at = (week: number) => 14 - week;
+  const a = r.guids.indexOf('a');
 
-  it('opens on the listed visuals, with no score and no arrivals', () => {
-    const first = r.frames[0];
-    expect(first.listed).toBe(2);
-    expect(first.arrived).toEqual([]);
-    expect(first.scored).toBe(false);
-    expect(first.unscored).toBe(true);
-    expect(first.scoredAt).toBe(-1);
-    expect(Number.isNaN(first.scores[a])).toBe(true);
-    // The dot waits where its first score later places it.
-    expect(first.positions[a]).toBeCloseTo(0.4);
+  it('names the two readings a day sits between', () => {
+    expect(spanAt(r, 0)).toEqual({ from: 0, to: 0, f: 0 });
+    expect(spanAt(r, 2)).toEqual({ from: 0, to: 1, f: 0 });
+    expect(spanAt(r, 4)).toEqual({ from: 0, to: 1, f: 0.5 });
+    expect(spanAt(r, 6)).toEqual({ from: 1, to: 1, f: 0 });
   });
 
-  it('marks the weeks in which popularity was recorded again', () => {
-    expect(r.frames.map((f) => f.resumed)).toEqual(r.frames.map((_, i) => i === at(13) || i === at(3)));
-    expect(lastScoredBefore(r, at(13))).toBeNull();
-    expect(lastScoredBefore(r, at(3))?.toISOString()).toBe(r.frames[at(13)].end.toISOString());
-    // A resumed week is neither a quiet week nor a catch-up week.
-    expect(r.frames[at(3)].quiet).toBe(false);
-    expect(r.frames[at(3)].catchUp).toBe(false);
-    expect(r.frames[at(3)].bigMoves).toBe(1);
+  it('moves a visual along a straight line between two readings', () => {
+    expect(valuesAt(r, 3).score[a]).toBeCloseTo(0.3);
+    expect(valuesAt(r, 4).score[a]).toBeCloseTo(0.4);
+    expect(valuesAt(r, 4).raters[a]).toBeCloseTo(50);
+    expect(valuesAt(r, 5).stars[a]).toBeCloseTo(3);
   });
 
-  it('treats a long run without a score as unscored, and holds the last score through it', () => {
-    for (let week = 12; week >= 4; week--) {
-      expect(r.frames[at(week)].unscored).toBe(true);
-      expect(r.frames[at(week)].scoredAt).toBe(at(13));
-      expect(r.frames[at(week)].scores[a]).toBeCloseTo(0.4);
-    }
-    // Weeks 2 to 0 are too few to be a stretch of their own.
-    expect(r.frames[at(2)].unscored).toBe(false);
-    expect(r.frames[at(3)].scoredAt).toBe(at(3));
+  it('holds before the first reading and from the last one on', () => {
+    expect(valuesAt(r, 0).score[a]).toBeCloseTo(0.2);
+    expect(valuesAt(r, 6).score[a]).toBeCloseTo(0.6);
   });
 
-  it('plays an unscored week quickly only when nothing was recorded in it', () => {
-    expect(r.frames[at(10)].quiet).toBe(true);
-    expect(r.frames[at(8)].quiet).toBe(false);
-    expect(r.frames[at(6)].quiet).toBe(false);
-  });
-
-  it('records arrivals, departures, versions and certifications without a score', () => {
-    const week8 = r.frames[at(8)];
-    expect(week8.arrived).toEqual([c]);
-    expect(week8.versions).toEqual([a]);
-    expect(week8.certified).toEqual([b]);
-    expect(week8.present[c]).toBe(1);
-    expect(Number.isNaN(week8.scores[c])).toBe(true);
-    expect(r.frames[at(6)].left).toEqual([b]);
-    expect(frameCounts(r, at(8))).toEqual({
-      listed: 3,
-      unrated: 3,
-      arrived: 1,
-      left: 0,
-      bigMoves: 0,
-      versions: 1,
-      certified: 1,
-    });
-    expect(frameCounts(r, at(8), (v) => v === b)).toMatchObject({ arrived: 0, versions: 0, certified: 1 });
-  });
-
-  it('forgets a score when the visual leaves, so a return starts with none', () => {
-    expect(Number.isNaN(r.frames[at(6)].scores[b])).toBe(true);
-    expect(r.frames[at(1)].present[b]).toBe(1);
-    expect(r.frames[at(1)].arrived).toEqual([b]);
-    expect(Number.isNaN(r.frames[at(1)].scores[b])).toBe(true);
-    // Its dot still has a place: the last score it had.
-    expect(r.frames[at(1)].positions[b]).toBeCloseTo(0.6);
-  });
-
-  it('dates a move from the day the earlier score was recorded', () => {
-    const m = movers(r, at(3), 4, 8);
-    expect(m.from?.toISOString()).toBe(r.frames[at(13)].end.toISOString());
-    expect(m.climbers.map((x) => x.guid)).toEqual(['a']);
-    expect(m.climbers[0].delta).toBeCloseTo(0.3);
-  });
-
-  it('lists who joined and who left over the lookback', () => {
-    const week6 = comings(r, at(6), 4);
-    expect(week6.from?.toISOString()).toBe(r.frames[at(10)].end.toISOString());
-    expect(week6.joined).toEqual([c]);
-    expect(week6.left).toEqual([b]);
-    expect(comings(r, at(6), 4, (v) => v === c)).toMatchObject({ joined: [c], left: [] });
-    expect(comings(r, 0, 4)).toEqual({ from: null, joined: [], left: [] });
+  it('gives NaN for a visual that was never read', () => {
+    const s = buildReplay(table([read('a', 1, 0.5), list('b', 1, LISTED)]), asOf);
+    expect(valuesAt(s, 1).score[s.guids.indexOf('b')]).toBeNaN();
   });
 });
 
 describe('movers', () => {
   const r = buildReplay(
     table([
-      ['up', 2, pack(0.2)],
-      ['down', 2, pack(0.8)],
-      ['flat', 2, pack(0.5)],
-      ['new', 0, pack(0.9)],
-      ['up', 0, pack(0.45)],
-      ['down', 0, pack(0.7)],
+      read('up', 3, 0.2),
+      read('down', 3, 0.7),
+      read('flat', 3, 0.5),
+      read('up', 0, 0.5),
+      read('down', 0, 0.6),
+      read('new', 0, 0.9, 0, 0, LISTED),
+      list('new', 3, 0),
     ]),
     asOf
   );
 
-  it('ranks climbers and sliders over the lookback, ignoring arrivals and unchanged visuals', () => {
-    const m = movers(r, 2, 4, 8);
-    expect(m.from?.toISOString()).toBe(r.frames[0].end.toISOString());
+  it('ranks the climbs and slides between a number of days ago and today', () => {
+    const m = movers(r, 3, 3, 5);
+    expect(m.from?.toISOString()).toBe('2026-09-27T00:00:00.000Z');
     expect(m.climbers.map((x) => x.guid)).toEqual(['up']);
-    expect(m.climbers[0].delta).toBeCloseTo(0.25);
+    expect(m.climbers[0].delta).toBeCloseTo(0.3);
     expect(m.sliders.map((x) => x.guid)).toEqual(['down']);
   });
 
-  it('has nothing to compare on the first frame', () => {
-    expect(movers(r, 0, 4, 8)).toEqual({ from: null, climbers: [], sliders: [] });
+  it('never counts a visual that arrived in between as a climb', () => {
+    const m = movers(r, 3, 3, 5);
+    expect(m.climbers.some((x) => x.guid === 'new')).toBe(false);
   });
 
-  it('ranks only the visuals the include test accepts', () => {
-    const down = r.guids.indexOf('down');
-    const m = movers(r, 2, 4, 8, (v) => v === down);
-    expect(m.climbers).toEqual([]);
-    expect(m.sliders.map((x) => x.guid)).toEqual(['down']);
+  it('ranks only the visuals the filter accepts', () => {
+    const up = r.guids.indexOf('up');
+    expect(movers(r, 3, 3, 5, (v) => v !== up).climbers).toEqual([]);
+  });
+
+  it('measures change from the last reading by the earlier day', () => {
+    // Day 2 has no reading of its own, so it compares with the first reading.
+    expect(movers(r, 3, 1, 5).climbers.map((x) => x.guid)).toEqual(['up']);
+  });
+
+  it("never counts a visual's first popularity, a rise from 0, as a climb", () => {
+    const first = buildReplay(
+      table([read('up', 3, 0.2), read('fresh', 3, 0), read('up', 0, 0.3), read('fresh', 0, 0.8)]),
+      asOf
+    );
+    expect(movers(first, 3, 3, 5).climbers.map((x) => x.guid)).toEqual(['up']);
+  });
+});
+
+describe('comings', () => {
+  it('lists who joined and left in the period, the most popular first', () => {
+    const r = buildReplay(
+      table([
+        read('a', 4, 0.5),
+        read('gone', 4, 0.3),
+        list('gone', 2, 0),
+        read('low', 1, 0.1),
+        read('high', 1, 0.9),
+        list('never', 1, LISTED),
+      ]),
+      asOf
+    );
+    const c = comings(r, 4, 4);
+    expect(c.joined.map((v) => r.guids[v])).toEqual(['high', 'low', 'never']);
+    expect(c.left.map((v) => r.guids[v])).toEqual(['gone']);
+  });
+});
+
+describe('certifiedSince', () => {
+  const r = buildReplay(
+    table([
+      read('early', 4, 0.3),
+      list('early', 2, LISTED | CERTIFIED),
+      read('late', 4, 0.8),
+      list('late', 1, LISTED | CERTIFIED),
+      list('born', 1, LISTED | CERTIFIED),
+      list('always', 4, LISTED | CERTIFIED),
+      list('other', 4, LISTED),
+    ]),
+    asOf
+  );
+
+  it('lists the visuals certified in the period, the most popular first', () => {
+    const c = certifiedSince(r, 4, 4);
+    expect(c.certified.map((v) => r.guids[v])).toEqual(['late', 'early']);
+    expect(c.from).toEqual(r.frames[0].day);
+  });
+
+  it('leaves out a visual that joined certified, and one certified before the period', () => {
+    expect(certifiedSince(r, 4, 1).certified).toEqual([]);
+    expect(certifiedSince(r, 0, 4)).toEqual({ from: null, certified: [] });
+  });
+
+  it('lists only the visuals the filter accepts', () => {
+    const c = certifiedSince(r, 4, 4, (v) => r.guids[v] === 'early');
+    expect(c.certified.map((v) => r.guids[v])).toEqual(['early']);
+  });
+});
+
+describe('modeStart', () => {
+  it('starts the popularity mode at the first reading and the listings mode at the first day', () => {
+    const r = buildReplay(table([list('a', 4, LISTED), read('a', 2, 0.5)]), asOf);
+    expect(modeStart(r, 'scores')).toBe(2);
+    expect(modeStart(r, 'listings')).toBe(0);
+    const never = buildReplay(table([list('a', 4, LISTED)]), asOf);
+    expect(modeStart(never, 'scores')).toBe(0);
   });
 });
 
 describe('frameCounts', () => {
   const r = buildReplay(
     table([
-      ['up', 2, pack(0.2)],
-      ['down', 2, pack(0.8)],
-      ['flat', 2, pack(0.5)],
-      ['new', 0, pack(0.9)],
-      ['up', 0, pack(0.45)],
-      ['down', 0, pack(0.7)],
-      ['flat', 0, pack(0.5, true)],
+      read('a', 3, 0.2, 0),
+      read('b', 3, 0.5, 4, 4, LISTED | CERTIFIED),
+      read('a', 1, 0.3, 1, 5, LISTED | VERSION),
+      list('c', 1, LISTED),
+      read('d', 0, 0.4),
     ]),
     asOf
   );
 
-  it('matches the numbers the frame carries when every visual counts', () => {
-    const c = frameCounts(r, 2);
-    const f = r.frames[2];
-    expect(c.listed).toBe(f.listed);
-    expect(c.arrived).toBe(f.arrived.length);
-    expect(c.left).toBe(f.left.length);
-    expect(c.bigMoves).toBe(f.bigMoves);
-    // The fixture carries no ratings, so every listed visual is unrated.
-    expect(c.unrated).toBe(f.listed);
+  it('counts the visuals not read yet, and the ones never read at all', () => {
+    const counts = frameCounts(r, 2);
+    expect(counts.listed).toBe(3);
+    expect(counts.unread).toBe(1);
+    expect(counts.unplaced).toBe(1);
+    expect(frameCounts(r, 3).unread).toBe(1);
   });
 
-  it('counts only the visuals the include test accepts', () => {
-    const up = r.guids.indexOf('up');
-    expect(frameCounts(r, 2, (v) => v === up)).toEqual({
-      listed: 1,
-      unrated: 1,
-      arrived: 0,
-      left: 0,
-      bigMoves: 1,
-      versions: 0,
-      certified: 0,
-    });
+  it('counts the day events, for a subset when given one', () => {
+    expect(frameCounts(r, 2)).toMatchObject({ arrived: 1, versions: 1, unrated: 1 });
+    const b = r.guids.indexOf('b');
+    const certifiedOnly = (v: number) => v === b;
+    expect(frameCounts(r, 2, certifiedOnly)).toMatchObject({ listed: 1, arrived: 0, versions: 0 });
+  });
+});
+
+describe('growth', () => {
+  it('grows by the square root of the versions published since a day, up to 2.2 times', () => {
+    const rows: Row[] = [list('a', 40, LISTED), list('b', 0, LISTED)];
+    for (let day = 39; day >= 1; day--) rows.push(list('a', day, LISTED | VERSION));
+    const r = buildReplay(table(rows), asOf);
+    const a = r.guids.indexOf('a');
+    expect(growth(r, 0, 0, a)).toBe(1);
+    expect(growth(r, 4, 0, a)).toBeCloseTo(1.44);
+    expect(growth(r, 4, 3, a)).toBeCloseTo(1.22);
+    expect(growth(r, 40, 0, a)).toBe(2.2);
+  });
+});
+
+describe('sentiment', () => {
+  it('centres average stars on a neutral 3, and has none without ratings', () => {
+    expect(sentiment(5, 10)).toBe(2);
+    expect(sentiment(1, 3)).toBe(-2);
+    expect(sentiment(4, 0)).toBeNull();
+    expect(sentiment(0, 4)).toBeNull();
   });
 });
 
 describe('jitter', () => {
-  it('is stable and within [0, 1)', () => {
+  it('is stable for a visual, spread over [0, 1), and changes with the salt', () => {
     expect(jitter('abc')).toBe(jitter('abc'));
-    for (const g of ['a', 'b', 'PBI_CV_1234']) {
+    expect(jitter('abc')).not.toBe(jitter('abd'));
+    expect(jitter('abc', 'x')).not.toBe(jitter('abc'));
+    for (const g of ['a', 'b', 'c', 'visual-guid-1']) {
       expect(jitter(g)).toBeGreaterThanOrEqual(0);
       expect(jitter(g)).toBeLessThan(1);
     }
-  });
-});
-
-describe('ratings and stars', () => {
-  const ratingsTable = (rows: [string, number, number, number | null, number | null][]) => ({
-    columns: [
-      { name: '[Visual]' },
-      { name: '[Week]' },
-      { name: '[Latest]' },
-      { name: '[Raters]' },
-      { name: '[Stars]' },
-    ],
-    rows,
-  });
-
-  it('unpacks the day-prefixed ratings count and average stars', () => {
-    expect(unpackRaters(DAY * 100000 + 276)).toBe(276);
-    expect(unpackStars(DAY * 1000 + 437)).toBeCloseTo(4.37);
-    expect(Number.isNaN(unpackRaters(null))).toBe(true);
-  });
-
-  it('carries ratings forward through blank weeks and back to before the first reading', () => {
-    const r = buildReplay(
-      ratingsTable([
-        ['a', 2, pack(0.4), null, null],
-        ['a', 1, pack(0.5), DAY * 100000 + 12, DAY * 1000 + 420],
-        ['a', 0, pack(0.6), null, null],
-      ]),
-      asOf
-    );
-    const a = r.guids.indexOf('a');
-    expect(r.frames.map((f) => f.raters[a])).toEqual([12, 12, 12]);
-    expect(r.frames[2].stars[a]).toBeCloseTo(4.2);
-  });
-
-  it('centres stars on a neutral 3, and gives an unrated visual no sentiment', () => {
-    expect(sentiment(3, 10)).toBe(0);
-    expect(sentiment(5, 10)).toBe(2);
-    expect(sentiment(1, 4)).toBe(-2);
-    expect(sentiment(0, 0)).toBeNull();
-    expect(sentiment(4, 0)).toBeNull();
   });
 });

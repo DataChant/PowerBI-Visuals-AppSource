@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Download, ExternalLink, PlayCircle, Star, X } from 'lucide-react';
 import { useEffect, useMemo, useRef } from 'react';
 
+import { useInert } from '@/hooks/use-inert';
 import { useQueryTable } from '@/hooks/use-query-table';
 import type { CatalogVisual, StarCount } from '@/lib/catalog';
 import { starsFor } from '@/lib/catalog';
@@ -17,6 +18,7 @@ import { asString, readRows } from '@/lib/table';
 import { toDataTable } from '@/lib/to-data-table';
 import { popularityHistory, visualProfile, visualScreenshots } from '@/queries';
 
+import { ChartImage, ChartTable } from './chart';
 import { EmptyState, ErrorState, LoadingBlock } from './states';
 import { CertifiedBadge, Thumb } from './ui';
 
@@ -148,20 +150,28 @@ function History({
       </EmptyState>
     );
   return (
-    <div role="img" aria-label="Popularity over time" className="flex h-[220px] flex-col">
-      <VegaVisual
-        spec={spec ?? source.vegaLiteSpec}
-        capabilities={OWN_TOOLTIP}
-        data={table}
-        theme={theme}
-        className="min-h-0 flex-1"
-        style={{ width: '100%', height: '100%' }}
-      />
-    </div>
+    <>
+      <ChartImage label="Popularity over time" className="flex h-[220px] flex-col">
+        <VegaVisual
+          spec={spec ?? source.vegaLiteSpec}
+          capabilities={OWN_TOOLTIP}
+          data={table}
+          theme={theme}
+          className="min-h-0 flex-1"
+          style={{ width: '100%', height: '100%' }}
+        />
+      </ChartImage>
+      <ChartTable table={table} caption={`${name}, popularity and ratings over time`} />
+    </>
   );
 }
 
-function Profile({ id }: { id: string }) {
+/** Said after the name of every link that opens in a new tab. */
+function NewTab() {
+  return <span className="sr-only">, opens in a new tab</span>;
+}
+
+function Profile({ id, name }: { id: string; name: string }) {
   const profile = useQueryTable(safeQuery(id, visualProfile));
   const shots = useQueryTable(safeQuery(id, visualScreenshots));
   const gone = (
@@ -226,6 +236,7 @@ function Profile({ id }: { id: string }) {
             <span className="inline-flex items-center gap-200 rounded-full bg-black/60 px-400 py-200 text-300 font-semibold">
               <PlayCircle className="icon-size-300" aria-hidden />
               Watch the video
+              <NewTab />
             </span>
           </span>
         </a>
@@ -234,7 +245,7 @@ function Profile({ id }: { id: string }) {
         <div>
           <h3 className="mb-200 text-300 font-bold">Screenshots</h3>
           <div className="flex snap-x gap-200 overflow-x-auto pb-200">
-            {screenshots.map((url) => (
+            {screenshots.map((url, i) => (
               <a
                 key={url}
                 href={url}
@@ -244,11 +255,12 @@ function Profile({ id }: { id: string }) {
               >
                 <img
                   src={url}
-                  alt="A screenshot of the visual from its Microsoft Marketplace listing"
+                  alt={`${name}, screenshot ${i + 1} of ${screenshots.length}`}
                   loading="lazy"
                   referrerPolicy="no-referrer"
                   className="h-[140px] w-auto"
                 />
+                <NewTab />
               </a>
             ))}
           </div>
@@ -266,6 +278,7 @@ function Profile({ id }: { id: string }) {
               >
                 {label}
                 <ExternalLink className="icon-size-100" aria-hidden />
+                <NewTab />
               </a>
             </li>
           ))}
@@ -289,6 +302,9 @@ export function VisualDrawer({
   onClose: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Declared before the focus effect, so the page is released before focus returns to it.
+  useInert(rootRef, Boolean(visual));
 
   useEffect(() => {
     if (!visual) return;
@@ -322,7 +338,7 @@ export function VisualDrawer({
   return (
     <AnimatePresence>
       {visual && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div ref={rootRef} className="fixed inset-0 z-50 flex justify-end">
           <motion.div
             aria-hidden
             className="absolute inset-0 bg-black/40"
@@ -331,7 +347,7 @@ export function VisualDrawer({
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          <motion.aside
+          <motion.div
             role="dialog"
             aria-modal="true"
             aria-label={name}
@@ -362,6 +378,7 @@ export function VisualDrawer({
                     >
                       Open in Microsoft Marketplace
                       <ExternalLink className="icon-size-100" aria-hidden />
+                      <NewTab />
                     </a>
                   )}
                   {entry?.download.startsWith('https://') && (
@@ -382,7 +399,7 @@ export function VisualDrawer({
                 type="button"
                 onClick={onClose}
                 aria-label="Close the visual details"
-                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full bg-card hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
+                className="inline-flex size-[40px] shrink-0 items-center justify-center rounded-full bg-card hover:bg-accent max-sm:size-[44px] focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <X className="icon-size-200" aria-hidden />
               </button>
@@ -433,10 +450,10 @@ export function VisualDrawer({
 
               <section>
                 <h3 className="mb-200 text-300 font-bold">About this visual</h3>
-                <Profile id={id} />
+                <Profile id={id} name={name} />
               </section>
             </div>
-          </motion.aside>
+          </motion.div>
         </div>
       )}
     </AnimatePresence>

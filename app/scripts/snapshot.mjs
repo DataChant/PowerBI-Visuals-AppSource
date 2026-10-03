@@ -8,9 +8,10 @@
 //
 // Neither needs a sign-in, so this runs anywhere: `npm run snapshot`.
 //
-// The leaderboard begins on 24 July 2025. What the repository recorded before
-// that is read from scripts/listing-history.json, which listing-history.mjs
-// built once from the older commits of "Visuals Summary.csv".
+// The leaderboard begins on 24 July 2025. Which visuals were listed, from
+// January 2024, and when each new version and certification came out, is read
+// from the commits of "Visuals Summary.csv": scripts/listing-history.json holds
+// those up to the day it was built, and the newer commits are read here.
 //
 // Whole-catalog files are written as they are. Per-visual files are split into
 // buckets, so opening one visual downloads a small file rather than everything.
@@ -18,15 +19,36 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  advance,
+  commitsSince,
+  copyAt,
+  dayOf,
+  get,
+  isoOf,
+  openStretch,
+  parseCsv,
+  readHistory,
+  REPOSITORY,
+  rowsOf,
+} from './listing-events.mjs';
+
 const CATALOG_URL =
   "https://catalogapi.azure.com/offers?api-version=2018-08-01-beta&storefront=appsource&$filter=offerType eq 'PowerBIVisuals'";
 // A GitHub Actions run reads the file from the repository it runs in, so the
 // site keeps building if the repository is renamed or forked.
-const REPOSITORY = process.env.GITHUB_REPOSITORY || 'DataChant/PowerBI-Visuals-Marketplace';
 const LEADERBOARD_URL = `https://raw.githubusercontent.com/${REPOSITORY}/refs/heads/main/leaderboard_data.csv`;
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'packages/frontend/public/snapshot');
+
+/**
+ * What the data files hold, as a number, written to built.json. A copy of the
+ * app published elsewhere reads the website's files only when this matches its
+ * own `DATA_FORMAT` in packages/frontend/src/lib/snapshot.ts, so raise both
+ * whenever a file changes shape.
+ */
+const DATA_FORMAT = 2;
 
 /** Keep in step with `bucketOf` in packages/frontend/src/lib/snapshot.ts. */
 const BUCKETS = 64;
@@ -34,19 +56,6 @@ function bucketOf(key) {
   let sum = 0;
   for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
   return sum % BUCKETS;
-}
-
-async function get(url) {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`${response.status} from ${url}`);
-      return response;
-    } catch (error) {
-      if (attempt === 4) throw error;
-      await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
-    }
-  }
 }
 
 async function loadCatalog() {
@@ -59,32 +68,6 @@ async function loadCatalog() {
   return offers;
 }
 
-/** A CSV parser for quoted fields, which visual and publisher names need. */
-function parseCsv(text) {
-  const rows = [];
-  let row = [];
-  let field = '';
-  let quoted = false;
-  for (let i = text.charCodeAt(0) === 0xfeff ? 1 : 0; i < text.length; i++) {
-    const c = text[i];
-    if (quoted) {
-      if (c !== '"') field += c;
-      else if (text[i + 1] === '"') (field += '"'), i++;
-      else quoted = false;
-    } else if (c === '"') quoted = true;
-    else if (c === ',') row.push(field), (field = '');
-    else if (c === '\n' || c === '\r') {
-      if (c === '\r' && text[i + 1] === '\n') i++;
-      row.push(field), rows.push(row), (row = []), (field = '');
-    } else field += c;
-  }
-  if (field || row.length) row.push(field), rows.push(row);
-  const [header, ...body] = rows;
-  return body
-    .filter((r) => r.length === header.length)
-    .map((r) => Object.fromEntries(header.map((h, i) => [h, r[i]])));
-}
-
 // Trailing spaces are dropped, as AppSource listings often carry them.
 const text = (value) => (value == null || value === '' ? null : String(value).trimEnd());
 const number = (value) => (value == null || value === '' ? null : Number(value));
@@ -92,8 +75,27 @@ const column = (name, dataType) => ({ name, dataType });
 const table = (columns, rows) => ({ status: 'success', table: { columns, rows } });
 
 const DAY = 86400000;
-/** The whole-day number of a date and time, counted the way the replay packs it. */
-const dayNumber = (ms) => Math.floor(ms / DAY) + 25569;
+
+// scripts/listing-history.json is committed now and then, so the commits made
+// since it was built are added here, oldest first. Listing them is one GitHub
+// API call, and downloading each copy does not count toward that limit. A long
+// gap is read only in part, and the leaderboard dates the days after it.
+const TOP_UP_LIMIT = 90;
+const listingHistory = readHistory(JSON.parse(readFileSync(join(root, 'scripts/listing-history.json'), 'utf8')));
+try {
+  const newer = await commitsSince(listingHistory.through);
+  for (const c of newer.slice(0, TOP_UP_LIMIT)) advance(listingHistory, c.stamp, rowsOf(await copyAt(c.sha)));
+  console.log(`listing history: ${newer.length} newer commits read, through ${listingHistory.through}`);
+  if (newer.length > 30)
+    console.warn(
+      `listing history: ${newer.length} commits were made since scripts/listing-history.json was built. ` +
+        'Run node scripts/listing-history.mjs --update and commit the file, so later builds read fewer.'
+    );
+} catch (error) {
+  console.warn(
+    `listing history: the commits after ${listingHistory.through} could not be read, so the leaderboard dates the days after it. ${error.message}`
+  );
+}
 
 const offers = await loadCatalog();
 console.log(`catalog: ${offers.length} visuals`);
@@ -112,6 +114,7 @@ const leaderboard = parseCsv(await (await get(LEADERBOARD_URL)).text()).map((r) 
     ratings: number(r['# of Ratings']),
     ratingsChange: number(r['# of Ratings Change']),
     average: number(r['Average Rating']),
+    averageChange: number(r['Average Rating Change']),
     certified: r['Is Certified'].trimEnd(),
     removed: r['Is Removed'] === 'Yes',
   };
@@ -205,7 +208,6 @@ for (const row of leaderboard) {
 const catalogByGuid = new Map(visuals.filter((v) => v.guid).map((v) => [v.guid, v]));
 const asOf = Math.max(...leaderboard.map((r) => r.ms));
 const asOfStamp = leaderboard.find((r) => r.ms === asOf).stamp;
-const listingHistory = JSON.parse(readFileSync(join(root, 'scripts/listing-history.json'), 'utf8'));
 
 /** The movement inside a window: the sum of the changes logged in it, or nothing when none was logged. */
 function change(rows, field, days) {
@@ -272,11 +274,13 @@ const standings = table(
         change(rows, 'ratingsChange', 90),
       ];
     }),
-    // A visual that left before the leaderboard began has no row in it. It is
-    // named here so the Replay page can show who it was. Its first-seen date is
-    // left empty, so the leaderboard still dates its own start correctly.
-    ...Object.entries(listingHistory.visuals)
-      .filter(([guid]) => !byGuid.has(guid))
+    // A visual that left before the leaderboard could record it has no row in
+    // it. It is named here so the Replay page can show who it was. Its
+    // first-seen date is left empty, so the leaderboard still dates its own
+    // start correctly. A visual listed today that the leaderboard has not yet
+    // recorded is named by the catalog instead.
+    ...[...listingHistory.visuals]
+      .filter(([guid, v]) => !byGuid.has(guid) && !openStretch(v))
       .map(([guid, v]) => {
         const gone = v.listed[v.listed.length - 1][1];
         const listed = catalogByGuid.get(guid);
@@ -293,7 +297,7 @@ const standings = table(
           listed?.id ?? null,
           listed?.thumbnail ?? null,
           listed?.releaseDate ?? null,
-          `${listingHistory.snapshots[gone ?? listingHistory.snapshots.length - 1].slice(0, 19)}.000`,
+          `${gone}T00:00:00.000`,
           null,
           asOfStamp,
           null,
@@ -308,104 +312,162 @@ const standings = table(
 );
 
 // ── Replay ─────────────────────────────────────────────────────────────────
-// One row per visual and week in which something was recorded about it. The
-// figures are those of the latest day in that week. The day is packed in front
-// of each value so one number carries both, and every packed number stays
-// below 2^53:
-//   Latest  = day * 10000  + popularity in thousandths * 2 + removed
-//   Raters  = day * 100000 + number of ratings
-//   Stars   = day * 1000   + average stars in hundredths
-//   Listing = listed at the end of the week (1) + a new version that week (2)
-//             + newly certified that week (4)
-// A popularity of 0 is a failed crawl, so it is never written as a score, but
-// its row still shows that the visual was listed. Raters and Stars are empty on
-// a removal row, so a visual keeps its last real figures for the dot that fades
-// out. Latest is empty on a row that records a listing, a version or a
-// certification without a score, which is every row before the leaderboard
-// began except those of 22 January 2024.
-const asOfDay = dayNumber(asOf);
-const weeks = new Map();
-function weekOf(guid, ms) {
-  const week = Math.floor((asOfDay - dayNumber(ms)) / 7);
-  const key = `${guid}\u0000${week}`;
-  let held = weeks.get(key);
-  if (!held) weeks.set(key, (held = { guid, week, packed: [null, null, null], at: -Infinity, listed: false, flags: 0 }));
-  return held;
-}
-/** The latest record in a week decides whether the visual ends that week listed. */
-function setListed(held, ms, listed) {
-  if (ms < held.at) return;
-  held.at = ms;
-  held.listed = listed;
-}
-function setScore(held, ms, popularity, ratings, average, removed) {
-  const day = dayNumber(ms);
-  [
-    day * 10000 + Math.round((popularity ?? 0) * 1000) * 2 + (removed ? 1 : 0),
-    removed || ratings == null ? null : day * 100000 + ratings,
-    removed || average == null ? null : day * 1000 + Math.round(average * 100),
-  ].forEach((value, i) => {
-    if (value != null && (held.packed[i] == null || value > held.packed[i])) held.packed[i] = value;
+// One row per visual and day on which something was recorded about it:
+//   Day         days before the latest leaderboard snapshot, which is day 0
+//   Popularity  the popularity read that day, empty when none was read
+//   Raters      the number of ratings read with it
+//   Stars       the average stars read with it
+//   Listing     listed at the end of the day (1) + a new version that day (2)
+//               + certified at the end of the day (4)
+// A visual's Listing holds until its next row. Which visuals were listed, and
+// when they changed, comes from the commits of "Visuals Summary.csv", which list
+// every visual on each day they were made. The leaderboard records a visual only
+// when its figures change, so it sees many arrivals and versions weeks late, and
+// it dates them only on the days after the newest of those commits. The figures
+// come from the leaderboard alone. When it read a visual more than once in a day
+// the latest reading counts. A popularity of 0 that follows a higher one is a
+// failed crawl, which the next reading undoes, so it is never written as a
+// reading. A popularity of 0 recorded before a visual's popularity first rose
+// above 0 is where the visual stood, so it is kept.
+const asOfDay = dayOf(asOfStamp);
+const throughDay = listingHistory.through ? dayOf(listingHistory.through) : -Infinity;
+
+// Each visual's stretches as [from, to, certified] day numbers, and the days of
+// its new versions and its certification.
+const timelines = new Map();
+for (const [guid, v] of listingHistory.visuals)
+  timelines.set(guid, {
+    listed: v.listed.map(([from, to, certified]) => [dayOf(from), to == null ? null : dayOf(to), certified]),
+    versions: v.versions.map(dayOf),
+    certified: v.certified.map(dayOf),
+    version: v.last?.[0] || null,
+    known: true,
   });
-}
+const listedOn = (t, day) => t.listed.some(([from, to]) => from <= day && (to == null || day < to));
+const certifiedOn = (t, day) =>
+  t.listed.some(([from, , certified]) => certified === 1 && from <= day) || t.certified.some((d) => d <= day);
 
-// Before the leaderboard: arrivals, departures, versions and certifications
-// from every commit, and the scores of the one commit that carried them.
-const historyTimes = listingHistory.snapshots.map((stamp) => Date.parse(stamp));
-const leaderboardStart = Math.min(...leaderboard.map((r) => r.ms));
-for (const [guid, v] of Object.entries(listingHistory.visuals)) {
-  for (const [from, to] of v.listed) {
-    setListed(weekOf(guid, historyTimes[from]), historyTimes[from], true);
-    if (to != null) setListed(weekOf(guid, historyTimes[to]), historyTimes[to], false);
-    // Listed in the last of those commits and never seen by the leaderboard:
-    // it left in the week between the two.
-    else if (!byGuid.has(guid)) setListed(weekOf(guid, leaderboardStart), leaderboardStart, false);
-  }
-  // A version, a certification or a score was read from a commit that listed the visual.
-  const seen = (i) => {
-    const held = weekOf(guid, historyTimes[i]);
-    setListed(held, historyTimes[i], true);
-    return held;
-  };
-  for (const i of v.versions) seen(i).flags |= 2;
-  for (const i of v.certified) seen(i).flags |= 4;
-  for (const [i, popularity, ratings, average] of v.scores)
-    setScore(seen(i), historyTimes[i], popularity, ratings, average, false);
-}
-
-// From the leaderboard: every row shows the visual listed or removed that day.
+// After the newest commit, the leaderboard: a removal ends a stretch, a visual
+// it shows for the first time arrives, and a version or a certification it
+// records is dated by its crawl. A visual the commits saw leave stays gone,
+// since the leaderboard is often late to record a removal.
 for (const [guid, rows] of byGuid) {
-  const before = listingHistory.visuals[guid]?.last;
-  let version = before?.[0] || null;
-  let certified = before ? before[1] === 1 : null;
+  let t = timelines.get(guid);
   for (const r of [...rows].sort((a, b) => a.ms - b.ms)) {
-    const held = weekOf(guid, r.ms);
-    setListed(held, r.ms, !r.removed);
-    if (r.version) {
-      if (version && r.version !== version) held.flags |= 2;
-      version = r.version;
+    const day = dayOf(r.stamp);
+    if (day <= throughDay) continue;
+    if (!t) {
+      if (r.removed) continue;
+      t = { listed: [], versions: [], certified: [], version: null, known: false };
+      timelines.set(guid, t);
     }
-    if (r.certified) {
-      if (r.certified === 'Certified' && certified === false) held.flags |= 4;
-      certified = r.certified === 'Certified';
+    const last = t.listed[t.listed.length - 1];
+    const open = last != null && last[1] == null;
+    if (r.removed) {
+      if (open) last[1] = day;
+      continue;
     }
-    if (r.popularity > 0 || r.removed)
-      setScore(held, r.ms, r.popularity, r.ratings, r.average, r.removed);
+    if (open) {
+      if (r.version && t.version && r.version !== t.version) t.versions.push(day);
+      if (r.certified === 'Certified' && !certifiedOn(t, day)) t.certified.push(day);
+    } else if (!t.known) t.listed.push([day, null, r.certified === 'Certified' ? 1 : 0]);
+    if (r.version) t.version = r.version;
   }
 }
+
+const firstRise = new Map();
+for (const r of leaderboard)
+  if (!r.removed && r.popularity > 0 && !(firstRise.get(r.guid) <= r.ms)) firstRise.set(r.guid, r.ms);
+const readings = new Map();
+for (const r of leaderboard) {
+  if (r.removed || r.popularity == null) continue;
+  if (!(r.popularity > 0) && r.ms >= (firstRise.get(r.guid) ?? Infinity)) continue;
+  const day = dayOf(r.stamp);
+  if (!readings.has(r.guid)) readings.set(r.guid, new Map());
+  const days = readings.get(r.guid);
+  const held = days.get(day);
+  if (!held || r.ms > held.ms || (r.ms === held.ms && r.popularity > held.popularity)) days.set(day, r);
+}
+
+// Many visuals listed after the leaderboard's first day enter it only once their
+// popularity first rises above 0, weeks after they were listed, already at their
+// new figures. Each change column is the difference from the figures the visual
+// had before, so its first row minus its changes says where it stood: for most,
+// a popularity of 0. That becomes its reading on the snapshot before its first
+// row, so the visual rises from there instead of seeming to hold its first
+// figures since the day it was listed. An empty change means there was nothing
+// to compare with, which for ratings and stars means nobody had rated the visual
+// yet.
+const snapshotDays = [...new Set([...readings.values()].flatMap((days) => [...days.keys()]))].sort(
+  (a, b) => a - b
+);
+const round = (value, places) => Math.round(value * 10 ** places) / 10 ** places;
+let starts = 0;
+for (const [guid, rows] of byGuid) {
+  const first = rows.reduce((a, b) => (b.ms < a.ms ? b : a));
+  if (first.removed || !(first.popularity > 0) || first.popularityChange == null) continue;
+  const firstDay = dayOf(first.stamp);
+  const before = snapshotDays.filter((day) => day < firstDay).pop();
+  if (before === undefined) continue;
+  const ratings =
+    first.ratings == null || first.ratingsChange == null ? null : Math.max(0, first.ratings - first.ratingsChange);
+  readings.get(guid).set(before, {
+    popularity: Math.max(0, round(first.popularity - first.popularityChange, 3)),
+    ratings,
+    average:
+      ratings > 0 && first.average != null && first.averageChange != null
+        ? round(first.average - first.averageChange, 2)
+        : null,
+  });
+  starts++;
+}
+console.log(`leaderboard: ${starts} visuals start from the figures their first row rose from`);
+
+let late = 0;
+const replayRows = [];
+for (const [guid, t] of timelines) {
+  const read = readings.get(guid) ?? new Map();
+  const days = new Set([...read.keys(), ...t.versions, ...t.certified]);
+  for (const [from, to] of t.listed) {
+    days.add(from);
+    if (to != null) days.add(to);
+  }
+  for (const day of [...days].sort((a, b) => a - b)) {
+    // A commit newer than the latest leaderboard snapshot waits for the next one.
+    if (day > asOfDay) {
+      late++;
+      continue;
+    }
+    const r = read.get(day);
+    replayRows.push([
+      guid,
+      asOfDay - day,
+      r?.popularity ?? null,
+      r?.ratings ?? null,
+      r?.average ?? null,
+      (listedOn(t, day) ? 1 : 0) + (t.versions.includes(day) ? 2 : 0) + (certifiedOn(t, day) ? 4 : 0),
+    ]);
+  }
+}
+const unlisted = [...readings.keys()].filter((guid) => !timelines.has(guid)).length;
+console.log(
+  `replay: from ${isoOf(asOfDay - replayRows.reduce((most, r) => Math.max(most, r[1]), 0))} to ${isoOf(asOfDay)}; ` +
+    `${late} changes after it wait for the next leaderboard snapshot; ` +
+    `${unlisted} visuals have readings but were never listed`
+);
 
 const replay = table(
   [
     column('[Visual]', 'String'),
-    column('[Week]', 'Int64'),
-    column('[Latest]', 'Double'),
+    column('[Day]', 'Int64'),
+    column('[Popularity]', 'Double'),
     column('[Raters]', 'Int64'),
     column('[Stars]', 'Double'),
     column('[Listing]', 'Int64'),
   ],
-  [...weeks.values()]
-    .sort((a, b) => b.week - a.week)
-    .map((w) => [w.guid, w.week, ...w.packed, (w.listed ? 1 : 0) + w.flags])
+  // Each visual's rows together, oldest first, so its name repeats on
+  // neighbouring rows and the served file compresses to a quarter of the size.
+  replayRows.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : b[1] - a[1]))
 );
 
 // ── Per-visual files ───────────────────────────────────────────────────────
@@ -483,5 +545,8 @@ for (const [name, { columns, rows }] of Object.entries({ profile, screenshots, h
   );
   console.log(`${name}: ${rows.length} rows`);
 }
-writeFileSync(join(out, 'built.json'), JSON.stringify({ asOf: asOfStamp }));
+writeFileSync(
+  join(out, 'built.json'),
+  JSON.stringify({ asOf: asOfStamp, builtAt: new Date().toISOString(), format: DATA_FORMAT })
+);
 console.log(`Data written to ${out}`);

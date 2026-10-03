@@ -123,7 +123,7 @@ export function Segmented<T extends string | number>({
             aria-checked={active}
             onClick={() => onChange(o.value)}
             className={cn(
-              'min-h-[32px] whitespace-nowrap rounded-full px-300 text-200 font-semibold transition-colors fit:min-h-[28px] focus-visible:outline-2 focus-visible:outline-ring',
+              'min-h-[32px] whitespace-nowrap rounded-full px-300 text-200 font-semibold transition-colors fit:min-h-[28px] max-sm:min-h-[44px] focus-visible:outline-2 focus-visible:outline-ring',
               active
                 ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground'
