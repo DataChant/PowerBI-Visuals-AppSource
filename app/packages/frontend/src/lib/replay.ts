@@ -88,7 +88,6 @@ export interface Move {
   score: number;
 }
 
-const BIG_MOVE = 0.05;
 const MOVE = 0.0005;
 
 const EMPTY: Replay = {
@@ -461,11 +460,6 @@ export interface FrameCounts {
   unplaced: number;
   arrived: number;
   left: number;
-  /**
-   * Listed visuals whose popularity moved by 5 points or more in a reading made
-   * this day. A visual's first popularity, a rise from 0, is not a move.
-   */
-  bigMoves: number;
   /** Listed visuals that published a new version this day. */
   versions: number;
   /** Listed visuals that became certified this day. */
@@ -485,16 +479,12 @@ export function frameCounts(
     unplaced: 0,
     arrived: 0,
     left: 0,
-    bigMoves: 0,
     versions: 0,
     certified: 0,
   };
   const frame = replay.frames[at];
   if (!frame) return counts;
   const reading = replay.readings[frame.reading];
-  // Only a reading made this day moves anything.
-  const readToday = reading && reading.frame === at;
-  const before = readToday ? replay.readings[frame.reading - 1] : undefined;
   const ok = (v: number) => !include || include(v);
   for (let v = 0; v < replay.guids.length; v++) {
     if (!ok(v) || !isListed(frame, v)) continue;
@@ -503,9 +493,6 @@ export function frameCounts(
     if (!(ratedBy > 0)) counts.unrated++;
     if (!reading || reading.readOn[v] < 0) counts.unread++;
     if (Number.isNaN(replay.first.score[v])) counts.unplaced++;
-    // NaN on either side, a visual with nothing to compare, is never a move.
-    if (before && before.scores[v] > 0 && Math.abs(reading.scores[v] - before.scores[v]) >= BIG_MOVE - MOVE)
-      counts.bigMoves++;
   }
   counts.arrived = frame.arrived.filter(ok).length;
   counts.left = frame.left.filter(ok).length;

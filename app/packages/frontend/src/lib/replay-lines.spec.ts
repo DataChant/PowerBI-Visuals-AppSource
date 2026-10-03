@@ -31,6 +31,8 @@ const replay = buildReplay(
     ['c', 6, null, null, null, LISTED],
     ['c', 1, null, null, null, 0],
     ['d', 4, 0.3, 0, 0, LISTED],
+    ['e', 2, null, null, null, LISTED | VERSION],
+    ['e', 1, null, null, null, LISTED | VERSION],
   ]),
   asOf
 );
@@ -69,10 +71,10 @@ describe('describeVisual', () => {
     );
   });
 
-  it('says when a listed visual has no popularity recorded yet', () => {
+  it('says when a listed visual has no popularity recorded yet, and counts its versions from when it was listed', () => {
     expect(describeVisual(replay, 'scores', 6, index('b'), who('b')).lines).toEqual([
       'No popularity recorded yet',
-      `No new version since ${day(2)}`,
+      `No new version since ${day(4)}`,
     ]);
   });
 
@@ -82,7 +84,7 @@ describe('describeVisual', () => {
     ]);
   });
 
-  it('gives the publisher, the first listed day and the versions since the record began in the listings view', () => {
+  it('gives the publisher, the first listed day and the versions since the record began or the visual was listed in the listings view', () => {
     expect(describeVisual(replay, 'listings', 6, index('a'), who('a')).lines).toEqual([
       'Publisher a',
       'Listed since the replay began',
@@ -91,7 +93,15 @@ describe('describeVisual', () => {
     expect(describeVisual(replay, 'listings', 6, index('b'), who('b')).lines).toEqual([
       'Publisher b',
       `Listed since ${day(4)}`,
-      `No new version since ${day(0)}`,
+      `No new version since ${day(4)}`,
+    ]);
+  });
+
+  it('does not count the version a visual arrived with as a new one', () => {
+    expect(describeVisual(replay, 'listings', 6, index('e'), who('e')).lines).toEqual([
+      'Publisher e',
+      `Listed since ${day(4)}`,
+      `1 new version since ${day(4)}`,
     ]);
   });
 });

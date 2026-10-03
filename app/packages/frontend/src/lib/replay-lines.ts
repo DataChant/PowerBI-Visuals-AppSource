@@ -31,7 +31,11 @@ export function describeVisual(
   const certified = (frame.state[v] & CERTIFIED) !== 0;
   if ((frame.state[v] & LISTED) === 0) return { certified, lines: ['Not listed on this day'] };
 
-  const since = modeStart(replay, mode);
+  let first = at;
+  while (first > 0 && (replay.frames[first - 1].state[v] & LISTED) !== 0) first--;
+  // New versions count from the start of the view, or from the day the visual
+  // was listed when that came later, so no visual is dated before it existed.
+  const since = Math.max(modeStart(replay, mode), first);
   const sinceDay = formatDate(replay.frames[since].day);
   const versions = frame.versions[v] - (replay.frames[since]?.versions[v] ?? 0);
   const versionLine =
@@ -60,8 +64,6 @@ export function describeVisual(
     };
   }
 
-  let first = at;
-  while (first > 0 && (replay.frames[first - 1].state[v] & LISTED) !== 0) first--;
   return {
     certified,
     lines: [

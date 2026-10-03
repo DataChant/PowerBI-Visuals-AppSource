@@ -33,8 +33,9 @@ import { refOf, type Who } from '@/lib/replay-who';
  * visuals above the others. A visual appears when it is listed, rises when it is
  * certified and grows with each new version.
  *
- * A visual that is moving shows its logo, which turns back into a dot once the
- * move ends.
+ * A visual that joins, becomes certified or publishes a new version shows its
+ * logo for a moment, in both modes. In the popularity mode a visual that is
+ * moving shows its logo too, which turns back into a dot once the move ends.
  */
 
 /** Half the cube's width; the scene runs from -SIZE to +SIZE on every axis. */
@@ -87,12 +88,17 @@ const EVENT_MS = 900;
 const MIX_MS = 450;
 /** How long a logo stays after its move ends. */
 const LOGO_AFTER_MS = 120;
-/** In the listings mode an event is a single moment, so its logo stays this much longer. */
+/** An event is a single moment, so its logo stays this much longer. */
 const LOGO_HOLD_MS = 600;
 /** With reduced motion nothing glides, so a logo simply shows for this long. */
 const LOGO_REDUCED_MS = 1500;
 /** The most logos shown at once, besides the followed visuals. */
 const MAX_LOGOS = 16;
+/**
+ * In the popularity mode, the events of the day take at most this many logos
+ * first, so the visuals that move most still show theirs.
+ */
+const EVENT_LOGOS = 8;
 /** A move shorter than this, in scene units, does not show a logo. */
 const LOGO_MIN_MOVE = 0.03;
 /** A visual that is moving already keeps its logo over one moving slightly further. */
@@ -146,6 +152,8 @@ interface Palette {
   up: THREE.Color;
   down: THREE.Color;
   gold: THREE.Color;
+  /** A visual that joined recently. */
+  fresh: THREE.Color;
   still: THREE.Color;
 }
 
@@ -154,6 +162,7 @@ function readPalette(): Palette {
     up: cssColor('--color-up', '#107c10'),
     down: cssColor('--color-down', '#c50f1f'),
     gold: cssColor('--color-gold', '#e3b505'),
+    fresh: cssColor('--color-new', '#54b948'),
     still: cssColor('--color-muted-foreground', '#6b6458'),
   };
 }
@@ -851,12 +860,12 @@ export default function Replay3D({
 
       const joined = at > 0 && listed && (recent.state[v] & LISTED) === 0;
       let colour = palette.still;
-      if (joined) colour = palette.gold;
+      if (joined) colour = palette.fresh;
       else if (dayA && dayB) {
         const rise = dayB[i + 1] - dayA[i + 1];
         if (rise > STILL) colour = palette.up;
         else if (rise < -STILL) colour = palette.down;
-      } else if (!scores && certified && (recent.state[v] & CERTIFIED) === 0) colour = palette.up;
+      } else if (!scores && certified && (recent.state[v] & CERTIFIED) === 0) colour = palette.gold;
       s.dots.setColorAt(v, colour);
 
       // A new version makes a visual swell for a moment, in both modes.
@@ -900,21 +909,39 @@ export default function Replay3D({
         s.logosChanged = true;
       }
     };
-    if (morph) {
-      // Every visual moves when the mode changes, so none is singled out.
-      s.logoUntil.fill(0);
-    } else if (scores) {
-      candidates.sort((a, b) => b.d - a.d);
-      for (const c of candidates.slice(0, MAX_LOGOS)) show(c.v, now + hold);
-    } else if (step) {
-      // A certification first, then an arrival, then a new version. A visual
-      // that leaves simply fades.
+    // A certification first, then an arrival, then a new version. A visual
+    // that leaves simply fades.
+    const events: number[] = [];
+    if (step && !morph) {
       const seen = new Set<number>();
       for (const v of [...frame.certified, ...frame.arrived, ...frame.versioned]) {
         if (seen.has(v) || s.picked[v] === 1 || s.toScale[v] <= 0) continue;
         seen.add(v);
-        show(v, now + hold + (reducedMotion ? 0 : LOGO_HOLD_MS));
+        events.push(v);
       }
+    }
+    const eventUntil = now + hold + (reducedMotion ? 0 : LOGO_HOLD_MS);
+    if (morph) {
+      // Every visual moves when the mode changes, so none is singled out.
+      s.logoUntil.fill(0);
+    } else if (scores) {
+      // The day's events and the visuals that moved most share the logos, and
+      // either takes the room the other leaves.
+      candidates.sort((a, b) => b.d - a.d);
+      const first = events.slice(0, EVENT_LOGOS);
+      const chosen = new Set(first);
+      for (const c of candidates) {
+        if (chosen.size >= MAX_LOGOS) break;
+        chosen.add(c.v);
+      }
+      for (const v of events.slice(EVENT_LOGOS)) {
+        if (chosen.size >= MAX_LOGOS) break;
+        chosen.add(v);
+      }
+      const isEvent = new Set(events);
+      for (const v of chosen) show(v, isEvent.has(v) ? eventUntil : now + hold);
+    } else {
+      for (const v of events) show(v, eventUntil);
     }
     // Too many logos at once hide the field, so the oldest give way.
     const showing = [...s.active].filter((v) => s.logoUntil[v] > now && s.picked[v] !== 1);

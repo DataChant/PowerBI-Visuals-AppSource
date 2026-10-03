@@ -2,7 +2,7 @@ import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import {
   ArrowUpDown,
   BadgeCheck,
-  Gauge,
+  FastForward,
   Hash,
   Info,
   LogIn,
@@ -58,16 +58,19 @@ import { describeVisual } from '@/lib/replay-lines';
 import { refOf, whoOf, type Who } from '@/lib/replay-who';
 import { cn } from '@/lib/utils';
 
-/** How long one day lasts in each view until another speed is chosen. Popularity moves slowly enough to follow. */
-const DEFAULT_SPEED: Record<ReplayMode, number> = { scores: 1000, listings: 250 };
-const SPEEDS = [
-  { ms: 2000, label: '1 day every 2 seconds' },
-  { ms: 1000, label: '1 day per second' },
-  { ms: 500, label: '2 days per second' },
-  { ms: 250, label: '4 days per second' },
-  { ms: 125, label: '8 days per second' },
-  { ms: 62.5, label: '16 days per second' },
-];
+/** How long one day lasts in each view at normal speed. Popularity moves slowly enough to follow. */
+const NORMAL_SPEED: Record<ReplayMode, number> = { scores: 1000, listings: 250 };
+/**
+ * The speeds Fast forward moves through, as multiples of the normal speed, as
+ * on a video player: each press moves one place along, and the press after the
+ * fastest returns to normal speed.
+ */
+const FAST_FORWARD = [1, 2, 4, 8, 16];
+const FASTEST = FAST_FORWARD[FAST_FORWARD.length - 1];
+function perSecond(ms: number) {
+  const days = 1000 / ms;
+  return `${formatInt(days)} ${days === 1 ? 'day' : 'days'} per second`;
+}
 /** The lists beside the field look back this many days. */
 const LOOKBACK_DAYS = 28;
 /** A visual is coloured as new, or as newly certified, for this many days. */
@@ -101,10 +104,15 @@ const LOGO_HOLD_MS = 600;
 const MIX_MS = 450;
 /** With reduced motion nothing glides, so a logo simply shows for this long. */
 const LOGO_REDUCED_MS = 1500;
-/** While the listings view plays, a logo stays about this long after its event. */
+/** While the replay plays, a logo stays about this long after its event. */
 const LOGO_SPAN_MS = 1500;
 /** The most logos the flat field shows at once, besides the followed visuals. */
 const FLAT_LOGOS = 16;
+/**
+ * In the popularity view, the events of the day take at most this many logos
+ * first, so the visuals that move most still show theirs.
+ */
+const FLAT_EVENT_LOGOS = 8;
 const FLAT_LOGO = 20;
 /** A popularity change smaller than this does not show a logo in the flat field. */
 const LOGO_MIN_SHIFT = 0.003;
@@ -323,25 +331,32 @@ function DotField({
     const add = (v: number) => {
       if (room() && visible[v] && isListed(frame, v)) shown.add(v);
     };
-    if (scores) {
-      const from = valuesAt(replay, step.from);
-      const moved: { v: number; d: number }[] = [];
-      for (let v = 0; v < replay.guids.length; v++) {
-        const d = Math.abs(values.score[v] - from.score[v]);
-        if (d >= LOGO_MIN_SHIFT) moved.push({ v, d });
-      }
-      moved.sort((a, b) => b.d - a.d);
-      for (const m of moved) add(m.v);
-    } else {
-      // While playing, each event keeps its logo for a moment after the day moves on.
-      const floor = playing
-        ? at - Math.max(1, Math.ceil(LOGO_SPAN_MS / stepMs))
-        : Math.max(step.from, at - 1);
-      for (let f = at; f > floor && f > 0 && room(); f--) {
-        const day = replay.frames[f];
-        for (const v of [...day.certified, ...day.arrived, ...day.versioned]) add(v);
-      }
+    // A certification first, then an arrival, then a new version. While playing,
+    // each event keeps its logo for a moment after the day moves on.
+    const events: number[] = [];
+    const floor = playing
+      ? at - Math.max(1, Math.ceil(LOGO_SPAN_MS / stepMs))
+      : Math.max(step.from, at - 1);
+    for (let f = at; f > floor && f > 0; f--) {
+      const day = replay.frames[f];
+      events.push(...day.certified, ...day.arrived, ...day.versioned);
     }
+    if (!scores) {
+      for (const v of events) add(v);
+      return shown;
+    }
+    // The popularity view shares its logos between the day's events and the
+    // visuals that moved most, and either takes the room the other leaves.
+    const from = valuesAt(replay, step.from);
+    const moved: { v: number; d: number }[] = [];
+    for (let v = 0; v < replay.guids.length; v++) {
+      const d = Math.abs(values.score[v] - from.score[v]);
+      if (d >= LOGO_MIN_SHIFT) moved.push({ v, d });
+    }
+    moved.sort((a, b) => b.d - a.d);
+    for (const v of events) if (shown.size - picks.length < FLAT_EVENT_LOGOS) add(v);
+    for (const m of moved) add(m.v);
+    for (const v of events) add(v);
     return shown;
   }, [moving, picks, visible, frame, scores, replay, step.from, values, playing, at, stepMs]);
 
@@ -414,15 +429,17 @@ function DotField({
               ? 'border-transparent bg-muted-foreground'
               : hollow
                 ? joined
-                  ? 'border-gold bg-transparent'
+                  ? 'border-new bg-transparent'
                   : 'border-muted-foreground bg-transparent'
                 : joined
-                  ? 'border-transparent bg-gold'
-                  : delta > STILL || newlyCertified
-                    ? 'border-transparent bg-up'
-                    : delta < -STILL
-                      ? 'border-transparent bg-down'
-                      : 'border-transparent bg-muted-foreground/45';
+                  ? 'border-transparent bg-new'
+                  : newlyCertified
+                    ? 'border-transparent bg-gold'
+                    : delta > STILL
+                      ? 'border-transparent bg-up'
+                      : delta < -STILL
+                        ? 'border-transparent bg-down'
+                        : 'border-transparent bg-muted-foreground/45';
             const lively = joined || newlyCertified || Math.abs(delta) > STILL;
             const grow = growth(replay, at, since, v);
             const logo = listed && logos.has(v) ? who[v] : undefined;
@@ -548,7 +565,7 @@ function Legend({
       ? [
           { swatch: 'size-[10px] bg-up', label: 'Gaining popularity' },
           { swatch: 'size-[10px] bg-down', label: 'Losing popularity' },
-          { swatch: 'size-[10px] bg-gold', label: 'Joined in the last 7 days' },
+          { swatch: 'size-[10px] bg-new', label: 'Joined in the last 7 days' },
           { swatch: 'size-[10px] bg-muted-foreground/45', label: 'No change' },
           {
             // The flat field draws it as a ring, and the 3D view as a smaller dot.
@@ -560,8 +577,8 @@ function Legend({
           grown,
         ]
       : [
-          { swatch: 'size-[10px] bg-gold', label: 'Joined in the last 7 days' },
-          { swatch: 'size-[10px] bg-up', label: 'Certified in the last 7 days' },
+          { swatch: 'size-[10px] bg-new', label: 'Joined in the last 7 days' },
+          { swatch: 'size-[10px] bg-gold', label: 'Certified in the last 7 days' },
           { swatch: 'size-[10px] bg-muted-foreground/45', label: 'Listed' },
           grown,
         ];
@@ -615,12 +632,11 @@ function ToolButton({
   );
 }
 
-function Count({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Count({ label, value }: { label: string; value: string }) {
   return (
     <li className="inline-flex min-h-[28px] shrink-0 items-center gap-200 rounded-full border border-border bg-card px-300 text-200">
       <span className="text-muted-foreground">{label}</span>
       <span className="tabular font-heading font-bold">{value}</span>
-      {hint && <span className="max-w-[220px] truncate text-muted-foreground">{hint}</span>}
     </li>
   );
 }
@@ -924,7 +940,7 @@ function MoversPanel({
         <>
           <Roster
             title="Joined"
-            icon={<LogIn className="icon-size-200 text-gold" aria-hidden />}
+            icon={<LogIn className="icon-size-200 text-new" aria-hidden />}
             visuals={turnover.joined}
             limit={joinedRows}
             replay={replay}
@@ -935,7 +951,7 @@ function MoversPanel({
           />
           <Roster
             title="Certified"
-            icon={<BadgeCheck className="icon-size-200 text-up" aria-hidden />}
+            icon={<BadgeCheck className="icon-size-200 text-gold" aria-hidden />}
             visuals={raised.certified}
             limit={raisedRows}
             replay={replay}
@@ -1142,9 +1158,8 @@ export function ReplayPage({
   );
   // The popularity view cannot go back before the first reading.
   const at = Math.min(last, Math.max(start, cursor));
-  const [speeds, setSpeeds] = useState(DEFAULT_SPEED);
-  const stepMs = speeds[mode];
   const [playing, setPlaying] = useState(() => !prefersReducedMotion());
+  const [boost, setBoost] = useState(1);
   const [reducedMotion] = useState(prefersReducedMotion);
   const [picks, setPicks] = useState<number[]>([]);
   const [flat, setFlat] = useState(() => !webglAvailable());
@@ -1170,10 +1185,23 @@ export function ReplayPage({
 
   // Playback stops by itself at the last day; Play then starts over.
   const running = playing && at < last;
+  // Fast forward lasts only while the replay plays, so Play always resumes at normal speed.
+  const speedUp = running ? boost : 1;
+  const stepMs = NORMAL_SPEED[mode] / speedUp;
 
+  // When the day shown began. The time a day takes to draw counts toward its
+  // length, or every speed would run slow, and the fastest ones by the most.
+  const dayBegan = useRef(0);
   useEffect(() => {
-    if (!running) return;
-    const timer = window.setTimeout(() => setCursor(at + 1), stepMs);
+    if (!running) {
+      dayBegan.current = 0;
+      return;
+    }
+    const wait = dayBegan.current ? Math.max(0, stepMs - (performance.now() - dayBegan.current)) : stepMs;
+    const timer = window.setTimeout(() => {
+      dayBegan.current = performance.now();
+      setCursor(at + 1);
+    }, wait);
     return () => window.clearTimeout(timer);
   }, [running, at, stepMs]);
 
@@ -1202,20 +1230,6 @@ export function ReplayPage({
   }, [maximized]);
 
   const counts = useMemo(() => frameCounts(replay, at, include), [replay, at, include]);
-  // The latest reading's moves, compared with the reading before it.
-  const k = frame?.reading ?? -1;
-  const readFrame = k >= 1 ? replay.readings[k].frame : -1;
-  const prevFrame = k >= 1 ? replay.readings[k - 1].frame : -1;
-  const latest = useMemo(
-    () =>
-      readFrame < 0
-        ? null
-        : {
-            bigMoves: frameCounts(replay, readFrame, include).bigMoves,
-            jump: movers(replay, readFrame, readFrame - prevFrame, 1, include).climbers[0],
-          },
-    [replay, readFrame, prevFrame, include]
-  );
   // A visual that was never read has no place on the popularity axis, so it has no dot there.
   const unplaced = useMemo(
     () => replay.first.score.reduce((n, s) => n + (Number.isNaN(s) ? 1 : 0), 0),
@@ -1237,6 +1251,15 @@ export function ReplayPage({
       if (at >= last) setCursor(start);
       setPlaying(true);
     }
+    setBoost(1);
+  };
+  // A press while the replay is paused starts it at the first speed above normal.
+  const fastForward = () => {
+    if (!running) {
+      if (at >= last) setCursor(start);
+      setPlaying(true);
+      setBoost(FAST_FORWARD[1]);
+    } else setBoost(FAST_FORWARD[(FAST_FORWARD.indexOf(boost) + 1) % FAST_FORWARD.length]);
   };
   const changeMode = (next: ReplayMode) => {
     if (next === mode) return;
@@ -1245,11 +1268,6 @@ export function ReplayPage({
   };
   const day = formatDate(frame.day);
   const following = picks.length > 0;
-  const jumper = latest?.jump ? who[latest.jump.index] : undefined;
-  const between =
-    readFrame >= 0
-      ? `between ${formatDate(replay.frames[prevFrame].day)} and ${formatDate(replay.frames[readFrame].day)}`
-      : '';
 
   // A note over the field, for the days that need one, and a line under the timeline on a wide screen.
   let note: string | null = null;
@@ -1285,21 +1303,44 @@ export function ReplayPage({
           )}
         >
           <div className="flex shrink-0 items-center gap-300">
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label={running ? 'Pause the replay' : at >= last ? 'Play the replay from the start' : 'Play the replay'}
-              className="inline-flex min-h-[40px] shrink-0 items-center gap-200 rounded-full bg-primary px-300 text-300 font-bold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:px-400"
-            >
-              {running ? (
-                <Pause className="icon-size-200" aria-hidden />
-              ) : (
-                <Play className="icon-size-200" aria-hidden />
-              )}
-              <span className="hidden sm:inline">
-                {running ? 'Pause' : at >= last ? 'Play again' : 'Play'}
-              </span>
-            </button>
+            <div className="flex shrink-0 items-center gap-100">
+              <button
+                type="button"
+                onClick={toggle}
+                aria-label={running ? 'Pause the replay' : at >= last ? 'Play the replay from the start' : 'Play the replay'}
+                className="inline-flex min-h-[40px] shrink-0 items-center gap-200 rounded-full bg-primary px-300 text-300 font-bold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:px-400"
+              >
+                {running ? (
+                  <Pause className="icon-size-200" aria-hidden />
+                ) : (
+                  <Play className="icon-size-200" aria-hidden />
+                )}
+                <span className="hidden sm:inline">
+                  {running ? 'Pause' : at >= last ? 'Play again' : 'Play'}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={fastForward}
+                aria-label={
+                  speedUp > 1
+                    ? `Fast forward. The replay is playing at ${speedUp} times the normal speed.`
+                    : 'Fast forward'
+                }
+                title="Fast forward"
+                className={cn(
+                  'inline-flex min-h-[40px] w-[60px] shrink-0 items-center justify-center gap-100 rounded-full border text-200 font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                  speedUp > 1
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border bg-card hover:bg-hover'
+                )}
+              >
+                <FastForward className="icon-size-200" aria-hidden />
+                <span className="tabular" aria-hidden>
+                  {speedUp}×
+                </span>
+              </button>
+            </div>
             <div className="shrink-0">
               <p className="tabular font-heading text-300 font-extrabold leading-300 sm:text-400 sm:leading-400">
                 {day}
@@ -1360,21 +1401,6 @@ export function ReplayPage({
                 className="shrink-0"
               />
             )}
-            <label className="inline-flex min-h-[40px] shrink-0 items-center gap-100 rounded-full border border-border bg-card pl-300 pr-200 text-200 font-semibold hover:bg-hover has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring">
-              <Gauge className="icon-size-100" aria-hidden />
-              <span className="sr-only">Playback speed</span>
-              <select
-                value={stepMs}
-                onChange={(e) => setSpeeds((s) => ({ ...s, [mode]: Number(e.target.value) }))}
-                className="cursor-pointer bg-transparent pr-100 font-semibold focus:outline-none"
-              >
-                {SPEEDS.map((s) => (
-                  <option key={s.ms} value={s.ms}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </label>
             <CertifiedToggle
               certifiedOnly={certifiedOnly}
               onChange={onCertifiedOnly}
@@ -1452,19 +1478,6 @@ export function ReplayPage({
               label={certifiedOnly ? 'Listed certified visuals' : 'Listed visuals'}
               value={formatInt(counts.listed)}
             />
-            {scores && latest && (
-              <>
-                <Count
-                  label={`Moved 5 points or more ${between}`}
-                  value={formatInt(latest.bigMoves)}
-                />
-                <Count
-                  label={`Biggest jump ${between}`}
-                  value={latest.jump ? formatScoreChange(latest.jump.delta) : 'None'}
-                  hint={jumper?.name}
-                />
-              </>
-            )}
             <Count label="Joined on this day" value={formatInt(counts.arrived)} />
             <Count label="Left on this day" value={formatInt(counts.left)} />
             <Count label="New versions on this day" value={formatInt(counts.versions)} />
@@ -1586,9 +1599,10 @@ export function ReplayPage({
                 ) : (
                   <div className="flex flex-col gap-200 text-200 leading-200">
                     <p>
-                      Every dot is a custom visual on Microsoft Marketplace.
-                      Pointing at a dot shows the visual, and selecting the dot
-                      opens its details.
+                      Every dot is a custom visual on Microsoft Marketplace.{' '}
+                      {scores
+                        ? 'Pointing at a dot shows the visual with its popularity, ratings, stars and new versions, and selecting the dot opens its details.'
+                        : 'Pointing at a dot shows the visual with its publisher, the day it was listed and its new versions, and selecting the dot opens its details.'}
                     </p>
                     {scores ? (
                       <p>
@@ -1596,8 +1610,8 @@ export function ReplayPage({
                         {formatDate(replay.frames[start].day)} to{' '}
                         {formatDate(replay.frames[last].day)}.{' '}
                         {flat
-                          ? 'Each listed visual is placed by its popularity score.'
-                          : 'The number of ratings runs across, popularity rises upward, and average stars run front to back, with 3 stars in the middle. You can drag the view to turn it.'}
+                          ? 'Each visual is placed across by its popularity score, and the certified visuals sit above the others.'
+                          : 'The number of ratings runs across, popularity rises upward, and average stars run front to back, with 3 stars in the middle.'}
                       </p>
                     ) : (
                       <p>
@@ -1606,12 +1620,18 @@ export function ReplayPage({
                         {formatDate(replay.frames[last].day)}. Certified visuals
                         sit above the others, and a visual rises on the day it
                         becomes certified.
-                        {flat ? '' : ' You can drag the view to turn it.'}
+                      </p>
+                    )}
+                    {!flat && (
+                      <p>
+                        You can drag the view to turn it, and scroll or pinch to
+                        bring it closer. Reset view returns it to where it
+                        started.
                       </p>
                     )}
                     <p>
                       {scores
-                        ? 'A visual that moves shows its logo until it comes to rest, and then turns back into a dot.'
+                        ? 'A visual that moves shows its logo until it comes to rest. A visual that joins, becomes certified or publishes a new version shows its logo for a moment. Each logo then turns back into a dot.'
                         : 'A visual that joins, becomes certified or publishes a new version shows its logo for a moment, and then turns back into a dot.'}{' '}
                       Each new version makes a visual a little larger.
                     </p>
@@ -1620,6 +1640,71 @@ export function ReplayPage({
                       flat={flat}
                       className="grid grid-cols-2 gap-x-300 gap-y-100 sm:grid-cols-3"
                     />
+
+                    <h3 className="mt-100 text-200 font-bold">Playing the replay</h3>
+                    <p>
+                      Play starts the replay and Pause stops it on the day shown.
+                      The replay stops by itself on the last day, and Play again
+                      starts it over. Moving along the timeline goes to any day
+                      and pauses the replay there.
+                    </p>
+                    <p>
+                      Fast forward speeds the replay up, as on a video player.
+                      Each press doubles the speed, up to {FASTEST} times the
+                      normal speed, and the press after that returns the replay
+                      to its normal speed. The Fast forward button shows the
+                      speed, and a press while the replay is paused starts it at
+                      twice the normal speed. Play always plays at the normal
+                      speed, which is{' '}
+                      {scoresReady
+                        ? `${perSecond(NORMAL_SPEED.scores)} in the Popularity view and ${perSecond(NORMAL_SPEED.listings)} in the Listings view.`
+                        : `${perSecond(NORMAL_SPEED.listings)}.`}
+                    </p>
+                    <p>
+                      Maximize fills the window with the replay. Restore, or the
+                      Escape key, returns the replay to its place in the page.
+                    </p>
+
+                    <h3 className="mt-100 text-200 font-bold">Choosing what the replay shows</h3>
+                    {scoresReady && (
+                      <p>
+                        Popularity and Listings switch between the two views and
+                        keep the day shown. The Popularity view starts on{' '}
+                        {formatDate(replay.frames[replay.firstReading].day)}, the
+                        first day popularity was read.
+                      </p>
+                    )}
+                    <p>
+                      <CertifiedBadge className="mr-100 align-[-3px]" />
+                      Certified visuals passed Microsoft's code review and can
+                      export to PowerPoint and PDF. The Certified option keeps
+                      only the certified visuals. A visual you follow stays in
+                      view either way.
+                    </p>
+                    <p>
+                      Follow visuals keeps up to {MAX_PICKS} chosen visuals in
+                      view and hides the rest.{' '}
+                      {flat
+                        ? 'Each followed visual shows its logo throughout.'
+                        : 'Each followed visual shows its logo and name throughout, and in the Popularity view it leaves a trail through its readings.'}
+                    </p>
+                    <p>
+                      {scores
+                        ? `Movers lists the visuals whose popularity climbed or slid the most over the last ${LOOKBACK_DAYS} days.`
+                        : `Movers lists the visuals that joined, became certified or left over the last ${LOOKBACK_DAYS} days.`}{' '}
+                      Counts gives the number of listed visuals on the day shown,
+                      and how many joined, left, published a new version or
+                      became certified that day.
+                    </p>
+                    {scores && (
+                      <p>
+                        The Popularity view leaves out the visuals that nobody
+                        has rated yet. Include visuals with no ratings brings
+                        them in.
+                      </p>
+                    )}
+
+                    <h3 className="mt-100 text-200 font-bold">Where the figures come from</h3>
                     {scores ? (
                       <p>
                         Popularity, ratings and stars were read about once a
@@ -1646,13 +1731,6 @@ export function ReplayPage({
                           : `${formatInt(unplaced)} visuals have no popularity recorded on any day. They are counted and named in the lists, and they have no dot in the Popularity view.`}
                       </p>
                     )}
-                    <p>
-                      <CertifiedBadge className="mr-100 align-[-3px]" />
-                      Certified visuals passed Microsoft's code review and can
-                      export to PowerPoint and PDF. The Certified option keeps
-                      only the certified visuals. A visual you follow stays in
-                      view either way.
-                    </p>
                     <p className="text-muted-foreground">
                       Data from Microsoft Marketplace. Popularity is Microsoft
                       Marketplace's own usage percentile.
