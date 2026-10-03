@@ -1,3 +1,4 @@
+import { MotionConfig } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { FilterBar } from '@/components/filter-bar';
@@ -98,6 +99,12 @@ function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  const tabLabel = TABS.find((t) => t.id === tab)?.label ?? '';
+  // A browser tab, a bookmark and a screen reader's window list all name the section.
+  useEffect(() => {
+    document.title = `${tabLabel} | Custom Visuals Marketplace`;
+  }, [tabLabel]);
+
   const goTo = (next: Tab) => {
     setTab(next);
     window.history.replaceState(null, '', `#${next}`);
@@ -178,6 +185,7 @@ function App() {
     };
     content = (
       <div className="flex flex-col gap-300 fit:min-h-0 fit:flex-1">
+        <h1 className="sr-only">{tabLabel}</h1>
         <FilterBar
           visuals={catalog}
           shown={filtered.length}
@@ -216,49 +224,51 @@ function App() {
   }
 
   return (
-    <div
-      className={cn(
-        'min-h-full bg-background',
-        // On a window that is wide and tall enough, a page is exactly one
-        // screen: the header and footer keep their height and the page takes
-        // the rest. The replay is left alone, because it sizes itself.
-        !isReplay && 'fit:flex fit:h-dvh fit:flex-col fit:overflow-hidden'
-      )}
-    >
-      <Header tab={tab} onTab={goTo} />
-      <main
+    <MotionConfig reducedMotion="user">
+      <div
         className={cn(
-          'mx-auto w-full max-w-[1280px] px-400',
-          // The replay is a player that fits one screen, so it keeps its margins tight.
-          isReplay
-            ? 'py-300'
-            : 'py-400 fit:flex fit:min-h-0 fit:flex-1 fit:flex-col fit:overflow-y-auto fit:py-200'
+          'min-h-full bg-background',
+          // On a window that is wide and tall enough, a page is exactly one
+          // screen: the header and footer keep their height and the page takes
+          // the rest. The replay is left alone, because it sizes itself.
+          !isReplay && 'fit:flex fit:h-dvh fit:flex-col fit:overflow-hidden'
         )}
       >
-        {content}
-      </main>
-      {/* The replay ends at the bottom of the window, and repeats these sentences in its own help. */}
-      {!isReplay && (
-        <footer className="mx-auto flex w-full max-w-[1280px] flex-col gap-100 px-400 pb-400 text-200 leading-200 text-muted-foreground fit:shrink-0 fit:gap-0 fit:pb-200">
-          <p>
-            <CertifiedBadge className="mr-100 align-[-3px]" />
-            Certified visuals passed Microsoft's code review and can export to PowerPoint and
-            PDF.
-          </p>
-          <p>
-            Data from Microsoft Marketplace, collected daily. Popularity is Microsoft
-            Marketplace's own usage percentile. Made with love for the Power BI community.
-          </p>
-        </footer>
-      )}
-      <VisualDrawer
-        visual={open}
-        catalog={catalog}
-        standings={standings}
-        stars={stars}
-        onClose={close}
-      />
-    </div>
+        <Header tab={tab} onTab={goTo} />
+        <main
+          className={cn(
+            'mx-auto w-full max-w-[1280px] px-400',
+            // The replay is a player that fits one screen, so it keeps its margins tight.
+            isReplay
+              ? 'py-300'
+              : 'py-400 fit:flex fit:min-h-0 fit:flex-1 fit:flex-col fit:overflow-y-auto fit:py-200'
+          )}
+        >
+          {content}
+        </main>
+        {/* The replay ends at the bottom of the window, and repeats these sentences in its own help. */}
+        {!isReplay && (
+          <footer className="mx-auto flex w-full max-w-[1280px] flex-col gap-100 px-400 pb-400 text-200 leading-200 text-muted-foreground fit:shrink-0 fit:gap-0 fit:pb-200">
+            <p>
+              <CertifiedBadge className="mr-100 align-[-3px]" />
+              Certified visuals passed Microsoft's code review and can export to PowerPoint and
+              PDF.
+            </p>
+            <p>
+              Data from Microsoft Marketplace, collected daily. Popularity is Microsoft
+              Marketplace's own usage percentile. Made with love for the Power BI community.
+            </p>
+          </footer>
+        )}
+        <VisualDrawer
+          visual={open}
+          catalog={catalog}
+          standings={standings}
+          stars={stars}
+          onClose={close}
+        />
+      </div>
+    </MotionConfig>
   );
 }
 

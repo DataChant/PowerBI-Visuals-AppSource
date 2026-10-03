@@ -291,6 +291,8 @@ interface Scene {
   pulseUntil: number;
   /** How much the visuals float, 0 in the popularity mode and 1 in the listings mode. */
   drift: number;
+  /** How far the floating has run, in milliseconds. It stands still while the replay is paused. */
+  driftClock: number;
   /** The camera's turn to a mode's starting angle, while it lasts. */
   glide: Glide | null;
   lastAt: number;
@@ -389,9 +391,9 @@ export default function Replay3D({
 
   // Everything the render loop reads lives in one ref, so a new day or a new
   // pick changes the scene without tearing down the renderer.
-  const live = useRef({ replay, mode, who, reducedMotion, onOpen, layout });
+  const live = useRef({ replay, mode, who, playing, reducedMotion, onOpen, layout });
   useLayoutEffect(() => {
-    live.current = { replay, mode, who, reducedMotion, onOpen, layout };
+    live.current = { replay, mode, who, playing, reducedMotion, onOpen, layout };
   });
 
   const scene = useRef<Scene | null>(null);
@@ -526,6 +528,7 @@ export default function Replay3D({
       busyUntil: 0,
       pulseUntil: 0,
       drift: 0,
+      driftClock: 0,
       glide: null,
       lastAt: -1,
       lastMode: null,
@@ -604,12 +607,12 @@ export default function Replay3D({
       };
     };
     // Where a visual is drawn, floating included.
-    const drawn = (s: Scene, v: number, now: number, out: THREE.Vector3) => {
+    const drawn = (s: Scene, v: number, out: THREE.Vector3) => {
       const i = v * 3;
       out.set(s.cur[i], s.cur[i + 1], s.cur[i + 2]);
       if (s.drift > 0) {
         const { phase, speed } = live.current.layout;
-        const a = now * speed[v] + phase[v];
+        const a = s.driftClock * speed[v] + phase[v];
         const d = DRIFT * s.drift;
         out.x += d * Math.sin(a);
         out.y += d * Math.sin(a * 1.3 + phase[v] * 1.7);
@@ -628,12 +631,16 @@ export default function Replay3D({
       if (!s) return;
       const dt = Math.min(100, Math.max(0, now - before));
       before = now;
-      const { mode: showing, reducedMotion: still } = live.current;
+      const { mode: showing, playing: running, reducedMotion: still } = live.current;
       glideCamera(s, now);
       controls.update();
 
       const floats = showing === 'listings' && !still ? 1 : 0;
+      const wasDrift = s.drift;
       if (s.drift !== floats) s.drift = still ? floats : approach(s.drift, floats, dt / MORPH_MS);
+      // Pause stops every movement on the field, the floating included.
+      if (running) s.driftClock += dt;
+      const drifting = s.drift > 0 && (running || s.drift !== wasDrift);
 
       // A dot turns into its logo while it moves, and back once it stops.
       let mixing = false;
@@ -655,13 +662,13 @@ export default function Replay3D({
       }
 
       const moving =
-        now < s.busyUntil + 50 || now < s.pulseUntil + 50 || mixing || s.drift > 0;
+        now < s.busyUntil + 50 || now < s.pulseUntil + 50 || mixing || drifting;
       if (moving) {
         for (let v = 0; v < n; v++) {
           sample(s, v, now);
           const k = s.curScale[v] * pulseOf(s, v, now) * (1 - s.mix[v]);
           scaleVector.setScalar(Math.max(k, 0.0001));
-          matrix.compose(drawn(s, v, now, place), quaternion, scaleVector);
+          matrix.compose(drawn(s, v, place), quaternion, scaleVector);
           dots.setMatrixAt(v, matrix);
         }
         dots.instanceMatrix.needsUpdate = true;
@@ -697,7 +704,7 @@ export default function Replay3D({
         for (const el of Array.from(marks) as HTMLElement[]) {
           const v = Number(el.dataset.index);
           const mix = s.mix[v];
-          drawn(s, v, now, place);
+          drawn(s, v, place);
           const p = project(place.x, place.y, place.z);
           if (!p.visible || s.toScale[v] <= 0 || mix <= 0.001) {
             el.style.opacity = '0';
@@ -721,7 +728,7 @@ export default function Replay3D({
       // The hover card follows its visual while the view turns.
       const card = hostRef.current?.querySelector<HTMLElement>('[data-hover-card]');
       if (card) {
-        drawn(s, Number(card.dataset.index), now, place);
+        drawn(s, Number(card.dataset.index), place);
         const p = project(place.x, place.y, place.z);
         const { width } = renderer.domElement.getBoundingClientRect();
         const left = Math.min(Math.max(p.x + 14, 8), width - card.offsetWidth - 8);

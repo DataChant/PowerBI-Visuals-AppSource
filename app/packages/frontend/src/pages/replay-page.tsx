@@ -28,7 +28,10 @@ import {
   useState,
   type MouseEvent,
   type ReactNode,
+  type Ref,
 } from 'react';
+
+import { useInert } from '@/hooks/use-inert';
 
 import { EmptyState, LoadingBlock } from '@/components/states';
 import { CertifiedBadge, CertifiedToggle, Segmented, Thumb } from '@/components/ui';
@@ -87,6 +90,11 @@ const THIRD_TITLE = 32;
 const MIN_PLAYER = 260;
 /** The space kept between the player and the bottom of the window. */
 const BOTTOM_GAP = 12;
+/**
+ * The least height the field keeps under the controls, so a short or zoomed
+ * window scrolls the page rather than squeezing the field away.
+ */
+const MIN_FIELD = 240;
 /** Bounds on the certified lane's share of the field's height, which otherwise follows its share of visuals. */
 const MIN_LANE = 0.25;
 const MAX_LANE = 0.6;
@@ -455,6 +463,8 @@ function DotField({
                   zIndex: logo ? 1 : undefined,
                   animationDuration: drift ? `${p.driftMs}ms` : undefined,
                   animationDelay: drift ? `${-p.phase * p.driftMs}ms` : undefined,
+                  // Pause stops every movement on the field, the drift included.
+                  animationPlayState: drift ? (playing ? 'running' : 'paused') : undefined,
                 }}
               >
                 <span
@@ -596,27 +606,33 @@ function Legend({
 
 /** One of the player's round controls. A pressed one is filled. */
 function ToolButton({
+  ref,
   icon,
   children,
   pressed,
   label,
+  description,
   onClick,
   className,
 }: {
+  ref?: Ref<HTMLButtonElement>;
   icon: ReactNode;
   children: ReactNode;
   pressed?: boolean;
   /** The name read out and shown on hover, when it says more than the visible text. */
   label?: string;
+  /** Shown on hover and read after the name, for a button whose visible text is its whole name. */
+  description?: string;
   onClick: () => void;
   className?: string;
 }) {
   return (
     <button
+      ref={ref}
       type="button"
       aria-pressed={pressed}
       aria-label={label}
-      title={label}
+      title={label ?? description}
       onClick={onClick}
       className={cn(
         'inline-flex min-h-[40px] shrink-0 items-center gap-100 rounded-full border px-300 text-200 font-semibold focus-visible:outline-2 focus-visible:outline-ring',
@@ -984,6 +1000,7 @@ function Picker({
   picks,
   certifiedOnly,
   onPicks,
+  searchRef,
 }: {
   who: (Who | undefined)[];
   replay: Replay;
@@ -991,6 +1008,8 @@ function Picker({
   picks: number[];
   certifiedOnly: boolean;
   onPicks: (picks: number[]) => void;
+  /** The search box, which takes focus when the panel opens. */
+  searchRef?: Ref<HTMLInputElement>;
 }) {
   const [query, setQuery] = useState('');
   const listId = useId();
@@ -1000,9 +1019,9 @@ function Picker({
   // Before the first reading, each visual counts by its first known popularity.
   const values = useMemo(() => valuesAt(replay, at), [replay, at]);
   const score = (v: number) => (Number.isNaN(values.score[v]) ? -1 : values.score[v]);
-  const matches = useMemo(() => {
+  const { matches, total } = useMemo(() => {
     // With the most visuals already followed, there is nothing left to offer.
-    if (!q || full) return [];
+    if (!q || full) return { matches: [], total: 0 };
     const taken = new Set(picks);
     const found: number[] = [];
     who.forEach((w, v) => {
@@ -1010,8 +1029,18 @@ function Picker({
       if (w.name.toLowerCase().includes(q) || w.publisher.toLowerCase().includes(q)) found.push(v);
     });
     const by = (v: number) => (Number.isNaN(values.score[v]) ? -1 : values.score[v]);
-    return found.sort((a, b) => by(b) - by(a)).slice(0, SUGGESTIONS);
+    return { matches: found.sort((a, b) => by(b) - by(a)).slice(0, SUGGESTIONS), total: found.length };
   }, [q, full, who, picks, values]);
+  // Said by a screen reader as the list changes, since the list itself is silent.
+  const announced = !q || full
+    ? ''
+    : total === 0
+      ? 'No visual matches that name.'
+      : total === 1
+        ? 'One visual matches.'
+        : total <= SUGGESTIONS
+          ? `${formatInt(total)} visuals match.`
+          : `${formatInt(total)} visuals match, and the ${SUGGESTIONS} most popular are listed.`;
 
   const add = (v: number) => {
     if (full) return;
@@ -1043,6 +1072,7 @@ function Picker({
           aria-hidden
         />
         <input
+          ref={searchRef}
           type="search"
           value={query}
           disabled={full}
@@ -1056,9 +1086,12 @@ function Picker({
               : 'Find a visual by name or publisher'
           }
           aria-controls={listId}
-          className="min-h-[40px] w-full rounded-full border border-border bg-card pl-[40px] pr-300 text-300 disabled:opacity-60"
+          className="min-h-[40px] w-full rounded-full border border-border bg-card pl-[40px] pr-300 text-300 focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-60"
         />
       </label>
+      <p role="status" className="sr-only">
+        {announced}
+      </p>
       <div className="flex flex-wrap gap-200">
         <button
           type="button"
@@ -1171,6 +1204,16 @@ export function ReplayPage({
   const [panel, setPanel] = useState<'follow' | 'help' | null>(null);
   const [maximized, setMaximized] = useState(false);
   const [slotRef, height] = useFitHeight<HTMLDivElement>();
+  const [chromeRef, chrome] = useSize<HTMLDivElement>();
+  const playerHeight = Math.max(height, chrome.height + 8 + MIN_FIELD);
+  const playerRef = useRef<HTMLDivElement>(null);
+  // A maximized player is the whole page, so the page behind it takes no focus and is not read out.
+  useInert(playerRef, maximized);
+  const followButton = useRef<HTMLButtonElement>(null);
+  const helpButton = useRef<HTMLButtonElement>(null);
+  const searchBox = useRef<HTMLInputElement>(null);
+  const panelHeading = useRef<HTMLHeadingElement>(null);
+  const openPanel = useRef<'follow' | 'help' | null>(null);
 
   const who = useMemo(() => whoOf(replay.guids, standings, catalog), [replay, standings, catalog]);
 
@@ -1218,6 +1261,22 @@ export function ReplayPage({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [maximized, panel]);
+
+  // A panel takes focus as it opens, and gives it back to its button when it closes.
+  useEffect(() => {
+    if (panel) {
+      openPanel.current = panel;
+      const box = searchBox.current;
+      if (panel === 'follow' && box && !box.disabled) box.focus();
+      else panelHeading.current?.focus();
+      return;
+    }
+    const closed = openPanel.current;
+    openPanel.current = null;
+    // Focus that went with the panel goes back to its button, and focus elsewhere stays.
+    if (!closed || (document.activeElement && document.activeElement !== document.body)) return;
+    (closed === 'follow' ? followButton : helpButton).current?.focus();
+  }, [panel]);
 
   // The page behind a maximized player stays still.
   useEffect(() => {
@@ -1294,197 +1353,199 @@ export function ReplayPage({
     <MotionConfig reducedMotion="user">
       <h1 className="sr-only">Replay: every day of Microsoft Marketplace</h1>
       {/* The slot keeps the player's place in the page while the player is maximized. */}
-      <div ref={slotRef} style={{ height }}>
+      <div ref={slotRef} style={{ height: playerHeight }}>
         <div
+          ref={playerRef}
           data-replay-player
           className={cn(
             'flex flex-col gap-200',
-            maximized ? 'fixed inset-0 z-40 bg-background p-300' : 'h-full'
+            maximized ? 'fixed inset-0 z-40 overflow-y-auto bg-background p-300' : 'h-full'
           )}
         >
-          <div className="flex shrink-0 items-center gap-300">
-            <div className="flex shrink-0 items-center gap-100">
-              <button
-                type="button"
-                onClick={toggle}
-                aria-label={running ? 'Pause the replay' : at >= last ? 'Play the replay from the start' : 'Play the replay'}
-                className="inline-flex min-h-[40px] shrink-0 items-center gap-200 rounded-full bg-primary px-300 text-300 font-bold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:px-400"
-              >
-                {running ? (
-                  <Pause className="icon-size-200" aria-hidden />
-                ) : (
-                  <Play className="icon-size-200" aria-hidden />
-                )}
-                <span className="hidden sm:inline">
-                  {running ? 'Pause' : at >= last ? 'Play again' : 'Play'}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={fastForward}
-                aria-label={
-                  speedUp > 1
-                    ? `Fast forward. The replay is playing at ${speedUp} times the normal speed.`
-                    : 'Fast forward'
+          {/* The controls are measured, so the field keeps its least height under them. */}
+          <div ref={chromeRef} className="flex shrink-0 flex-col gap-200">
+            <div className="flex shrink-0 items-center gap-300">
+              <div className="flex shrink-0 items-center gap-100">
+                <button
+                  type="button"
+                  onClick={toggle}
+                  aria-label={running ? 'Pause the replay' : at >= last ? 'Play again from the first day' : 'Play the replay'}
+                  className="inline-flex min-h-[40px] shrink-0 items-center gap-200 rounded-full bg-primary px-300 text-300 font-bold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:px-400"
+                >
+                  {running ? (
+                    <Pause className="icon-size-200" aria-hidden />
+                  ) : (
+                    <Play className="icon-size-200" aria-hidden />
+                  )}
+                  <span className="hidden sm:inline">
+                    {running ? 'Pause' : at >= last ? 'Play again' : 'Play'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={fastForward}
+                  aria-label={
+                    speedUp > 1
+                      ? `Fast forward. The replay is playing at ${speedUp} times the normal speed.`
+                      : 'Fast forward'
+                  }
+                  title="Fast forward"
+                  className={cn(
+                    'inline-flex min-h-[40px] w-[60px] shrink-0 items-center justify-center gap-100 rounded-full border text-200 font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                    speedUp > 1
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border bg-card hover:bg-hover'
+                  )}
+                >
+                  <FastForward className="icon-size-200" aria-hidden />
+                  <span className="tabular" aria-hidden>
+                    {speedUp}×
+                  </span>
+                </button>
+              </div>
+              <div className="shrink-0">
+                <p className="tabular font-heading text-300 font-extrabold leading-300 sm:text-400 sm:leading-400">
+                  {day}
+                </p>
+                <p className="tabular text-100 leading-100 text-muted-foreground">
+                  Day {formatInt(at - start + 1)} of {formatInt(last - start + 1)}
+                </p>
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col justify-center">
+                <input
+                  type="range"
+                  min={start}
+                  max={last}
+                  step={1}
+                  value={at}
+                  aria-label="Day"
+                  aria-valuetext={day}
+                  onChange={(e) => {
+                    setPlaying(false);
+                    setCursor(Number(e.target.value));
+                  }}
+                  className="h-[36px] w-full cursor-pointer accent-[var(--color-pbi)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring xl:h-[22px]"
+                />
+                {/* A wide screen has room for the day's note under the timeline, clear of the field. */}
+                <p className="hidden h-[16px] truncate text-200 leading-200 text-muted-foreground xl:block">
+                  {note ?? line}
+                </p>
+              </div>
+              <ToolButton
+                icon={
+                  maximized ? (
+                    <Minimize2 className="icon-size-200" aria-hidden />
+                  ) : (
+                    <Maximize2 className="icon-size-200" aria-hidden />
+                  )
                 }
-                title="Fast forward"
-                className={cn(
-                  'inline-flex min-h-[40px] w-[60px] shrink-0 items-center justify-center gap-100 rounded-full border text-200 font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                  speedUp > 1
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-card hover:bg-hover'
-                )}
+                label={maximized ? 'Restore the replay to its place in the page' : 'Maximize the replay'}
+                onClick={() => setMaximized((m) => !m)}
               >
-                <FastForward className="icon-size-200" aria-hidden />
-                <span className="tabular" aria-hidden>
-                  {speedUp}×
-                </span>
-              </button>
+                <span className="hidden md:inline">{maximized ? 'Restore' : 'Maximize'}</span>
+              </ToolButton>
             </div>
-            <div className="shrink-0">
-              <p className="tabular font-heading text-300 font-extrabold leading-300 sm:text-400 sm:leading-400">
-                {day}
-              </p>
-              <p className="tabular text-100 leading-100 text-muted-foreground">
-                Day {formatInt(at - start + 1)} of {formatInt(last - start + 1)}
-              </p>
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <input
-                type="range"
-                min={start}
-                max={last}
-                step={1}
-                value={at}
-                aria-label="Day"
-                aria-valuetext={day}
-                onChange={(e) => {
-                  setPlaying(false);
-                  setCursor(Number(e.target.value));
-                }}
-                className="h-[36px] w-full cursor-pointer accent-[var(--color-pbi)] xl:h-[22px]"
-              />
-              {/* A wide screen has room for the day's note under the timeline, clear of the field. */}
-              <p className="hidden h-[16px] truncate text-200 leading-200 text-muted-foreground xl:block">
-                {note ?? line}
-              </p>
-            </div>
-            <ToolButton
-              icon={
-                maximized ? (
-                  <Minimize2 className="icon-size-200" aria-hidden />
-                ) : (
-                  <Maximize2 className="icon-size-200" aria-hidden />
-                )
-              }
-              label={maximized ? 'Return the replay to its place in the page' : 'Fill the window with the replay'}
-              onClick={() => setMaximized((m) => !m)}
-            >
-              <span className="hidden md:inline">{maximized ? 'Restore' : 'Maximize'}</span>
-            </ToolButton>
-          </div>
 
-          <div
-            role="group"
-            aria-label="Replay options"
-            className="-m-[3px] flex shrink-0 items-center gap-200 overflow-x-auto p-[3px] sm:flex-wrap sm:overflow-visible"
-          >
-            {scoresReady && (
-              <Segmented
-                label="What the replay shows"
-                value={mode}
-                options={[
-                  { value: 'scores', label: 'Popularity' },
-                  { value: 'listings', label: 'Listings' },
-                ]}
-                onChange={changeMode}
+            <div
+              role="group"
+              aria-label="Replay options"
+              className="-m-[3px] flex shrink-0 items-center gap-200 overflow-x-auto p-[3px] sm:flex-wrap sm:overflow-visible"
+            >
+              {scoresReady && (
+                <Segmented
+                  label="What the replay shows"
+                  value={mode}
+                  options={[
+                    { value: 'scores', label: 'Popularity' },
+                    { value: 'listings', label: 'Listings' },
+                  ]}
+                  onChange={changeMode}
+                  className="shrink-0"
+                />
+              )}
+              <CertifiedToggle
+                certifiedOnly={certifiedOnly}
+                onChange={onCertifiedOnly}
                 className="shrink-0"
               />
-            )}
-            <CertifiedToggle
-              certifiedOnly={certifiedOnly}
-              onChange={onCertifiedOnly}
-              className="shrink-0"
-            />
-            <ToolButton
-              icon={<Target className="icon-size-100" aria-hidden />}
-              pressed={panel === 'follow'}
-              onClick={() => setPanel((p) => (p === 'follow' ? null : 'follow'))}
-            >
-              {following
-                ? `Following ${formatInt(picks.length)} ${picks.length === 1 ? 'visual' : 'visuals'}`
-                : 'Follow visuals'}
-            </ToolButton>
-            <ToolButton
-              icon={<ArrowUpDown className="icon-size-100" aria-hidden />}
-              pressed={showMovers}
-              label={
-                scores
-                  ? showMovers
-                    ? 'Hide the climbing and sliding visuals'
-                    : 'Show the climbing and sliding visuals'
-                  : showMovers
-                    ? 'Hide the visuals that joined, became certified or left'
-                    : 'Show the visuals that joined, became certified or left'
-              }
-              onClick={() => setShowMovers((m) => !m)}
-            >
-              Movers
-            </ToolButton>
-            <ToolButton
-              icon={<Hash className="icon-size-100" aria-hidden />}
-              pressed={showCounts}
-              label={showCounts ? "Hide the day's counts" : "Show the day's counts"}
-              onClick={() => setShowCounts((c) => !c)}
-            >
-              Counts
-            </ToolButton>
-            {scores && !following && (
-              <label className="inline-flex min-h-[40px] shrink-0 cursor-pointer items-center gap-200 rounded-full border border-border bg-card px-300 text-200 font-semibold hover:bg-hover has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={showUnrated}
-                  onChange={(e) => setShowUnrated(e.target.checked)}
-                  className="size-[16px] accent-[var(--color-pbi)]"
-                />
-                Include visuals with no ratings ({formatInt(counts.unrated)})
-              </label>
-            )}
-            <ToolButton
-              icon={<Info className="icon-size-100" aria-hidden />}
-              pressed={panel === 'help'}
-              onClick={() => setPanel((p) => (p === 'help' ? null : 'help'))}
-            >
-              How to read this view
-            </ToolButton>
-            {!flat && (
               <ToolButton
-                icon={<RotateCcw className="icon-size-100" aria-hidden />}
-                onClick={() => setResetSignal((n) => n + 1)}
+                ref={followButton}
+                icon={<Target className="icon-size-100" aria-hidden />}
+                pressed={panel === 'follow'}
+                onClick={() => setPanel((p) => (p === 'follow' ? null : 'follow'))}
               >
-                Reset view
+                {following
+                  ? `Following ${formatInt(picks.length)} ${picks.length === 1 ? 'visual' : 'visuals'}`
+                  : 'Follow visuals'}
               </ToolButton>
-            )}
+              <ToolButton
+                icon={<ArrowUpDown className="icon-size-100" aria-hidden />}
+                pressed={showMovers}
+                description={
+                  scores
+                    ? 'The climbing and sliding visuals'
+                    : 'The visuals that joined, became certified or left'
+                }
+                onClick={() => setShowMovers((m) => !m)}
+              >
+                Movers
+              </ToolButton>
+              <ToolButton
+                icon={<Hash className="icon-size-100" aria-hidden />}
+                pressed={showCounts}
+                description="The day's counts"
+                onClick={() => setShowCounts((c) => !c)}
+              >
+                Counts
+              </ToolButton>
+              {scores && !following && (
+                <label className="inline-flex min-h-[40px] shrink-0 cursor-pointer items-center gap-200 rounded-full border border-border bg-card px-300 text-200 font-semibold hover:bg-hover has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={showUnrated}
+                    onChange={(e) => setShowUnrated(e.target.checked)}
+                    className="size-[16px] accent-[var(--color-pbi)]"
+                  />
+                  Include visuals with no ratings ({formatInt(counts.unrated)})
+                </label>
+              )}
+              <ToolButton
+                ref={helpButton}
+                icon={<Info className="icon-size-100" aria-hidden />}
+                pressed={panel === 'help'}
+                onClick={() => setPanel((p) => (p === 'help' ? null : 'help'))}
+              >
+                How to read this view
+              </ToolButton>
+              {!flat && (
+                <ToolButton
+                  icon={<RotateCcw className="icon-size-100" aria-hidden />}
+                  onClick={() => setResetSignal((n) => n + 1)}
+                >
+                  Reset view
+                </ToolButton>
+              )}
+            </div>
+
+            <ul
+              aria-label={certifiedOnly ? `${day} in numbers, certified visuals only` : `${day} in numbers`}
+              className={cn(
+                showCounts ? '-m-[3px] flex shrink-0 gap-200 overflow-x-auto p-[3px]' : 'sr-only'
+              )}
+            >
+              <Count
+                label={certifiedOnly ? 'Listed certified visuals' : 'Listed visuals'}
+                value={formatInt(counts.listed)}
+              />
+              <Count label="Joined on this day" value={formatInt(counts.arrived)} />
+              <Count label="Left on this day" value={formatInt(counts.left)} />
+              <Count label="New versions on this day" value={formatInt(counts.versions)} />
+              <Count label="Newly certified on this day" value={formatInt(counts.certified)} />
+            </ul>
           </div>
 
-          <ul
-            aria-label={certifiedOnly ? `${day} in numbers, certified visuals only` : `${day} in numbers`}
-            className={cn(
-              showCounts ? '-m-[3px] flex shrink-0 gap-200 overflow-x-auto p-[3px]' : 'sr-only'
-            )}
-          >
-            <Count
-              label={certifiedOnly ? 'Listed certified visuals' : 'Listed visuals'}
-              value={formatInt(counts.listed)}
-            />
-            <Count label="Joined on this day" value={formatInt(counts.arrived)} />
-            <Count label="Left on this day" value={formatInt(counts.left)} />
-            <Count label="New versions on this day" value={formatInt(counts.versions)} />
-            <Count label="Newly certified on this day" value={formatInt(counts.certified)} />
-          </ul>
-
-          <div className="relative flex min-h-0 flex-1 gap-300">
+          <div className="relative flex min-h-[240px] flex-1 gap-300">
             <div className="relative min-h-0 min-w-0 flex-1">
               <div className="absolute inset-0">
                 {flat ? (
@@ -1569,13 +1630,17 @@ export function ReplayPage({
                 }`}
               >
                 <div className="flex items-center justify-between gap-200">
-                  <h2 className="text-300 font-bold">
+                  <h2 ref={panelHeading} tabIndex={-1} className="text-300 font-bold outline-none">
                     {panel === 'follow' ? 'Follow visuals' : 'How to read this view'}
                   </h2>
                   <button
                     type="button"
                     onClick={() => setPanel(null)}
-                    aria-label="Close"
+                    aria-label={
+                      panel === 'follow'
+                        ? 'Close the Follow visuals panel'
+                        : 'Close the How to read this view panel'
+                    }
                     className="inline-flex size-[32px] shrink-0 items-center justify-center rounded-full hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
                   >
                     <X className="icon-size-200" aria-hidden />
@@ -1594,6 +1659,7 @@ export function ReplayPage({
                       picks={picks}
                       certifiedOnly={certifiedOnly}
                       onPicks={setPicks}
+                      searchRef={searchBox}
                     />
                   </>
                 ) : (

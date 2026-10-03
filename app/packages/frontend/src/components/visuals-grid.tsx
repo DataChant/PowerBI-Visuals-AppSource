@@ -1,6 +1,6 @@
 import { DataGrid, type GridColumnDef, type Row } from '@microsoft/fabric-datagrid';
 import { useCssTheme } from '@microsoft/fabric-visuals';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import type { CatalogVisual, StarCount } from '@/lib/catalog';
 import { formatInt, formatPercent, formatRating, formatScore } from '@/lib/format';
@@ -28,6 +28,24 @@ export function VisualsGrid({
   mode?: 'catalog' | 'ratings';
 }) {
   const theme = useCssTheme();
+  const host = useRef<HTMLDivElement>(null);
+  const empty = visuals.length === 0;
+  const name =
+    mode === 'ratings'
+      ? 'Rated visuals that match the current filters'
+      : 'Visuals that match the current filters';
+
+  // The grid draws its table without a name, and redraws it when the layout
+  // changes, so the name is put back whenever the table is replaced.
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    const label = () => el.querySelector('[role="grid"]')?.setAttribute('aria-label', name);
+    label();
+    const watch = new MutationObserver(label);
+    watch.observe(el, { childList: true, subtree: true });
+    return () => watch.disconnect();
+  }, [empty, name]);
 
   const rows = useMemo<Row[]>(() => {
     const totals = new Map<string, number[]>();
@@ -135,7 +153,7 @@ export function VisualsGrid({
     ];
   }, [mode, onOpen]);
 
-  if (visuals.length === 0)
+  if (empty)
     return (
       <EmptyState title="No visuals match">
         Loosen a filter or clear them all to see the full catalog again.
@@ -143,7 +161,7 @@ export function VisualsGrid({
     );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-auto">
+    <div ref={host} className="flex min-h-0 flex-1 flex-col overflow-auto">
       <DataGrid
         columns={columns}
         data={rows}

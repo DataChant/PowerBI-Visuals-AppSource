@@ -6,9 +6,10 @@ import { TABS, type Tab } from '@/lib/tabs';
 import { cn } from '@/lib/utils';
 
 const PIXIE_LINKS = [
-  { label: 'Website', href: 'https://bipixie.com' },
+  { label: 'Website', name: 'BI Pixie website', href: 'https://bipixie.com' },
   {
     label: 'Fabric workload',
+    name: 'BI Pixie Fabric workload',
     href: 'https://app.fabric.microsoft.com/workloadhub/detail/DataChant.BIPixie.Product?experience=fabric-developer',
   },
 ];
@@ -67,7 +68,7 @@ function PixieRibbon() {
                 href={link.href}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={`BI Pixie ${link.label.toLowerCase()}, opens in a new tab`}
+                aria-label={`${link.name}, opens in a new tab`}
                 className="inline-flex min-h-[44px] items-center gap-100 font-semibold text-white underline fit:min-h-[28px] underline-offset-2 hover:text-[#F8CF70] focus-visible:outline-2 focus-visible:outline-[#F8CF70]"
               >
                 {link.label}

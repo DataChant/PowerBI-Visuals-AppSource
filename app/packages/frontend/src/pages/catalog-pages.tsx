@@ -1,4 +1,5 @@
 import type { InteractionEvent } from '@microsoft/fabric-visuals-core';
+import { useReducedMotion } from 'framer-motion';
 import { MousePointerClick } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -388,11 +389,16 @@ export function WordsPage({ visuals, onOpen }: CatalogPageProps) {
   const [picked, setPicked] = useState<string | null>(null);
   const current = picked ? words.find((w) => w.word === picked) : undefined;
   const selected = current?.word ?? null;
+  // The cloud's smallest words are hard to hit on a phone, so the list can name every word.
+  const [allWords, setAllWords] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
   // On narrow screens the list sits below the cloud, so bring it into view.
   useEffect(() => {
-    if (selected && window.innerWidth < 1024) panel.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [selected]);
+    if (selected && window.innerWidth < 1024)
+      panel.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  }, [selected, reduceMotion]);
+  const listed = allWords ? words : words.slice(0, 10);
   return (
     <div
       className={
@@ -460,9 +466,23 @@ export function WordsPage({ visuals, onOpen }: CatalogPageProps) {
           )}
         </Card>
       ) : (
-        <Card title="Most mentioned" subtitle="The words the most visual descriptions use. Select one to list its visuals.">
+        <Card
+          title="Most mentioned"
+          subtitle="The words the most visual descriptions use. Select one to list its visuals."
+          actions={
+            words.length > 10 && (
+              <button
+                type="button"
+                onClick={() => setAllWords((all) => !all)}
+                className="min-h-[32px] rounded-full border border-border px-300 text-200 font-semibold hover:bg-hover focus-visible:outline-2 focus-visible:outline-ring"
+              >
+                {allWords ? 'Show the top 10 words' : `Show all ${formatInt(words.length)} words`}
+              </button>
+            )
+          }
+        >
           <ScrollList className="flex flex-col gap-100 fit:min-h-0 fit:flex-1 fit:gap-0 fit:overflow-y-auto">
-            {words.slice(0, 10).map((w) => (
+            {listed.map((w) => (
               <li key={w.word}>
                 <button
                   type="button"
