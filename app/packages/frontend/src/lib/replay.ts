@@ -450,6 +450,22 @@ export function certifiedSince(
   return { from: base.day, certified: certified.sort(placeOrder(replay, at)) };
 }
 
+/**
+ * The first day within `days` days after day `at` on which each visual becomes
+ * certified or loses its certification, so the replay can start its move early.
+ * A visual with no such day in that time is not in the map.
+ */
+export function certificationsAhead(replay: Replay, at: number, days: number): Map<number, number> {
+  const ahead = new Map<number, number>();
+  const until = Math.min(replay.frames.length - 1, at + days);
+  for (let c = at + 1; c <= until; c++) {
+    const frame = replay.frames[c];
+    for (const v of frame.certified) if (!ahead.has(v)) ahead.set(v, c);
+    for (const v of frame.uncertified) if (!ahead.has(v)) ahead.set(v, c);
+  }
+  return ahead;
+}
+
 export interface FrameCounts {
   listed: number;
   /** Listed visuals nobody has rated yet. */
@@ -520,6 +536,46 @@ export function growth(replay: Replay, at: number, since: number, v: number): nu
 export function sentiment(stars: number, raters: number): number | null {
   if (!(raters > 0) || !(stars >= 1)) return null;
   return stars - 3;
+}
+
+/**
+ * The most ratings any visual has on any day of the replay, where the 3D
+ * view's ratings axis ends. It holds for the whole replay, so a visual that
+ * gains ratings moves along the axis rather than the axis stretching under it.
+ * At least 10, so a replay with few ratings still has an axis to read.
+ */
+export function mostRatings(replay: Replay): number {
+  let most = 0;
+  for (const reading of replay.readings) {
+    for (const r of reading.raters) if (r > most) most = r;
+  }
+  return Math.max(10, Math.ceil(most));
+}
+
+/**
+ * Where a number of ratings sits along the ratings axis, from 0 at none to 1
+ * at `end`. The axis is a log scale, since most visuals have only a few
+ * ratings and a handful have hundreds.
+ */
+export function ratingsAlong(raters: number, end: number): number {
+  const r = Number.isNaN(raters) ? 0 : Math.min(end, Math.max(0, raters));
+  return Math.log10(1 + r) / Math.log10(1 + end);
+}
+
+/** A mark closer to the end of the ratings axis than this would crowd the end's own mark. */
+const TICK_CLEARANCE = 0.85;
+
+/**
+ * The marks along a ratings axis that ends at `end`: none, each power of ten
+ * that sits clear of the end, and the end itself.
+ */
+export function ratingTicks(end: number): number[] {
+  const ticks = [0];
+  for (let t = 1; t < end; t *= 10) {
+    if (ratingsAlong(t, end) <= TICK_CLEARANCE) ticks.push(t);
+  }
+  ticks.push(end);
+  return ticks;
 }
 
 /**

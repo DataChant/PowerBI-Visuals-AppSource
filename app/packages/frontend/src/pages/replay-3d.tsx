@@ -7,10 +7,14 @@ import type { VisualRef } from '@/components/visual-drawer';
 import { formatInt } from '@/lib/format';
 import {
   CERTIFIED,
+  certificationsAhead,
   growth,
   jitter,
   LISTED,
   modeStart,
+  mostRatings,
+  ratingsAlong,
+  ratingTicks,
   readingValues,
   sentiment,
   spanAt,
@@ -24,14 +28,18 @@ import { refOf, type Who } from '@/lib/replay-who';
  * The replay's field in three dimensions, in one of two modes.
  *
  * In the popularity mode, the number of ratings runs across (on a log scale,
- * since a handful of visuals hold most of the ratings), popularity runs up and
+ * since a handful of visuals hold most of the ratings, up to the most ratings
+ * any visual has during the replay), popularity runs up and
  * average stars run in depth, with 3 stars as the neutral middle. Between two
  * readings of the leaderboard each visual glides along a straight line, one day
  * at a time.
  *
  * In the listings mode, each visual floats at a place of its own, the certified
- * visuals above the others. A visual appears when it is listed, rises when it is
- * certified and grows with each new version.
+ * visuals above the others. A visual appears when it is listed and grows with
+ * each new version. While the replay plays, a visual about to become certified
+ * starts to rise early, so it crosses the floor between the two groups on the
+ * day of its certification, and a visual losing its certification falls the
+ * same way.
  *
  * A visual that joins, becomes certified or publishes a new version shows its
  * logo for a moment, in both modes. In the popularity mode a visual that is
@@ -42,7 +50,13 @@ import { refOf, type Who } from '@/lib/replay-who';
 
 /** Half the cube's width; the scene runs from -SIZE to +SIZE on every axis. */
 const SIZE = 5;
-const MAX_RATERS = 300;
+/**
+ * In the popularity mode the visuals and the axis marks stop this far inside
+ * the cube, so the marks at the ends of two axes do not meet at a corner.
+ */
+const INSET = 0.6;
+/** Half the width the visuals take up in the popularity mode. */
+const REACH = SIZE - INSET;
 const DOT_RADIUS = 0.09;
 /** The starting angle; the distance is fitted to the view's shape. */
 const CAMERA_HOME = new THREE.Vector3(0.55, 0.38, 0.74).normalize();
@@ -73,7 +87,6 @@ function fittedDistance(aspect: number) {
 /** A press that travels further than this is a drag that turns the view, not a click. */
 const CLICK_SLOP = 5;
 
-const RATER_TICKS = [0, 1, 10, 100, 300];
 const POPULARITY_TICKS = [0, 25, 50, 75, 100];
 const Z_TICKS = [-2, -1, 0, 1, 2];
 
@@ -86,6 +99,8 @@ const MORPH_MS = 900;
 const SCRUB_MS = 600;
 /** A visual that is certified rises at least this slowly, however fast the replay plays. */
 const EVENT_MS = 900;
+/** The height of the listings mode's floor between the certified visuals and the others. */
+const DIVIDER_Y = 0.1;
 /** How long a logo takes to fade into its dot, and back. */
 const MIX_MS = 450;
 /** How long a logo stays after its move ends. */
@@ -139,20 +154,33 @@ function eased(t: number, kind: number) {
   return t;
 }
 
+/**
+ * How long after it starts a move from height `from` to height `to`, eased in
+ * and out over `duration`, crosses the floor between the certified visuals and
+ * the others. When the floor lies outside the move, the nearer end of the move
+ * stands in for it.
+ */
+function crossingAfter(from: number, to: number, duration: number) {
+  if (to === from) return 0;
+  const f = Math.min(1, Math.max(0, (DIVIDER_Y - from) / (to - from)));
+  // The ease in and out, run backwards from the share of the way to the share of the time.
+  const t = f < 0.5 ? Math.cbrt(f / 4) : 1 - Math.cbrt(2 * (1 - f)) / 2;
+  return t * duration;
+}
+
 function approach(value: number, goal: number, by: number) {
   return goal > value ? Math.min(goal, value + by) : Math.max(goal, value - by);
 }
 
 function yOf(score: number) {
-  return (score * 2 - 1) * SIZE;
+  return (score * 2 - 1) * REACH;
 }
-function xOf(raters: number) {
-  const r = Number.isNaN(raters) ? 0 : Math.max(0, raters);
-  return (Math.log10(1 + r) / Math.log10(1 + MAX_RATERS)) * 2 * SIZE - SIZE;
+function xOf(raters: number, end: number) {
+  return ratingsAlong(raters, end) * 2 * REACH - REACH;
 }
 function zOf(stars: number, raters: number) {
   const s = sentiment(stars, raters);
-  return s === null ? 0 : (s / 2) * SIZE;
+  return s === null ? 0 : (s / 2) * REACH;
 }
 
 function cssColor(name: string, fallback: string) {
@@ -188,6 +216,8 @@ interface Layout {
    */
   readings: Float32Array[];
   raters: Float32Array[];
+  /** Where the ratings axis ends: the most ratings any visual has during the replay. */
+  ratingsEnd: number;
   /** The listings mode: each visual's own place, and where it floats in each band. */
   homeX: Float32Array;
   homeZ: Float32Array;
@@ -207,6 +237,7 @@ function buildLayout(replay: Replay): Layout {
   };
   const readings: Float32Array[] = [];
   const raters: Float32Array[] = [];
+  const ratingsEnd = mostRatings(replay);
   for (let k = 0; k < replay.readings.length; k++) {
     readingValues(replay, k, values);
     const p = new Float32Array(n * 3);
@@ -217,7 +248,7 @@ function buildLayout(replay: Replay): Layout {
         p[i] = p[i + 1] = p[i + 2] = NaN;
         continue;
       }
-      p[i] = xOf(values.raters[v]);
+      p[i] = xOf(values.raters[v], ratingsEnd);
       p[i + 1] = yOf(score);
       p[i + 2] = zOf(values.stars[v], values.raters[v]);
     }
@@ -241,7 +272,7 @@ function buildLayout(replay: Replay): Layout {
     // One float takes between 6 and 18 seconds.
     speed[v] = (Math.PI * 2) / (6000 + jitter(g, 's') * 12000);
   });
-  return { readings, raters, homeX, homeZ, certifiedY, otherY, phase, speed };
+  return { readings, raters, ratingsEnd, homeX, homeZ, certifiedY, otherY, phase, speed };
 }
 
 export interface Replay3DProps {
@@ -290,6 +321,11 @@ interface Scene {
   startedAt: Float64Array;
   duration: Float32Array;
   ease: Uint8Array;
+  /**
+   * The day on which each visual's move is timed to cross the floor, as it
+   * becomes certified or loses its certification, or -1 for any other move.
+   */
+  leadFor: Int32Array;
   /** Where each visual is drawn now, before it floats. */
   cur: Float32Array;
   curScale: Float32Array;
@@ -464,11 +500,21 @@ export default function Replay3D({
         new THREE.LineBasicMaterial({ color: palette.still, transparent: true, opacity: 0.35 })
       )
     );
-    // The popularity mode's floor grid and neutral 3-star plane.
-    const grid = new THREE.GridHelper(2 * SIZE, 4, palette.still, palette.still);
-    grid.position.y = -SIZE;
-    (grid.material as THREE.Material).transparent = true;
-    (grid.material as THREE.Material).opacity = 0.25;
+    // The popularity mode's floor grid, a line under each mark of the ratings
+    // and stars axes, and its neutral 3-star plane.
+    const floor: number[] = [];
+    for (const t of ratingTicks(layout.ratingsEnd)) {
+      const x = xOf(t, layout.ratingsEnd);
+      floor.push(x, -SIZE, -SIZE, x, -SIZE, SIZE);
+    }
+    for (const t of Z_TICKS) {
+      const z = (t / 2) * REACH;
+      floor.push(-SIZE, -SIZE, z, SIZE, -SIZE, z);
+    }
+    const grid = new THREE.LineSegments(
+      new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(floor, 3)),
+      new THREE.LineBasicMaterial({ color: palette.still, transparent: true, opacity: 0.25 })
+    );
     three.add(grid);
     const neutral = new THREE.Mesh(
       new THREE.PlaneGeometry(2 * SIZE, 2 * SIZE),
@@ -493,7 +539,7 @@ export default function Replay3D({
       })
     );
     divider.rotation.x = -Math.PI / 2;
-    divider.position.y = 0.1;
+    divider.position.y = DIVIDER_Y;
     divider.visible = false;
     three.add(divider);
 
@@ -547,6 +593,7 @@ export default function Replay3D({
       startedAt: new Float64Array(n),
       duration: new Float32Array(n),
       ease: new Uint8Array(n),
+      leadFor: new Int32Array(n).fill(-1),
       cur: new Float32Array(n * 3),
       curScale: new Float32Array(n),
       grow: new Float32Array(n).fill(1),
@@ -855,6 +902,17 @@ export default function Replay3D({
     s.palette = palette;
     const versioned = new Set(frame.versioned);
     const candidates: { v: number; d: number }[] = [];
+    // While the replay plays the listings mode, a visual about to become
+    // certified, or to lose its certification, starts to move early enough to
+    // cross the floor as that day begins. The look ahead reaches as many days
+    // as one such move lasts.
+    const ahead =
+      !scores && playing && !morph && !reducedMotion
+        ? certificationsAhead(replay, at, Math.floor(EVENT_MS / stepMs))
+        : null;
+    /** The visuals whose move is timed to cross the floor, besides the followed ones. */
+    const leading: number[] = [];
+    let busy = now + duration;
 
     for (let v = 0; v < n; v++) {
       const i = v * 3;
@@ -868,6 +926,8 @@ export default function Replay3D({
       let tz: number;
       let shown: boolean;
       let scale: number;
+      /** The day of the change this visual is moving early for, or -1. */
+      let lead = -1;
       if (scores) {
         const grow = growth(replay, at, since, v);
         s.grow[v] = grow;
@@ -893,10 +953,17 @@ export default function Replay3D({
         const grow = growth(replay, at, 0, v);
         s.grow[v] = grow;
         tx = layout.homeX[v];
-        ty = certified ? layout.certifiedY[v] : layout.otherY[v];
         tz = layout.homeZ[v];
         shown = listed && (following ? picked : !certifiedOnly || certified);
         scale = shown ? grow : 0;
+        // A visual drawn both before and after its change heads for its new
+        // side already. One that appears or goes with the change simply does so.
+        const c = ahead?.get(v);
+        const then = c !== undefined && (replay.frames[c].state[v] & CERTIFIED) !== 0;
+        if (c !== undefined && shown && s.curScale[v] >= 0.01 && (following || !certifiedOnly || then)) {
+          lead = c;
+        }
+        ty = (lead >= 0 ? then : certified) ? layout.certifiedY[v] : layout.otherY[v];
       }
 
       const joined = at > 0 && listed && (recent.state[v] & LISTED) === 0;
@@ -920,9 +987,36 @@ export default function Replay3D({
         s.pulseUntil = now + PULSE_MS;
       }
 
-      if (tx === s.to[i] && ty === s.to[i + 1] && tz === s.to[i + 2] && scale === s.toScale[v]) {
-        continue;
+      const heading = tx === s.to[i] && ty === s.to[i + 1] && tz === s.to[i + 2];
+      if (
+        heading &&
+        !morph &&
+        !reducedMotion &&
+        s.leadFor[v] >= 0 &&
+        now < s.startedAt[v] + s.duration[v]
+      ) {
+        // Already on its way to cross the floor on the day. A move that has not
+        // begun yet is timed again, since the replay may now play faster or
+        // slower.
+        if (lead === s.leadFor[v] && s.startedAt[v] > now) {
+          const crosses = now + (lead - at) * stepMs;
+          s.startedAt[v] = Math.max(now, crosses - crossingAfter(s.from[i + 1], ty, s.duration[v]));
+        }
+        const t = Math.min(1, Math.max(0, (now - s.startedAt[v]) / s.duration[v]));
+        const e = eased(t, s.ease[v]);
+        // A new size joins the move from the size drawn now, rather than
+        // restarting the move and its timing, unless the move is all but over.
+        if (scale === s.toScale[v] || e < 0.99) {
+          if (scale !== s.toScale[v]) {
+            s.fromScale[v] = (s.curScale[v] - scale * e) / (1 - e);
+            s.toScale[v] = scale;
+          }
+          busy = Math.max(busy, s.startedAt[v] + s.duration[v]);
+          if (lead >= 0 && !picked) leading.push(v);
+          continue;
+        }
       }
+      if (heading && scale === s.toScale[v]) continue;
       if (scores && !morph && shown && !picked && s.curScale[v] >= 0.01) {
         const d = Math.hypot(tx - s.cur[i], ty - s.cur[i + 1], tz - s.cur[i + 2]);
         if (d >= LOGO_MIN_MOVE) {
@@ -942,12 +1036,22 @@ export default function Replay3D({
       s.startedAt[v] = now;
       s.duration[v] = duration;
       s.ease[v] = kind;
+      s.leadFor[v] = lead;
+      if (lead >= 0) {
+        // Timed so the visual crosses the floor just as the day of its change begins.
+        const crosses = now + (lead - at) * stepMs;
+        s.startedAt[v] = Math.max(now, crosses - crossingAfter(s.from[i + 1], ty, EVENT_MS));
+        s.duration[v] = EVENT_MS;
+        s.ease[v] = EASE_IN_OUT;
+        busy = Math.max(busy, s.startedAt[v] + EVENT_MS);
+        if (!picked) leading.push(v);
+      }
     }
     const sphere = s.dots[SPHERE];
     if (sphere.instanceColor) sphere.instanceColor.needsUpdate = true;
     (s.dots[RISING].material as THREE.MeshStandardMaterial).color.copy(palette.up);
     (s.dots[FALLING].material as THREE.MeshStandardMaterial).color.copy(palette.down);
-    s.busyUntil = Math.max(s.busyUntil, now + duration);
+    s.busyUntil = Math.max(s.busyUntil, busy);
 
     // Which visuals show their logo.
     const hold = reducedMotion ? LOGO_REDUCED_MS : duration + LOGO_AFTER_MS;
@@ -990,7 +1094,13 @@ export default function Replay3D({
       const isEvent = new Set(events);
       for (const v of chosen) show(v, isEvent.has(v) ? eventUntil : now + hold);
     } else {
-      for (const v of events) show(v, eventUntil);
+      // A visual moving early for its change shows its logo from the start, so
+      // the logo crosses the floor with it, and holds it as long after the move
+      // as any other event does.
+      const ledUntil = (v: number) =>
+        s.startedAt[v] + s.duration[v] + LOGO_AFTER_MS + LOGO_HOLD_MS;
+      for (const v of events) show(v, s.leadFor[v] === at ? ledUntil(v) : eventUntil);
+      for (const v of leading) show(v, ledUntil(v));
     }
     // Too many logos at once hide the field, so the oldest give way.
     const showing = [...s.active].filter((v) => s.logoUntil[v] > now && s.picked[v] !== 1);
@@ -1054,12 +1164,12 @@ export default function Replay3D({
   const labels: { key: string; at: [number, number, number]; text: string; strong?: boolean }[] =
     scores
       ? [
-          ...RATER_TICKS.map((t) => ({
+          ...ratingTicks(layout.ratingsEnd).map((t) => ({
             key: `x${t}`,
-            at: [xOf(t), -SIZE, E] as [number, number, number],
+            at: [xOf(t, layout.ratingsEnd), -SIZE, E] as [number, number, number],
             text: formatInt(t),
           })),
-          { key: 'xt', at: [0, -SIZE - 1.1, E + 0.6], text: 'Ratings', strong: true },
+          { key: 'xt', at: [0, -SIZE - 1.1, E + 0.6], text: 'Ratings (log scale)', strong: true },
           ...POPULARITY_TICKS.map((t) => ({
             key: `y${t}`,
             at: [-E, yOf(t / 100), E] as [number, number, number],
@@ -1068,7 +1178,7 @@ export default function Replay3D({
           { key: 'yt', at: [-E - 0.4, SIZE + 1, E], text: 'Popularity', strong: true },
           ...Z_TICKS.map((t) => ({
             key: `z${t}`,
-            at: [E, -SIZE, (t / 2) * SIZE] as [number, number, number],
+            at: [E, -SIZE, (t / 2) * REACH] as [number, number, number],
             text: t === 0 ? '3★' : `${t + 3}★`,
           })),
           { key: 'zt', at: [E + 1.4, -SIZE - 0.6, 0], text: 'Average stars', strong: true },

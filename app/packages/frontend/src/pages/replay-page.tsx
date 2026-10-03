@@ -1705,15 +1705,16 @@ export function ReplayPage({
                         {formatDate(replay.frames[last].day)}.{' '}
                         {flat
                           ? 'Each visual is placed across by its popularity score, and the certified visuals sit above the others.'
-                          : 'The number of ratings runs across, popularity rises upward, and average stars run front to back, with 3 stars in the middle.'}
+                          : 'The number of ratings runs across on a log scale, which gives room to the many visuals with only a few ratings, and it ends at the most ratings any visual has during the replay. Popularity rises upward, and average stars run front to back, with 3 stars in the middle.'}
                       </p>
                     ) : (
                       <p>
                         The Listings view runs one day at a time, from{' '}
                         {formatDate(replay.frames[0].day)} to{' '}
-                        {formatDate(replay.frames[last].day)}. Certified visuals
-                        sit above the others, and a visual rises on the day it
-                        becomes certified.
+                        {formatDate(replay.frames[last].day)}.{' '}
+                        {flat
+                          ? 'Certified visuals sit above the others, and a visual rises on the day it becomes certified.'
+                          : 'Certified visuals sit above the others, and a visual that becomes certified rises to join them, crossing over on the day of its certification.'}
                       </p>
                     )}
                     {!flat && (

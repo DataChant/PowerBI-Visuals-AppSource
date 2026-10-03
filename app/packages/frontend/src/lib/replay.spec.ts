@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import {
   buildReplay,
   CERTIFIED,
+  certificationsAhead,
   certifiedSince,
   comings,
   frameCounts,
@@ -11,7 +12,10 @@ import {
   lastReading,
   LISTED,
   modeStart,
+  mostRatings,
   movers,
+  ratingsAlong,
+  ratingTicks,
   readingValues,
   sentiment,
   spanAt,
@@ -299,6 +303,36 @@ describe('certifiedSince', () => {
   });
 });
 
+describe('certificationsAhead', () => {
+  const r = buildReplay(
+    table([
+      list('a', 5, LISTED),
+      list('a', 3, LISTED | CERTIFIED),
+      list('a', 1, LISTED),
+      list('b', 5, LISTED),
+      list('b', 2, LISTED | CERTIFIED),
+      list('born', 4, LISTED | CERTIFIED),
+    ]),
+    asOf
+  );
+  const a = r.guids.indexOf('a');
+  const b = r.guids.indexOf('b');
+
+  it('finds the first certification or loss of each visual in the days after the one shown', () => {
+    expect([...certificationsAhead(r, 0, 5)]).toEqual([
+      [a, 2],
+      [b, 3],
+    ]);
+    expect(certificationsAhead(r, 2, 5).get(a)).toBe(4);
+  });
+
+  it('looks only as many days ahead as asked, and not past the last day', () => {
+    expect([...certificationsAhead(r, 0, 2)]).toEqual([[a, 2]]);
+    expect(certificationsAhead(r, 0, 1).size).toBe(0);
+    expect(certificationsAhead(r, 4, 100).size).toBe(0);
+  });
+});
+
 describe('modeStart', () => {
   it('starts the popularity mode at the first reading and the listings mode at the first day', () => {
     const r = buildReplay(table([list('a', 4, LISTED), read('a', 2, 0.5)]), asOf);
@@ -356,6 +390,35 @@ describe('sentiment', () => {
     expect(sentiment(1, 3)).toBe(-2);
     expect(sentiment(4, 0)).toBeNull();
     expect(sentiment(0, 4)).toBeNull();
+  });
+});
+
+describe('the ratings axis', () => {
+  it('ends at the most ratings any visual has on any day, not only the last one', () => {
+    const r = buildReplay(
+      table([read('a', 20, 0.5, 40, 4), read('b', 20, 0.4, 7, 3), read('a', 10, 0.5, 276, 4), read('a', 0, 0.5, 250, 4)]),
+      asOf
+    );
+    expect(mostRatings(r)).toBe(276);
+  });
+
+  it('keeps an axis of at least 10 ratings for a replay with few or none', () => {
+    expect(mostRatings(buildReplay(table([read('a', 5, 0.5, 3, 4)]), asOf))).toBe(10);
+    expect(mostRatings(buildReplay(table([]), asOf))).toBe(10);
+  });
+
+  it('places ratings on a log scale from none to the end, and holds a count past the end at the end', () => {
+    expect(ratingsAlong(0, 276)).toBe(0);
+    expect(ratingsAlong(276, 276)).toBe(1);
+    expect(ratingsAlong(10, 276)).toBeCloseTo(Math.log10(11) / Math.log10(277));
+    expect(ratingsAlong(500, 276)).toBe(1);
+    expect(ratingsAlong(NaN, 276)).toBe(0);
+  });
+
+  it('marks none, the powers of ten clear of the end, and the end', () => {
+    expect(ratingTicks(276)).toEqual([0, 1, 10, 100, 276]);
+    expect(ratingTicks(120)).toEqual([0, 1, 10, 120]);
+    expect(ratingTicks(10)).toEqual([0, 1, 10]);
   });
 });
 
