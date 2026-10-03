@@ -54,7 +54,7 @@ The app then opens at <http://localhost:5173>.
 
 ## Publishing your own copy as a Fabric app
 
-The app is built with [Rayfin](https://www.npmjs.com/package/@microsoft/rayfin-cli), so you can also publish your own copy as an app in Microsoft Fabric.
+The app is built with the [Rayfin SDK](https://learn.microsoft.com/en-us/javascript/api/fabric-apps-sdk-javascript/rayfin-overview), the foundation of [Fabric Apps (preview)](https://learn.microsoft.com/en-us/fabric/apps/overview) in Microsoft Fabric, so you can also publish your own copy as a Fabric app with the [Rayfin command line](https://www.npmjs.com/package/@microsoft/rayfin-cli).
 
 The repository holds no workspace ID, item ID or key, and there is nothing to fill in before you publish. The app reads only static data files, so it needs no semantic model and no Fabric connection. You choose the workspace when you publish.
 
@@ -62,6 +62,8 @@ The repository holds no workspace ID, item ID or key, and there is nothing to fi
 
 - Node.js 22 or 24.
 - A Fabric workspace on a Fabric capacity, in which you can create items.
+- A capacity in a [region that offers Fabric Apps](https://learn.microsoft.com/en-us/fabric/admin/region-availability).
+- The **Fabric Apps (preview)** tenant setting turned on by a Fabric tenant administrator, for the whole organization or for a security group you belong to.
 
 ### Steps
 
