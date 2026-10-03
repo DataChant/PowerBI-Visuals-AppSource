@@ -5,6 +5,10 @@ Welcome to the PowerBI-Visuals-Marketplace repository! This is a repository of P
 
 The **[Custom Visuals Marketplace](https://datachant.github.io/PowerBI-Visuals-Marketplace/)** website ranks every Power BI custom visual listed on Microsoft Marketplace by popularity, and replays day by day how the rankings changed. The website is rebuilt after every daily refresh, and nobody needs to sign in to use it. It is built with [Rayfin](https://learn.microsoft.com/en-us/javascript/api/fabric-apps-sdk-javascript/rayfin-overview), and its source is in the [app](app) folder, which also explains how to publish a copy as a Fabric app.
 
+A video tour of the website, 1 minute and 23 seconds long, is on [YouTube](https://youtu.be/ABocSzcHIGg).
+
+[![The Custom Visuals Marketplace video tour on YouTube](https://img.youtube.com/vi/ABocSzcHIGg/maxresdefault.jpg)](https://youtu.be/ABocSzcHIGg)
+
 Learn more in our Wiki [here](https://github.com/DataChant/PowerBI-Visuals-Marketplace/wiki).
 
 Have questions regarding this repository? Contact DataChant [here](https://forms.office.com/r/xZMuiaSdYh?origin=lprLink).
