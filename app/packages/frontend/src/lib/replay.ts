@@ -323,7 +323,8 @@ export function valuesAt(replay: Replay, at: number, out?: Values): Values {
 
 /**
  * A visual's latest reading on or before day `at`: its figures and the frame of
- * the day they were read. Null while it has not been read.
+ * the day the leaderboard last recorded them, which it does only when they
+ * change. Null while it has not been read.
  */
 export function lastReading(
   replay: Replay,
@@ -353,7 +354,8 @@ function isListed(frame: ReplayFrame, v: number): boolean {
  * The visuals whose popularity moved most between `lookback` days before day
  * `at` and day `at`, each as last read by that day. Only visuals listed and
  * read at both ends count, so an arrival or a farewell is never mistaken for a
- * climb or a slide.
+ * climb or a slide. A rise from 0 is a visual's first popularity, which is
+ * usually far larger than any climb, so it is not counted as one either.
  */
 export function movers(
   replay: Replay,
@@ -374,7 +376,7 @@ export function movers(
   for (let v = 0; v < replay.guids.length; v++) {
     if (include && !include(v)) continue;
     if (!isListed(frame, v) || !isListed(base, v)) continue;
-    if (Number.isNaN(now[v]) || Number.isNaN(then[v])) continue;
+    if (Number.isNaN(now[v]) || !(then[v] > 0)) continue;
     const delta = now[v] - then[v];
     if (Math.abs(delta) > MOVE) moves.push({ index: v, guid: replay.guids[v], delta, score: now[v] });
   }
@@ -459,7 +461,10 @@ export interface FrameCounts {
   unplaced: number;
   arrived: number;
   left: number;
-  /** Listed visuals whose popularity moved by 5 points or more in a reading made this day. */
+  /**
+   * Listed visuals whose popularity moved by 5 points or more in a reading made
+   * this day. A visual's first popularity, a rise from 0, is not a move.
+   */
   bigMoves: number;
   /** Listed visuals that published a new version this day. */
   versions: number;
@@ -499,7 +504,8 @@ export function frameCounts(
     if (!reading || reading.readOn[v] < 0) counts.unread++;
     if (Number.isNaN(replay.first.score[v])) counts.unplaced++;
     // NaN on either side, a visual with nothing to compare, is never a move.
-    if (before && Math.abs(reading.scores[v] - before.scores[v]) >= BIG_MOVE - MOVE) counts.bigMoves++;
+    if (before && before.scores[v] > 0 && Math.abs(reading.scores[v] - before.scores[v]) >= BIG_MOVE - MOVE)
+      counts.bigMoves++;
   }
   counts.arrived = frame.arrived.filter(ok).length;
   counts.left = frame.left.filter(ok).length;

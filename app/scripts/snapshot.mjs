@@ -114,6 +114,7 @@ const leaderboard = parseCsv(await (await get(LEADERBOARD_URL)).text()).map((r) 
     ratings: number(r['# of Ratings']),
     ratingsChange: number(r['# of Ratings Change']),
     average: number(r['Average Rating']),
+    averageChange: number(r['Average Rating Change']),
     certified: r['Is Certified'].trimEnd(),
     removed: r['Is Removed'] === 'Yes',
   };
@@ -324,8 +325,10 @@ const standings = table(
 // when its figures change, so it sees many arrivals and versions weeks late, and
 // it dates them only on the days after the newest of those commits. The figures
 // come from the leaderboard alone. When it read a visual more than once in a day
-// the latest reading counts, and a popularity of 0 is a failed crawl, so it is
-// never written as a reading.
+// the latest reading counts. A popularity of 0 that follows a higher one is a
+// failed crawl, which the next reading undoes, so it is never written as a
+// reading. A popularity of 0 recorded before a visual's popularity first rose
+// above 0 is where the visual stood, so it is kept.
 const asOfDay = dayOf(asOfStamp);
 const throughDay = listingHistory.through ? dayOf(listingHistory.through) : -Infinity;
 
@@ -372,15 +375,53 @@ for (const [guid, rows] of byGuid) {
   }
 }
 
+const firstRise = new Map();
+for (const r of leaderboard)
+  if (!r.removed && r.popularity > 0 && !(firstRise.get(r.guid) <= r.ms)) firstRise.set(r.guid, r.ms);
 const readings = new Map();
 for (const r of leaderboard) {
-  if (r.removed || !(r.popularity > 0)) continue;
+  if (r.removed || r.popularity == null) continue;
+  if (!(r.popularity > 0) && r.ms >= (firstRise.get(r.guid) ?? Infinity)) continue;
   const day = dayOf(r.stamp);
   if (!readings.has(r.guid)) readings.set(r.guid, new Map());
   const days = readings.get(r.guid);
   const held = days.get(day);
   if (!held || r.ms > held.ms || (r.ms === held.ms && r.popularity > held.popularity)) days.set(day, r);
 }
+
+// Many visuals listed after the leaderboard's first day enter it only once their
+// popularity first rises above 0, weeks after they were listed, already at their
+// new figures. Each change column is the difference from the figures the visual
+// had before, so its first row minus its changes says where it stood: for most,
+// a popularity of 0. That becomes its reading on the snapshot before its first
+// row, so the visual rises from there instead of seeming to hold its first
+// figures since the day it was listed. An empty change means there was nothing
+// to compare with, which for ratings and stars means nobody had rated the visual
+// yet.
+const snapshotDays = [...new Set([...readings.values()].flatMap((days) => [...days.keys()]))].sort(
+  (a, b) => a - b
+);
+const round = (value, places) => Math.round(value * 10 ** places) / 10 ** places;
+let starts = 0;
+for (const [guid, rows] of byGuid) {
+  const first = rows.reduce((a, b) => (b.ms < a.ms ? b : a));
+  if (first.removed || !(first.popularity > 0) || first.popularityChange == null) continue;
+  const firstDay = dayOf(first.stamp);
+  const before = snapshotDays.filter((day) => day < firstDay).pop();
+  if (before === undefined) continue;
+  const ratings =
+    first.ratings == null || first.ratingsChange == null ? null : Math.max(0, first.ratings - first.ratingsChange);
+  readings.get(guid).set(before, {
+    popularity: Math.max(0, round(first.popularity - first.popularityChange, 3)),
+    ratings,
+    average:
+      ratings > 0 && first.average != null && first.averageChange != null
+        ? round(first.average - first.averageChange, 2)
+        : null,
+  });
+  starts++;
+}
+console.log(`leaderboard: ${starts} visuals start from the figures their first row rose from`);
 
 let late = 0;
 const replayRows = [];

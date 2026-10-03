@@ -239,6 +239,14 @@ describe('movers', () => {
     // Day 2 has no reading of its own, so it compares with the first reading.
     expect(movers(r, 3, 1, 5).climbers.map((x) => x.guid)).toEqual(['up']);
   });
+
+  it("never counts a visual's first popularity, a rise from 0, as a climb", () => {
+    const first = buildReplay(
+      table([read('up', 3, 0.2), read('fresh', 3, 0), read('up', 0, 0.3), read('fresh', 0, 0.8)]),
+      asOf
+    );
+    expect(movers(first, 3, 3, 5).climbers.map((x) => x.guid)).toEqual(['up']);
+  });
 });
 
 describe('comings', () => {
@@ -316,6 +324,11 @@ describe('frameCounts', () => {
   it('counts a big move only on a day the leaderboard was read', () => {
     expect(frameCounts(r, 2).bigMoves).toBe(1);
     expect(frameCounts(r, 1).bigMoves).toBe(0);
+  });
+
+  it("never counts a visual's first popularity, a rise from 0, as a big move", () => {
+    const first = buildReplay(table([read('fresh', 2, 0), read('fresh', 0, 0.8)]), asOf);
+    expect(frameCounts(first, 2).bigMoves).toBe(0);
   });
 
   it('counts the visuals not read yet, and the ones never read at all', () => {

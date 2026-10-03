@@ -1625,7 +1625,10 @@ export function ReplayPage({
                         Popularity, ratings and stars were read about once a
                         week until spring 2026 and every day since June 2026.
                         Between two readings, each visual moves in a straight
-                        line from one reading to the next.
+                        line from one reading to the next. A visual whose
+                        popularity was still 0 sits at 0 on the popularity axis
+                        until its popularity first rises, and that first rise is
+                        not counted as a climb.
                       </p>
                     ) : (
                       <p>

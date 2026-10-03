@@ -42,13 +42,16 @@ export function describeVisual(
   if (mode === 'scores') {
     const read = lastReading(replay, at, v);
     if (!read) return { certified, lines: ['No popularity recorded yet', versionLine] };
-    const readOn = replay.frames[read.frame].day;
+    // The leaderboard records a visual only when its figures change, so a
+    // reading that does not record it still holds them. They are as of the
+    // latest reading.
+    const readOn = replay.readings[frame.reading].frame;
     return {
       certified,
       lines: [
-        read.frame === at
+        readOn === at
           ? `Popularity ${formatScore(read.score)}`
-          : `Popularity ${formatScore(read.score)}, last read ${formatDate(readOn)}`,
+          : `Popularity ${formatScore(read.score)} as of ${formatDate(replay.frames[readOn].day)}`,
         read.raters > 0
           ? `${formatInt(read.raters)} rating${read.raters === 1 ? '' : 's'}, ${formatStars(read.stars)}`
           : 'No ratings yet',

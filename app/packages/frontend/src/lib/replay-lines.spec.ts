@@ -30,6 +30,7 @@ const replay = buildReplay(
     ['b', 2, null, null, null, LISTED],
     ['c', 6, null, null, null, LISTED],
     ['c', 1, null, null, null, 0],
+    ['d', 4, 0.3, 0, 0, LISTED],
   ]),
   asOf
 );
@@ -55,11 +56,17 @@ describe('describeVisual', () => {
     });
   });
 
-  it('dates a reading that was not made on the day shown', () => {
+  it('dates the figures by the latest reading when none was made on the day shown', () => {
     const { certified, lines } = describeVisual(replay, 'scores', 4, index('a'), who('a'));
     expect(certified).toBe(false);
-    expect(lines[0]).toBe(`Popularity ${formatScore(0.2)}, last read ${day(2)}`);
+    expect(lines[0]).toBe(`Popularity ${formatScore(0.2)} as of ${day(2)}`);
     expect(lines[1]).toBe('No ratings yet');
+  });
+
+  it('gives the figures a reading holds for a visual it did not record, since they did not change', () => {
+    expect(describeVisual(replay, 'scores', 6, index('d'), who('d')).lines[0]).toBe(
+      `Popularity ${formatScore(0.3)}`
+    );
   });
 
   it('says when a listed visual has no popularity recorded yet', () => {
